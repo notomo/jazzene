@@ -1,6 +1,12 @@
 {
   "import": [
-    "internal/jazzene/core"
+    "internal/jazzene/core",
+    {
+      "path": "mizchi/js/builtins/global",
+      "alias": "js_global"
+    }
   ],
-  "supported-targets": ["js"]
+  "supported-targets": [
+    "js"
+  ]
 }

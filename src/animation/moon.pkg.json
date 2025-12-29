@@ -1,6 +1,13 @@
 {
   "import": [
+    {
+      "path": "mizchi/js/browser/dom",
+      "alias": "js_browser_dom"
+    },
     "internal/jazzene/core"
   ],
-  "supported-targets": ["js"]
+  "supported-targets": [
+    "js"
+  ],
+  "warn-list": "-unused_error_type"
 }

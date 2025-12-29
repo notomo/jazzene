@@ -1,4 +1,7 @@
 ///|
+fn run_async(f : async () -> Unit noraise) -> Unit = "%async.run"
+
+///|
 /// Jazzene - Jazz Improvisation Web App
 fn main {
   // State signals
@@ -44,18 +47,20 @@ fn main {
 
           // Stop playing when sequence ends
           if index == notes.length() - 1 {
-            ffi_set_timeout(fn() { is_playing.set(false) }, 1000)
+            let _ = @js_global.set_timeout(fn() { is_playing.set(false) }, 1000)
+
           }
         },
       )
     }
   }
 
-  // Start animation loop
-  @animation.start_animation_loop(
-    fn() { animation_state.update(@animation.update_animation) },
-    fn() { true }, // Always running
-  )
+  run_async(fn() {
+    @animation.start_animation_loop(
+      fn() { animation_state.update(@animation.update_animation) },
+      fn() { true }, // Always running
+    )
+  })
 
   // Render app
   let doc = @js_dom.document()
@@ -92,10 +97,3 @@ fn main {
     None => ()
   }
 }
-
-///|
-/// FFI: setTimeout
-extern "js" fn ffi_set_timeout(callback : () -> Unit, delay_ms : Int) -> Unit =
-  #| (callback, delayMs) => {
-  #|   setTimeout(callback, delayMs);
-  #| }
