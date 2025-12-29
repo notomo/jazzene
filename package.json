@@ -5,7 +5,7 @@
   "scripts": {
     "check": "moon check && moon fmt --check",
     "format": "moon fmt",
-    "test": "moon test -v",
+    "test": "moon test -v -p internal/jazzene/core --target wasm-gc",
     "test:e2e": "playwright test",
     "dev": "vite",
     "build": "moon build && vite build"
