@@ -1,0 +1,6 @@
+{
+  "import": [
+    "internal/jazzene/core"
+  ],
+  "supported-targets": ["js"]
+}

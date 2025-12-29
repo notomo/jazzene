@@ -1,0 +1,150 @@
+import { test, expect } from "@playwright/test";
+
+test.describe("Jazzene - Jazz Improvisation Web App", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto("/");
+  });
+
+  test("should render all three main sections", async ({ page }) => {
+    // Check header
+    await expect(page.getByText("Jazzene")).toBeVisible();
+    await expect(page.getByText("Jazz Improvisation Generator")).toBeVisible();
+
+    // Check lead sheet section
+    await expect(page.getByText("Lead Sheet")).toBeVisible();
+    await expect(
+      page.getByPlaceholder(/Enter chord progression/),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Generate Improvisation" }),
+    ).toBeVisible();
+    await expect(page.getByRole("button", { name: "Play" })).toBeVisible();
+
+    // Check falling notes section
+    await expect(page.getByText("Notes")).toBeVisible();
+    const fallingNotesContainer = page.locator(".falling-notes-container");
+    await expect(fallingNotesContainer).toBeVisible();
+
+    // Check piano keyboard section
+    await expect(page.getByText("Piano Keyboard")).toBeVisible();
+    const pianoContainer = page.locator(".piano-keyboard");
+    await expect(pianoContainer).toBeVisible();
+  });
+
+  test("should have default chord progression in input", async ({ page }) => {
+    const input = page.getByPlaceholder(/Enter chord progression/);
+    await expect(input).toHaveValue("Cm7 F7 Bbmaj7 Ebmaj7");
+  });
+
+  test("should allow editing chord progression", async ({ page }) => {
+    const input = page.getByPlaceholder(/Enter chord progression/);
+
+    // Clear and enter new progression
+    await input.clear();
+    await input.fill("Dm7 G7 Cmaj7");
+
+    await expect(input).toHaveValue("Dm7 G7 Cmaj7");
+  });
+
+  test("should generate improvisation on button click", async ({ page }) => {
+    const generateButton = page.getByRole("button", {
+      name: "Generate Improvisation",
+    });
+
+    // Click generate button
+    await generateButton.click();
+
+    // The application should generate notes (internal state change)
+    // We can verify this by checking if Play button remains enabled
+    const playButton = page.getByRole("button", { name: "Play" });
+    await expect(playButton).toBeEnabled();
+  });
+
+  test("should show play button state changes", async ({ page }) => {
+    const generateButton = page.getByRole("button", {
+      name: "Generate Improvisation",
+    });
+    const playButton = page.getByRole("button", { name: "Play" });
+
+    // Generate notes first
+    await generateButton.click();
+
+    // Click play button
+    await playButton.click();
+
+    // Button should change to "Playing..." state
+    await expect(
+      page.getByRole("button", { name: "Playing..." }),
+    ).toBeVisible();
+
+    // Wait for playback to finish (notes should play within a few seconds)
+    await expect(playButton).toBeVisible({ timeout: 10000 });
+  });
+
+  test("should disable play button during playback", async ({ page }) => {
+    const generateButton = page.getByRole("button", {
+      name: "Generate Improvisation",
+    });
+
+    // Generate notes first
+    await generateButton.click();
+
+    // Start playback
+    await page.getByRole("button", { name: "Play" }).click();
+
+    // Playing button should be disabled (has cursor-not-allowed class)
+    const playingButton = page.getByRole("button", { name: "Playing..." });
+    await expect(playingButton).toHaveClass(/cursor-not-allowed/);
+  });
+
+  test("should have professional dark theme styling", async ({ page }) => {
+    // Check gradient background
+    const body = page.locator("body");
+    const appContainer = page.locator(".min-h-screen");
+    await expect(appContainer).toHaveClass(/bg-gradient-to-br/);
+    await expect(appContainer).toHaveClass(/from-slate-950/);
+    await expect(appContainer).toHaveClass(/to-slate-900/);
+
+    // Check lead sheet card styling
+    const leadSheet = page.locator(".lead-sheet");
+    await expect(leadSheet).toHaveClass(/bg-slate-800/);
+    await expect(leadSheet).toHaveClass(/rounded-xl/);
+    await expect(leadSheet).toHaveClass(/shadow-2xl/);
+
+    // Check title gradient
+    const title = page.getByText("Jazzene");
+    await expect(title).toHaveClass(/text-5xl/);
+    await expect(title).toHaveClass(/bg-gradient-to-r/);
+  });
+
+  test("should generate different progressions correctly", async ({ page }) => {
+    const input = page.getByPlaceholder(/Enter chord progression/);
+    const generateButton = page.getByRole("button", {
+      name: "Generate Improvisation",
+    });
+
+    // Test with simple progression
+    await input.clear();
+    await input.fill("Cmaj7 Am7 Dm7 G7");
+    await generateButton.click();
+
+    // Should be able to play
+    const playButton = page.getByRole("button", { name: "Play" });
+    await expect(playButton).toBeEnabled();
+  });
+
+  test("should handle empty chord progression gracefully", async ({ page }) => {
+    const input = page.getByPlaceholder(/Enter chord progression/);
+    const generateButton = page.getByRole("button", {
+      name: "Generate Improvisation",
+    });
+
+    // Clear input
+    await input.clear();
+    await generateButton.click();
+
+    // Play button should still be present (even if no notes generated)
+    const playButton = page.getByRole("button", { name: "Play" });
+    await expect(playButton).toBeVisible();
+  });
+});

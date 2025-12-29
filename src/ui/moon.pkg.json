@@ -1,0 +1,16 @@
+{
+  "import": [
+    "mizchi/luna/luna/signal",
+    {
+      "path": "mizchi/luna/platform/dom/element",
+      "alias": "dom"
+    },
+    {
+      "path": "mizchi/js/browser/dom",
+      "alias": "js_dom"
+    },
+    "internal/jazzene/core",
+    "internal/jazzene/animation"
+  ],
+  "supported-targets": ["js"]
+}

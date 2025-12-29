@@ -12,6 +12,22 @@
     {
       "path": "mizchi/js/browser/dom",
       "alias": "js_dom"
+    },
+    {
+      "path": "internal/jazzene/core",
+      "alias": "core"
+    },
+    {
+      "path": "internal/jazzene/audio",
+      "alias": "audio"
+    },
+    {
+      "path": "internal/jazzene/animation",
+      "alias": "animation"
+    },
+    {
+      "path": "internal/jazzene/ui",
+      "alias": "ui"
     }
   ],
   "link": {

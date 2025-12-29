@@ -6,6 +6,7 @@
     "check": "moon check && moon fmt --check",
     "format": "moon fmt",
     "test": "moon test -v",
+    "test:e2e": "playwright test",
     "dev": "vite",
     "build": "moon build && vite build"
   },
