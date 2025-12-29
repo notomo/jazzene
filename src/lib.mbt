@@ -1,9 +1,6 @@
 ///|
 /// Jazzene - Jazz Improvisation Web App
 fn main {
-  // Initialize random seed with current timestamp
-  @core.init_random_seed(get_timestamp())
-
   // State signals
   let chord_input = @signal.signal("Cm7 F7 Bbmaj7 Ebmaj7")
   let generated_notes : @signal.Signal[Array[@core.Note]] = @signal.signal([])
@@ -95,13 +92,6 @@ fn main {
     None => ()
   }
 }
-
-///|
-/// FFI: Get current timestamp
-extern "js" fn get_timestamp() -> Int =
-  #| () => {
-  #|   return Math.floor(Date.now() / 1000);
-  #| }
 
 ///|
 /// FFI: setTimeout

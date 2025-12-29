@@ -51,51 +51,11 @@ fn random_note_from_chord(chord : Chord) -> Note {
   }
 
   // Select random note
-  let index = random_int(extended_tones.length())
+  let index = global_rand.int(limit=extended_tones.length())
   Note::from_midi(extended_tones[index])
 }
 
-///| Simple pseudo-random number generator
+///| Global random number generator
 
 ///|
-/// Returns a value in [0, max)
-fn random_int(max : Int) -> Int {
-  if max <= 0 {
-    return 0
-  }
-  // Simple LCG (Linear Congruential Generator)
-  // Note: This is deterministic. For true randomness, we'd need JS FFI to Math.random()
-  let seed = get_and_update_seed()
-  (seed % max + max) % max
-}
-
-///| Global seed for pseudo-random number generation
-
-///| In a real implementation, this would be initialized with JS Date.now()
-
-///| Note: MoonBit doesn't support mutable let bindings in this context,
-
-///|
-/// so we use a simple stateless PRNG based on time or counter
-priv struct SeedRef {
-  mut val : Int
-}
-
-///|
-let global_seed_ref : SeedRef = { val: 12345 }
-
-///|
-fn get_and_update_seed() -> Int {
-  let a = 1103515245
-  let c = 12345
-  let m = 0x7FFFFFFF // 2^31 - 1
-  let new_seed = (a * global_seed_ref.val + c) % m
-  global_seed_ref.val = new_seed
-  new_seed
-}
-
-///|
-/// Initialize random seed (call this from main with JS timestamp)
-pub fn init_random_seed(seed : Int) -> Unit {
-  global_seed_ref.val = seed
-}
+let global_rand : @random.Rand = @random.Rand::chacha8()
