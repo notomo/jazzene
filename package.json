@@ -7,6 +7,8 @@
     "build": "moon build && vite build"
   },
   "devDependencies": {
+    "@tailwindcss/vite": "^4.1.18",
+    "tailwindcss": "^4.0.2",
     "vite": "^6.0.0",
     "vite-plugin-moonbit": "^0.1.0"
   }
