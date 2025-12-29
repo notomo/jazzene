@@ -3,6 +3,9 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "check": "moon check && moon fmt --check",
+    "format": "moon fmt",
+    "test": "moon test -v",
     "dev": "vite",
     "build": "moon build && vite build"
   },
