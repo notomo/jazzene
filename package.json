@@ -3,6 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "check_all": "npm run format && npm run check && npm run test && npm run test:e2e",
     "check": "moon check && moon fmt --check",
     "format": "moon fmt",
     "test": "moon test -v -p internal/jazzene/core --target wasm-gc",

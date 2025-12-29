@@ -6,11 +6,13 @@ pub fn render_lead_sheet(
   on_play : () -> Unit,
   is_playing : @signal.Signal[Bool],
 ) -> @dom.DomNode {
-  // Input event handler
   let on_input : @dom.InputHandler = fn(e) {
     let target = e.target()
-    let value = ffi_get_input_value(target)
-    chord_input.set(value)
+    let value = target.nodeValue()
+    match value {
+      Some(x) => chord_input.set(x)
+      None => ()
+    }
   }
   @dom.div(
     class="lead-sheet bg-slate-800 p-8 rounded-xl shadow-2xl border border-slate-700",
@@ -60,8 +62,3 @@ pub fn render_lead_sheet(
     ],
   )
 }
-
-///|
-/// FFI: Get value from input element
-extern "js" fn ffi_get_input_value(target : @js_dom.Element) -> String =
-  #| (target) => target.value || ""
