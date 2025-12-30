@@ -13,7 +13,10 @@ test.describe("Jazzene - Jazz Improvisation Web App", () => {
     await expect(
       page.getByRole("button", { name: "Generate Improvisation" }),
     ).toBeVisible();
-    await expect(page.getByRole("button", { name: "Play" })).toBeVisible();
+    // Play/Pause button should be visible (starts as "Play")
+    await expect(
+      page.getByRole("button", { name: /Play|Pause|Resume/ }),
+    ).toBeVisible();
 
     // Check falling notes section
     const fallingNotesContainer = page.locator(".falling-notes-container");
@@ -53,7 +56,7 @@ test.describe("Jazzene - Jazz Improvisation Web App", () => {
     await expect(playButton).toBeEnabled();
   });
 
-  test("should show play button state changes", async ({ page }) => {
+  test("should show play/pause button state changes", async ({ page }) => {
     const generateButton = page.getByRole("button", {
       name: "Generate Improvisation",
     });
@@ -65,16 +68,17 @@ test.describe("Jazzene - Jazz Improvisation Web App", () => {
     // Click play button
     await playButton.click();
 
-    // Button should change to "Playing..." state
-    await expect(
-      page.getByRole("button", { name: "Playing..." }),
-    ).toBeVisible();
+    // Button should change to "Pause" state
+    await expect(page.getByRole("button", { name: "Pause" })).toBeVisible();
 
-    // Wait for playback to finish (notes should play within a few seconds)
-    await expect(playButton).toBeVisible({ timeout: 10000 });
+    // Click pause button
+    await page.getByRole("button", { name: "Pause" }).click();
+
+    // Button should change to "Resume" state
+    await expect(page.getByRole("button", { name: "Resume" })).toBeVisible();
   });
 
-  test("should disable play button during playback", async ({ page }) => {
+  test("should allow pausing during playback", async ({ page }) => {
     const generateButton = page.getByRole("button", {
       name: "Generate Improvisation",
     });
@@ -85,9 +89,10 @@ test.describe("Jazzene - Jazz Improvisation Web App", () => {
     // Start playback
     await page.getByRole("button", { name: "Play" }).click();
 
-    // Playing button should be disabled (has cursor-not-allowed class)
-    const playingButton = page.getByRole("button", { name: "Playing..." });
-    await expect(playingButton).toHaveClass(/cursor-not-allowed/);
+    // Pause button should be enabled and yellow
+    const pauseButton = page.getByRole("button", { name: "Pause" });
+    await expect(pauseButton).toBeEnabled();
+    await expect(pauseButton).toHaveClass(/bg-yellow-600/);
   });
 
   test("should have professional dark theme styling", async ({ page }) => {
@@ -135,5 +140,73 @@ test.describe("Jazzene - Jazz Improvisation Web App", () => {
     // Play button should still be present (even if no notes generated)
     const playButton = page.getByRole("button", { name: "Play" });
     await expect(playButton).toBeVisible();
+  });
+
+  test("should display seekbar with time display", async ({ page }) => {
+    // Seekbar should be visible
+    const seekbar = page.locator('input[type="range"]');
+    await expect(seekbar).toBeVisible();
+
+    // Time displays should show 0:00 / 0:00 initially
+    const timeDisplays = page.locator(".text-slate-400");
+    await expect(timeDisplays.first()).toContainText("0:00");
+  });
+
+  test("should disable seekbar when no notes generated", async ({ page }) => {
+    const seekbar = page.locator('input[type="range"]');
+
+    // Seekbar should be disabled initially (no notes)
+    await expect(seekbar).toBeDisabled();
+  });
+
+  test("should enable seekbar after generating notes", async ({ page }) => {
+    const generateButton = page.getByRole("button", {
+      name: "Generate Improvisation",
+    });
+    const seekbar = page.locator('input[type="range"]');
+
+    // Generate notes
+    await generateButton.click();
+
+    // Seekbar should now be enabled
+    await expect(seekbar).toBeEnabled();
+  });
+
+  test("should update time display during playback", async ({ page }) => {
+    const generateButton = page.getByRole("button", {
+      name: "Generate Improvisation",
+    });
+    const playButton = page.getByRole("button", { name: "Play" });
+
+    // Generate and play
+    await generateButton.click();
+    await playButton.click();
+
+    // Wait a bit for playback to start
+    await page.waitForTimeout(1000);
+
+    // Total duration should be greater than 0:00
+    const timeDisplays = page.locator(".text-slate-400");
+    const totalTime = await timeDisplays.last().textContent();
+    expect(totalTime).not.toBe("0:00");
+  });
+
+  test("should allow seeking with seekbar", async ({ page }) => {
+    const generateButton = page.getByRole("button", {
+      name: "Generate Improvisation",
+    });
+    const seekbar = page.locator('input[type="range"]');
+
+    // Generate notes
+    await generateButton.click();
+
+    // Move seekbar to middle
+    await seekbar.fill("50");
+
+    // Current time should update
+    const timeDisplays = page.locator(".text-slate-400");
+    const currentTime = await timeDisplays.first().textContent();
+    // Time should be non-zero after seeking
+    expect(currentTime).not.toBe("0:00");
   });
 });

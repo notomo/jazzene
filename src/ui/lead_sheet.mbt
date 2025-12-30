@@ -1,9 +1,12 @@
 ///|
-/// Render lead sheet component (chord input + buttons)
+/// Render lead sheet component (chord input + buttons + seekbar)
 pub fn render_lead_sheet(
   chord_input : @signal.Signal[String],
   on_generate : () -> Unit,
-  on_play : () -> Unit,
+  on_play_pause : () -> Unit,
+  on_seek : (Double) -> Unit,
+  playback_state : @signal.Signal[@playback_state.PlaybackState],
+  generated_notes : @signal.Signal[Array[@core.Note]],
   is_playing : @signal.Signal[Bool],
 ) -> @dom.DomNode {
   let on_input : @dom.InputHandler = fn(e) {
@@ -34,27 +37,30 @@ pub fn render_lead_sheet(
           @dom.button(
             dyn_class=fn() {
               if is_playing.get() {
-                "flex-1 px-6 py-3 bg-gray-600 text-white rounded-lg font-semibold shadow-lg cursor-not-allowed"
+                "flex-1 px-6 py-3 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg font-semibold transition-colors shadow-lg"
               } else {
                 "flex-1 px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition-colors shadow-lg"
               }
             },
-            on=@dom.events().click(fn(_) {
-              if not(is_playing.get()) {
-                on_play()
-              }
-            }),
+            on=@dom.events().click(fn(_) { on_play_pause() }),
             [
               @dom.text_dyn(fn() {
                 if is_playing.get() {
-                  "Playing..."
+                  "Pause"
                 } else {
-                  "Play"
+                  let state = playback_state.get()
+                  if state.current_note_index > 0 {
+                    "Resume"
+                  } else {
+                    "Play"
+                  }
                 }
               }),
             ],
           ),
         ]),
+        // Seekbar below buttons
+        render_seekbar(playback_state, generated_notes, on_seek),
       ]),
     ],
   )
