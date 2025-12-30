@@ -20,8 +20,9 @@ pub fn AudioEngine::play_note(
   self : AudioEngine,
   note : @core.Note,
   duration_ms : Int,
+  volume : Double,
 ) -> Unit {
-  ffi_play_note(self.context, note.midi_number, duration_ms)
+  ffi_play_note(self.context, note.midi_number, duration_ms, volume)
 }
 
 ///|
@@ -38,8 +39,9 @@ extern "js" fn ffi_play_note(
   context : AudioContext,
   midi_number : Int,
   duration_ms : Int,
+  volume : Double,
 ) -> Unit =
-  #| (ctx, midiNumber, durationMs) => {
+  #| (ctx, midiNumber, durationMs, volume) => {
   #|   // Convert MIDI to frequency: f = 440 * 2^((n-69)/12)
   #|   const frequency = 440 * Math.pow(2, (midiNumber - 69) / 12);
   #|
@@ -60,7 +62,7 @@ extern "js" fn ffi_play_note(
   #|   const releaseTime = 0.1;
   #|
   #|   gain.gain.setValueAtTime(0, now);
-  #|   gain.gain.linearRampToValueAtTime(0.3, now + attackTime);
+  #|   gain.gain.linearRampToValueAtTime(volume, now + attackTime);
   #|   gain.gain.exponentialRampToValueAtTime(0.01, now + durationSec - releaseTime);
   #|
   #|   // Start and stop oscillator

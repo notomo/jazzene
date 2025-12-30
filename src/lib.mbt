@@ -20,6 +20,11 @@ fn main {
   // Audio engine
   let audio_engine = @audio.AudioEngine::create()
 
+  // Audio and tempo controls
+  let volume = @signal.signal(0.3)
+  let is_muted = @signal.signal(false)
+  let tempo = @signal.signal(120)
+
   // Current playing note (as signal, not memo)
   let current_note : @signal.Signal[@core.Note?] = @signal.signal(None)
 
@@ -71,7 +76,7 @@ fn main {
       // PLAY or RESUME: Schedule remaining notes from current position
       let start_index = state.current_note_index
       let start_time_ms = state.playback_position_ms
-      let bpm = 120
+      let bpm = tempo.get()
       let ms_per_quarter = 60000 / bpm
       let new_timeouts : Array[@js_global.Timer] = []
       for i = start_index; i < notes.length(); i = i + 1 {
@@ -146,7 +151,7 @@ fn main {
     }
 
     // Step 2: Calculate new position
-    let bpm = 120
+    let bpm = tempo.get()
     let ms_per_quarter = 60000 / bpm
     let total_duration = notes.length() * ms_per_quarter
     let new_position_ms = (position_percent / 100.0 * total_duration.to_double()).to_int()
@@ -176,7 +181,8 @@ fn main {
       animation_state.update(fn(s) {
         @animation.update_animation(s, fn(note) {
           // Play sound when note reaches bottom
-          audio_engine.play_note(note, 500) // 500ms duration
+          let vol = if is_muted.get() { 0.0 } else { volume.get() }
+          audio_engine.play_note(note, 500, vol) // 500ms duration
           current_note.set(Some(note))
           // Clear current note after a short duration
           let _ = @js_global.set_timeout(fn() { current_note.set(None) }, 200)
@@ -197,7 +203,7 @@ fn main {
           // Top: Lead sheet
           @ui.render_lead_sheet(
             chord_input, on_generate, on_play_pause, on_seek, playback_state, generated_notes,
-            is_playing,
+            is_playing, volume, is_muted, tempo,
           ),
 
           // Bottom: Falling notes + Piano keyboard (connected) - grow to fill remaining space

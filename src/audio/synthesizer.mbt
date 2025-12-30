@@ -14,7 +14,7 @@ pub fn play_note_sequence(
     // Schedule note playback
     let _ = @js_global.set_timeout(
       fn() {
-        engine.play_note(note, ms_per_quarter - 50) // Slight gap between notes
+        engine.play_note(note, ms_per_quarter - 50, 0.3) // Slight gap between notes
         on_note_callback(i)
       },
       delay_ms,
