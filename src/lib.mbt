@@ -1,7 +1,4 @@
 ///|
-fn run_async(f : async () -> Unit noraise) -> Unit = "%async.run"
-
-///|
 /// Jazzene - Jazz Improvisation Web App
 fn main {
   // State signals
@@ -55,12 +52,10 @@ fn main {
     }
   }
 
-  run_async(fn() {
-    @animation.start_animation_loop(
-      fn() { animation_state.update(@animation.update_animation) },
-      fn() { true }, // Always running
-    )
-  })
+  @animation.start_animation_loop(
+    fn() { animation_state.update(@animation.update_animation) },
+    fn() { true }, // Always running
+  )
 
   // Render app
   let doc = @js_dom.document()
