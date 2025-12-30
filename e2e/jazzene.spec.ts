@@ -27,7 +27,7 @@ test.describe("Jazzene - Jazz Improvisation Web App", () => {
 
     // Check piano keyboard section
     await expect(page.getByText("Piano Keyboard")).toBeVisible();
-    const pianoContainer = page.locator(".piano-keyboard");
+    const pianoContainer = page.getByText("Piano Keyboard").locator("..");
     await expect(pianoContainer).toBeVisible();
   });
 

@@ -4,7 +4,7 @@ pub fn render_piano_keyboard(
   current_note : @signal.Signal[@core.Note?],
 ) -> @dom.DomNode {
   @dom.div(
-    class="piano-keyboard bg-slate-900 p-6 rounded-xl shadow-2xl border border-slate-700",
+    class="font-sans bg-slate-900 p-6 rounded-xl shadow-2xl border border-slate-700",
     [
       @dom.h3(class="text-xl font-bold mb-4 text-blue-400", [
         @dom.text("Piano Keyboard"),

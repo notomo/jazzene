@@ -26,7 +26,7 @@ fn render_falling_notes_dynamic(
     let x = falling_note.x
     let y = falling_note.y
     let note_el = @dom.div(
-      class="absolute w-3 h-12 bg-blue-400 rounded-full shadow-lg falling-note",
+      class="absolute w-3 h-12 bg-blue-400 rounded-full shadow-lg shadow-blue-400/50 animate-pulse",
       dyn_style=fn() {
         "left: " +
         x.to_string() +
