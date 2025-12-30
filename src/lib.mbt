@@ -7,7 +7,6 @@ fn main {
   let animation_state = @signal.signal(
     @animation.create_initial_animation_state(),
   )
-  let current_note_index : @signal.Signal[Int?] = @signal.signal(None)
   let is_playing = @signal.signal(false)
 
   // Audio engine
@@ -29,31 +28,50 @@ fn main {
     let notes = generated_notes.get()
     if notes.length() > 0 {
       is_playing.set(true)
-      @audio.play_note_sequence(
-        audio_engine,
-        notes,
-        120, // BPM
-        fn(index : Int) {
-          current_note_index.set(Some(index))
-          if index < notes.length() {
-            current_note.set(Some(notes[index]))
-            animation_state.update(fn(s) {
-              @animation.add_note(s, notes[index])
-            })
-          }
 
-          // Stop playing when sequence ends
-          if index == notes.length() - 1 {
-            let _ = @js_global.set_timeout(fn() { is_playing.set(false) }, 1000)
+      // Schedule notes to be added to animation with timing (sound will be triggered when they reach bottom)
+      let bpm = 120
+      let ms_per_quarter = 60000 / bpm
+      for i = 0; i < notes.length(); i = i + 1 {
+        let note = notes[i]
+        let delay_ms = i * ms_per_quarter
+        let index = i
 
-          }
-        },
-      )
+        // Schedule note to be added to animation
+        let _ = @js_global.set_timeout(
+          fn() {
+            animation_state.update(fn(s) { @animation.add_note(s, note) })
+
+            // Stop playing when last note is added + time to fall
+            if index == notes.length() - 1 {
+              let _ = @js_global.set_timeout(
+                fn() { is_playing.set(false) },
+                3000,
+              )
+
+            }
+          },
+          delay_ms,
+        )
+
+      }
     }
   }
 
+  // Animation loop with sound trigger callback
   @animation.start_animation_loop(
-    fn() { animation_state.update(@animation.update_animation) },
+    fn() {
+      animation_state.update(fn(s) {
+        @animation.update_animation(s, fn(note) {
+          // Play sound when note reaches bottom
+          audio_engine.play_note(note, 500) // 500ms duration
+          current_note.set(Some(note))
+          // Clear current note after a short duration
+          let _ = @js_global.set_timeout(fn() { current_note.set(None) }, 200)
+
+        })
+      })
+    },
     fn() { true }, // Always running
   )
 
