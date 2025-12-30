@@ -3,16 +3,12 @@
 pub fn render_falling_notes(
   animation_state : @signal.Signal[@animation.AnimationState],
 ) -> @dom.DomNode {
-  @dom.div(
-    class="falling-notes-container bg-slate-950 rounded-xl shadow-2xl border border-slate-700 p-4",
-    [
-      @dom.h3(class="text-xl font-bold mb-4 text-blue-400", [@dom.text("Notes")]),
-      @dom.div(class="relative h-96 bg-slate-900 rounded-lg overflow-hidden", [
-        // Dynamic rendering of falling notes
-        @dom.fragment(render_falling_notes_dynamic(animation_state)),
-      ]),
-    ],
-  )
+  @dom.div(class="falling-notes-container flex-1 flex flex-col", [
+    @dom.div(class="relative flex-1 bg-slate-900 overflow-hidden", [
+      // Dynamic rendering of falling notes
+      @dom.fragment(render_falling_notes_dynamic(animation_state)),
+    ]),
+  ])
 }
 
 ///|

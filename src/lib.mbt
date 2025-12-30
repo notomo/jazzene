@@ -67,29 +67,19 @@ fn main {
   match doc.getElementById("app") {
     Some(el) => {
       let app = @dom.div(
-        class="min-h-screen bg-gradient-to-br from-slate-950 to-slate-900 text-white p-8",
+        class="h-screen bg-gradient-to-br from-slate-950 to-slate-900 text-white p-6 flex flex-col overflow-hidden",
         [
-          @dom.div(class="max-w-6xl mx-auto", [
-            @dom.h1(
-              class="text-5xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-600",
-              [@dom.text("Jazzene")],
-            ),
-            @dom.p(class="text-slate-400 mb-8", [
-              @dom.text("Jazz Improvisation Generator"),
-            ]),
-            @dom.div(class="space-y-6", [
-              // Top: Lead sheet
-              @ui.render_lead_sheet(
-                chord_input, on_generate, on_play, is_playing,
-              ),
+          // Top: Lead sheet
+          @ui.render_lead_sheet(chord_input, on_generate, on_play, is_playing),
 
-              // Middle: Falling notes
+          // Bottom: Falling notes + Piano keyboard (connected) - grow to fill remaining space
+          @dom.div(
+            class="bg-slate-950 rounded-xl shadow-2xl border-2 border-slate-700 overflow-hidden flex-1 mt-6 flex flex-col",
+            [
               @ui.render_falling_notes(animation_state),
-
-              // Bottom: Piano keyboard
               @ui.render_piano_keyboard(current_note),
-            ]),
-          ]),
+            ],
+          ),
         ],
       )
       @dom.render(el |> @dom.DomElement::from_jsdom, app)

@@ -6,12 +6,7 @@ test.describe("Jazzene - Jazz Improvisation Web App", () => {
   });
 
   test("should render all three main sections", async ({ page }) => {
-    // Check header
-    await expect(page.getByText("Jazzene")).toBeVisible();
-    await expect(page.getByText("Jazz Improvisation Generator")).toBeVisible();
-
     // Check lead sheet section
-    await expect(page.getByText("Lead Sheet")).toBeVisible();
     await expect(
       page.getByPlaceholder(/Enter chord progression/),
     ).toBeVisible();
@@ -21,14 +16,12 @@ test.describe("Jazzene - Jazz Improvisation Web App", () => {
     await expect(page.getByRole("button", { name: "Play" })).toBeVisible();
 
     // Check falling notes section
-    await expect(page.getByText("Notes")).toBeVisible();
     const fallingNotesContainer = page.locator(".falling-notes-container");
     await expect(fallingNotesContainer).toBeVisible();
 
-    // Check piano keyboard section
-    await expect(page.getByText("Piano Keyboard")).toBeVisible();
-    const pianoContainer = page.getByText("Piano Keyboard").locator("..");
-    await expect(pianoContainer).toBeVisible();
+    // Check that we have 2 bordered sections: Lead sheet and notes+keyboard
+    const sections = page.locator(".border-2");
+    await expect(sections).toHaveCount(2); // Lead sheet, notes+keyboard (connected)
   });
 
   test("should have default chord progression in input", async ({ page }) => {
@@ -100,7 +93,7 @@ test.describe("Jazzene - Jazz Improvisation Web App", () => {
   test("should have professional dark theme styling", async ({ page }) => {
     // Check gradient background
     const body = page.locator("body");
-    const appContainer = page.locator(".min-h-screen");
+    const appContainer = page.locator(".h-screen");
     await expect(appContainer).toHaveClass(/bg-gradient-to-br/);
     await expect(appContainer).toHaveClass(/from-slate-950/);
     await expect(appContainer).toHaveClass(/to-slate-900/);
@@ -110,11 +103,7 @@ test.describe("Jazzene - Jazz Improvisation Web App", () => {
     await expect(leadSheet).toHaveClass(/bg-slate-800/);
     await expect(leadSheet).toHaveClass(/rounded-xl/);
     await expect(leadSheet).toHaveClass(/shadow-2xl/);
-
-    // Check title gradient
-    const title = page.getByText("Jazzene");
-    await expect(title).toHaveClass(/text-5xl/);
-    await expect(title).toHaveClass(/bg-gradient-to-r/);
+    await expect(leadSheet).toHaveClass(/border-2/);
   });
 
   test("should generate different progressions correctly", async ({ page }) => {

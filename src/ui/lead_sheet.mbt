@@ -15,11 +15,8 @@ pub fn render_lead_sheet(
     }
   }
   @dom.div(
-    class="lead-sheet bg-slate-800 p-8 rounded-xl shadow-2xl border border-slate-700",
+    class="lead-sheet bg-slate-800 p-8 rounded-xl shadow-2xl border-2 border-slate-700",
     [
-      @dom.h2(class="text-2xl font-bold mb-6 text-blue-400", [
-        @dom.text("Lead Sheet"),
-      ]),
       @dom.div(class="space-y-4", [
         @dom.input(
           type_="text",
