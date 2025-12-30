@@ -67,14 +67,14 @@ fn main {
   match doc.getElementById("app") {
     Some(el) => {
       let app = @dom.div(
-        class="h-screen bg-gradient-to-br from-slate-950 to-slate-900 text-white p-6 flex flex-col overflow-hidden",
+        class="h-screen bg-gradient-to-br from-slate-950 to-slate-900 text-white p-1 flex flex-col overflow-hidden",
         [
           // Top: Lead sheet
           @ui.render_lead_sheet(chord_input, on_generate, on_play, is_playing),
 
           // Bottom: Falling notes + Piano keyboard (connected) - grow to fill remaining space
           @dom.div(
-            class="bg-slate-950 rounded-xl shadow-2xl border-2 border-slate-700 overflow-hidden flex-1 mt-6 flex flex-col",
+            class="bg-slate-950 rounded-xl shadow-2xl border-2 border-slate-700 overflow-hidden flex-1 mt-2 flex flex-col",
             [
               @ui.render_falling_notes(animation_state),
               @ui.render_piano_keyboard(current_note),

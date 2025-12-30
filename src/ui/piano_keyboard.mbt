@@ -5,52 +5,101 @@ pub fn render_piano_keyboard(
 ) -> @dom.DomNode {
   @dom.div(class="font-sans w-full", [
     @dom.div(
-      class="relative h-40 bg-slate-950 overflow-hidden flex items-end w-full",
+      class="relative h-40 bg-slate-950 overflow-hidden w-full flex",
       render_piano_keys(current_note),
     ),
   ])
 }
 
 ///|
-/// Render individual piano keys (simplified: one octave)
+/// Render individual piano keys with realistic layout
 fn render_piano_keys(
   current_note : @signal.Signal[@core.Note?],
 ) -> Array[@dom.DomNode] {
-  let keys : Array[@dom.DomNode] = []
+  let white_keys : Array[@dom.DomNode] = []
+  let black_keys : Array[@dom.DomNode] = []
 
-  // Extended range: C2 to C7 (MIDI 36-96) for full width
+  // Count total white keys for position calculation
+  let mut total_white_keys = 0
+  for midi = 36; midi < 97; midi = midi + 1 {
+    if not(is_black_key(midi % 12)) {
+      total_white_keys = total_white_keys + 1
+    }
+  }
+
+  // Generate white and black keys separately
   for midi = 36; midi < 97; midi = midi + 1 {
     let is_black = is_black_key(midi % 12)
     let midi_captured = midi // Capture for closure
-    let key = @dom.div(
-      dyn_class=fn() {
-        let base_class = if is_black {
-          "h-24 flex-1 min-w-0 "
-        } else {
-          "h-32 flex-1 min-w-0 "
-        }
-        let is_active = match current_note.get() {
-          Some(note) => note.midi_number == midi_captured
-          None => false
-        }
-        let color_class = if is_active {
-          if is_black {
-            "bg-blue-500 border-r border-blue-400"
-          } else {
-            "bg-blue-400 border-r border-blue-300"
+    if is_black {
+      // Black key - positioned absolutely between white keys
+      let white_key_index = count_white_keys_before(midi)
+      let black_key = @dom.div(
+        dyn_class=fn() {
+          let is_active = match current_note.get() {
+            Some(note) => note.midi_number == midi_captured
+            None => false
           }
-        } else if is_black {
-          "bg-gray-800 border-r border-gray-700"
-        } else {
-          "bg-white border-r border-gray-300"
-        }
-        base_class + color_class + " transition-colors"
-      },
-      [],
-    )
-    keys.push(key)
+          let color_class = if is_active {
+            "bg-blue-500"
+          } else {
+            "bg-gray-900"
+          }
+          "absolute top-0 h-24 w-8 rounded-b-md shadow-lg z-10 transition-colors " +
+          color_class
+        },
+        dyn_style=fn() {
+          // Position black key on the border between two white keys
+          let position = white_key_index.to_double() *
+            100.0 /
+            total_white_keys.to_double()
+          "left: " + position.to_string() + "%; transform: translateX(-50%);"
+        },
+        [],
+      )
+      black_keys.push(black_key)
+    } else {
+      // White key - flex layout, full height
+      let white_key = @dom.div(
+        dyn_class=fn() {
+          let is_active = match current_note.get() {
+            Some(note) => note.midi_number == midi_captured
+            None => false
+          }
+          let color_class = if is_active {
+            "bg-blue-400 border-blue-300"
+          } else {
+            "bg-white border-gray-300"
+          }
+          "h-full flex-1 border-r transition-colors " + color_class
+        },
+        [],
+      )
+      white_keys.push(white_key)
+    }
   }
-  keys
+
+  // Combine white keys and black keys (black keys on top)
+  let result : Array[@dom.DomNode] = []
+  for key in white_keys {
+    result.push(key)
+  }
+  for key in black_keys {
+    result.push(key)
+  }
+  result
+}
+
+///|
+/// Count white keys before a given MIDI note
+fn count_white_keys_before(midi : Int) -> Int {
+  let mut count = 0
+  for i = 36; i < midi; i = i + 1 {
+    if not(is_black_key(i % 12)) {
+      count = count + 1
+    }
+  }
+  count
 }
 
 ///|
