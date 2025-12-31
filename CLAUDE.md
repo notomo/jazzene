@@ -35,38 +35,6 @@ npm run test
 
 **IMPORTANT**: Before completing any task, run `npm run check_all` to ensure all checks pass.
 
-## MoonBit Investigation Tools
-
-### Documentation Lookup
-
-Use `moon doc` to query documentation for MoonBit standard library symbols:
-
-```bash
-# Example: Query the random package
-moon doc @random
-# Output:
-# package "moonbitlang/core/random"
-#
-# type Rand
-#   pub fn Rand::bigint(Self, Int) -> @bigint.BigInt
-#   pub fn Rand::boolean(Self) -> Bool
-#   ...
-```
-
-**Symbol name reference**: See https://github.com/moonbitlang/core for available packages and symbols.
-
-### IDE Commands
-
-The `moon ide` command provides code navigation features:
-
-```bash
-moon ide --help
-# Available commands:
-#   goto-definition   Find definition of a symbol
-#   find-references   Find references of a symbol
-#   peek-def          Peek Definition of a symbol at a location
-```
-
 ## Architecture
 
 ### Build Pipeline
@@ -117,13 +85,6 @@ index.html           # HTML template with #app mount point
 target/js/           # MoonBit build output (gitignored)
 .mooncakes/          # MoonBit package cache (like node_modules)
 ```
-
-## MoonBit Package System
-
-- `moon.mod.json`: Module-level config (dependencies: `mizchi/luna`, `mizchi/js`)
-- `src/moon.pkg.json`: Package-level config (imports, target: js, is-main: true)
-- `.mooncakes/`: Cached dependencies (similar to `node_modules`)
-- Packages use `@` prefix for imports: `@signal.signal()`, `@dom.div()`
 
 ## Rendering Flow
 
