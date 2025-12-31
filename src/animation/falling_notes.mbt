@@ -92,6 +92,45 @@ pub fn add_note(state : AnimationState, note : @core.Note) -> AnimationState {
 }
 
 ///|
+/// Add a note at a specific y position (for preview mode)
+pub fn add_note_at_position(
+  state : AnimationState,
+  note : @core.Note,
+  y_position : Double,
+) -> AnimationState {
+  let midi = note.midi_number
+  // Only handle notes in keyboard range (36-96, C2-C7)
+  if midi < 36 || midi >= 97 {
+    return state
+  }
+  let is_black = is_black_key(midi % 12)
+  let total_white_keys = count_total_white_keys()
+
+  // Calculate position same as piano keyboard
+  let x = if is_black {
+    // Black key - position on border between white keys
+    let white_key_index = count_white_keys_before(midi)
+    white_key_index.to_double() * 100.0 / total_white_keys.to_double()
+  } else {
+    // White key - calculate center position
+    let white_key_index = count_white_keys_before(midi)
+    (white_key_index.to_double() + 0.5) * 100.0 / total_white_keys.to_double()
+  }
+  let new_note = FallingNote::{
+    note,
+    x,
+    y: y_position, // Use provided position instead of 0
+    velocity: 1.0, // Pixels per frame
+    id: state.next_id,
+    is_black,
+    triggered: y_position >= 95.0, // Already triggered if at bottom
+  }
+  let new_notes = state.notes.copy()
+  new_notes.push(new_note)
+  AnimationState::{ notes: new_notes, next_id: state.next_id + 1 }
+}
+
+///|
 /// Update animation state (move notes down, remove off-screen, trigger sounds)
 pub fn update_animation(
   state : AnimationState,

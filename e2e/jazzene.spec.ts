@@ -10,13 +10,8 @@ test.describe("Jazzene - Jazz Improvisation Web App", () => {
     await expect(
       page.getByPlaceholder(/Enter chord progression/),
     ).toBeVisible();
-    await expect(
-      page.getByRole("button", { name: "Generate Improvisation" }),
-    ).toBeVisible();
-    // Play/Pause button should be visible (starts as "Play")
-    await expect(
-      page.getByRole("button", { name: /Play|Pause|Resume/ }),
-    ).toBeVisible();
+    // Play/Stop button should be visible (starts as "Play")
+    await expect(page.getByRole("button", { name: /Play|Stop/ })).toBeVisible();
 
     // Check falling notes section
     const fallingNotesContainer = page.locator(".falling-notes-container");
@@ -42,62 +37,41 @@ test.describe("Jazzene - Jazz Improvisation Web App", () => {
     await expect(input).toHaveValue("Dm7 G7 Cmaj7");
   });
 
-  test("should generate improvisation on button click", async ({ page }) => {
-    const generateButton = page.getByRole("button", {
-      name: "Generate Improvisation",
-    });
-
-    // Click generate button
-    await generateButton.click();
-
-    // The application should generate notes (internal state change)
-    // We can verify this by checking if Play button remains enabled
+  test("should auto-generate improvisation on page load", async ({ page }) => {
+    // Notes should be auto-generated from default chord progression
+    // We can verify this by checking if Play button is enabled
     const playButton = page.getByRole("button", { name: "Play" });
     await expect(playButton).toBeEnabled();
   });
 
-  test("should show play/pause button state changes", async ({ page }) => {
-    const generateButton = page.getByRole("button", {
-      name: "Generate Improvisation",
-    });
+  test("should show play/stop button state changes", async ({ page }) => {
     const playButton = page.getByRole("button", { name: "Play" });
-
-    // Generate notes first
-    await generateButton.click();
 
     // Click play button
     await playButton.click();
 
-    // Button should change to "Pause" state
-    await expect(page.getByRole("button", { name: "Pause" })).toBeVisible();
+    // Button should change to "Stop" state
+    await expect(page.getByRole("button", { name: "Stop" })).toBeVisible();
 
-    // Click pause button
-    await page.getByRole("button", { name: "Pause" }).click();
+    // Click stop button
+    await page.getByRole("button", { name: "Stop" }).click();
 
-    // Button should change to "Resume" state
-    await expect(page.getByRole("button", { name: "Resume" })).toBeVisible();
+    // Button should change back to "Play" state
+    await expect(page.getByRole("button", { name: "Play" })).toBeVisible();
   });
 
-  test("should allow pausing during playback", async ({ page }) => {
-    const generateButton = page.getByRole("button", {
-      name: "Generate Improvisation",
-    });
-
-    // Generate notes first
-    await generateButton.click();
-
+  test("should allow stopping during playback", async ({ page }) => {
     // Start playback
     await page.getByRole("button", { name: "Play" }).click();
 
-    // Pause button should be enabled and yellow
-    const pauseButton = page.getByRole("button", { name: "Pause" });
-    await expect(pauseButton).toBeEnabled();
-    await expect(pauseButton).toHaveClass(/bg-yellow-600/);
+    // Stop button should be enabled and red
+    const stopButton = page.getByRole("button", { name: "Stop" });
+    await expect(stopButton).toBeEnabled();
+    await expect(stopButton).toHaveClass(/bg-red-600/);
   });
 
   test("should have professional dark theme styling", async ({ page }) => {
     // Check gradient background
-    const body = page.locator("body");
     const appContainer = page.locator(".h-screen");
     await expect(appContainer).toHaveClass(/bg-gradient-to-br/);
     await expect(appContainer).toHaveClass(/from-slate-950/);
@@ -111,31 +85,25 @@ test.describe("Jazzene - Jazz Improvisation Web App", () => {
     await expect(leadSheet).toHaveClass(/border-2/);
   });
 
-  test("should generate different progressions correctly", async ({ page }) => {
+  test("should auto-generate different progressions correctly", async ({
+    page,
+  }) => {
     const input = page.getByPlaceholder(/Enter chord progression/);
-    const generateButton = page.getByRole("button", {
-      name: "Generate Improvisation",
-    });
 
-    // Test with simple progression
+    // Test with simple progression - notes auto-generate on input change
     await input.clear();
     await input.fill("Cmaj7 Am7 Dm7 G7");
-    await generateButton.click();
 
-    // Should be able to play
+    // Should be able to play immediately (auto-generated)
     const playButton = page.getByRole("button", { name: "Play" });
     await expect(playButton).toBeEnabled();
   });
 
   test("should handle empty chord progression gracefully", async ({ page }) => {
     const input = page.getByPlaceholder(/Enter chord progression/);
-    const generateButton = page.getByRole("button", {
-      name: "Generate Improvisation",
-    });
 
     // Clear input
     await input.clear();
-    await generateButton.click();
 
     // Play button should still be present (even if no notes generated)
     const playButton = page.getByRole("button", { name: "Play" });
@@ -147,39 +115,24 @@ test.describe("Jazzene - Jazz Improvisation Web App", () => {
     const seekbar = page.locator('input[type="range"].w-full');
     await expect(seekbar).toBeVisible();
 
-    // Time display container should show 0:00 / 0:00 initially
+    // Time display container should show time
     const timeDisplay = page.locator(".flex.justify-between.text-slate-400");
-    await expect(timeDisplay).toContainText("0:00");
+    await expect(timeDisplay).toBeVisible();
   });
 
-  test("should disable seekbar when no notes generated", async ({ page }) => {
+  test("should enable seekbar after auto-generating notes", async ({
+    page,
+  }) => {
     const seekbar = page.locator('input[type="range"].w-full');
 
-    // Seekbar should be disabled initially (no notes)
-    await expect(seekbar).toBeDisabled();
-  });
-
-  test("should enable seekbar after generating notes", async ({ page }) => {
-    const generateButton = page.getByRole("button", {
-      name: "Generate Improvisation",
-    });
-    const seekbar = page.locator('input[type="range"].w-full');
-
-    // Generate notes
-    await generateButton.click();
-
-    // Seekbar should now be enabled
+    // Seekbar should be enabled (notes auto-generated from default progression)
     await expect(seekbar).toBeEnabled();
   });
 
   test("should update time display during playback", async ({ page }) => {
-    const generateButton = page.getByRole("button", {
-      name: "Generate Improvisation",
-    });
     const playButton = page.getByRole("button", { name: "Play" });
 
-    // Generate and play
-    await generateButton.click();
+    // Play
     await playButton.click();
 
     // Wait a bit for playback to start
@@ -192,15 +145,9 @@ test.describe("Jazzene - Jazz Improvisation Web App", () => {
   });
 
   test("should allow seeking with seekbar", async ({ page }) => {
-    const generateButton = page.getByRole("button", {
-      name: "Generate Improvisation",
-    });
     const seekbar = page.locator('input[type="range"].w-full');
 
-    // Generate notes
-    await generateButton.click();
-
-    // Seekbar should be enabled
+    // Seekbar should be enabled (auto-generated notes)
     await expect(seekbar).toBeEnabled();
 
     // Should be able to move seekbar to middle
@@ -209,5 +156,56 @@ test.describe("Jazzene - Jazz Improvisation Web App", () => {
     // Verify seekbar value was updated
     const value = await seekbar.inputValue();
     expect(value).toBe("50");
+  });
+
+  test("should show note preview when seeking while stopped", async ({
+    page,
+  }) => {
+    const seekbar = page.locator('input[type="range"].w-full');
+
+    // Move seekbar while stopped
+    await seekbar.fill("25");
+
+    // Falling notes should be visible (preview mode)
+    const fallingNotesContainer = page.locator(".falling-notes-container");
+    await expect(fallingNotesContainer).toBeVisible();
+  });
+
+  test("should preserve position when stopping", async ({ page }) => {
+    const playButton = page.getByRole("button", { name: "Play" });
+
+    // Start playing
+    await playButton.click();
+
+    // Wait long enough to get past 1 second (so time shows as 0:01 or more)
+    await page.waitForTimeout(1500);
+
+    // Stop
+    await page.getByRole("button", { name: "Stop" }).click();
+
+    // Play button should be visible again
+    await expect(page.getByRole("button", { name: "Play" })).toBeVisible();
+
+    // Position should be preserved (time should not be 0:00 / X:XX)
+    const timeDisplay = page.locator(".flex.justify-between.text-slate-400");
+    const time = await timeDisplay.textContent();
+    expect(time).not.toMatch(/^0:00/); // Current time should not be 0:00
+  });
+
+  test("should auto-regenerate notes when chord input changes", async ({
+    page,
+  }) => {
+    const input = page.getByPlaceholder(/Enter chord progression/);
+
+    // Change chord progression
+    await input.clear();
+    await input.fill("Am7 D7 Gmaj7");
+
+    // Wait for auto-generation
+    await page.waitForTimeout(100);
+
+    // Play button should still be enabled with new notes
+    const playButton = page.getByRole("button", { name: "Play" });
+    await expect(playButton).toBeEnabled();
   });
 });

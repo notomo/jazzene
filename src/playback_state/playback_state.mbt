@@ -5,7 +5,6 @@ pub(all) struct PlaybackState {
   playback_position_ms : Int
   total_duration_ms : Int
   scheduled_timeouts : Array[@js_global.Timer]
-  is_paused : Bool
 }
 
 ///|
@@ -15,13 +14,11 @@ pub fn PlaybackState::new(
   playback_position_ms : Int,
   total_duration_ms : Int,
   scheduled_timeouts : Array[@js_global.Timer],
-  is_paused : Bool,
 ) -> PlaybackState {
   PlaybackState::{
     current_note_index,
     playback_position_ms,
     total_duration_ms,
     scheduled_timeouts,
-    is_paused,
   }
 }

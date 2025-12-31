@@ -22,10 +22,8 @@ pub fn render_seekbar(
     @dom.div(class="flex justify-between text-sm text-slate-400 mb-2", [
       @dom.text_dyn(fn() {
         let state = playback_state.get()
-        format_time(state.playback_position_ms)
-      }),
-      @dom.text_dyn(fn() {
-        let state = playback_state.get()
+        format_time(state.playback_position_ms) +
+        " / " +
         format_time(state.total_duration_ms)
       }),
     ]),

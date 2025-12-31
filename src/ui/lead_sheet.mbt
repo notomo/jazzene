@@ -2,7 +2,6 @@
 /// Render lead sheet component (chord input + buttons + seekbar)
 pub fn render_lead_sheet(
   chord_input : @signal.Signal[String],
-  on_generate : () -> Unit,
   on_play_pause : () -> Unit,
   on_seek : (Double) -> Unit,
   playback_state : @signal.Signal[@playback_state.PlaybackState],
@@ -55,14 +54,9 @@ pub fn render_lead_sheet(
         ),
         @dom.div(class="flex gap-4", [
           @dom.button(
-            class="flex-1 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-colors shadow-lg",
-            on=@dom.events().click(fn(_) { on_generate() }),
-            [@dom.text("Generate Improvisation")],
-          ),
-          @dom.button(
             dyn_class=fn() {
               if is_playing.get() {
-                "flex-1 px-6 py-3 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg font-semibold transition-colors shadow-lg"
+                "flex-1 px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition-colors shadow-lg"
               } else {
                 "flex-1 px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition-colors shadow-lg"
               }
@@ -71,14 +65,9 @@ pub fn render_lead_sheet(
             [
               @dom.text_dyn(fn() {
                 if is_playing.get() {
-                  "Pause"
+                  "Stop"
                 } else {
-                  let state = playback_state.get()
-                  if state.current_note_index > 0 {
-                    "Resume"
-                  } else {
-                    "Play"
-                  }
+                  "Play"
                 }
               }),
             ],
