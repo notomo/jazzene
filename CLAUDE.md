@@ -141,6 +141,11 @@ Using Tailwind v4 via `@tailwindcss/vite` plugin. Import in `src/global.css`:
 @import "tailwindcss";
 ```
 
+**Styling Guidelines:**
+- **Use Tailwind utility classes** for all styling - apply classes directly in MoonBit code
+- **DO NOT modify `src/global.css`** - it should only contain the Tailwind import
+- **NO custom CSS** - use Tailwind's utility classes to achieve desired styling
+
 Apply utility classes directly in MoonBit:
 ```moonbit
 @dom.div([], class="text-3xl flex flex-col gap-3")
