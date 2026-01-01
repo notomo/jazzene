@@ -17,6 +17,7 @@ pub fn render_seek_bar(
   mode : @signal.Signal[PlaybackMode],
   tempo : @signal.Signal[Int],
   audio_ctx : @audio.AudioContext,
+  frame_count : @signal.Signal[Int],
 ) -> @dom.DomNode {
   // Computed values
   let total_duration_ms = @signal.memo(fn() {
@@ -27,6 +28,8 @@ pub fn render_seek_bar(
     }
   })
   let position_ms = @signal.memo(fn() {
+    // Reference frame_count to trigger updates every frame
+    let _ = frame_count.get()
     match mode.get() {
       Stopped(pos) => pos
       Playing(started_at, started_from, _) => {

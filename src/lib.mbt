@@ -13,6 +13,7 @@ fn main {
   let tempo = @signal.signal(120)
   let volume = @signal.signal(0.3)
   let is_muted = @signal.signal(false)
+  let frame_count = @signal.signal(0) // Incremented every frame for UI updates
 
   // Reactive note generation when chord input changes
   let _ = @signal.effect(fn() {
@@ -33,6 +34,8 @@ fn main {
 
   // Tick-based main loop
   fn tick() -> Unit {
+    // Update frame counter to trigger UI reactivity
+    frame_count.update(fn(n) { n + 1 })
     match mode.get() {
       Stopped(_) => () // No-op when stopped
       Playing(started_at_ms, started_from_position, _audio_start) => {
@@ -96,7 +99,9 @@ fn main {
                 ]),
                 // seek_bar
                 @dom.div(class="flex-1", [
-                  @ui.render_seek_bar(notes, mode, tempo, audio_ctx),
+                  @ui.render_seek_bar(
+                    notes, mode, tempo, audio_ctx, frame_count,
+                  ),
                 ]),
               ]),
             ],
