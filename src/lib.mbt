@@ -109,7 +109,10 @@ fn main {
           @dom.div(
             class="bg-slate-950 rounded-xl shadow-2xl border-2 border-slate-700 overflow-hidden flex-1 mt-2 flex flex-col",
             attrs=[("aria-label", @dom.Attr::AttrString("visualization"))],
-            [@ui.render_falling_notes(), @ui.render_keyboard()],
+            [
+              @ui.render_falling_notes(notes, mode, tempo, frame_count),
+              @ui.render_keyboard(notes, mode, tempo, frame_count),
+            ],
           ),
         ],
       )

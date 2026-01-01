@@ -18,7 +18,12 @@ export default defineConfig({
   projects: [
     {
       name: "chromium",
-      use: { ...devices["Desktop Chrome"] },
+      use: {
+        ...devices["Desktop Chrome"],
+        launchOptions: {
+          args: ["--window-position=3520,0", "--window-size=1920,1080"],
+        },
+      },
     },
   ],
 

@@ -1,17 +1,49 @@
 ///|
 /// Render piano keyboard component
-pub fn render_keyboard() -> @dom.DomNode {
+pub fn render_keyboard(
+  notes : @signal.Signal[Array[@music.Note]],
+  mode : @signal.Signal[PlaybackMode],
+  tempo : @signal.Signal[Int],
+  frame_count : @signal.Signal[Int],
+) -> @dom.DomNode {
+  // Calculate currently playing notes
+  let playing_notes = @signal.memo(fn() {
+    let _ = frame_count.get()
+    let pos = match mode.get() {
+      Stopped(p) => p
+      Playing(started_at, started_from, _) => {
+        let now_ms = @date.Date::now()
+        started_from + (now_ms - started_at)
+      }
+    }
+    let note_list = notes.get()
+    let tempo_val = tempo.get()
+    let mut current_pos = 0
+    let active_midi_notes : Array[Int] = []
+    for note in note_list {
+      let duration_ms = note.duration.to_ms(tempo_val)
+      let start_ms = current_pos
+      let end_ms = current_pos + duration_ms
+
+      // Check if note is currently playing
+      if pos >= start_ms && pos < end_ms {
+        active_midi_notes.push(note.midi.value)
+      }
+      current_pos = current_pos + duration_ms
+    }
+    active_midi_notes
+  })
   @dom.div(class="w-full", [
     @dom.div(
       class="relative h-40 bg-slate-950 overflow-hidden w-full flex",
-      render_piano_keys(),
+      render_piano_keys(playing_notes),
     ),
   ])
 }
 
 ///|
 /// Render individual piano keys with realistic layout
-fn render_piano_keys() -> Array[@dom.DomNode] {
+fn render_piano_keys(playing_notes : () -> Array[Int]) -> Array[@dom.DomNode] {
   let white_keys : Array[@dom.DomNode] = []
   let black_keys : Array[@dom.DomNode] = []
 
@@ -30,7 +62,11 @@ fn render_piano_keys() -> Array[@dom.DomNode] {
       // Black key - positioned absolutely between white keys
       let white_key_index = count_white_keys_before(midi)
       let black_key = @dom.div(
-        class="absolute top-0 h-24 w-8 rounded-b-md shadow-lg z-10 transition-colors bg-gray-900",
+        dyn_class=fn() {
+          let active = playing_notes().contains(midi)
+          "absolute top-0 h-24 w-8 rounded-b-md shadow-lg z-10 transition-colors " +
+          (if active { "bg-blue-500" } else { "bg-gray-900" })
+        },
         style="left: " +
           (white_key_index.to_double() * 100.0 / total_white_keys.to_double()).to_string() +
           "%; transform: translateX(-50%);",
@@ -40,7 +76,11 @@ fn render_piano_keys() -> Array[@dom.DomNode] {
     } else {
       // White key - flex layout, full height
       let white_key = @dom.div(
-        class="h-full flex-1 border-r transition-colors bg-white border-gray-300",
+        dyn_class=fn() {
+          let active = playing_notes().contains(midi)
+          "h-full flex-1 border-r transition-colors border-gray-300 " +
+          (if active { "bg-blue-400" } else { "bg-white" })
+        },
         [],
       )
       white_keys.push(white_key)
@@ -56,25 +96,4 @@ fn render_piano_keys() -> Array[@dom.DomNode] {
     result.push(key)
   }
   result
-}
-
-///|
-/// Count white keys before a given MIDI note
-fn count_white_keys_before(midi : Int) -> Int {
-  let mut count = 0
-  for i = 36; i < midi; i = i + 1 {
-    if not(is_black_key(i % 12)) {
-      count = count + 1
-    }
-  }
-  count
-}
-
-///|
-/// Check if a note is a black key (chromatic scale position)
-fn is_black_key(note_in_octave : Int) -> Bool {
-  match note_in_octave {
-    1 | 3 | 6 | 8 | 10 => true // C#, D#, F#, G#, A#
-    _ => false
-  }
 }
