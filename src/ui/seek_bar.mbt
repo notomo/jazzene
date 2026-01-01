@@ -13,18 +13,16 @@ fn format_time(ms : Int) -> String {
 ///|
 /// Render seek_bar UI component
 pub fn render_seek_bar(
-  position_ms : @signal.Signal[Int],
-  total_duration_ms : @signal.Signal[Int],
-  has_notes : @signal.Signal[Bool],
+  position_ms : () -> Int,
+  total_duration_ms : () -> Int,
+  has_notes : () -> Bool,
   on_seek : (Double) -> Unit,
 ) -> @dom.DomNode {
   @dom.div(class="p-4 bg-slate-800", [
     // Time display: "0:00 / 2:30"
     @dom.div(class="flex justify-between text-sm text-slate-400 mb-2", [
       @dom.text_dyn(fn() {
-        format_time(position_ms.get()) +
-        " / " +
-        format_time(total_duration_ms.get())
+        format_time(position_ms()) + " / " + format_time(total_duration_ms())
       }),
     ]),
 
@@ -38,17 +36,15 @@ pub fn render_seek_bar(
         ("step", @dom.Attr::AttrInt(1)),
       ],
       dyn_value=fn() {
-        let total = total_duration_ms.get()
+        let total = total_duration_ms()
         if total == 0 {
           "0"
         } else {
-          let percent = position_ms.get().to_double() /
-            total.to_double() *
-            100.0
+          let percent = position_ms().to_double() / total.to_double() * 100.0
           percent.to_int().to_string()
         }
       },
-      dyn_disabled=fn() { not(has_notes.get()) },
+      dyn_disabled=fn() { not(has_notes()) },
       on=@dom.events().change(fn(e) {
         let target = e.target()
         let event_target = target.as_event_target()
