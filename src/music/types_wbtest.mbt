@@ -15,9 +15,9 @@ test "NoteDuration to_ms with tempo 120" {
 
 ///|
 test "MidiNumber validation" {
-  inspect(MidiNumber::new(60), content="Some(MidiNumber { value: 60 })")
-  inspect(MidiNumber::new(0), content="Some(MidiNumber { value: 0 })")
-  inspect(MidiNumber::new(127), content="Some(MidiNumber { value: 127 })")
+  inspect(MidiNumber::new(60), content="Some({value: 60})")
+  inspect(MidiNumber::new(0), content="Some({value: 0})")
+  inspect(MidiNumber::new(127), content="Some({value: 127})")
   inspect(MidiNumber::new(-1), content="None")
   inspect(MidiNumber::new(128), content="None")
 }
@@ -69,10 +69,7 @@ test "Chord tones" {
 ///|
 test "Note creation" {
   let note = Note::new(60, Quarter)
-  inspect(
-    note,
-    content="Some(Note { midi: MidiNumber { value: 60 }, duration: Quarter })",
-  )
+  inspect(note, content="Some({midi: {value: 60}, duration: Quarter})")
   let invalid = Note::new(128, Quarter)
   inspect(invalid, content="None")
 }
@@ -87,16 +84,16 @@ test "Note name" {
 
 ///|
 test "Tempo validation" {
-  inspect(Tempo::new(120), content="Some(Tempo { bpm: 120 })")
-  inspect(Tempo::new(30), content="Some(Tempo { bpm: 30 })")
-  inspect(Tempo::new(300), content="Some(Tempo { bpm: 300 })")
+  inspect(Tempo::new(120), content="Some({bpm: 120})")
+  inspect(Tempo::new(30), content="Some({bpm: 30})")
+  inspect(Tempo::new(300), content="Some({bpm: 300})")
   inspect(Tempo::new(29), content="None")
   inspect(Tempo::new(301), content="None")
 }
 
 ///|
 test "Position validation" {
-  inspect(Position::new(0), content="Some(Position { ms: 0 })")
-  inspect(Position::new(1000), content="Some(Position { ms: 1000 })")
+  inspect(Position::new(0), content="Some({ms: 0})")
+  inspect(Position::new(1000), content="Some({ms: 1000})")
   inspect(Position::new(-1), content="None")
 }
