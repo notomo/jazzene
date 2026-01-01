@@ -8,6 +8,5 @@
   ],
   "supported-targets": [
     "js"
-  ],
-  "warn-list": "-unused_error_type"
+  ]
 }

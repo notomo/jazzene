@@ -7,11 +7,14 @@ pub fn start_animation_loop(
   state_update_fn : () -> Unit,
   running_signal_get : () -> Bool,
 ) -> Unit {
-  fn animation_loop() -> Unit raise { // -unused_error_type is for this raise
+  fn animation_loop() -> Unit raise {
     if running_signal_get() {
       state_update_fn()
     }
-    // Continue the loop
+    if false {
+      // suppress unused_error_type
+      raise fail("unreachable")
+    }
     run_async(fn() { @js_browser_dom.requestAnimationFrame(animation_loop) })
   }
 
