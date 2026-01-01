@@ -5,23 +5,14 @@ fn main {
   let audio_ctx = @audio.AudioContext::new()
 
   // Individual signals (sources of truth)
-  let mode : @signal.Signal[PlaybackMode] = @signal.signal(
-    PlaybackMode::Stopped(0),
+  let mode : @signal.Signal[@ui.PlaybackMode] = @signal.signal(
+    @ui.PlaybackMode::stopped(0),
   )
   let notes : @signal.Signal[Array[@music.Note]] = @signal.signal([])
   let chord_input = @signal.signal("Cm7 F7 Bbmaj7 Ebmaj7")
   let tempo = @signal.signal(120)
   let volume = @signal.signal(0.3)
   let is_muted = @signal.signal(false)
-
-  // Computed total duration (derived value using memo)
-  let total_duration_ms = @signal.memo(fn() {
-    if notes.get().length() > 0 {
-      @audio.calculate_total_duration(notes.get(), tempo.get())
-    } else {
-      0
-    }
-  })
 
   // Reactive note generation when chord input changes
   let _ = @signal.effect(fn() {
@@ -59,8 +50,13 @@ fn main {
         )
 
         // Check for end of playback
-        if current_pos >= total_duration_ms() {
-          mode.set(PlaybackMode::Stopped(total_duration_ms()))
+        let total_duration = if notes.get().length() > 0 {
+          @audio.calculate_total_duration(notes.get(), tempo.get())
+        } else {
+          0
+        }
+        if current_pos >= total_duration {
+          mode.set(@ui.PlaybackMode::stopped(total_duration))
         }
       }
     }
@@ -78,64 +74,6 @@ fn main {
 
   start_tick_loop()
 
-  // Event handlers
-  fn on_play_pause() -> Unit {
-    if notes.get().length() == 0 {
-      return
-    }
-    match mode.get() {
-      Stopped(position_ms) => {
-        // Start playing from current position
-        let now_ms = @date.Date::now()
-        let audio_start = audio_ctx.current_time()
-        mode.set(PlaybackMode::Playing(now_ms, position_ms, audio_start))
-      }
-      Playing(_, started_from, _) => {
-        // Stop and preserve position
-        let now_ms = @date.Date::now()
-        let current_pos = started_from + (now_ms - started_from)
-        mode.set(PlaybackMode::Stopped(current_pos))
-      }
-    }
-  }
-
-  fn on_seek(position_percent : Double) -> Unit {
-    if notes.get().length() == 0 {
-      return
-    }
-    let new_position_ms = (position_percent /
-    100.0 *
-    total_duration_ms().to_double()).to_int()
-    match mode.get() {
-      Stopped(_) =>
-        // Just update position
-        mode.set(PlaybackMode::Stopped(new_position_ms))
-      Playing(_, _, _) => {
-        // Restart from new position
-        let now_ms = @date.Date::now()
-        let audio_start = audio_ctx.current_time()
-        mode.set(PlaybackMode::Playing(now_ms, new_position_ms, audio_start))
-      }
-    }
-  }
-
-  let is_playing = @signal.memo(fn() {
-    match mode.get() {
-      Stopped(_) => false
-      Playing(_, _, _) => true
-    }
-  })
-  let position_ms = @signal.memo(fn() {
-    match mode.get() {
-      Stopped(pos) => pos
-      Playing(started_at, started_from, _) => {
-        let now_ms = @date.Date::now()
-        started_from + (now_ms - started_at)
-      }
-    }
-  })
-  let has_notes = @signal.memo(fn() { notes.get().length() > 0 })
-
   // Render app
   let doc = @js_dom.document()
   match doc.getElementById("app") {
@@ -151,15 +89,13 @@ fn main {
                 @ui.render_chord_input(chord_input),
                 // Playback controls
                 @dom.div(class="flex gap-4 items-center", [
-                  @ui.render_play_pause_button(on_play_pause, is_playing),
+                  @ui.render_play_pause_button(notes, mode, audio_ctx),
                   @ui.render_volume_control(volume, is_muted),
                   @ui.render_bpm_input(tempo),
                 ]),
                 // seek_bar
                 @dom.div(class="flex-1", [
-                  @ui.render_seek_bar(
-                    position_ms, total_duration_ms, has_notes, on_seek,
-                  ),
+                  @ui.render_seek_bar(notes, mode, tempo, audio_ctx),
                 ]),
               ]),
             ],
