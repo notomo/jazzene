@@ -20,6 +20,14 @@
     {
       "path": "mizchi/js/builtins/date",
       "alias": "date"
+    },
+    {
+      "path": "mizchi/js/browser/canvas",
+      "alias": "canvas"
+    },
+    {
+      "path": "mizchi/js/browser/dom",
+      "alias": "js_dom"
     }
   ],
   "supported-targets": [

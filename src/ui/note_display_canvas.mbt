@@ -1,0 +1,161 @@
+///|
+fn cast_to_canvas_notes(elem : @js_dom.Element) -> @js_dom.HTMLCanvasElement = "%identity"
+
+///|
+extern "js" fn get_context_2d_notes(
+  canvas : @js_dom.HTMLCanvasElement,
+) -> @canvas.CanvasRenderingContext2D =
+  #|(canvas) => canvas.getContext("2d")
+
+///|
+extern "js" fn get_client_width_notes(
+  canvas : @js_dom.HTMLCanvasElement,
+) -> Int =
+  #|(canvas) => canvas.clientWidth
+
+///|
+extern "js" fn set_canvas_style_width_notes(
+  canvas : @js_dom.HTMLCanvasElement,
+  width : String,
+) -> Unit =
+  #|(canvas, width) => { canvas.style.width = width; }
+
+///|
+/// Render falling notes display component using Canvas API
+pub fn render_falling_notes_canvas(
+  notes : @signal.Signal[Array[@music.Note]],
+  mode : @signal.Signal[PlaybackMode],
+  tempo : @signal.Signal[Int],
+  frame_count : @signal.Signal[Int],
+) -> @dom.DomNode {
+  // Create canvas element
+  let canvas_elem = @js_dom.document().createElement("canvas")
+  let canvas = cast_to_canvas_notes(canvas_elem)
+
+  // Set canvas to fill width
+  set_canvas_style_width_notes(canvas, "100%")
+  canvas.height = 600
+
+  // Get 2D context
+  let ctx = get_context_2d_notes(canvas)
+
+  // Calculate current playback position
+  let position_ms = @signal.memo(fn() {
+    let _ = frame_count.get()
+    match mode.get() {
+      Stopped(pos) => pos
+      Playing(started_at, started_from, _) => {
+        let now_ms = @date.Date::now()
+        started_from + (now_ms - started_at)
+      }
+    }
+  })
+
+  // Pre-calculate note positions (immutable list with start times)
+  let note_positions = @signal.memo(fn() {
+    let note_list = notes.get()
+    let tempo_val = tempo.get()
+    let mut current_pos = 0
+    let positions : Array[(Int, Int, Int)] = [] // (midi, start_ms, duration_ms)
+    for note in note_list {
+      let duration_ms = note.duration.to_ms(tempo_val)
+      positions.push((note.midi.value, current_pos, duration_ms))
+      current_pos = current_pos + duration_ms
+    }
+    positions
+  })
+
+  // Redraw on frame count change
+  let _ = @signal.effect(fn() {
+    let _ = frame_count.get()
+    let pos = position_ms()
+    let positions = note_positions()
+
+    // Update canvas width to match displayed width
+    let client_width = get_client_width_notes(canvas)
+    if client_width > 0 {
+      canvas.width = client_width
+    }
+    draw_notes(
+      ctx,
+      canvas.width.to_double(),
+      canvas.height.to_double(),
+      positions,
+      pos,
+    )
+  })
+
+  // Convert canvas to DomNode using ToDomNode trait
+  let canvas_dom_node = @dom.ToDomNode::to_dom_node(canvas.as_node())
+
+  // Wrap in div with aria-label for E2E tests
+  @dom.div(class="flex-1 flex flex-col", [
+    @dom.div(
+      class="relative flex-1 bg-slate-900 overflow-hidden",
+      attrs=[("aria-label", @dom.Attr::AttrString("falling notes"))],
+      [canvas_dom_node],
+    ),
+  ])
+}
+
+///|
+/// Draw falling notes on canvas
+fn draw_notes(
+  ctx : @canvas.CanvasRenderingContext2D,
+  width : Double,
+  height : Double,
+  note_positions : Array[(Int, Int, Int)],
+  current_pos : Int,
+) -> Unit {
+  // Clear canvas
+  ctx.clearRect(0.0, 0.0, width, height)
+
+  // Background
+  ctx.fillStyle = "#0f172a"
+  ctx.fillRect(0.0, 0.0, width, height)
+  let rect = { left: 0.0, top: 0.0, width, height }
+  let key_areas = calc_key_areas(rect, 36, 96)
+  let window_ms = 3000
+
+  // Draw notes
+  for note_data in note_positions {
+    let (midi, start_ms, duration_ms) = note_data
+    let end_ms = start_ms + duration_ms
+    let start_offset = start_ms - current_pos
+    let end_offset = end_ms - current_pos
+
+    // Check if note is visible in 3-second window
+    if end_offset < 0 || start_offset > window_ms {
+      continue
+    }
+
+    // Find key area for this MIDI note
+    let key_index = midi - 36
+    if key_index < 0 || key_index >= key_areas.length() {
+      continue
+    }
+    let key_area = key_areas[key_index]
+
+    // Calculate vertical position (inverted: future at top, now at bottom)
+    // bottom is where the note starts (closer to now)
+    // top is where the note ends (further from now)
+    let bottom_percent = 100.0 -
+      start_offset.to_double() / window_ms.to_double() * 100.0
+    let top_percent = 100.0 -
+      end_offset.to_double() / window_ms.to_double() * 100.0
+    let bottom_y = height * bottom_percent / 100.0
+    let top_y = height * top_percent / 100.0
+
+    // Determine color based on playing state
+    let is_playing = current_pos >= start_ms && current_pos < end_ms
+    ctx.fillStyle = if is_playing { "#3b82f6" } else { "#60a5fa" }
+
+    // Draw note rectangle
+    ctx.fillRect(
+      key_area.rect.left,
+      top_y,
+      key_area.rect.width,
+      bottom_y - top_y,
+    )
+  }
+}

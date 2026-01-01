@@ -82,36 +82,33 @@ fn main {
   match doc.getElementById("app") {
     Some(el) => {
       let app = @dom.div(
-        class="h-screen bg-gradient-to-br from-slate-950 to-slate-900 text-white p-1 flex flex-col overflow-hidden",
+        class="h-screen bg-gradient-to-br from-slate-950 to-slate-900 text-white grid grid-rows-[1fr_1fr]",
         [
           @dom.div(
-            class="bg-slate-800 p-8 rounded-xl shadow-2xl border-2 border-slate-700",
+            class="bg-slate-800 p-4 rounded-xl shadow-2xl border-2 border-slate-700",
             attrs=[("aria-label", @dom.Attr::AttrString("lead sheet"))],
             [
-              @dom.div(class="space-y-4", [
-                // Chord input textarea
+              @dom.div([
                 @ui.render_chord_input(chord_input),
-                // Playback controls
                 @dom.div(class="flex gap-4 items-center", [
                   @ui.render_play_pause_button(notes, mode, audio_ctx),
                   @ui.render_volume_control(volume, is_muted),
                   @ui.render_bpm_input(tempo),
-                ]),
-                // seek_bar
-                @dom.div(class="flex-1", [
-                  @ui.render_seek_bar(
-                    notes, mode, tempo, audio_ctx, frame_count,
-                  ),
+                  @dom.div(class="flex-1", [
+                    @ui.render_seek_bar(
+                      notes, mode, tempo, audio_ctx, frame_count,
+                    ),
+                  ]),
                 ]),
               ]),
             ],
           ),
           @dom.div(
-            class="bg-slate-950 rounded-xl shadow-2xl border-2 border-slate-700 overflow-hidden flex-1 mt-2 flex flex-col",
+            class="bg-slate-950 shadow-2xl border-slate-700 h-fit flex flex-col",
             attrs=[("aria-label", @dom.Attr::AttrString("visualization"))],
             [
-              @ui.render_falling_notes(notes, mode, tempo, frame_count),
-              @ui.render_keyboard(notes, mode, tempo, frame_count),
+              @ui.render_falling_notes_canvas(notes, mode, tempo, frame_count),
+              @ui.render_keyboard_canvas(notes, mode, tempo, frame_count),
             ],
           ),
         ],
