@@ -17,10 +17,10 @@ pub fn render_play_pause_button(
         let audio_start = audio_ctx.current_time()
         mode.set(PlaybackMode::playing(now_ms, position_ms, audio_start))
       }
-      Playing(_, started_from, _) => {
+      Playing(started_at, started_from, _) => {
         // Stop and preserve position
         let now_ms = @date.Date::now()
-        let current_pos = started_from + (now_ms - started_from)
+        let current_pos = started_from + (now_ms - started_at)
         mode.set(PlaybackMode::stopped(current_pos))
       }
     }

@@ -202,4 +202,52 @@ test.describe("Jazzene - Jazz Improvisation Web App", () => {
     const playButton = page.getByRole("button", { name: "Play" });
     await expect(playButton).toBeEnabled();
   });
+
+  test("should update seekbar value during playback", async ({ page }) => {
+    const seek_bar = page.getByLabel("playback position");
+
+    // Get initial seekbar value (should be 0)
+    const initialValue = await seek_bar.inputValue();
+
+    // Start playing
+    await page.getByRole("button", { name: "Play" }).click();
+
+    // Wait for playback to progress
+    await page.waitForTimeout(500);
+
+    // Get seekbar value after playback started
+    const playingValue = await seek_bar.inputValue();
+
+    // Seekbar should have moved forward (value increased)
+    expect(parseInt(playingValue)).toBeGreaterThan(parseInt(initialValue));
+  });
+
+  test("should show correct time after stopping playback", async ({ page }) => {
+    // Start playing
+    await page.getByRole("button", { name: "Play" }).click();
+
+    // Wait for some playback time
+    await page.waitForTimeout(800);
+
+    // Stop playback
+    await page.getByRole("button", { name: "Stop" }).click();
+
+    // Get time display
+    const timeDisplay = page.getByLabel("time display");
+    const time = await timeDisplay.textContent();
+
+    // Time should be in valid format (M:SS / M:SS)
+    // Should NOT contain huge numbers like 29454216:47
+    expect(time).toMatch(/^\d{1,2}:\d{2} \/ \d{1,2}:\d{2}$/);
+
+    // Extract current time (before the slash)
+    const currentTime = time!.split(" / ")[0];
+    const [minutes, seconds] = currentTime.split(":").map((n) => parseInt(n));
+
+    // Minutes should be reasonable (less than 10 for a short test song)
+    expect(minutes).toBeLessThan(10);
+    // Seconds should be valid (0-59)
+    expect(seconds).toBeGreaterThanOrEqual(0);
+    expect(seconds).toBeLessThan(60);
+  });
 });
