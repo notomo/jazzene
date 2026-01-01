@@ -1,7 +1,7 @@
 ///|
 /// Render piano keyboard component
 pub fn render_keyboard() -> @dom.DomNode {
-  @dom.div(class="font-sans w-full", [
+  @dom.div(class="w-full", [
     @dom.div(
       class="relative h-40 bg-slate-950 overflow-hidden w-full flex",
       render_piano_keys(),

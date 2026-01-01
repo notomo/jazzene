@@ -82,7 +82,8 @@ fn main {
         class="h-screen bg-gradient-to-br from-slate-950 to-slate-900 text-white p-1 flex flex-col overflow-hidden",
         [
           @dom.div(
-            class="lead-sheet bg-slate-800 p-8 rounded-xl shadow-2xl border-2 border-slate-700",
+            class="bg-slate-800 p-8 rounded-xl shadow-2xl border-2 border-slate-700",
+            attrs=[("aria-label", @dom.Attr::AttrString("lead sheet"))],
             [
               @dom.div(class="space-y-4", [
                 // Chord input textarea
@@ -102,6 +103,7 @@ fn main {
           ),
           @dom.div(
             class="bg-slate-950 rounded-xl shadow-2xl border-2 border-slate-700 overflow-hidden flex-1 mt-2 flex flex-col",
+            attrs=[("aria-label", @dom.Attr::AttrString("visualization"))],
             [@ui.render_falling_notes(), @ui.render_keyboard()],
           ),
         ],

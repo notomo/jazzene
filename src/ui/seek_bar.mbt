@@ -69,11 +69,15 @@ pub fn render_seek_bar(
   }
   @dom.div(class="p-4 bg-slate-800", [
     // Time display: "0:00 / 2:30"
-    @dom.div(class="flex justify-between text-sm text-slate-400 mb-2", [
-      @dom.text_dyn(fn() {
-        format_time(position_ms()) + " / " + format_time(total_duration_ms())
-      }),
-    ]),
+    @dom.div(
+      class="flex justify-between text-sm text-slate-400 mb-2",
+      attrs=[("aria-label", @dom.Attr::AttrString("time display"))],
+      [
+        @dom.text_dyn(fn() {
+          format_time(position_ms()) + " / " + format_time(total_duration_ms())
+        }),
+      ],
+    ),
 
     // Range slider with Tailwind styling
     @dom.input(
@@ -83,6 +87,7 @@ pub fn render_seek_bar(
         ("min", @dom.Attr::AttrInt(0)),
         ("max", @dom.Attr::AttrInt(100)),
         ("step", @dom.Attr::AttrInt(1)),
+        ("aria-label", @dom.Attr::AttrString("playback position")),
       ],
       dyn_value=fn() {
         let total = total_duration_ms()

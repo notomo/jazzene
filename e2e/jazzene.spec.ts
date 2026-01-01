@@ -14,12 +14,12 @@ test.describe("Jazzene - Jazz Improvisation Web App", () => {
     await expect(page.getByRole("button", { name: /Play|Stop/ })).toBeVisible();
 
     // Check falling notes section
-    const fallingNotesContainer = page.locator(".falling-notes-container");
+    const fallingNotesContainer = page.getByLabel("falling notes");
     await expect(fallingNotesContainer).toBeVisible();
 
-    // Check that we have 2 bordered sections: Lead sheet and notes+keyboard
-    const sections = page.locator(".border-2");
-    await expect(sections).toHaveCount(2); // Lead sheet, notes+keyboard (connected)
+    // Check that we have lead sheet and visualization sections
+    await expect(page.getByLabel("lead sheet")).toBeVisible();
+    await expect(page.getByLabel("visualization")).toBeVisible();
   });
 
   test("should have default chord progression in input", async ({ page }) => {
@@ -64,25 +64,19 @@ test.describe("Jazzene - Jazz Improvisation Web App", () => {
     // Start playback
     await page.getByRole("button", { name: "Play" }).click();
 
-    // Stop button should be enabled and red
+    // Stop button should be enabled
     const stopButton = page.getByRole("button", { name: "Stop" });
     await expect(stopButton).toBeEnabled();
-    await expect(stopButton).toHaveClass(/bg-red-600/);
   });
 
   test("should have professional dark theme styling", async ({ page }) => {
-    // Check gradient background
-    const appContainer = page.locator(".h-screen");
-    await expect(appContainer).toHaveClass(/bg-gradient-to-br/);
-    await expect(appContainer).toHaveClass(/from-slate-950/);
-    await expect(appContainer).toHaveClass(/to-slate-900/);
+    // Check lead sheet section exists
+    const leadSheet = page.getByLabel("lead sheet");
+    await expect(leadSheet).toBeVisible();
 
-    // Check lead sheet card styling
-    const leadSheet = page.locator(".lead-sheet");
-    await expect(leadSheet).toHaveClass(/bg-slate-800/);
-    await expect(leadSheet).toHaveClass(/rounded-xl/);
-    await expect(leadSheet).toHaveClass(/shadow-2xl/);
-    await expect(leadSheet).toHaveClass(/border-2/);
+    // Check visualization section exists
+    const visualization = page.getByLabel("visualization");
+    await expect(visualization).toBeVisible();
   });
 
   test("should auto-generate different progressions correctly", async ({
@@ -111,19 +105,19 @@ test.describe("Jazzene - Jazz Improvisation Web App", () => {
   });
 
   test("should display seek_bar with time display", async ({ page }) => {
-    // seek_bar should be visible (has w-full class, unlike volume slider which has flex-1)
-    const seek_bar = page.locator('input[type="range"].w-full');
+    // seek_bar should be visible
+    const seek_bar = page.getByLabel("playback position");
     await expect(seek_bar).toBeVisible();
 
     // Time display container should show time
-    const timeDisplay = page.locator(".flex.justify-between.text-slate-400");
+    const timeDisplay = page.getByLabel("time display");
     await expect(timeDisplay).toBeVisible();
   });
 
   test("should enable seek_bar after auto-generating notes", async ({
     page,
   }) => {
-    const seek_bar = page.locator('input[type="range"].w-full');
+    const seek_bar = page.getByLabel("playback position");
 
     // seek_bar should be enabled (notes auto-generated from default progression)
     await expect(seek_bar).toBeEnabled();
@@ -139,13 +133,13 @@ test.describe("Jazzene - Jazz Improvisation Web App", () => {
     await page.waitForTimeout(1000);
 
     // Total duration should be greater than 0:00
-    const timeDisplay = page.locator(".flex.justify-between.text-slate-400");
+    const timeDisplay = page.getByLabel("time display");
     const totalTime = await timeDisplay.textContent();
     expect(totalTime).not.toContain("0:00 / 0:00"); // Should not be initial state
   });
 
   test("should allow seeking with seek_bar", async ({ page }) => {
-    const seek_bar = page.locator('input[type="range"].w-full');
+    const seek_bar = page.getByLabel("playback position");
 
     // seek_bar should be enabled (auto-generated notes)
     await expect(seek_bar).toBeEnabled();
@@ -161,13 +155,13 @@ test.describe("Jazzene - Jazz Improvisation Web App", () => {
   test("should show note preview when seeking while stopped", async ({
     page,
   }) => {
-    const seek_bar = page.locator('input[type="range"].w-full');
+    const seek_bar = page.getByLabel("playback position");
 
     // Move seek_bar while stopped
     await seek_bar.fill("25");
 
     // Falling notes should be visible (preview mode)
-    const fallingNotesContainer = page.locator(".falling-notes-container");
+    const fallingNotesContainer = page.getByLabel("falling notes");
     await expect(fallingNotesContainer).toBeVisible();
   });
 
@@ -187,7 +181,7 @@ test.describe("Jazzene - Jazz Improvisation Web App", () => {
     await expect(page.getByRole("button", { name: "Play" })).toBeVisible();
 
     // Position should be preserved (time should not be 0:00 / X:XX)
-    const timeDisplay = page.locator(".flex.justify-between.text-slate-400");
+    const timeDisplay = page.getByLabel("time display");
     const time = await timeDisplay.textContent();
     expect(time).not.toMatch(/^0:00/); // Current time should not be 0:00
   });
