@@ -49,14 +49,12 @@ pub fn render_seekbar(
         }
       },
       dyn_disabled=fn() { not(has_notes.get()) },
-      on=@dom.events().input(fn(e) {
+      on=@dom.events().change(fn(e) {
         let target = e.target()
-        match target.nodeValue() {
-          Some(value_str) =>
-            match @js_global.parseFloat(value_str) {
-              Some(percent) => on_seek(percent)
-              None => ()
-            }
+        let event_target = target.as_event_target()
+        let value = event_target.as_any()._get("value").to_string()
+        match @js_global.parseFloat(value) {
+          Some(percent) => on_seek(percent)
           None => ()
         }
       }),

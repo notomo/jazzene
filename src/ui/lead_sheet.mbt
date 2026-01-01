@@ -14,11 +14,9 @@ pub fn render_lead_sheet(
 ) -> @dom.DomNode {
   let on_input : @dom.InputHandler = fn(e) {
     let target = e.target()
-    let value = target.nodeValue()
-    match value {
-      Some(x) => chord_input.set(x)
-      None => ()
-    }
+    let event_target = target.as_event_target()
+    let value = event_target.as_any()._get("value").to_string()
+    chord_input.set(value)
   }
   @dom.div(
     class="lead-sheet bg-slate-800 p-8 rounded-xl shadow-2xl border-2 border-slate-700",

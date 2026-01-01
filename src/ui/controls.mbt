@@ -13,23 +13,19 @@ pub fn render_controls(
   // Event handlers
   let on_volume_change : @dom.InputHandler = fn(e) {
     let target = e.target()
-    match target.nodeValue() {
-      Some(value_str) =>
-        match @js_global.parseFloat(value_str) {
-          Some(percent) => volume.set(percent / 100.0)
-          None => ()
-        }
+    let event_target = target.as_event_target()
+    let value = event_target.as_any()._get("value").to_string()
+    match @js_global.parseFloat(value) {
+      Some(percent) => volume.set(percent / 100.0)
       None => ()
     }
   }
   let on_tempo_change : @dom.InputHandler = fn(e) {
     let target = e.target()
-    match target.nodeValue() {
-      Some(value_str) =>
-        match @js_global.parseInt(value_str) {
-          Some(bpm) => if bpm >= 30 && bpm <= 300 { tempo.set(bpm) }
-          None => ()
-        }
+    let event_target = target.as_event_target()
+    let value = event_target.as_any()._get("value").to_string()
+    match @js_global.parseInt(value) {
+      Some(bpm) => if bpm >= 30 && bpm <= 300 { tempo.set(bpm) }
       None => ()
     }
   }

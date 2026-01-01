@@ -26,10 +26,6 @@
       "alias": "ui"
     },
     {
-      "path": "mizchi/js/builtins/global",
-      "alias": "js_global"
-    },
-    {
       "path": "mizchi/js/builtins/date",
       "alias": "date"
     }
