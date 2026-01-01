@@ -1,21 +1,17 @@
 ///|
 /// Render piano keyboard component
-pub fn render_piano_keyboard(
-  current_note : @signal.Signal[@core.Note?],
-) -> @dom.DomNode {
+pub fn render_keyboard() -> @dom.DomNode {
   @dom.div(class="font-sans w-full", [
     @dom.div(
       class="relative h-40 bg-slate-950 overflow-hidden w-full flex",
-      render_piano_keys(current_note),
+      render_piano_keys(),
     ),
   ])
 }
 
 ///|
 /// Render individual piano keys with realistic layout
-fn render_piano_keys(
-  current_note : @signal.Signal[@core.Note?],
-) -> Array[@dom.DomNode] {
+fn render_piano_keys() -> Array[@dom.DomNode] {
   let white_keys : Array[@dom.DomNode] = []
   let black_keys : Array[@dom.DomNode] = []
 
@@ -30,49 +26,21 @@ fn render_piano_keys(
   // Generate white and black keys separately
   for midi = 36; midi < 97; midi = midi + 1 {
     let is_black = is_black_key(midi % 12)
-    let midi_captured = midi // Capture for closure
     if is_black {
       // Black key - positioned absolutely between white keys
       let white_key_index = count_white_keys_before(midi)
       let black_key = @dom.div(
-        dyn_class=fn() {
-          let is_active = match current_note.get() {
-            Some(note) => note.midi_number == midi_captured
-            None => false
-          }
-          let color_class = if is_active {
-            "bg-blue-500"
-          } else {
-            "bg-gray-900"
-          }
-          "absolute top-0 h-24 w-8 rounded-b-md shadow-lg z-10 transition-colors " +
-          color_class
-        },
-        dyn_style=fn() {
-          // Position black key on the border between two white keys
-          let position = white_key_index.to_double() *
-            100.0 /
-            total_white_keys.to_double()
-          "left: " + position.to_string() + "%; transform: translateX(-50%);"
-        },
+        class="absolute top-0 h-24 w-8 rounded-b-md shadow-lg z-10 transition-colors bg-gray-900",
+        style="left: " +
+          (white_key_index.to_double() * 100.0 / total_white_keys.to_double()).to_string() +
+          "%; transform: translateX(-50%);",
         [],
       )
       black_keys.push(black_key)
     } else {
       // White key - flex layout, full height
       let white_key = @dom.div(
-        dyn_class=fn() {
-          let is_active = match current_note.get() {
-            Some(note) => note.midi_number == midi_captured
-            None => false
-          }
-          let color_class = if is_active {
-            "bg-blue-400 border-blue-300"
-          } else {
-            "bg-white border-gray-300"
-          }
-          "h-full flex-1 border-r transition-colors " + color_class
-        },
+        class="h-full flex-1 border-r transition-colors bg-white border-gray-300",
         [],
       )
       white_keys.push(white_key)

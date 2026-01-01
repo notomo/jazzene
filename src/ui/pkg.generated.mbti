@@ -1,0 +1,30 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "internal/jazzene/ui"
+
+import(
+  "internal/jazzene/animation"
+  "internal/jazzene/core"
+  "internal/jazzene/playback_state"
+  "mizchi/luna/luna/signal"
+  "mizchi/luna/platform/dom/element"
+)
+
+// Values
+pub fn render_controls(() -> Unit, @signal.Signal[Bool], @signal.Signal[Double], @signal.Signal[Bool], @signal.Signal[Int]) -> @element.DomNode
+
+pub fn render_falling_notes(@signal.Signal[@animation.AnimationState]) -> @element.DomNode
+
+pub fn render_keyboard(@signal.Signal[@core.Note?]) -> @element.DomNode
+
+pub fn render_lead_sheet(@signal.Signal[String], () -> Unit, (Double) -> Unit, @signal.Signal[@playback_state.PlaybackState], @signal.Signal[Array[@core.Note]], @signal.Signal[Bool], @signal.Signal[Double], @signal.Signal[Bool], @signal.Signal[Int]) -> @element.DomNode
+
+pub fn render_seekbar(@signal.Signal[@playback_state.PlaybackState], @signal.Signal[Array[@core.Note]], (Double) -> Unit) -> @element.DomNode
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits
+

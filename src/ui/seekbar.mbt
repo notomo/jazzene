@@ -13,18 +13,18 @@ fn format_time(ms : Int) -> String {
 ///|
 /// Render seekbar UI component
 pub fn render_seekbar(
-  playback_state : @signal.Signal[@playback_state.PlaybackState],
-  generated_notes : @signal.Signal[Array[@core.Note]],
+  position_ms : @signal.Signal[Int],
+  total_duration_ms : @signal.Signal[Int],
+  has_notes : @signal.Signal[Bool],
   on_seek : (Double) -> Unit,
 ) -> @dom.DomNode {
   @dom.div(class="p-4 bg-slate-800", [
     // Time display: "0:00 / 2:30"
     @dom.div(class="flex justify-between text-sm text-slate-400 mb-2", [
       @dom.text_dyn(fn() {
-        let state = playback_state.get()
-        format_time(state.playback_position_ms) +
+        format_time(position_ms.get()) +
         " / " +
-        format_time(state.total_duration_ms)
+        format_time(total_duration_ms.get())
       }),
     ]),
 
@@ -38,17 +38,17 @@ pub fn render_seekbar(
         ("step", @dom.Attr::AttrInt(1)),
       ],
       dyn_value=fn() {
-        let state = playback_state.get()
-        if state.total_duration_ms == 0 {
+        let total = total_duration_ms.get()
+        if total == 0 {
           "0"
         } else {
-          let percent = state.playback_position_ms.to_double() /
-            state.total_duration_ms.to_double() *
+          let percent = position_ms.get().to_double() /
+            total.to_double() *
             100.0
           percent.to_int().to_string()
         }
       },
-      dyn_disabled=fn() { generated_notes.get().length() == 0 },
+      dyn_disabled=fn() { not(has_notes.get()) },
       on=@dom.events().input(fn(e) {
         let target = e.target()
         match target.nodeValue() {

@@ -8,10 +8,7 @@
     {
       "path": "mizchi/js/builtins/global",
       "alias": "js_global"
-    },
-    "internal/jazzene/core",
-    "internal/jazzene/animation",
-    "internal/jazzene/playback_state"
+    }
   ],
   "supported-targets": [
     "js"

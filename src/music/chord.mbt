@@ -1,16 +1,14 @@
-///| Parse a single chord string into a Chord struct
-
-///| Examples: "Cm7" -> Chord { root: "C", quality: "m7" }
-
 ///|
-///          "F#maj7" -> Chord { root: "F#", quality: "maj7" }
+/// Parse a single chord string into a Chord struct
+/// Examples: "Cm7" -> Chord { root: C, quality: Minor7 }
+///           "F#maj7" -> Chord { root: FSharp, quality: Major7 }
 pub fn parse_chord(input : String) -> Result[Chord, String] {
   if input.length() == 0 {
     return Err("Empty chord string")
   }
 
   // Parse root note (1 or 2 characters)
-  let (root, quality_start) = if input.length() >= 2 &&
+  let (root_str, quality_start) = if input.length() >= 2 &&
     (input[1] == '#' || input[1] == 'b') {
     // Two character root (e.g., "F#", "Bb")
     let c1 = input[0].to_int().unsafe_to_char()
@@ -27,8 +25,33 @@ pub fn parse_chord(input : String) -> Result[Chord, String] {
   } else {
     substring_from(input, quality_start)
   }
-  let quality = normalize_quality(quality_str)
+
+  // Convert root string to NoteName
+  let root = match NoteName::from_string(root_str) {
+    Some(name) => name
+    None => return Err("Invalid root note: " + root_str)
+  }
+
+  // Parse quality string to ChordQuality
+  let quality = parse_quality(quality_str)
   Ok(Chord::{ root, quality })
+}
+
+///|
+/// Parse quality string to ChordQuality enum
+fn parse_quality(quality : String) -> ChordQuality {
+  match quality {
+    "maj7" | "M7" | "Δ7" | "△7" => Major7
+    "m7" | "min7" | "-7" => Minor7
+    "7" | "dom7" => Dominant7
+    "dim7" | "°7" => Diminished7
+    "m7b5" | "m7♭5" | "ø7" | "half-dim" => HalfDiminished
+    "aug" | "+" => Augmented
+    "sus4" | "sus" => Sus4
+    "m" | "min" | "-" => Minor
+    "" | "maj" | "M" => Major
+    _ => Major // default to major if unknown
+  }
 }
 
 ///|
@@ -42,25 +65,7 @@ fn substring_from(s : String, start : Int) -> String {
 }
 
 ///|
-/// Normalize chord quality strings to canonical forms
-fn normalize_quality(quality : String) -> String {
-  match quality {
-    "maj7" | "M7" | "Δ7" | "△7" => "maj7"
-    "m7" | "min7" | "-7" => "m7"
-    "7" | "dom7" => "7"
-    "dim7" | "°7" => "dim7"
-    "m7b5" | "m7♭5" | "ø7" | "half-dim" => "m7b5"
-    "aug" | "+" => "aug"
-    "sus4" | "sus" => "sus4"
-    "" | "maj" | "M" => "" // major triad
-    "m" | "min" | "-" => "m"
-    _ => quality // keep as-is if unknown
-  }
-}
-
-///| Parse a chord progression string into an array of chords
-
-///|
+/// Parse a chord progression string into an array of chords
 /// Example: "Cm7 F7 Bbmaj7 Ebmaj7" -> [Chord, Chord, Chord, Chord]
 pub fn parse_chord_progression(input : String) -> Array[Chord] {
   let trimmed = input.trim()

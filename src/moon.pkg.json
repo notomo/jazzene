@@ -14,28 +14,24 @@
       "alias": "js_dom"
     },
     {
-      "path": "internal/jazzene/core",
-      "alias": "core"
+      "path": "internal/jazzene/music",
+      "alias": "music"
     },
     {
       "path": "internal/jazzene/audio",
       "alias": "audio"
     },
     {
-      "path": "internal/jazzene/animation",
-      "alias": "animation"
-    },
-    {
       "path": "internal/jazzene/ui",
       "alias": "ui"
     },
     {
-      "path": "internal/jazzene/playback_state",
-      "alias": "playback_state"
-    },
-    {
       "path": "mizchi/js/builtins/global",
       "alias": "js_global"
+    },
+    {
+      "path": "mizchi/js/builtins/date",
+      "alias": "date"
     }
   ],
   "link": {

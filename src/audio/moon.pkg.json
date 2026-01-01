@@ -1,12 +1,20 @@
 {
+  "is-main": false,
+  "supported-targets": [
+    "js"
+  ],
   "import": [
-    "internal/jazzene/core",
+    {
+      "path": "internal/jazzene/music",
+      "alias": "music"
+    },
+    {
+      "path": "mizchi/js/core",
+      "alias": "js"
+    },
     {
       "path": "mizchi/js/builtins/global",
       "alias": "js_global"
     }
-  ],
-  "supported-targets": [
-    "js"
   ]
 }
