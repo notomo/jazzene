@@ -11,8 +11,8 @@ fn format_time(ms : Int) -> String {
 }
 
 ///|
-/// Render seekbar UI component
-pub fn render_seekbar(
+/// Render seek_bar UI component
+pub fn render_seek_bar(
   position_ms : @signal.Signal[Int],
   total_duration_ms : @signal.Signal[Int],
   has_notes : @signal.Signal[Bool],

@@ -110,23 +110,23 @@ test.describe("Jazzene - Jazz Improvisation Web App", () => {
     await expect(playButton).toBeVisible();
   });
 
-  test("should display seekbar with time display", async ({ page }) => {
-    // Seekbar should be visible (has w-full class, unlike volume slider which has flex-1)
-    const seekbar = page.locator('input[type="range"].w-full');
-    await expect(seekbar).toBeVisible();
+  test("should display seek_bar with time display", async ({ page }) => {
+    // seek_bar should be visible (has w-full class, unlike volume slider which has flex-1)
+    const seek_bar = page.locator('input[type="range"].w-full');
+    await expect(seek_bar).toBeVisible();
 
     // Time display container should show time
     const timeDisplay = page.locator(".flex.justify-between.text-slate-400");
     await expect(timeDisplay).toBeVisible();
   });
 
-  test("should enable seekbar after auto-generating notes", async ({
+  test("should enable seek_bar after auto-generating notes", async ({
     page,
   }) => {
-    const seekbar = page.locator('input[type="range"].w-full');
+    const seek_bar = page.locator('input[type="range"].w-full');
 
-    // Seekbar should be enabled (notes auto-generated from default progression)
-    await expect(seekbar).toBeEnabled();
+    // seek_bar should be enabled (notes auto-generated from default progression)
+    await expect(seek_bar).toBeEnabled();
   });
 
   test("should update time display during playback", async ({ page }) => {
@@ -144,27 +144,27 @@ test.describe("Jazzene - Jazz Improvisation Web App", () => {
     expect(totalTime).not.toContain("0:00 / 0:00"); // Should not be initial state
   });
 
-  test("should allow seeking with seekbar", async ({ page }) => {
-    const seekbar = page.locator('input[type="range"].w-full');
+  test("should allow seeking with seek_bar", async ({ page }) => {
+    const seek_bar = page.locator('input[type="range"].w-full');
 
-    // Seekbar should be enabled (auto-generated notes)
-    await expect(seekbar).toBeEnabled();
+    // seek_bar should be enabled (auto-generated notes)
+    await expect(seek_bar).toBeEnabled();
 
-    // Should be able to move seekbar to middle
-    await seekbar.fill("50");
+    // Should be able to move seek_bar to middle
+    await seek_bar.fill("50");
 
-    // Verify seekbar value was updated
-    const value = await seekbar.inputValue();
+    // Verify seek_bar value was updated
+    const value = await seek_bar.inputValue();
     expect(value).toBe("50");
   });
 
   test("should show note preview when seeking while stopped", async ({
     page,
   }) => {
-    const seekbar = page.locator('input[type="range"].w-full');
+    const seek_bar = page.locator('input[type="range"].w-full');
 
-    // Move seekbar while stopped
-    await seekbar.fill("25");
+    // Move seek_bar while stopped
+    await seek_bar.fill("25");
 
     // Falling notes should be visible (preview mode)
     const fallingNotesContainer = page.locator(".falling-notes-container");

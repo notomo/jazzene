@@ -205,9 +205,26 @@ fn main {
       let app = @dom.div(
         class="h-screen bg-gradient-to-br from-slate-950 to-slate-900 text-white p-1 flex flex-col overflow-hidden",
         [
-          @ui.render_lead_sheet(
-            chord_input, on_play_pause, on_seek, is_playing, position_ms, total_duration_ms,
-            has_notes, tempo, volume, is_muted,
+          @dom.div(
+            class="lead-sheet bg-slate-800 p-8 rounded-xl shadow-2xl border-2 border-slate-700",
+            [
+              @dom.div(class="space-y-4", [
+                // Chord input textarea
+                @ui.render_chord_input(chord_input),
+                // Playback controls
+                @dom.div(class="flex gap-4 items-center", [
+                  @ui.render_play_pause_button(on_play_pause, is_playing),
+                  @ui.render_volume_control(volume, is_muted),
+                  @ui.render_bpm_input(tempo),
+                ]),
+                // seek_bar
+                @dom.div(class="flex-1", [
+                  @ui.render_seek_bar(
+                    position_ms, total_duration_ms, has_notes, on_seek,
+                  ),
+                ]),
+              ]),
+            ],
           ),
           @dom.div(
             class="bg-slate-950 rounded-xl shadow-2xl border-2 border-slate-700 overflow-hidden flex-1 mt-2 flex flex-col",
