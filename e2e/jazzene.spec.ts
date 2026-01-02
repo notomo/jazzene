@@ -95,4 +95,12 @@ test.describe("Jazzene - Jazz Improvisation Web App", () => {
     expect(seconds).toBeGreaterThanOrEqual(0);
     expect(seconds).toBeLessThan(60);
   });
+
+  test("should restart from beginning when play is pressed after playback finishes", async () => {
+    await jazzene.setSeekbarValue("100");
+
+    await jazzene.play();
+    await jazzene.waitForPlayback(100);
+    await expect(jazzene.getStopButton()).toBeEnabled();
+  });
 });

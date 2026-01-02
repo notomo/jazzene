@@ -4,6 +4,7 @@ pub fn render_play_pause_button(
   notes : @signal.Signal[Array[@music.Note]],
   mode : @signal.Signal[PlaybackMode],
   audio_ctx : @web_audio.AudioContext,
+  tempo : @signal.Signal[Int],
 ) -> @dom.DomNode {
   // Event handler
   let on_play_pause : @dom.MouseHandler = fn(_) {
@@ -12,10 +13,21 @@ pub fn render_play_pause_button(
     }
     match mode.get() {
       Stopped(position_ms) => {
-        // Start playing from current position
+        // Calculate total duration
+        let total_duration = @audio.calculate_total_duration(
+          notes.get(),
+          tempo.get(),
+        )
+        // If at the end, restart from beginning
+        let start_position = if position_ms >= total_duration {
+          0
+        } else {
+          position_ms
+        }
+        // Start playing
         let now_ms = @date.Date::now()
         let audio_start = audio_ctx.current_time()
-        mode.set(PlaybackMode::playing(now_ms, position_ms, audio_start))
+        mode.set(PlaybackMode::playing(now_ms, start_position, audio_start))
       }
       Playing(started_at, started_from, _) => {
         // Stop and preserve position

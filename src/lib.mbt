@@ -90,7 +90,7 @@ fn main {
               @dom.div([
                 @ui.render_chord_input(chord_input),
                 @dom.div(class="flex gap-4 items-center", [
-                  @ui.render_play_pause_button(notes, mode, audio_ctx),
+                  @ui.render_play_pause_button(notes, mode, audio_ctx, tempo),
                   @ui.render_volume_control(volume),
                   @ui.render_bpm_input(tempo),
                   @dom.div(class="flex-1", [
