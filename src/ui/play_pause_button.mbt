@@ -5,9 +5,9 @@ pub fn render_play_pause_button(
   mode : @signal.Signal[PlaybackMode],
   audio_ctx : @web_audio.AudioContext,
   tempo : @signal.Signal[Int],
-) -> @dom.DomNode {
+) -> @luna_dom.DomNode {
   // Event handler
-  let on_play_pause : @dom.MouseHandler = fn(_) {
+  let on_play_pause : @luna_dom.MouseHandler = fn(_) {
     if note_values.get().length() == 0 {
       return
     }
@@ -43,7 +43,7 @@ pub fn render_play_pause_button(
       Playing(..) => true
     }
   })
-  @dom.button(
+  @luna_dom.button(
     dyn_class=fn() {
       if is_playing() {
         "px-8 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition-colors shadow-lg"
@@ -51,7 +51,7 @@ pub fn render_play_pause_button(
         "px-8 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition-colors shadow-lg"
       }
     },
-    on=@dom.events().click(on_play_pause),
-    [@dom.text_dyn(fn() { if is_playing() { "■" } else { "▶" } })],
+    on=@luna_dom.events().click(on_play_pause),
+    [@luna_dom.text_dyn(fn() { if is_playing() { "■" } else { "▶" } })],
   )
 }

@@ -21,7 +21,7 @@ pub fn render_keyboard_canvas(
   mode : @signal.Signal[PlaybackMode],
   tempo : @signal.Signal[Int],
   frame_count : @signal.Signal[Int],
-) -> @dom.DomNode {
+) -> @luna_dom.DomNode {
   let canvas_elem = @js_dom.document().createElement("canvas")
   let canvas = cast_to_canvas(canvas_elem)
   set_canvas_style_width(canvas, "100%")
@@ -78,12 +78,12 @@ pub fn render_keyboard_canvas(
   })
 
   // Convert canvas to DomNode using ToDomNode trait
-  let canvas_dom_node = @dom.ToDomNode::to_dom_node(canvas.as_node())
+  let canvas_dom_node = @luna_dom.ToDomNode::to_dom_node(canvas.as_node())
 
   // Wrap in div with aria-label for E2E tests
-  @dom.div(
+  @luna_dom.div(
     class="w-full",
-    attrs=[("aria-label", @dom.Attr::AttrString("keyboard canvas"))],
+    attrs=[("aria-label", @luna_dom.Attr::AttrString("keyboard canvas"))],
     [canvas_dom_node],
   )
 }

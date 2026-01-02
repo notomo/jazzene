@@ -29,7 +29,7 @@ pub fn render_falling_notes_canvas(
   tempo : @signal.Signal[Int],
   frame_count : @signal.Signal[Int],
   audio_ctx : @web_audio.AudioContext,
-) -> @dom.DomNode {
+) -> @luna_dom.DomNode {
   // Create canvas element
   let canvas_elem = @js_dom.document().createElement("canvas")
   let canvas = cast_to_canvas_notes(canvas_elem)
@@ -137,13 +137,13 @@ pub fn render_falling_notes_canvas(
   })
 
   // Convert canvas to DomNode using ToDomNode trait
-  let canvas_dom_node = @dom.ToDomNode::to_dom_node(canvas.as_node())
+  let canvas_dom_node = @luna_dom.ToDomNode::to_dom_node(canvas.as_node())
 
   // Wrap in div with aria-label for E2E tests
-  @dom.div(class="flex-1 flex flex-col", [
-    @dom.div(
+  @luna_dom.div(class="flex-1 flex flex-col", [
+    @luna_dom.div(
       class="relative flex-1 bg-slate-900 overflow-hidden",
-      attrs=[("aria-label", @dom.Attr::AttrString("falling notes"))],
+      attrs=[("aria-label", @luna_dom.Attr::AttrString("falling notes"))],
       [canvas_dom_node],
     ),
   ])

@@ -81,22 +81,22 @@ fn main {
   let doc = @js_dom.document()
   match doc.getElementById("app") {
     Some(el) => {
-      let app = @dom.div(
+      let app = @luna_dom.div(
         class="h-screen bg-gradient-to-br from-slate-950 to-slate-900 text-white grid grid-rows-[1fr_1fr]",
         [
-          @dom.div(
+          @luna_dom.div(
             class="bg-slate-800 p-4 rounded-xl shadow-2xl border-2 border-slate-700",
-            attrs=[("aria-label", @dom.Attr::AttrString("lead sheet"))],
+            attrs=[("aria-label", @luna_dom.Attr::AttrString("lead sheet"))],
             [
-              @dom.div([
+              @luna_dom.div([
                 @ui.render_chord_input(chord_input),
-                @dom.div(class="flex gap-4 items-center", [
+                @luna_dom.div(class="flex gap-4 items-center", [
                   @ui.render_play_pause_button(
                     note_values, mode, audio_ctx, tempo,
                   ),
                   @ui.render_volume_control(volume),
                   @ui.render_bpm_input(tempo),
-                  @dom.div(class="flex-1", [
+                  @luna_dom.div(class="flex-1", [
                     @ui.render_seek_bar(
                       note_values, mode, tempo, audio_ctx, frame_count,
                     ),
@@ -105,9 +105,9 @@ fn main {
               ]),
             ],
           ),
-          @dom.div(
+          @luna_dom.div(
             class="bg-slate-950 shadow-2xl border-slate-700 h-fit flex flex-col",
-            attrs=[("aria-label", @dom.Attr::AttrString("visualization"))],
+            attrs=[("aria-label", @luna_dom.Attr::AttrString("visualization"))],
             [
               @ui.render_falling_notes_canvas(
                 note_values, mode, tempo, frame_count, audio_ctx,
@@ -117,7 +117,7 @@ fn main {
           ),
         ],
       )
-      @dom.render(el |> @dom.DomElement::from_jsdom, app)
+      @luna_dom.render(el |> @luna_dom.DomElement::from_dom, app)
     }
     None => ()
   }

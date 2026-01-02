@@ -18,7 +18,7 @@ pub fn render_seek_bar(
   tempo : @signal.Signal[Int],
   audio_ctx : @web_audio.AudioContext,
   frame_count : @signal.Signal[Int],
-) -> @dom.DomNode {
+) -> @luna_dom.DomNode {
   // Computed values
   let total_duration_ms = @signal.memo(fn() {
     if note_values.get().length() > 0 {
@@ -41,7 +41,7 @@ pub fn render_seek_bar(
   let has_notes = @signal.memo(fn() { note_values.get().length() > 0 })
 
   // Event handler
-  let on_seek : @dom.InputHandler = fn(e) {
+  let on_seek : @luna_dom.InputHandler = fn(e) {
     if note_values.get().length() == 0 {
       return
     }
@@ -70,27 +70,27 @@ pub fn render_seek_bar(
       None => ()
     }
   }
-  @dom.div(class="p-4 bg-slate-800", [
+  @luna_dom.div(class="p-4 bg-slate-800", [
     // Time display: "0:00 / 2:30"
-    @dom.div(
+    @luna_dom.div(
       class="flex justify-between text-sm text-slate-400 mb-2",
-      attrs=[("aria-label", @dom.Attr::AttrString("time display"))],
+      attrs=[("aria-label", @luna_dom.Attr::AttrString("time display"))],
       [
-        @dom.text_dyn(fn() {
+        @luna_dom.text_dyn(fn() {
           format_time(position_ms()) + " / " + format_time(total_duration_ms())
         }),
       ],
     ),
 
     // Range slider with Tailwind styling
-    @dom.input(
+    @luna_dom.input(
       type_="range",
       class="w-full h-2 bg-slate-700 rounded-lg cursor-pointer accent-blue-500 disabled:opacity-50 disabled:cursor-not-allowed",
       attrs=[
-        ("min", @dom.Attr::AttrInt(0)),
-        ("max", @dom.Attr::AttrInt(100)),
-        ("step", @dom.Attr::AttrInt(1)),
-        ("aria-label", @dom.Attr::AttrString("playback position")),
+        ("min", @luna_dom.Attr::AttrInt(0)),
+        ("max", @luna_dom.Attr::AttrInt(100)),
+        ("step", @luna_dom.Attr::AttrInt(1)),
+        ("aria-label", @luna_dom.Attr::AttrString("playback position")),
       ],
       dyn_value=fn() {
         let total = total_duration_ms()
@@ -102,7 +102,7 @@ pub fn render_seek_bar(
         }
       },
       dyn_disabled=fn() { not(has_notes()) },
-      on=@dom.events().input(on_seek),
+      on=@luna_dom.events().input(on_seek),
     ),
   ])
 }

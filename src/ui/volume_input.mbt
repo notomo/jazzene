@@ -1,11 +1,13 @@
 ///|
 /// Render volume control with popup
-pub fn render_volume_control(volume : @signal.Signal[Double]) -> @dom.DomNode {
+pub fn render_volume_control(
+  volume : @signal.Signal[Double],
+) -> @luna_dom.DomNode {
   // Volume popup state
   let show_volume_popup = @signal.signal(false)
 
   // Event handlers
-  let on_volume_change : @dom.InputHandler = fn(e) {
+  let on_volume_change : @luna_dom.InputHandler = fn(e) {
     let target = e.target()
     let event_target = target.as_event_target()
     let value = event_target.as_any()._get("value").to_string()
@@ -14,15 +16,17 @@ pub fn render_volume_control(volume : @signal.Signal[Double]) -> @dom.DomNode {
       None => ()
     }
   }
-  @dom.div(class="relative", [
-    @dom.button(
+  @luna_dom.div(class="relative", [
+    @luna_dom.button(
       class="p-3 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors shadow-lg",
-      on=@dom.events().click(fn(_) { show_volume_popup.update(fn(v) { !v }) }),
-      attrs=[("aria-label", @dom.Attr::AttrString("Volume control"))],
-      [@dom.text("🔊")],
+      on=@luna_dom.events().click(fn(_) {
+        show_volume_popup.update(fn(v) { !v })
+      }),
+      attrs=[("aria-label", @luna_dom.Attr::AttrString("Volume control"))],
+      [@luna_dom.text("🔊")],
     ),
     // Volume popup (vertical slider)
-    @dom.div(
+    @luna_dom.div(
       dyn_class=fn() {
         if show_volume_popup.get() {
           "absolute z-10 top-full left-1/2 -translate-x-1/2 mt-2 bg-slate-800 p-3 rounded-lg shadow-xl border border-slate-600"
@@ -31,18 +35,18 @@ pub fn render_volume_control(volume : @signal.Signal[Double]) -> @dom.DomNode {
         }
       },
       [
-        @dom.input(
+        @luna_dom.input(
           type_="range",
           class="h-32 w-12 accent-blue-500 cursor-pointer [writing-mode:vertical-lr] [direction:rtl]",
           attrs=[
-            ("min", @dom.Attr::AttrInt(0)),
-            ("max", @dom.Attr::AttrInt(100)),
-            ("step", @dom.Attr::AttrInt(1)),
-            ("orient", @dom.Attr::AttrString("vertical")),
-            ("aria-label", @dom.Attr::AttrString("Volume")),
+            ("min", @luna_dom.Attr::AttrInt(0)),
+            ("max", @luna_dom.Attr::AttrInt(100)),
+            ("step", @luna_dom.Attr::AttrInt(1)),
+            ("orient", @luna_dom.Attr::AttrString("vertical")),
+            ("aria-label", @luna_dom.Attr::AttrString("Volume")),
           ],
           dyn_value=fn() { (volume.get() * 100.0).to_int().to_string() },
-          on=@dom.events().input(on_volume_change),
+          on=@luna_dom.events().input(on_volume_change),
         ),
       ],
     ),
