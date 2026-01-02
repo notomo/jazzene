@@ -24,7 +24,7 @@ jobs:
       - run: npm ci
       - run: npx playwright install --with-deps chromium
 
-      - uses: hustcer/setup-moonbit@v1.17
+      - uses: illusory0x0/setup-moonbit@v0.1.1
         with:
           version: stable
       - run: |
