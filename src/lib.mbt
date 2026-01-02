@@ -107,7 +107,9 @@ fn main {
             class="bg-slate-950 shadow-2xl border-slate-700 h-fit flex flex-col",
             attrs=[("aria-label", @dom.Attr::AttrString("visualization"))],
             [
-              @ui.render_falling_notes_canvas(notes, mode, tempo, frame_count),
+              @ui.render_falling_notes_canvas(
+                notes, mode, tempo, frame_count, audio_ctx,
+              ),
               @ui.render_keyboard_canvas(notes, mode, tempo, frame_count),
             ],
           ),

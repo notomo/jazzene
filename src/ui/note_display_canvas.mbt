@@ -21,12 +21,20 @@ extern "js" fn set_canvas_style_width_notes(
   #|(canvas, width) => { canvas.style.width = width; }
 
 ///|
+extern "js" fn add_wheel_listener_notes(
+  canvas : @js_dom.HTMLCanvasElement,
+  handler : (@js_dom.WheelEvent) -> Unit,
+) -> Unit =
+  #|(canvas, handler) => { canvas.addEventListener('wheel', handler); }
+
+///|
 /// Render falling notes display component using Canvas API
 pub fn render_falling_notes_canvas(
   notes : @signal.Signal[Array[@music.Note]],
   mode : @signal.Signal[PlaybackMode],
   tempo : @signal.Signal[Int],
   frame_count : @signal.Signal[Int],
+  audio_ctx : @audio.AudioContext,
 ) -> @dom.DomNode {
   // Create canvas element
   let canvas_elem = @js_dom.document().createElement("canvas")
@@ -64,6 +72,50 @@ pub fn render_falling_notes_canvas(
     }
     positions
   })
+
+  // Calculate total duration
+  let total_duration_ms = @signal.memo(fn() {
+    if notes.get().length() > 0 {
+      @audio.calculate_total_duration(notes.get(), tempo.get())
+    } else {
+      0
+    }
+  })
+
+  // Add wheel event listener for seeking
+  let on_wheel : (@js_dom.WheelEvent) -> Unit = fn(e) {
+    if notes.get().length() == 0 {
+      return
+    }
+    e.preventDefault()
+    let current_pos = position_ms()
+    let seek_amount = 100 // milliseconds per wheel tick
+    let new_position_ms = if e.deltaY > 0.0 {
+      // Wheel down: move forward
+      current_pos + seek_amount
+    } else {
+      // Wheel up: move backward
+      current_pos - seek_amount
+    }
+    // Clamp position to valid range
+    let clamped_position = if new_position_ms < 0 {
+      0
+    } else if new_position_ms > total_duration_ms() {
+      total_duration_ms()
+    } else {
+      new_position_ms
+    }
+    // Update mode
+    match mode.get() {
+      Stopped(_) => mode.set(PlaybackMode::stopped(clamped_position))
+      Playing(_, _, _) => {
+        let now_ms = @date.Date::now()
+        let audio_start = audio_ctx.current_time()
+        mode.set(PlaybackMode::playing(now_ms, clamped_position, audio_start))
+      }
+    }
+  }
+  add_wheel_listener_notes(canvas, on_wheel)
 
   // Redraw on frame count change
   let _ = @signal.effect(fn() {

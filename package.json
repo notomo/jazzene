@@ -9,7 +9,7 @@
     "test": "moon test -v -p internal/jazzene/music --target wasm-gc",
     "test:e2e": "playwright test",
     "dev": "vite",
-    "start": "npm run dev",
+    "start": "npm run dev -- --open",
     "build": "moon build && vite build"
   },
   "devDependencies": {
