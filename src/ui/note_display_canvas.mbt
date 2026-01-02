@@ -6,6 +6,20 @@ extern "js" fn add_wheel_listener_notes(
   #|(canvas, handler) => { canvas.addEventListener('wheel', handler); }
 
 ///|
+extern "js" fn add_drag_listeners_notes(
+  canvas : @js_dom.HTMLCanvasElement,
+  on_drag_start : (@js_dom.MouseEvent) -> Unit,
+  on_drag_move : (@js_dom.MouseEvent) -> Unit,
+  on_drag_end : (@js_dom.MouseEvent) -> Unit,
+) -> Unit =
+  #|(canvas, onDragStart, onDragMove, onDragEnd) => {
+  #|  canvas.addEventListener('mousedown', onDragStart);
+  #|  canvas.addEventListener('mousemove', onDragMove);
+  #|  canvas.addEventListener('mouseup', onDragEnd);
+  #|  canvas.addEventListener('mouseleave', onDragEnd);
+  #|}
+
+///|
 /// Render falling notes display component using Canvas API
 pub fn render_falling_notes_canvas(
   note_values : @signal.Signal[Array[@music.NoteValue]],
@@ -94,6 +108,57 @@ pub fn render_falling_notes_canvas(
     }
   }
   add_wheel_listener_notes(canvas, on_wheel)
+
+  // Add drag event listeners for seeking
+  let drag_start_y : Ref[Double?] = { val: None }
+  let drag_start_position_ms : Ref[Int?] = { val: None }
+  let on_drag_start : (@js_dom.MouseEvent) -> Unit = fn(e) {
+    if note_values.get().length() == 0 {
+      return
+    }
+    drag_start_y.val = Some(e.clientY)
+    drag_start_position_ms.val = Some(position_ms())
+  }
+  let on_drag_move : (@js_dom.MouseEvent) -> Unit = fn(e) {
+    match (drag_start_y.val, drag_start_position_ms.val) {
+      (Some(start_y), Some(start_pos)) => {
+        let current_y = e.clientY
+        let delta_y = current_y - start_y
+
+        // Calculate seek amount based on drag distance
+        // 10 pixels = 100ms (adjustable sensitivity)
+        let seek_amount = (delta_y * 10.0).to_int()
+        let new_position_ms = start_pos + seek_amount
+
+        // Clamp position to valid range
+        let clamped_position = if new_position_ms < 0 {
+          0
+        } else if new_position_ms > total_duration_ms() {
+          total_duration_ms()
+        } else {
+          new_position_ms
+        }
+
+        // Update mode
+        match mode.get() {
+          Stopped(..) => mode.set(PlaybackMode::stopped(clamped_position))
+          Playing(..) => {
+            let now_ms = @date.Date::now()
+            let audio_start = audio_ctx.current_time()
+            mode.set(
+              PlaybackMode::playing(now_ms, clamped_position, audio_start),
+            )
+          }
+        }
+      }
+      _ => ()
+    }
+  }
+  let on_drag_end : (@js_dom.MouseEvent) -> Unit = fn(_e) {
+    drag_start_y.val = None
+    drag_start_position_ms.val = None
+  }
+  add_drag_listeners_notes(canvas, on_drag_start, on_drag_move, on_drag_end)
 
   // Redraw on frame count change
   let _ = @signal.effect(fn() {
