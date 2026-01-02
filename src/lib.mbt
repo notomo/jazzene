@@ -49,6 +49,7 @@ fn main {
           tempo.get(),
           current_pos,
           100,
+          volume.get(),
         )
 
         // Check for end of playback

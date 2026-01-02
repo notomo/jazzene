@@ -47,6 +47,7 @@ pub fn schedule_notes_in_window(
   tempo_bpm : Int,
   current_pos_ms : Int,
   lookahead_ms : Int,
+  volume : Double,
 ) -> Unit {
   let window_end_ms = current_pos_ms + lookahead_ms
 
@@ -71,7 +72,7 @@ pub fn schedule_notes_in_window(
             midi_val.value,
             audio_start_time,
             duration_sec,
-            0.7,
+            volume,
           )
         }
       Rest(..) => () // Rests advance time but produce no sound
