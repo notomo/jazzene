@@ -12,7 +12,6 @@ fn main {
   let chord_input = @signal.signal("Cm7 F7 Bbmaj7 Ebmaj7")
   let tempo = @signal.signal(120)
   let volume = @signal.signal(0.3)
-  let is_muted = @signal.signal(false)
   let frame_count = @signal.signal(0) // Incremented every frame for UI updates
 
   // Reactive note generation when chord input changes
@@ -92,7 +91,7 @@ fn main {
                 @ui.render_chord_input(chord_input),
                 @dom.div(class="flex gap-4 items-center", [
                   @ui.render_play_pause_button(notes, mode, audio_ctx),
-                  @ui.render_volume_control(volume, is_muted),
+                  @ui.render_volume_control(volume),
                   @ui.render_bpm_input(tempo),
                   @dom.div(class="flex-1", [
                     @ui.render_seek_bar(
