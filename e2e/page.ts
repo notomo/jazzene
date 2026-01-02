@@ -13,9 +13,9 @@ export async function openJazzenePage({ page }: { page: Page }) {
     getChordInput: () => page.getByPlaceholder(/Enter chord progression/),
 
     // Playback controls
-    getPlayButton: () => page.getByRole("button", { name: "Play" }),
-    getStopButton: () => page.getByRole("button", { name: "Stop" }),
-    getPlayOrStopButton: () => page.getByRole("button", { name: /Play|Stop/ }),
+    getPlayButton: () => page.getByRole("button", { name: "▶" }),
+    getStopButton: () => page.getByRole("button", { name: "■" }),
+    getPlayOrStopButton: () => page.getByRole("button", { name: /▶|■/ }),
 
     // Seekbar and time display
     getSeekbar: () => page.getByLabel("playback position"),

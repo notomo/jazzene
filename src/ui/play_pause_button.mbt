@@ -40,6 +40,6 @@ pub fn render_play_pause_button(
       }
     },
     on=@dom.events().click(on_play_pause),
-    [@dom.text_dyn(fn() { if is_playing() { "Stop" } else { "Play" } })],
+    [@dom.text_dyn(fn() { if is_playing() { "■" } else { "▶" } })],
   )
 }
