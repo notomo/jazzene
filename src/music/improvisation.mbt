@@ -13,25 +13,33 @@ pub fn ImprovisationSettings::default() -> ImprovisationSettings {
 ///|
 /// Generate improvisation from a chord progression
 /// Returns note values (notes and rests) with varying durations
+/// Notes are generated to fit exactly within measure boundaries
 pub fn generate_improvisation(
   chords : Array[Chord],
   settings : ImprovisationSettings,
 ) -> Array[NoteValue] {
   let note_values : Array[NoteValue] = []
+  let beats_per_measure = settings.notes_per_measure.to_double()
 
-  // Add ~1 measure of rest at the beginning (4 quarter notes = 1 measure in 4/4 time)
+  // Add ~1 measure of rest at the beginning
   note_values.push(NoteValue::Rest(duration=Half))
   note_values.push(NoteValue::Rest(duration=Half))
   for chord in chords {
-    for _i = 0; _i < settings.notes_per_measure; _i = _i + 1 {
+    // Track remaining beats in current measure
+    let mut remaining_beats = beats_per_measure
+    while remaining_beats > 0.0 {
       let midi_number = random_midi_from_chord(chord)
-      let duration = random_duration()
+      // Get duration that fits within remaining beats
+      let duration = random_duration_with_limit(remaining_beats)
+
       // Create note with validation
       match Note::new(midi_number, duration) {
-        Some(note) =>
+        Some(note) => {
           note_values.push(
             NoteValue::Note(midi=note.midi, duration=note.duration),
           )
+          remaining_beats = remaining_beats - duration.to_beats()
+        }
         None => () // Skip invalid notes
       }
     }
@@ -40,16 +48,58 @@ pub fn generate_improvisation(
 }
 
 ///|
-/// Generate random duration
-/// Distribution: 20% eighth, 60% quarter, 20% half
-fn random_duration() -> NoteDuration {
+/// Generate random duration that fits within the remaining beats
+/// Distribution: 20% eighth, 60% quarter, 20% half (adjusted based on remaining beats)
+fn random_duration_with_limit(remaining_beats : Double) -> NoteDuration {
+  // Filter available durations based on remaining beats
+  let available : Array[NoteDuration] = []
+  if remaining_beats >= 2.0 {
+    available.push(Half)
+  }
+  if remaining_beats >= 1.0 {
+    available.push(Quarter)
+  }
+  if remaining_beats >= 0.5 {
+    available.push(Eighth)
+  }
+
+  // If no durations fit (shouldn't happen), default to smallest
+  if available.length() == 0 {
+    return Eighth
+  }
+
+  // If only one option, return it
+  if available.length() == 1 {
+    return available[0]
+  }
+
+  // Prefer distribution: 20% eighth, 60% quarter, 20% half (when all available)
   let r = global_rand.int(limit=100)
-  if r < 20 {
-    Eighth
-  } else if r < 80 {
-    Quarter
+  if available.length() == 3 {
+    // All durations available
+    if r < 20 {
+      Eighth
+    } else if r < 80 {
+      Quarter
+    } else {
+      Half
+    }
+  } else if available.length() == 2 {
+    if available.contains(Quarter) && available.contains(Eighth) {
+      // Only Quarter and Eighth available
+      if r < 25 {
+        Eighth
+      } else {
+        Quarter
+      }
+      // Half and something else
+    } else if r < 50 {
+      available[0]
+    } else {
+      available[1]
+    }
   } else {
-    Half
+    available[0]
   }
 }
 

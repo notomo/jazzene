@@ -4,8 +4,9 @@ test "generate improvisation from single chord" {
   let settings = ImprovisationSettings::default()
   let note_values = generate_improvisation(chords, settings)
 
-  // Should generate 4 notes + 2 initial rests = 6 total
-  inspect(note_values.length(), content="6")
+  // Should generate notes that fit within 4 beats + 2 initial rests
+  // Note count varies based on random durations
+  inspect(note_values.length() >= 2, content="true")
 
   // All note values should have valid durations
   for note_value in note_values {
@@ -14,6 +15,13 @@ test "generate improvisation from single chord" {
       // Compiler ensures exhaustiveness
     }
   }
+
+  // Verify total beats match expected (4 beats per measure + 4 beats of initial rests)
+  let mut total_beats = 0.0
+  for note_value in note_values {
+    total_beats = total_beats + note_value.duration().to_beats()
+  }
+  inspect(total_beats, content="8")
 }
 
 ///|
@@ -26,8 +34,12 @@ test "generate improvisation from chord progression" {
   let settings = ImprovisationSettings::default()
   let note_values = generate_improvisation(chords, settings)
 
-  // 3 chords * 4 notes + 2 initial rests = 14 total
-  inspect(note_values.length(), content="14")
+  // Verify total beats match expected (3 chords * 4 beats + 4 beats of initial rests = 16 beats)
+  let mut total_beats = 0.0
+  for note_value in note_values {
+    total_beats = total_beats + note_value.duration().to_beats()
+  }
+  inspect(total_beats, content="16")
 }
 
 ///|
@@ -35,8 +47,13 @@ test "improvisation with custom settings" {
   let chords = [Chord::{ root: G, quality: Dominant7 }]
   let settings = ImprovisationSettings::{ notes_per_measure: 8 }
   let note_values = generate_improvisation(chords, settings)
-  // 8 notes + 2 initial rests = 10 total
-  inspect(note_values.length(), content="10")
+
+  // Verify total beats match expected (8 beats per measure + 4 beats of initial rests = 12 beats)
+  let mut total_beats = 0.0
+  for note_value in note_values {
+    total_beats = total_beats + note_value.duration().to_beats()
+  }
+  inspect(total_beats, content="12")
 }
 
 ///|
