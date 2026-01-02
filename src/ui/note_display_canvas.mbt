@@ -8,12 +8,6 @@ extern "js" fn get_context_2d_notes(
   #|(canvas) => canvas.getContext("2d")
 
 ///|
-extern "js" fn get_client_width_notes(
-  canvas : @js_dom.HTMLCanvasElement,
-) -> Int =
-  #|(canvas) => canvas.clientWidth
-
-///|
 extern "js" fn set_canvas_style_width_notes(
   canvas : @js_dom.HTMLCanvasElement,
   width : String,
@@ -129,7 +123,7 @@ pub fn render_falling_notes_canvas(
     let positions = note_positions()
 
     // Update canvas width to match displayed width
-    let client_width = get_client_width_notes(canvas)
+    let client_width = canvas.clientWidth()
     if client_width > 0 {
       canvas.width = client_width
     }

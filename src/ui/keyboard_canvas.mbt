@@ -8,10 +8,6 @@ extern "js" fn get_context_2d(
   #|(canvas) => canvas.getContext("2d")
 
 ///|
-extern "js" fn get_client_width(canvas : @js_dom.HTMLCanvasElement) -> Int =
-  #|(canvas) => canvas.clientWidth
-
-///|
 extern "js" fn set_canvas_style_width(
   canvas : @js_dom.HTMLCanvasElement,
   width : String,
@@ -26,15 +22,9 @@ pub fn render_keyboard_canvas(
   tempo : @signal.Signal[Int],
   frame_count : @signal.Signal[Int],
 ) -> @dom.DomNode {
-  // Create canvas element
   let canvas_elem = @js_dom.document().createElement("canvas")
   let canvas = cast_to_canvas(canvas_elem)
-
-  // Set canvas to fill width
   set_canvas_style_width(canvas, "100%")
-  canvas.height = 160
-
-  // Get 2D context
   let ctx = get_context_2d(canvas)
 
   // Calculate currently playing notes
@@ -75,7 +65,7 @@ pub fn render_keyboard_canvas(
     let active_notes = playing_notes()
 
     // Update canvas width to match displayed width
-    let client_width = get_client_width(canvas)
+    let client_width = canvas.clientWidth()
     if client_width > 0 {
       canvas.width = client_width
     }
