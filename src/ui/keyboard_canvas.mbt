@@ -1,20 +1,4 @@
 ///|
-fn cast_to_canvas(elem : @js_dom.Element) -> @js_dom.HTMLCanvasElement = "%identity"
-
-///|
-extern "js" fn get_context_2d(
-  canvas : @js_dom.HTMLCanvasElement,
-) -> @canvas.CanvasRenderingContext2D =
-  #|(canvas) => canvas.getContext("2d")
-
-///|
-extern "js" fn set_canvas_style_width(
-  canvas : @js_dom.HTMLCanvasElement,
-  width : String,
-) -> Unit =
-  #|(canvas, width) => { canvas.style.width = width; }
-
-///|
 /// Render piano keyboard component using Canvas API
 pub fn render_keyboard_canvas(
   note_values : @signal.Signal[Array[@music.NoteValue]],
@@ -25,6 +9,7 @@ pub fn render_keyboard_canvas(
   let canvas_elem = @js_dom.document().createElement("canvas")
   let canvas = cast_to_canvas(canvas_elem)
   set_canvas_style_width(canvas, "100%")
+  set_canvas_style_height(canvas, "100%")
   let ctx = get_context_2d(canvas)
 
   // Calculate currently playing notes

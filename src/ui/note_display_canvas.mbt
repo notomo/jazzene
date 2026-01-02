@@ -1,20 +1,4 @@
 ///|
-fn cast_to_canvas_notes(elem : @js_dom.Element) -> @js_dom.HTMLCanvasElement = "%identity"
-
-///|
-extern "js" fn get_context_2d_notes(
-  canvas : @js_dom.HTMLCanvasElement,
-) -> @canvas.CanvasRenderingContext2D =
-  #|(canvas) => canvas.getContext("2d")
-
-///|
-extern "js" fn set_canvas_style_width_notes(
-  canvas : @js_dom.HTMLCanvasElement,
-  width : String,
-) -> Unit =
-  #|(canvas, width) => { canvas.style.width = width; }
-
-///|
 extern "js" fn add_wheel_listener_notes(
   canvas : @js_dom.HTMLCanvasElement,
   handler : (@js_dom.WheelEvent) -> Unit,
@@ -30,16 +14,11 @@ pub fn render_falling_notes_canvas(
   frame_count : @signal.Signal[Int],
   audio_ctx : @web_audio.AudioContext,
 ) -> @luna_dom.DomNode {
-  // Create canvas element
   let canvas_elem = @js_dom.document().createElement("canvas")
-  let canvas = cast_to_canvas_notes(canvas_elem)
-
-  // Set canvas to fill width
-  set_canvas_style_width_notes(canvas, "100%")
-  canvas.height = 600
-
-  // Get 2D context
-  let ctx = get_context_2d_notes(canvas)
+  let canvas = cast_to_canvas(canvas_elem)
+  set_canvas_style_width(canvas, "100%")
+  set_canvas_style_height(canvas, "100%")
+  let ctx = get_context_2d(canvas)
 
   // Calculate current playback position
   let position_ms = @signal.memo(fn() {

@@ -46,9 +46,9 @@ pub fn render_play_pause_button(
   @luna_dom.button(
     dyn_class=fn() {
       if is_playing() {
-        "px-8 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition-colors shadow-lg"
+        "px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition-colors shadow-lg"
       } else {
-        "px-8 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition-colors shadow-lg"
+        "px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition-colors shadow-lg"
       }
     },
     on=@luna_dom.events().click(on_play_pause),

@@ -92,3 +92,26 @@ fn is_black_key(note_in_octave : Int) -> Bool {
     _ => false
   }
 }
+
+///|
+extern "js" fn get_context_2d(
+  canvas : @js_dom.HTMLCanvasElement,
+) -> @canvas.CanvasRenderingContext2D =
+  #|(canvas) => canvas.getContext("2d")
+
+///|
+extern "js" fn set_canvas_style_width(
+  canvas : @js_dom.HTMLCanvasElement,
+  width : String,
+) -> Unit =
+  #|(canvas, width) => { canvas.style.width = width; }
+
+///|
+extern "js" fn set_canvas_style_height(
+  canvas : @js_dom.HTMLCanvasElement,
+  height : String,
+) -> Unit =
+  #|(canvas, height) => { canvas.style.height = height; }
+
+///|
+fn cast_to_canvas(elem : @js_dom.Element) -> @js_dom.HTMLCanvasElement = "%identity"

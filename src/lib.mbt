@@ -82,21 +82,23 @@ fn main {
   match doc.getElementById("app") {
     Some(el) => {
       let app = @luna_dom.div(
-        class="h-screen bg-gradient-to-br from-slate-950 to-slate-900 text-white grid grid-rows-[1fr_1fr]",
+        class="h-screen bg-gradient-to-br from-slate-950 to-slate-900 text-white grid grid-rows-[min-content_1fr]",
         [
           @luna_dom.div(
-            class="bg-slate-800 p-4 rounded-xl shadow-2xl border-2 border-slate-700",
+            class="h-wit p-2 bg-slate-800 rounded-xl shadow-2xl border-2 border-slate-700",
             attrs=[("aria-label", @luna_dom.Attr::AttrString("lead sheet"))],
             [
               @luna_dom.div([
-                @ui.render_chord_input(chord_input),
-                @luna_dom.div(class="flex gap-4 items-center", [
+                @luna_dom.div(class="flex gap-4 items-center p-1", [
+                  @ui.render_chord_input(chord_input),
+                  @ui.render_bpm_input(tempo),
+                ]),
+                @luna_dom.div(class="flex gap-4 items-baseline p-1", [
                   @ui.render_play_pause_button(
                     note_values, mode, audio_ctx, tempo,
                   ),
                   @ui.render_volume_control(volume),
-                  @ui.render_bpm_input(tempo),
-                  @luna_dom.div(class="flex-1", [
+                  @luna_dom.div(class="w-full", [
                     @ui.render_seek_bar(
                       note_values, mode, tempo, audio_ctx, frame_count,
                     ),
@@ -106,7 +108,7 @@ fn main {
             ],
           ),
           @luna_dom.div(
-            class="bg-slate-950 shadow-2xl border-slate-700 h-fit flex flex-col",
+            class="bg-slate-950 shadow-2xl border-slate-700 h-full flex flex-col",
             attrs=[("aria-label", @luna_dom.Attr::AttrString("visualization"))],
             [
               @ui.render_falling_notes_canvas(

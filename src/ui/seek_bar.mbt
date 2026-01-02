@@ -70,10 +70,10 @@ pub fn render_seek_bar(
       None => ()
     }
   }
-  @luna_dom.div(class="p-4 bg-slate-800", [
+  @luna_dom.div(class="flex gap-2 items-baseline bg-slate-800", [
     // Time display: "0:00 / 2:30"
     @luna_dom.div(
-      class="flex justify-between text-sm text-slate-400 mb-2",
+      class="flex justify-between text-sm text-slate-400 mb-2 text-nowrap",
       attrs=[("aria-label", @luna_dom.Attr::AttrString("time display"))],
       [
         @luna_dom.text_dyn(fn() {
