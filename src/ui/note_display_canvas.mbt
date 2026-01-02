@@ -58,6 +58,8 @@ pub fn render_falling_notes_canvas(
 ) -> @luna_dom.DomNode {
   let canvas_elem = @js_dom.document().createElement("canvas")
   let canvas = cast_to_canvas(canvas_elem)
+  set_canvas_style_width(canvas, "100%")
+  set_canvas_style_height(canvas, "100%")
   let ctx = get_context_2d(canvas)
 
   // Calculate current playback position
@@ -197,12 +199,6 @@ pub fn render_falling_notes_canvas(
     if client_width > 0 {
       canvas.width = client_width
     }
-    let client_height = canvas.clientHeight()
-    if client_height > 0 {
-      canvas.height = client_height
-    }
-    set_canvas_style_width(canvas, "100%")
-    set_canvas_style_height(canvas, "100%")
     draw_notes(
       ctx,
       canvas.width.to_double(),
