@@ -40,12 +40,6 @@ pub fn MidiNumber::new(value : Int) -> MidiNumber? {
 }
 
 ///|
-/// Create MidiNumber without validation (for internal use)
-pub fn MidiNumber::unsafe_new(value : Int) -> MidiNumber {
-  MidiNumber::{ value, }
-}
-
-///|
 /// Note name enum for type-safe chord roots
 pub enum NoteName {
   C
@@ -61,25 +55,6 @@ pub enum NoteName {
   ASharp // A# / Bb
   B
 } derive(Eq, Show)
-
-///|
-/// Convert note name to string
-pub fn NoteName::to_string(self : NoteName) -> String {
-  match self {
-    C => "C"
-    CSharp => "C#"
-    D => "D"
-    DSharp => "D#"
-    E => "E"
-    F => "F"
-    FSharp => "F#"
-    G => "G"
-    GSharp => "G#"
-    A => "A"
-    ASharp => "A#"
-    B => "B"
-  }
-}
 
 ///|
 /// Parse string to note name
@@ -137,22 +112,6 @@ pub enum ChordQuality {
 } derive(Eq, Show)
 
 ///|
-/// Convert chord quality to string
-pub fn ChordQuality::to_string(self : ChordQuality) -> String {
-  match self {
-    Major7 => "maj7"
-    Minor7 => "m7"
-    Dominant7 => "7"
-    HalfDiminished => "m7b5"
-    Diminished7 => "dim7"
-    Augmented => "aug"
-    Sus4 => "sus4"
-    Major => ""
-    Minor => "m"
-  }
-}
-
-///|
 /// Get chord tone intervals for a quality
 pub fn ChordQuality::intervals(self : ChordQuality) -> Array[Int] {
   match self {
@@ -208,36 +167,4 @@ pub fn Note::name(self : Note) -> String {
   let octave = self.midi.value / 12 - 1
   let note_index = self.midi.value % 12
   note_names[note_index] + octave.to_string()
-}
-
-///|
-/// Tempo newtype with validation (30-300 BPM)
-pub struct Tempo {
-  bpm : Int
-} derive(Eq, Show)
-
-///|
-/// Create Tempo with validation
-pub fn Tempo::new(bpm : Int) -> Tempo? {
-  if bpm >= 30 && bpm <= 300 {
-    Some(Tempo::{ bpm, })
-  } else {
-    None
-  }
-}
-
-///|
-/// Position in milliseconds
-pub struct Position {
-  ms : Int
-} derive(Eq, Show)
-
-///|
-/// Create Position with validation (>= 0)
-pub fn Position::new(ms : Int) -> Position? {
-  if ms >= 0 {
-    Some(Position::{ ms, })
-  } else {
-    None
-  }
 }

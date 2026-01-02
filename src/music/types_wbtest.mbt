@@ -23,14 +23,6 @@ test "MidiNumber validation" {
 }
 
 ///|
-test "NoteName to_string" {
-  inspect(C.to_string(), content="C")
-  inspect(CSharp.to_string(), content="C#")
-  inspect(FSharp.to_string(), content="F#")
-  inspect(B.to_string(), content="B")
-}
-
-///|
 test "NoteName from_string" {
   inspect(NoteName::from_string("C"), content="Some(C)")
   inspect(NoteName::from_string("C#"), content="Some(CSharp)")
@@ -80,20 +72,4 @@ test "Note name" {
   inspect(c4.name(), content="C4")
   let a4 = Note::new(69, Quarter).unwrap()
   inspect(a4.name(), content="A4")
-}
-
-///|
-test "Tempo validation" {
-  inspect(Tempo::new(120), content="Some({bpm: 120})")
-  inspect(Tempo::new(30), content="Some({bpm: 30})")
-  inspect(Tempo::new(300), content="Some({bpm: 300})")
-  inspect(Tempo::new(29), content="None")
-  inspect(Tempo::new(301), content="None")
-}
-
-///|
-test "Position validation" {
-  inspect(Position::new(0), content="Some({ms: 0})")
-  inspect(Position::new(1000), content="Some({ms: 1000})")
-  inspect(Position::new(-1), content="None")
 }
