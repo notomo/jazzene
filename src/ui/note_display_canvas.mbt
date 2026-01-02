@@ -133,6 +133,7 @@ pub fn render_falling_notes_canvas(
       canvas.height.to_double(),
       positions,
       pos,
+      tempo.get(),
     )
   })
 
@@ -157,6 +158,7 @@ fn draw_notes(
   height : Double,
   note_positions : Array[(Int, Int, Int)],
   current_pos : Int,
+  tempo : Int,
 ) -> Unit {
   // Clear canvas
   ctx.clearRect(0.0, 0.0, width, height)
@@ -225,6 +227,27 @@ fn draw_notes(
       }
       ctx.fillStyle = color
       ctx.fillRect(key_area.rect.left, 0.0, 1.0, height)
+    }
+  }
+
+  // Draw horizontal lines for each measure (1小節ごとの横線)
+  // In 4/4 time, one measure = 4 quarter notes
+  let measure_ms = 60000 * 4 / tempo // (60000ms/BPM) * 4 beats
+
+  // Find the first measure line visible in the window
+  let first_measure = current_pos / measure_ms
+  let last_measure = (current_pos + window_ms) / measure_ms + 1
+  for i = first_measure; i <= last_measure; i = i + 1 {
+    let measure_pos_ms = i * measure_ms
+    let offset = measure_pos_ms - current_pos
+
+    // Check if this measure line is visible
+    if offset >= 0 && offset <= window_ms {
+      // Calculate y position (inverted: future at top, now at bottom)
+      let percent = 100.0 - offset.to_double() / window_ms.to_double() * 100.0
+      let y = height * percent / 100.0
+      ctx.fillStyle = "rgba(255, 255, 255, 0.3)"
+      ctx.fillRect(0.0, y, width, 1.0)
     }
   }
 }
