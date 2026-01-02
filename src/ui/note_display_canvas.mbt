@@ -13,10 +13,38 @@ extern "js" fn add_drag_listeners_notes(
   on_drag_end : (@js_dom.MouseEvent) -> Unit,
 ) -> Unit =
   #|(canvas, onDragStart, onDragMove, onDragEnd) => {
+  #|  // Mouse events
   #|  canvas.addEventListener('mousedown', onDragStart);
   #|  canvas.addEventListener('mousemove', onDragMove);
   #|  canvas.addEventListener('mouseup', onDragEnd);
   #|  canvas.addEventListener('mouseleave', onDragEnd);
+  #|
+  #|  // Touch events for tablets/mobile
+  #|  canvas.addEventListener('touchstart', (e) => {
+  #|    if (e.touches.length > 0) {
+  #|      const touch = e.touches[0];
+  #|      onDragStart({ clientY: touch.clientY });
+  #|    }
+  #|  });
+  #|  canvas.addEventListener('touchmove', (e) => {
+  #|    if (e.touches.length > 0) {
+  #|      e.preventDefault(); // Prevent scrolling while dragging
+  #|      const touch = e.touches[0];
+  #|      onDragMove({ clientY: touch.clientY });
+  #|    }
+  #|  }, { passive: false });
+  #|  canvas.addEventListener('touchend', (e) => {
+  #|    if (e.changedTouches.length > 0) {
+  #|      const touch = e.changedTouches[0];
+  #|      onDragEnd({ clientY: touch.clientY });
+  #|    }
+  #|  });
+  #|  canvas.addEventListener('touchcancel', (e) => {
+  #|    if (e.changedTouches.length > 0) {
+  #|      const touch = e.changedTouches[0];
+  #|      onDragEnd({ clientY: touch.clientY });
+  #|    }
+  #|  });
   #|}
 
 ///|
