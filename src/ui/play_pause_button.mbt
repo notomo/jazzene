@@ -12,7 +12,7 @@ pub fn render_play_pause_button(
       return
     }
     match mode.get() {
-      Stopped(position_ms) => {
+      Stopped(position_ms~) => {
         // Calculate total duration
         let total_duration = @audio.calculate_total_duration(
           note_values.get(),
@@ -29,7 +29,7 @@ pub fn render_play_pause_button(
         let audio_start = audio_ctx.current_time()
         mode.set(PlaybackMode::playing(now_ms, start_position, audio_start))
       }
-      Playing(started_at, started_from, _) => {
+      Playing(started_at_ms=started_at, started_from_position=started_from, ..) => {
         // Stop and preserve position
         let now_ms = @date.Date::now()
         let current_pos = started_from + (now_ms - started_at)
@@ -39,8 +39,8 @@ pub fn render_play_pause_button(
   }
   let is_playing = @signal.memo(fn() {
     match mode.get() {
-      Stopped(_) => false
-      Playing(_, _, _) => true
+      Stopped(..) => false
+      Playing(..) => true
     }
   })
   @dom.button(

@@ -31,8 +31,8 @@ pub fn render_seek_bar(
     // Reference frame_count to trigger updates every frame
     let _ = frame_count.get()
     match mode.get() {
-      Stopped(pos) => pos
-      Playing(started_at, started_from, _) => {
+      Stopped(position_ms=pos) => pos
+      Playing(started_at_ms=started_at, started_from_position=started_from, ..) => {
         let now_ms = @date.Date::now()
         started_from + (now_ms - started_at)
       }
@@ -54,10 +54,10 @@ pub fn render_seek_bar(
         100.0 *
         total_duration_ms().to_double()).to_int()
         match mode.get() {
-          Stopped(_) =>
+          Stopped(..) =>
             // Just update position
             mode.set(PlaybackMode::stopped(new_position_ms))
-          Playing(_, _, _) => {
+          Playing(..) => {
             // Restart from new position
             let now_ms = @date.Date::now()
             let audio_start = audio_ctx.current_time()

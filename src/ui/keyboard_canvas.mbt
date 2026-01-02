@@ -41,8 +41,8 @@ pub fn render_keyboard_canvas(
   let playing_notes = @signal.memo(fn() {
     let _ = frame_count.get()
     let pos = match mode.get() {
-      Stopped(p) => p
-      Playing(started_at, started_from, _) => {
+      Stopped(position_ms=p) => p
+      Playing(started_at_ms=started_at, started_from_position=started_from, ..) => {
         let now_ms = @date.Date::now()
         started_from + (now_ms - started_at)
       }

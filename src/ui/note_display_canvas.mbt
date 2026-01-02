@@ -51,8 +51,8 @@ pub fn render_falling_notes_canvas(
   let position_ms = @signal.memo(fn() {
     let _ = frame_count.get()
     match mode.get() {
-      Stopped(pos) => pos
-      Playing(started_at, started_from, _) => {
+      Stopped(position_ms=pos) => pos
+      Playing(started_at_ms=started_at, started_from_position=started_from, ..) => {
         let now_ms = @date.Date::now()
         started_from + (now_ms - started_at)
       }
@@ -112,8 +112,8 @@ pub fn render_falling_notes_canvas(
     }
     // Update mode
     match mode.get() {
-      Stopped(_) => mode.set(PlaybackMode::stopped(clamped_position))
-      Playing(_, _, _) => {
+      Stopped(..) => mode.set(PlaybackMode::stopped(clamped_position))
+      Playing(..) => {
         let now_ms = @date.Date::now()
         let audio_start = audio_ctx.current_time()
         mode.set(PlaybackMode::playing(now_ms, clamped_position, audio_start))

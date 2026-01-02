@@ -36,8 +36,8 @@ fn main {
     // Update frame counter to trigger UI reactivity
     frame_count.update(fn(n) { n + 1 })
     match mode.get() {
-      Stopped(_) => () // No-op when stopped
-      Playing(started_at_ms, started_from_position, _audio_start) => {
+      Stopped(..) => () // No-op when stopped
+      Playing(started_at_ms~, started_from_position~, ..) => {
         let now_ms = @date.Date::now()
         let elapsed_ms = now_ms - started_at_ms
         let current_pos = started_from_position + elapsed_ms
