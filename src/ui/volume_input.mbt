@@ -33,7 +33,7 @@ pub fn render_volume_control(volume : @signal.Signal[Double]) -> @dom.DomNode {
       [
         @dom.input(
           type_="range",
-          class="h-32 w-12 accent-blue-500 cursor-pointer [-webkit-appearance:slider-vertical] [writing-mode:vertical-lr] rotate-180",
+          class="h-32 w-12 accent-blue-500 cursor-pointer [writing-mode:vertical-lr] [direction:rtl]",
           attrs=[
             ("min", @dom.Attr::AttrInt(0)),
             ("max", @dom.Attr::AttrInt(100)),
