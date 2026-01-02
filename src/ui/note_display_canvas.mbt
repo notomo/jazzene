@@ -89,7 +89,7 @@ pub fn render_falling_notes_canvas(
     }
     e.preventDefault()
     let current_pos = position_ms()
-    let seek_amount = 100 // milliseconds per wheel tick
+    let seek_amount = 500 // milliseconds per wheel tick
     let new_position_ms = if e.deltaY > 0.0 {
       // Wheel down: move forward
       current_pos + seek_amount
