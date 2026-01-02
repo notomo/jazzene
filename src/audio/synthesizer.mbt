@@ -1,7 +1,7 @@
 ///|
 /// Schedule a single note to play at a specific time
 pub fn schedule_note(
-  ctx : AudioContext,
+  ctx : @web_audio.AudioContext,
   midi : Int,
   start_time : Double,
   duration_sec : Double,
@@ -42,7 +42,7 @@ pub fn schedule_note(
 /// Schedule notes in a lookahead window for smooth playback
 /// This avoids setTimeout drift by using WebAudio's precise scheduling
 pub fn schedule_notes_in_window(
-  ctx : AudioContext,
+  ctx : @web_audio.AudioContext,
   notes : Array[@music.Note],
   tempo_bpm : Int,
   current_pos_ms : Int,

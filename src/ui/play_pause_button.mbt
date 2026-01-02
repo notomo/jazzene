@@ -3,7 +3,7 @@
 pub fn render_play_pause_button(
   notes : @signal.Signal[Array[@music.Note]],
   mode : @signal.Signal[PlaybackMode],
-  audio_ctx : @audio.AudioContext,
+  audio_ctx : @web_audio.AudioContext,
 ) -> @dom.DomNode {
   // Event handler
   let on_play_pause : @dom.MouseHandler = fn(_) {

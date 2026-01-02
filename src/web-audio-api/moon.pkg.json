@@ -1,0 +1,12 @@
+{
+  "is-main": false,
+  "supported-targets": [
+    "js"
+  ],
+  "import": [
+    {
+      "path": "mizchi/js/core",
+      "alias": "js"
+    }
+  ]
+}

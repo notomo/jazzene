@@ -9,8 +9,8 @@
       "alias": "music"
     },
     {
-      "path": "mizchi/js/core",
-      "alias": "js"
+      "path": "internal/jazzene/web-audio-api",
+      "alias": "web_audio"
     }
   ]
 }

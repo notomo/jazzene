@@ -2,7 +2,7 @@
 /// Jazzene - Jazz Improvisation Web App (Tick-based Architecture)
 fn main {
   // Create audio context
-  let audio_ctx = @audio.AudioContext::new()
+  let audio_ctx = @web_audio.AudioContext::new()
 
   // Individual signals (sources of truth)
   let mode : @signal.Signal[@ui.PlaybackMode] = @signal.signal(

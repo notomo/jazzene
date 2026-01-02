@@ -34,7 +34,7 @@ pub fn render_falling_notes_canvas(
   mode : @signal.Signal[PlaybackMode],
   tempo : @signal.Signal[Int],
   frame_count : @signal.Signal[Int],
-  audio_ctx : @audio.AudioContext,
+  audio_ctx : @web_audio.AudioContext,
 ) -> @dom.DomNode {
   // Create canvas element
   let canvas_elem = @js_dom.document().createElement("canvas")

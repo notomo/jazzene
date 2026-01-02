@@ -118,3 +118,4 @@ Apply utility classes directly in MoonBit:
 - **No Hot Reload for MoonBit**: Changes to `.mbt` files require full rebuild (handled by vite-plugin-moonbit)
 - **Package Format**: ESM only (`"type": "module"` in package.json, `"format": "esm"` in moon.pkg.json)
 - **Main Entry**: `src/moon.pkg.json` has `"is-main": true` - this package exports the main function
+- **Web Audio API**: All Web Audio API access must go through the `src/web-audio-api` package. Never use raw JavaScript FFI for Web Audio APIs outside this package.

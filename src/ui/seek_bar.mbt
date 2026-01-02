@@ -16,7 +16,7 @@ pub fn render_seek_bar(
   notes : @signal.Signal[Array[@music.Note]],
   mode : @signal.Signal[PlaybackMode],
   tempo : @signal.Signal[Int],
-  audio_ctx : @audio.AudioContext,
+  audio_ctx : @web_audio.AudioContext,
   frame_count : @signal.Signal[Int],
 ) -> @dom.DomNode {
   // Computed values
