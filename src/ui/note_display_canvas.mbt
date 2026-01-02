@@ -209,4 +209,22 @@ fn draw_notes(
       bottom_y - top_y,
     )
   }
+
+  // Draw vertical lines for white keys (after notes, so they're visible)
+  for key_area in key_areas {
+    if key_area.is_black {
+      // Skip black keys
+      ()
+    } else {
+      // White key - check if it's an octave line (C)
+      let note_in_octave = key_area.midi % 12
+      let color = if note_in_octave == 0 {
+        "rgba(255, 255, 255, 0.4)" // Octave lines are darker
+      } else {
+        "rgba(255, 255, 255, 0.15)" // Regular white key lines
+      }
+      ctx.fillStyle = color
+      ctx.fillRect(key_area.rect.left, 0.0, 1.0, height)
+    }
+  }
 }
