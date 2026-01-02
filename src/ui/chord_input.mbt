@@ -11,7 +11,7 @@ pub fn render_chord_input(
   }
   @luna_dom.input(
     type_="text",
-    class="w-full px-4 py-3 bg-slate-900 text-white rounded-lg border border-slate-600 focus:border-blue-500 focus:outline-none text-lg font-mono",
+    class="w-full px-4 py-2 bg-slate-900 text-white rounded-lg border border-slate-600 focus:border-blue-500 focus:outline-none text-lg font-mono",
     on=@luna_dom.events().input(on_input),
     dyn_value=fn() { chord_input.get() },
     placeholder="Enter chord progression (e.g., Cm7 F7 Bbmaj7 Ebmaj7)",

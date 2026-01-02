@@ -82,7 +82,7 @@ fn main {
   match doc.getElementById("app") {
     Some(el) => {
       let app = @luna_dom.div(
-        class="h-screen bg-gradient-to-br from-slate-950 to-slate-900 text-white grid grid-rows-[min-content_1fr]",
+        class="h-svh bg-gradient-to-br from-slate-950 to-slate-900 text-white grid grid-rows-[min-content_1fr]",
         [
           @luna_dom.div(
             class="h-wit p-2 bg-slate-800 rounded-xl shadow-2xl border-2 border-slate-700",
@@ -108,7 +108,7 @@ fn main {
             ],
           ),
           @luna_dom.div(
-            class="bg-slate-950 shadow-2xl border-slate-700 h-full flex flex-col",
+            class="bg-slate-950 shadow-2xl border-slate-700 h-full grid grid-rows-[80%_20%]",
             attrs=[("aria-label", @luna_dom.Attr::AttrString("visualization"))],
             [
               @ui.render_falling_notes_canvas(
