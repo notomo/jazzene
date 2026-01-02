@@ -11,4 +11,7 @@ export default defineConfig({
     }),
     tailwindcss({}),
   ],
+  server: {
+    // allowedHosts: [".trycloudflare.com"], // for npm run tunnel
+  },
 });
