@@ -10,7 +10,7 @@ fn main {
   )
   let note_values : @signal.Signal[Array[@music.NoteValue]] = @signal.signal([])
   let chord_input = @signal.signal("Cm7 F7 Bbmaj7 Ebmaj7")
-  let tempo = @signal.signal(120)
+  let tempo = @signal.signal(200)
   let volume = @signal.signal(0.3)
   let frame_count = @signal.signal(0) // Incremented every frame for UI updates
 
