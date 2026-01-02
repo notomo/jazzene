@@ -25,7 +25,7 @@ pub fn render_volume_control(volume : @signal.Signal[Double]) -> @dom.DomNode {
     @dom.div(
       dyn_class=fn() {
         if show_volume_popup.get() {
-          "absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-slate-800 p-3 rounded-lg shadow-xl border border-slate-600"
+          "absolute z-10 top-full left-1/2 -translate-x-1/2 mt-2 bg-slate-800 p-3 rounded-lg shadow-xl border border-slate-600"
         } else {
           "hidden"
         }
@@ -33,7 +33,7 @@ pub fn render_volume_control(volume : @signal.Signal[Double]) -> @dom.DomNode {
       [
         @dom.input(
           type_="range",
-          class="h-32 w-12 accent-blue-500 cursor-pointer",
+          class="h-32 w-12 accent-blue-500 cursor-pointer [-webkit-appearance:slider-vertical] [writing-mode:vertical-lr] rotate-180",
           attrs=[
             ("min", @dom.Attr::AttrInt(0)),
             ("max", @dom.Attr::AttrInt(100)),
