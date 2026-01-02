@@ -12,24 +12,31 @@ pub fn ImprovisationSettings::default() -> ImprovisationSettings {
 
 ///|
 /// Generate improvisation from a chord progression
-/// Returns notes with varying durations (eighth, quarter, half)
+/// Returns note values (notes and rests) with varying durations
 pub fn generate_improvisation(
   chords : Array[Chord],
   settings : ImprovisationSettings,
-) -> Array[Note] {
-  let notes : Array[Note] = []
+) -> Array[NoteValue] {
+  let note_values : Array[NoteValue] = []
+
+  // Add ~1 measure of rest at the beginning (4 quarter notes = 1 measure in 4/4 time)
+  note_values.push(NoteValue::Rest(duration=Half))
+  note_values.push(NoteValue::Rest(duration=Half))
   for chord in chords {
     for _i = 0; _i < settings.notes_per_measure; _i = _i + 1 {
       let midi_number = random_midi_from_chord(chord)
       let duration = random_duration()
       // Create note with validation
       match Note::new(midi_number, duration) {
-        Some(note) => notes.push(note)
+        Some(note) =>
+          note_values.push(
+            NoteValue::Note(midi=note.midi, duration=note.duration),
+          )
         None => () // Skip invalid notes
       }
     }
   }
-  notes
+  note_values
 }
 
 ///|

@@ -21,7 +21,7 @@ extern "js" fn set_canvas_style_width(
 ///|
 /// Render piano keyboard component using Canvas API
 pub fn render_keyboard_canvas(
-  notes : @signal.Signal[Array[@music.Note]],
+  note_values : @signal.Signal[Array[@music.NoteValue]],
   mode : @signal.Signal[PlaybackMode],
   tempo : @signal.Signal[Int],
   frame_count : @signal.Signal[Int],
@@ -47,18 +47,22 @@ pub fn render_keyboard_canvas(
         started_from + (now_ms - started_at)
       }
     }
-    let note_list = notes.get()
+    let note_value_list = note_values.get()
     let tempo_val = tempo.get()
     let mut current_pos = 0
     let active_midi_notes : Array[Int] = []
-    for note in note_list {
-      let duration_ms = note.duration.to_ms(tempo_val)
+    for note_value in note_value_list {
+      let duration_ms = note_value.duration().to_ms(tempo_val)
       let start_ms = current_pos
       let end_ms = current_pos + duration_ms
 
-      // Check if note is currently playing
-      if pos >= start_ms && pos < end_ms {
-        active_midi_notes.push(note.midi.value)
+      // Check if note is currently playing (rests never highlight keys)
+      match note_value {
+        Note(midi=midi_val, ..) =>
+          if pos >= start_ms && pos < end_ms {
+            active_midi_notes.push(midi_val.value)
+          }
+        Rest(..) => () // Rests don't highlight any keys
       }
       current_pos = current_pos + duration_ms
     }

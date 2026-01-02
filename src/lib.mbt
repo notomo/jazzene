@@ -8,7 +8,7 @@ fn main {
   let mode : @signal.Signal[@ui.PlaybackMode] = @signal.signal(
     @ui.PlaybackMode::stopped(0),
   )
-  let notes : @signal.Signal[Array[@music.Note]] = @signal.signal([])
+  let note_values : @signal.Signal[Array[@music.NoteValue]] = @signal.signal([])
   let chord_input = @signal.signal("Cm7 F7 Bbmaj7 Ebmaj7")
   let tempo = @signal.signal(120)
   let volume = @signal.signal(0.3)
@@ -18,15 +18,15 @@ fn main {
   let _ = @signal.effect(fn() {
     let input = chord_input.get()
     if input.length() == 0 {
-      notes.set([])
+      note_values.set([])
     } else {
       let chords = @music.parse_chord_progression(input)
       if chords.length() > 0 {
         let settings = @music.ImprovisationSettings::default()
-        let generated_notes = @music.generate_improvisation(chords, settings)
-        notes.set(generated_notes)
+        let generated = @music.generate_improvisation(chords, settings)
+        note_values.set(generated)
       } else {
-        notes.set([])
+        note_values.set([])
       }
     }
   })
@@ -45,15 +45,15 @@ fn main {
         // Schedule audio in lookahead window
         @audio.schedule_notes_in_window(
           audio_ctx,
-          notes.get(),
+          note_values.get(),
           tempo.get(),
           current_pos,
           100,
         )
 
         // Check for end of playback
-        let total_duration = if notes.get().length() > 0 {
-          @audio.calculate_total_duration(notes.get(), tempo.get())
+        let total_duration = if note_values.get().length() > 0 {
+          @audio.calculate_total_duration(note_values.get(), tempo.get())
         } else {
           0
         }
@@ -90,12 +90,14 @@ fn main {
               @dom.div([
                 @ui.render_chord_input(chord_input),
                 @dom.div(class="flex gap-4 items-center", [
-                  @ui.render_play_pause_button(notes, mode, audio_ctx, tempo),
+                  @ui.render_play_pause_button(
+                    note_values, mode, audio_ctx, tempo,
+                  ),
                   @ui.render_volume_control(volume),
                   @ui.render_bpm_input(tempo),
                   @dom.div(class="flex-1", [
                     @ui.render_seek_bar(
-                      notes, mode, tempo, audio_ctx, frame_count,
+                      note_values, mode, tempo, audio_ctx, frame_count,
                     ),
                   ]),
                 ]),
@@ -107,9 +109,9 @@ fn main {
             attrs=[("aria-label", @dom.Attr::AttrString("visualization"))],
             [
               @ui.render_falling_notes_canvas(
-                notes, mode, tempo, frame_count, audio_ctx,
+                note_values, mode, tempo, frame_count, audio_ctx,
               ),
-              @ui.render_keyboard_canvas(notes, mode, tempo, frame_count),
+              @ui.render_keyboard_canvas(note_values, mode, tempo, frame_count),
             ],
           ),
         ],

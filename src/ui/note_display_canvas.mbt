@@ -30,7 +30,7 @@ extern "js" fn add_wheel_listener_notes(
 ///|
 /// Render falling notes display component using Canvas API
 pub fn render_falling_notes_canvas(
-  notes : @signal.Signal[Array[@music.Note]],
+  note_values : @signal.Signal[Array[@music.NoteValue]],
   mode : @signal.Signal[PlaybackMode],
   tempo : @signal.Signal[Int],
   frame_count : @signal.Signal[Int],
@@ -61,13 +61,18 @@ pub fn render_falling_notes_canvas(
 
   // Pre-calculate note positions (immutable list with start times)
   let note_positions = @signal.memo(fn() {
-    let note_list = notes.get()
+    let note_value_list = note_values.get()
     let tempo_val = tempo.get()
     let mut current_pos = 0
     let positions : Array[(Int, Int, Int)] = [] // (midi, start_ms, duration_ms)
-    for note in note_list {
-      let duration_ms = note.duration.to_ms(tempo_val)
-      positions.push((note.midi.value, current_pos, duration_ms))
+    for note_value in note_value_list {
+      let duration_ms = note_value.duration().to_ms(tempo_val)
+      // Only track positions for actual notes (rests are invisible gaps)
+      match note_value {
+        Note(midi=midi_val, ..) =>
+          positions.push((midi_val.value, current_pos, duration_ms))
+        Rest(..) => () // Rests don't render but advance timing
+      }
       current_pos = current_pos + duration_ms
     }
     positions
@@ -75,8 +80,8 @@ pub fn render_falling_notes_canvas(
 
   // Calculate total duration
   let total_duration_ms = @signal.memo(fn() {
-    if notes.get().length() > 0 {
-      @audio.calculate_total_duration(notes.get(), tempo.get())
+    if note_values.get().length() > 0 {
+      @audio.calculate_total_duration(note_values.get(), tempo.get())
     } else {
       0
     }
@@ -84,7 +89,7 @@ pub fn render_falling_notes_canvas(
 
   // Add wheel event listener for seeking
   let on_wheel : (@js_dom.WheelEvent) -> Unit = fn(e) {
-    if notes.get().length() == 0 {
+    if note_values.get().length() == 0 {
       return
     }
     e.preventDefault()

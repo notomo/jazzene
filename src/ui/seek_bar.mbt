@@ -13,7 +13,7 @@ fn format_time(ms : Int) -> String {
 ///|
 /// Render seek_bar UI component
 pub fn render_seek_bar(
-  notes : @signal.Signal[Array[@music.Note]],
+  note_values : @signal.Signal[Array[@music.NoteValue]],
   mode : @signal.Signal[PlaybackMode],
   tempo : @signal.Signal[Int],
   audio_ctx : @web_audio.AudioContext,
@@ -21,8 +21,8 @@ pub fn render_seek_bar(
 ) -> @dom.DomNode {
   // Computed values
   let total_duration_ms = @signal.memo(fn() {
-    if notes.get().length() > 0 {
-      @audio.calculate_total_duration(notes.get(), tempo.get())
+    if note_values.get().length() > 0 {
+      @audio.calculate_total_duration(note_values.get(), tempo.get())
     } else {
       0
     }
@@ -38,11 +38,11 @@ pub fn render_seek_bar(
       }
     }
   })
-  let has_notes = @signal.memo(fn() { notes.get().length() > 0 })
+  let has_notes = @signal.memo(fn() { note_values.get().length() > 0 })
 
   // Event handler
   let on_seek : @dom.InputHandler = fn(e) {
-    if notes.get().length() == 0 {
+    if note_values.get().length() == 0 {
       return
     }
     let target = e.target()

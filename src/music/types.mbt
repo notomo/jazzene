@@ -168,3 +168,28 @@ pub fn Note::name(self : Note) -> String {
   let note_index = self.midi.value % 12
   note_names[note_index] + octave.to_string()
 }
+
+///|
+/// Musical event - either a note or a rest
+pub enum NoteValue {
+  Note(midi~ : MidiNumber, duration~ : NoteDuration)
+  Rest(duration~ : NoteDuration)
+} derive(Eq, Show)
+
+///|
+/// Get duration from either Note or Rest
+pub fn NoteValue::duration(self : NoteValue) -> NoteDuration {
+  match self {
+    Note(duration=d, ..) => d
+    Rest(duration=d) => d
+  }
+}
+
+///|
+/// Get MIDI value if this is a Note
+pub fn NoteValue::midi(self : NoteValue) -> MidiNumber? {
+  match self {
+    Note(midi=m, ..) => Some(m)
+    Rest(..) => None
+  }
+}

@@ -2,14 +2,14 @@
 test "generate improvisation from single chord" {
   let chords = [Chord::{ root: C, quality: Major7 }]
   let settings = ImprovisationSettings::default()
-  let notes = generate_improvisation(chords, settings)
+  let note_values = generate_improvisation(chords, settings)
 
-  // Should generate 4 notes (default notes_per_measure)
-  inspect(notes.length(), content="4")
+  // Should generate 4 notes + 2 initial rests = 6 total
+  inspect(note_values.length(), content="6")
 
-  // All notes should have valid durations
-  for note in notes {
-    match note.duration {
+  // All note values should have valid durations
+  for note_value in note_values {
+    match note_value.duration() {
       Eighth | Quarter | Half => ()
       // Compiler ensures exhaustiveness
     }
@@ -24,32 +24,33 @@ test "generate improvisation from chord progression" {
     Chord::{ root: B, quality: Major7 },
   ]
   let settings = ImprovisationSettings::default()
-  let notes = generate_improvisation(chords, settings)
+  let note_values = generate_improvisation(chords, settings)
 
-  // 3 chords * 4 notes = 12 notes
-  inspect(notes.length(), content="12")
+  // 3 chords * 4 notes + 2 initial rests = 14 total
+  inspect(note_values.length(), content="14")
 }
 
 ///|
 test "improvisation with custom settings" {
   let chords = [Chord::{ root: G, quality: Dominant7 }]
   let settings = ImprovisationSettings::{ notes_per_measure: 8 }
-  let notes = generate_improvisation(chords, settings)
-  inspect(notes.length(), content="8")
+  let note_values = generate_improvisation(chords, settings)
+  // 8 notes + 2 initial rests = 10 total
+  inspect(note_values.length(), content="10")
 }
 
 ///|
 test "notes have varying durations" {
   let chords = [Chord::{ root: C, quality: Major7 }]
   let settings = ImprovisationSettings::{ notes_per_measure: 100 }
-  let notes = generate_improvisation(chords, settings)
+  let note_values = generate_improvisation(chords, settings)
 
-  // Count duration types
+  // Count duration types (including 2 initial Half rests)
   let mut eighth_count = 0
   let mut quarter_count = 0
   let mut half_count = 0
-  for note in notes {
-    match note.duration {
+  for note_value in note_values {
+    match note_value.duration() {
       Eighth => eighth_count = eighth_count + 1
       Quarter => quarter_count = quarter_count + 1
       Half => half_count = half_count + 1

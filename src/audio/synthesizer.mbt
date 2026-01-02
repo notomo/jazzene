@@ -43,7 +43,7 @@ pub fn schedule_note(
 /// This avoids setTimeout drift by using WebAudio's precise scheduling
 pub fn schedule_notes_in_window(
   ctx : @web_audio.AudioContext,
-  notes : Array[@music.Note],
+  note_values : Array[@music.NoteValue],
   tempo_bpm : Int,
   current_pos_ms : Int,
   lookahead_ms : Int,
@@ -52,21 +52,31 @@ pub fn schedule_notes_in_window(
 
   // Calculate position in the note sequence
   let mut position_ms = 0
-  for note in notes {
-    let note_duration_ms = note.duration.to_ms(tempo_bpm)
-    let note_end_ms = position_ms + note_duration_ms
+  for note_value in note_values {
+    let duration_ms = note_value.duration().to_ms(tempo_bpm)
+    let end_ms = position_ms + duration_ms
 
-    // Schedule if note starts within the lookahead window
-    if position_ms >= current_pos_ms && position_ms < window_end_ms {
-      // Convert to audio context time
-      let audio_start_time = ctx.current_time() +
-        (position_ms - current_pos_ms).to_double() / 1000.0
-      let duration_sec = note_duration_ms.to_double() / 1000.0
+    // Schedule audio only for actual notes (skip rests)
+    match note_value {
+      Note(midi=midi_val, ..) =>
+        if position_ms >= current_pos_ms && position_ms < window_end_ms {
+          // Convert to audio context time
+          let audio_start_time = ctx.current_time() +
+            (position_ms - current_pos_ms).to_double() / 1000.0
+          let duration_sec = duration_ms.to_double() / 1000.0
 
-      // Schedule the note
-      schedule_note(ctx, note.midi.value, audio_start_time, duration_sec, 0.7)
+          // Schedule the note
+          schedule_note(
+            ctx,
+            midi_val.value,
+            audio_start_time,
+            duration_sec,
+            0.7,
+          )
+        }
+      Rest(..) => () // Rests advance time but produce no sound
     }
-    position_ms = note_end_ms
+    position_ms = end_ms
 
     // Stop if we've passed the window
     if position_ms >= window_end_ms {
@@ -78,12 +88,12 @@ pub fn schedule_notes_in_window(
 ///|
 /// Calculate total duration of a note sequence in milliseconds
 pub fn calculate_total_duration(
-  notes : Array[@music.Note],
+  note_values : Array[@music.NoteValue],
   tempo_bpm : Int,
 ) -> Int {
   let mut total_ms = 0
-  for note in notes {
-    total_ms = total_ms + note.duration.to_ms(tempo_bpm)
+  for note_value in note_values {
+    total_ms = total_ms + note_value.duration().to_ms(tempo_bpm)
   }
   total_ms
 }

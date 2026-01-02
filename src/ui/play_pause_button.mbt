@@ -1,21 +1,21 @@
 ///|
 /// Render play/pause button
 pub fn render_play_pause_button(
-  notes : @signal.Signal[Array[@music.Note]],
+  note_values : @signal.Signal[Array[@music.NoteValue]],
   mode : @signal.Signal[PlaybackMode],
   audio_ctx : @web_audio.AudioContext,
   tempo : @signal.Signal[Int],
 ) -> @dom.DomNode {
   // Event handler
   let on_play_pause : @dom.MouseHandler = fn(_) {
-    if notes.get().length() == 0 {
+    if note_values.get().length() == 0 {
       return
     }
     match mode.get() {
       Stopped(position_ms) => {
         // Calculate total duration
         let total_duration = @audio.calculate_total_duration(
-          notes.get(),
+          note_values.get(),
           tempo.get(),
         )
         // If at the end, restart from beginning
