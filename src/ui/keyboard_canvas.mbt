@@ -13,33 +13,15 @@ pub fn render_keyboard_canvas(
 
   // Calculate currently playing notes
   let playing_notes = @signal.memo(fn() {
-    let pos = playback_position_ms.get()
-    let note_value_list = note_values.get()
-    let tempo_val = tempo.get()
-    let mut current_pos = 0
-    let active_midi_notes : Array[Int] = []
-    for note_value in note_value_list {
-      let duration_ms = note_value.duration().to_ms(tempo_val)
-      let start_ms = current_pos
-      let end_ms = current_pos + duration_ms
-
-      // Check if note is currently playing (rests never highlight keys)
-      match note_value {
-        Note(midi=midi_val, ..) =>
-          if pos >= start_ms && pos < end_ms {
-            active_midi_notes.push(midi_val.value)
-          }
-        Rest(..) => () // Rests don't highlight any keys
-      }
-      current_pos = current_pos + duration_ms
-    }
-    active_midi_notes
+    @music.calculate_active_midi_notes(
+      note_values.get(),
+      playback_position_ms.get(),
+      tempo.get(),
+    )
   })
 
   // Redraw when playing notes change
   let _ = @signal.effect(fn() {
-    let active_notes = playing_notes()
-
     // Update canvas width to match displayed width
     let client_width = canvas.clientWidth()
     if client_width > 0 {
@@ -49,7 +31,7 @@ pub fn render_keyboard_canvas(
       ctx,
       canvas.width.to_double(),
       canvas.height.to_double(),
-      active_notes,
+      playing_notes(),
     )
   })
 
