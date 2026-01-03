@@ -3,7 +3,6 @@
 pub fn render_play_pause_button(
   note_values : @signal.Signal[Array[@music.NoteValue]],
   mode : @signal.Signal[PlaybackMode],
-  audio_ctx : @web_audio.AudioContext,
   tempo : @signal.Signal[Int],
 ) -> @luna_dom.DomNode {
   // Event handler
@@ -26,10 +25,9 @@ pub fn render_play_pause_button(
         }
         // Start playing
         let now_ms = @date.Date::now()
-        let audio_start = audio_ctx.current_time()
-        mode.set(PlaybackMode::playing(now_ms, start_position, audio_start))
+        mode.set(PlaybackMode::playing(now_ms, start_position))
       }
-      Playing(started_at_ms=started_at, started_from_position=started_from, ..) => {
+      Playing(started_at_ms=started_at, started_from_position=started_from) => {
         // Stop and preserve position
         let now_ms = @date.Date::now()
         let current_pos = started_from + (now_ms - started_at)

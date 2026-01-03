@@ -14,10 +14,6 @@
       "alias": "music"
     },
     {
-      "path": "internal/jazzene/web-audio-api",
-      "alias": "web_audio"
-    },
-    {
       "path": "internal/jazzene/audio",
       "alias": "audio"
     },

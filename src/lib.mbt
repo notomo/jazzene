@@ -37,7 +37,7 @@ fn main {
     frame_count.update(fn(n) { n + 1 })
     match mode.get() {
       Stopped(..) => () // No-op when stopped
-      Playing(started_at_ms~, started_from_position~, ..) => {
+      Playing(started_at_ms~, started_from_position~) => {
         let now_ms = @date.Date::now()
         let elapsed_ms = now_ms - started_at_ms
         let current_pos = started_from_position + elapsed_ms
@@ -94,14 +94,10 @@ fn main {
                   @ui.render_bpm_input(tempo),
                 ]),
                 @luna_dom.div(class="flex gap-4 items-baseline p-1", [
-                  @ui.render_play_pause_button(
-                    note_values, mode, audio_ctx, tempo,
-                  ),
+                  @ui.render_play_pause_button(note_values, mode, tempo),
                   @ui.render_volume_control(volume),
                   @luna_dom.div(class="w-full", [
-                    @ui.render_seek_bar(
-                      note_values, mode, tempo, audio_ctx, frame_count,
-                    ),
+                    @ui.render_seek_bar(note_values, mode, tempo, frame_count),
                   ]),
                 ]),
               ]),
@@ -112,7 +108,7 @@ fn main {
             attrs=[("aria-label", @luna_dom.Attr::AttrString("visualization"))],
             [
               @ui.render_falling_notes_canvas(
-                note_values, mode, tempo, frame_count, audio_ctx,
+                note_values, mode, tempo, frame_count,
               ),
               @ui.render_keyboard_canvas(note_values, mode, tempo, frame_count),
             ],

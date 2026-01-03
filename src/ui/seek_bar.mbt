@@ -16,7 +16,6 @@ pub fn render_seek_bar(
   note_values : @signal.Signal[Array[@music.NoteValue]],
   mode : @signal.Signal[PlaybackMode],
   tempo : @signal.Signal[Int],
-  audio_ctx : @web_audio.AudioContext,
   frame_count : @signal.Signal[Int],
 ) -> @luna_dom.DomNode {
   // Computed values
@@ -32,7 +31,7 @@ pub fn render_seek_bar(
     let _ = frame_count.get()
     match mode.get() {
       Stopped(position_ms=pos) => pos
-      Playing(started_at_ms=started_at, started_from_position=started_from, ..) => {
+      Playing(started_at_ms=started_at, started_from_position=started_from) => {
         let now_ms = @date.Date::now()
         started_from + (now_ms - started_at)
       }
@@ -60,10 +59,7 @@ pub fn render_seek_bar(
           Playing(..) => {
             // Restart from new position
             let now_ms = @date.Date::now()
-            let audio_start = audio_ctx.current_time()
-            mode.set(
-              PlaybackMode::playing(now_ms, new_position_ms, audio_start),
-            )
+            mode.set(PlaybackMode::playing(now_ms, new_position_ms))
           }
         }
       }

@@ -17,7 +17,7 @@ pub fn render_keyboard_canvas(
     let _ = frame_count.get()
     let pos = match mode.get() {
       Stopped(position_ms=p) => p
-      Playing(started_at_ms=started_at, started_from_position=started_from, ..) => {
+      Playing(started_at_ms=started_at, started_from_position=started_from) => {
         let now_ms = @date.Date::now()
         started_from + (now_ms - started_at)
       }
