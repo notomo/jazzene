@@ -15,7 +15,6 @@ pub fn render_play_pause_button(
     if is_playing.get() {
       is_playing.set(false)
     } else {
-      // Calculate total duration
       let total_duration = @music.calculate_total_duration(
         note_values.get(),
         tempo.get(),

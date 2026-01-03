@@ -1,6 +1,6 @@
 ///|
 /// Schedule a single note to play at a specific time
-pub fn schedule_note(
+fn schedule_note(
   ctx : @web_audio.AudioContext,
   midi : Int,
   start_time : Double,
@@ -49,39 +49,20 @@ pub fn schedule_notes_in_window(
   lookahead_ms : Int,
   volume : Double,
 ) -> Unit {
-  let window_end_ms = current_pos_ms + lookahead_ms
-
-  // Calculate position in the note sequence
-  let mut position_ms = 0
-  for note_value in note_values {
-    let duration_ms = note_value.duration().to_ms(tempo_bpm)
-    let end_ms = position_ms + duration_ms
-
-    // Schedule audio only for actual notes (skip rests)
-    match note_value {
-      Note(midi=midi_val, ..) =>
-        if position_ms >= current_pos_ms && position_ms < window_end_ms {
-          // Convert to audio context time
-          let audio_start_time = ctx.current_time() +
-            (position_ms - current_pos_ms).to_double() / 1000.0
-          let duration_sec = duration_ms.to_double() / 1000.0
-
-          // Schedule the note
-          schedule_note(
-            ctx,
-            midi_val.value,
-            audio_start_time,
-            duration_sec,
-            volume,
-          )
-        }
-      Rest(..) => () // Rests advance time but produce no sound
-    }
-    position_ms = end_ms
-
-    // Stop if we've passed the window
-    if position_ms >= window_end_ms {
-      break
-    }
+  let sounds = @music.extract_sounds_in_window(
+    note_values,
+    tempo_bpm,
+    current_pos_ms,
+    lookahead_ms,
+    ctx.current_time(),
+  )
+  for sound in sounds {
+    schedule_note(
+      ctx,
+      sound.midi,
+      sound.audio_start_time,
+      sound.duration_sec,
+      volume,
+    )
   }
 }
