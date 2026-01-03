@@ -11,6 +11,12 @@ fn main {
   let chord_input = @signal.signal("Cm7 F7 Bbmaj7 Ebmaj7")
   let tempo = @signal.signal(200)
   let volume = @signal.signal(0.3)
+  let _ = @signal.effect(fn() {
+    let x = chord_input.get()
+      |> @music.parse_chord_progression
+      |> @music.generate_improvisation(@music.ImprovisationSettings::default())
+    note_values.set(x)
+  })
 
   // Track playback session (only used when playing)
   let playback_started_at_raf_time = @signal.signal(0.0)
@@ -24,23 +30,6 @@ fn main {
     playback_position_ms.set(position_ms)
     is_playing.set(true)
   }
-
-  // Reactive note generation when chord input changes
-  let _ = @signal.effect(fn() {
-    let input = chord_input.get()
-    if input.length() == 0 {
-      note_values.set([])
-    } else {
-      let chords = @music.parse_chord_progression(input)
-      if chords.length() > 0 {
-        let settings = @music.ImprovisationSettings::default()
-        let generated = @music.generate_improvisation(chords, settings)
-        note_values.set(generated)
-      } else {
-        note_values.set([])
-      }
-    }
-  })
 
   // Tick-based main loop
   fn tick(raf_time : Double) -> Unit {

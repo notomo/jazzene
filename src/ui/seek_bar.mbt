@@ -19,11 +19,9 @@ pub fn render_seek_bar(
   tempo : @signal.Signal[Int],
   start_playing : (Int) -> Unit,
 ) -> @luna_dom.DomNode {
-  // Computed values
   let total_duration_ms = @signal.memo(fn() {
     @music.calculate_total_duration(note_values.get(), tempo.get())
   })
-  let has_notes = @signal.memo(fn() { note_values.get().length() > 0 })
 
   // Event handler
   let on_seek : @luna_dom.InputHandler = fn(e) {
@@ -84,7 +82,7 @@ pub fn render_seek_bar(
           percent.to_int().to_string()
         }
       },
-      dyn_disabled=fn() { not(has_notes()) },
+      dyn_disabled=fn() { not(note_values.get().length() > 0) },
       on=@luna_dom.events().input(on_seek),
     ),
   ])
