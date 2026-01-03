@@ -14,13 +14,14 @@ fn main {
   let volume = @signal.signal(0.3)
 
   // Track playback session (only used when Playing)
-  let playback_started_at_ms = @signal.signal(0)
+  let playback_started_at_raf_time = @signal.signal(0.0)
   let playback_started_from_position = @signal.signal(0)
+  let pending_start_position : Ref[Int?] = { val: None }
 
   // Helper function to start playback
   fn start_playing(position_ms : Int) -> Unit {
-    playback_started_at_ms.set(@date.Date::now())
-    playback_started_from_position.set(position_ms)
+    // Set flag to start on next RAF tick (to capture RAF time)
+    pending_start_position.val = Some(position_ms)
     mode.set(@ui.PlaybackMode::playing(position_ms))
   }
 
@@ -52,13 +53,21 @@ fn main {
   })
 
   // Tick-based main loop
-  fn tick() -> Unit {
+  fn tick(raf_time : Double) -> Unit {
+    // Handle pending playback start
+    match pending_start_position.val {
+      Some(pos) => {
+        playback_started_at_raf_time.set(raf_time)
+        playback_started_from_position.set(pos)
+        pending_start_position.val = None
+      }
+      None => ()
+    }
     match mode.get() {
       Stopped(..) => () // No-op when stopped
       Playing(..) => {
-        // Calculate current position from playback session
-        let now_ms = @date.Date::now()
-        let elapsed_ms = now_ms - playback_started_at_ms.get()
+        // Calculate current position from RAF time
+        let elapsed_ms = (raf_time - playback_started_at_raf_time.get()).to_int()
         let current_pos = playback_started_from_position.get() + elapsed_ms
 
         // Update mode with current position
@@ -89,8 +98,8 @@ fn main {
 
   // Start requestAnimationFrame loop
   fn start_tick_loop() -> Unit {
-    fn loop_fn(_time : Double) -> Unit {
-      tick()
+    fn loop_fn(time : Double) -> Unit {
+      tick(time)
       @js_dom.window().requestAnimationFrame(loop_fn) |> ignore
     }
 

@@ -28,10 +28,6 @@
     {
       "path": "internal/jazzene/ui",
       "alias": "ui"
-    },
-    {
-      "path": "mizchi/js/builtins/date",
-      "alias": "date"
     }
   ],
   "link": {
