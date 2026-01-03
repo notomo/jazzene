@@ -25,11 +25,6 @@ fn main {
     is_playing.set(true)
   }
 
-  // Helper function to stop playback
-  fn stop_playing() -> Unit {
-    is_playing.set(false)
-  }
-
   // Reactive note generation when chord input changes
   let _ = @signal.effect(fn() {
     let input = chord_input.get()
@@ -89,17 +84,7 @@ fn main {
     }
   }
 
-  // Start requestAnimationFrame loop
-  fn start_tick_loop() -> Unit {
-    fn loop_fn(time : Double) -> Unit {
-      tick(time)
-      @js_dom.window().requestAnimationFrame(loop_fn) |> ignore
-    }
-
-    @js_dom.window().requestAnimationFrame(loop_fn) |> ignore
-  }
-
-  start_tick_loop()
+  start_loop(tick)
 
   // Render app
   let doc = @js_dom.document()
@@ -120,7 +105,6 @@ fn main {
                 @luna_dom.div(class="flex gap-4 items-baseline p-1", [
                   @ui.render_play_pause_button(
                     note_values, is_playing, playback_position_ms, tempo, start_playing,
-                    stop_playing,
                   ),
                   @ui.render_volume_control(volume),
                   @luna_dom.div(class="w-full", [
@@ -150,4 +134,14 @@ fn main {
     }
     None => ()
   }
+}
+
+///|
+fn start_loop(tick : (Double) -> Unit) -> Unit {
+  fn loop_fn(time : Double) -> Unit {
+    tick(time)
+    @js_dom.window().requestAnimationFrame(loop_fn) |> ignore
+  }
+
+  @js_dom.window().requestAnimationFrame(loop_fn) |> ignore
 }

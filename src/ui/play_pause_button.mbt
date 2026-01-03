@@ -6,7 +6,6 @@ pub fn render_play_pause_button(
   playback_position_ms : @signal.Signal[Int],
   tempo : @signal.Signal[Int],
   start_playing : (Int) -> Unit,
-  stop_playing : () -> Unit,
 ) -> @luna_dom.DomNode {
   // Event handler
   let on_play_pause : @luna_dom.MouseHandler = fn(_) {
@@ -14,7 +13,7 @@ pub fn render_play_pause_button(
       return
     }
     if is_playing.get() {
-      stop_playing()
+      is_playing.set(false)
     } else {
       // Calculate total duration
       let total_duration = @audio.calculate_total_duration(
