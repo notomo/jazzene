@@ -1,9 +1,9 @@
 ///|
 /// Playback mode tracks whether we're stopped or playing
-/// This enum makes impossible states impossible - you can't be "playing at no position"
+/// Both variants hold the current playback position in milliseconds
 pub enum PlaybackMode {
   Stopped(position_ms~ : Int)
-  Playing(started_at_ms~ : Int, started_from_position~ : Int)
+  Playing(position_ms~ : Int)
 } derive(Eq, Show)
 
 ///|
@@ -14,9 +14,6 @@ pub fn PlaybackMode::stopped(position_ms : Int) -> PlaybackMode {
 
 ///|
 /// Create a Playing mode
-pub fn PlaybackMode::playing(
-  started_at_ms : Int,
-  started_from_position : Int,
-) -> PlaybackMode {
-  PlaybackMode::Playing(started_at_ms~, started_from_position~)
+pub fn PlaybackMode::playing(position_ms : Int) -> PlaybackMode {
+  PlaybackMode::Playing(position_ms~)
 }

@@ -4,6 +4,8 @@ pub fn render_play_pause_button(
   note_values : @signal.Signal[Array[@music.NoteValue]],
   mode : @signal.Signal[PlaybackMode],
   tempo : @signal.Signal[Int],
+  start_playing : (Int) -> Unit,
+  stop_playing : () -> Unit,
 ) -> @luna_dom.DomNode {
   // Event handler
   let on_play_pause : @luna_dom.MouseHandler = fn(_) {
@@ -24,15 +26,11 @@ pub fn render_play_pause_button(
           position_ms
         }
         // Start playing
-        let now_ms = @date.Date::now()
-        mode.set(PlaybackMode::playing(now_ms, start_position))
+        start_playing(start_position)
       }
-      Playing(started_at_ms=started_at, started_from_position=started_from) => {
-        // Stop and preserve position
-        let now_ms = @date.Date::now()
-        let current_pos = started_from + (now_ms - started_at)
-        mode.set(PlaybackMode::stopped(current_pos))
-      }
+      Playing(..) =>
+        // Stop and preserve current position
+        stop_playing()
     }
   }
   let is_playing = @signal.memo(fn() {

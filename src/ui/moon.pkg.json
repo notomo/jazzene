@@ -18,10 +18,6 @@
       "alias": "audio"
     },
     {
-      "path": "mizchi/js/builtins/date",
-      "alias": "date"
-    },
-    {
       "path": "mizchi/js/browser/canvas",
       "alias": "canvas"
     },

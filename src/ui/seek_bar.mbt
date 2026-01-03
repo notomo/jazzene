@@ -16,7 +16,7 @@ pub fn render_seek_bar(
   note_values : @signal.Signal[Array[@music.NoteValue]],
   mode : @signal.Signal[PlaybackMode],
   tempo : @signal.Signal[Int],
-  frame_count : @signal.Signal[Int],
+  start_playing : (Int) -> Unit,
 ) -> @luna_dom.DomNode {
   // Computed values
   let total_duration_ms = @signal.memo(fn() {
@@ -27,14 +27,9 @@ pub fn render_seek_bar(
     }
   })
   let position_ms = @signal.memo(fn() {
-    // Reference frame_count to trigger updates every frame
-    let _ = frame_count.get()
     match mode.get() {
       Stopped(position_ms=pos) => pos
-      Playing(started_at_ms=started_at, started_from_position=started_from) => {
-        let now_ms = @date.Date::now()
-        started_from + (now_ms - started_at)
-      }
+      Playing(position_ms=pos) => pos
     }
   })
   let has_notes = @signal.memo(fn() { note_values.get().length() > 0 })
@@ -56,11 +51,9 @@ pub fn render_seek_bar(
           Stopped(..) =>
             // Just update position
             mode.set(PlaybackMode::stopped(new_position_ms))
-          Playing(..) => {
+          Playing(..) =>
             // Restart from new position
-            let now_ms = @date.Date::now()
-            mode.set(PlaybackMode::playing(now_ms, new_position_ms))
-          }
+            start_playing(new_position_ms)
         }
       }
       None => ()

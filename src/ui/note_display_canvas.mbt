@@ -53,7 +53,7 @@ pub fn render_falling_notes_canvas(
   note_values : @signal.Signal[Array[@music.NoteValue]],
   mode : @signal.Signal[PlaybackMode],
   tempo : @signal.Signal[Int],
-  frame_count : @signal.Signal[Int],
+  start_playing : (Int) -> Unit,
 ) -> @luna_dom.DomNode {
   let canvas_elem = @js_dom.document().createElement("canvas")
   let canvas = cast_to_canvas(canvas_elem)
@@ -63,13 +63,9 @@ pub fn render_falling_notes_canvas(
 
   // Calculate current playback position
   let position_ms = @signal.memo(fn() {
-    let _ = frame_count.get()
     match mode.get() {
       Stopped(position_ms=pos) => pos
-      Playing(started_at_ms=started_at, started_from_position=started_from) => {
-        let now_ms = @date.Date::now()
-        started_from + (now_ms - started_at)
-      }
+      Playing(position_ms=pos) => pos
     }
   })
 
@@ -127,10 +123,7 @@ pub fn render_falling_notes_canvas(
     // Update mode
     match mode.get() {
       Stopped(..) => mode.set(PlaybackMode::stopped(clamped_position))
-      Playing(..) => {
-        let now_ms = @date.Date::now()
-        mode.set(PlaybackMode::playing(now_ms, clamped_position))
-      }
+      Playing(..) => start_playing(clamped_position)
     }
   }
   add_wheel_listener_notes(canvas, on_wheel)
@@ -168,10 +161,7 @@ pub fn render_falling_notes_canvas(
         // Update mode
         match mode.get() {
           Stopped(..) => mode.set(PlaybackMode::stopped(clamped_position))
-          Playing(..) => {
-            let now_ms = @date.Date::now()
-            mode.set(PlaybackMode::playing(now_ms, clamped_position))
-          }
+          Playing(..) => start_playing(clamped_position)
         }
       }
       _ => ()
@@ -183,9 +173,8 @@ pub fn render_falling_notes_canvas(
   }
   add_drag_listeners_notes(canvas, on_drag_start, on_drag_move, on_drag_end)
 
-  // Redraw on frame count change
+  // Redraw when position or notes change
   let _ = @signal.effect(fn() {
-    let _ = frame_count.get()
     let pos = position_ms()
     let positions = note_positions()
 

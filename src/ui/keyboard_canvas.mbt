@@ -4,7 +4,6 @@ pub fn render_keyboard_canvas(
   note_values : @signal.Signal[Array[@music.NoteValue]],
   mode : @signal.Signal[PlaybackMode],
   tempo : @signal.Signal[Int],
-  frame_count : @signal.Signal[Int],
 ) -> @luna_dom.DomNode {
   let canvas_elem = @js_dom.document().createElement("canvas")
   let canvas = cast_to_canvas(canvas_elem)
@@ -14,13 +13,9 @@ pub fn render_keyboard_canvas(
 
   // Calculate currently playing notes
   let playing_notes = @signal.memo(fn() {
-    let _ = frame_count.get()
     let pos = match mode.get() {
       Stopped(position_ms=p) => p
-      Playing(started_at_ms=started_at, started_from_position=started_from) => {
-        let now_ms = @date.Date::now()
-        started_from + (now_ms - started_at)
-      }
+      Playing(position_ms=p) => p
     }
     let note_value_list = note_values.get()
     let tempo_val = tempo.get()
@@ -44,9 +39,8 @@ pub fn render_keyboard_canvas(
     active_midi_notes
   })
 
-  // Redraw on frame count change
+  // Redraw when playing notes change
   let _ = @signal.effect(fn() {
-    let _ = frame_count.get()
     let active_notes = playing_notes()
 
     // Update canvas width to match displayed width
