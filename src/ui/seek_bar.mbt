@@ -21,11 +21,7 @@ pub fn render_seek_bar(
 ) -> @luna_dom.DomNode {
   // Computed values
   let total_duration_ms = @signal.memo(fn() {
-    if note_values.get().length() > 0 {
-      @audio.calculate_total_duration(note_values.get(), tempo.get())
-    } else {
-      0
-    }
+    @music.calculate_total_duration(note_values.get(), tempo.get())
   })
   let has_notes = @signal.memo(fn() { note_values.get().length() > 0 })
 

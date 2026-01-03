@@ -73,3 +73,53 @@ test "Note name" {
   let a4 = Note::new(69, Quarter).unwrap()
   inspect(a4.name(), content="A4")
 }
+
+///|
+test "calculate_total_duration with tempo 120" {
+  let tempo = 120
+  let midi = MidiNumber::new(60).unwrap()
+
+  // Single quarter note: 500ms
+  let notes1 = [Note(midi~, duration=Quarter)]
+  inspect(calculate_total_duration(notes1, tempo), content="500")
+
+  // Two quarter notes: 1000ms
+  let notes2 = [Note(midi~, duration=Quarter), Note(midi~, duration=Quarter)]
+  inspect(calculate_total_duration(notes2, tempo), content="1000")
+
+  // Mixed durations: Half + Quarter + Eighth = 2 + 1 + 0.5 beats = 1750ms
+  let notes3 = [
+    Note(midi~, duration=Half),
+    Note(midi~, duration=Quarter),
+    Note(midi~, duration=Eighth),
+  ]
+  inspect(calculate_total_duration(notes3, tempo), content="1750")
+
+  // With rests
+  let notes4 = [
+    Note(midi~, duration=Quarter),
+    Rest(duration=Quarter),
+    Note(midi~, duration=Quarter),
+  ]
+  inspect(calculate_total_duration(notes4, tempo), content="1500")
+}
+
+///|
+test "calculate_total_duration with tempo 90" {
+  let tempo = 90
+  let midi = MidiNumber::new(60).unwrap()
+
+  // Quarter note at 90 bpm: 60000/90 = 666.67ms ≈ 666ms
+  let notes = [Note(midi~, duration=Quarter)]
+  inspect(calculate_total_duration(notes, tempo), content="666")
+
+  // Half note: 2 beats = 1332ms (60000/90 * 2 = 666 * 2 = 1332 due to integer division)
+  let notes2 = [Note(midi~, duration=Half)]
+  inspect(calculate_total_duration(notes2, tempo), content="1332")
+}
+
+///|
+test "calculate_total_duration empty array" {
+  let notes : Array[NoteValue] = []
+  inspect(calculate_total_duration(notes, 120), content="0")
+}

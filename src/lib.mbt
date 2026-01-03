@@ -70,13 +70,10 @@ fn main {
         100,
         volume.get(),
       )
-
-      // Check for end of playback
-      let total_duration = if note_values.get().length() > 0 {
-        @audio.calculate_total_duration(note_values.get(), tempo.get())
-      } else {
-        0
-      }
+      let total_duration = @music.calculate_total_duration(
+        note_values.get(),
+        tempo.get(),
+      )
       if current_pos >= total_duration {
         playback_position_ms.set(total_duration)
         is_playing.set(false)

@@ -14,10 +14,6 @@
       "alias": "music"
     },
     {
-      "path": "internal/jazzene/audio",
-      "alias": "audio"
-    },
-    {
       "path": "mizchi/js/browser/canvas",
       "alias": "canvas"
     },
