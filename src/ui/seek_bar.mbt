@@ -14,7 +14,8 @@ fn format_time(ms : Int) -> String {
 /// Render seek_bar UI component
 pub fn render_seek_bar(
   note_values : @signal.Signal[Array[@music.NoteValue]],
-  mode : @signal.Signal[PlaybackMode],
+  is_playing : @signal.Signal[Bool],
+  playback_position_ms : @signal.Signal[Int],
   tempo : @signal.Signal[Int],
   start_playing : (Int) -> Unit,
 ) -> @luna_dom.DomNode {
@@ -24,12 +25,6 @@ pub fn render_seek_bar(
       @audio.calculate_total_duration(note_values.get(), tempo.get())
     } else {
       0
-    }
-  })
-  let position_ms = @signal.memo(fn() {
-    match mode.get() {
-      Stopped(position_ms=pos) => pos
-      Playing(position_ms=pos) => pos
     }
   })
   let has_notes = @signal.memo(fn() { note_values.get().length() > 0 })
@@ -47,13 +42,12 @@ pub fn render_seek_bar(
         let new_position_ms = (position_percent /
         100.0 *
         total_duration_ms().to_double()).to_int()
-        match mode.get() {
-          Stopped(..) =>
-            // Just update position
-            mode.set(PlaybackMode::stopped(new_position_ms))
-          Playing(..) =>
-            // Restart from new position
-            start_playing(new_position_ms)
+        if is_playing.get() {
+          // Restart from new position
+          start_playing(new_position_ms)
+        } else {
+          // Just update position
+          playback_position_ms.set(new_position_ms)
         }
       }
       None => ()
@@ -66,7 +60,9 @@ pub fn render_seek_bar(
       attrs=[("aria-label", @luna_dom.Attr::AttrString("time display"))],
       [
         @luna_dom.text_dyn(fn() {
-          format_time(position_ms()) + " / " + format_time(total_duration_ms())
+          format_time(playback_position_ms.get()) +
+          " / " +
+          format_time(total_duration_ms())
         }),
       ],
     ),
@@ -86,7 +82,9 @@ pub fn render_seek_bar(
         if total == 0 {
           "0"
         } else {
-          let percent = position_ms().to_double() / total.to_double() * 100.0
+          let percent = playback_position_ms.get().to_double() /
+            total.to_double() *
+            100.0
           percent.to_int().to_string()
         }
       },

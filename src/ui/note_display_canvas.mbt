@@ -51,7 +51,8 @@ extern "js" fn add_drag_listeners_notes(
 /// Render falling notes display component using Canvas API
 pub fn render_falling_notes_canvas(
   note_values : @signal.Signal[Array[@music.NoteValue]],
-  mode : @signal.Signal[PlaybackMode],
+  is_playing : @signal.Signal[Bool],
+  playback_position_ms : @signal.Signal[Int],
   tempo : @signal.Signal[Int],
   start_playing : (Int) -> Unit,
 ) -> @luna_dom.DomNode {
@@ -60,14 +61,6 @@ pub fn render_falling_notes_canvas(
   set_canvas_style_width(canvas, "100%")
   set_canvas_style_height(canvas, "100%")
   let ctx = get_context_2d(canvas)
-
-  // Calculate current playback position
-  let position_ms = @signal.memo(fn() {
-    match mode.get() {
-      Stopped(position_ms=pos) => pos
-      Playing(position_ms=pos) => pos
-    }
-  })
 
   // Pre-calculate note positions (immutable list with start times)
   let note_positions = @signal.memo(fn() {
@@ -103,7 +96,7 @@ pub fn render_falling_notes_canvas(
       return
     }
     e.preventDefault()
-    let current_pos = position_ms()
+    let current_pos = playback_position_ms.get()
     let seek_amount = 500 // milliseconds per wheel tick
     let new_position_ms = if e.deltaY > 0.0 {
       // Wheel down: move forward
@@ -120,10 +113,11 @@ pub fn render_falling_notes_canvas(
     } else {
       new_position_ms
     }
-    // Update mode
-    match mode.get() {
-      Stopped(..) => mode.set(PlaybackMode::stopped(clamped_position))
-      Playing(..) => start_playing(clamped_position)
+    // Update position
+    if is_playing.get() {
+      start_playing(clamped_position)
+    } else {
+      playback_position_ms.set(clamped_position)
     }
   }
   add_wheel_listener_notes(canvas, on_wheel)
@@ -136,7 +130,7 @@ pub fn render_falling_notes_canvas(
       return
     }
     drag_start_y.val = Some(e.clientY)
-    drag_start_position_ms.val = Some(position_ms())
+    drag_start_position_ms.val = Some(playback_position_ms.get())
   }
   let on_drag_move : (@js_dom.MouseEvent) -> Unit = fn(e) {
     match (drag_start_y.val, drag_start_position_ms.val) {
@@ -158,10 +152,11 @@ pub fn render_falling_notes_canvas(
           new_position_ms
         }
 
-        // Update mode
-        match mode.get() {
-          Stopped(..) => mode.set(PlaybackMode::stopped(clamped_position))
-          Playing(..) => start_playing(clamped_position)
+        // Update position
+        if is_playing.get() {
+          start_playing(clamped_position)
+        } else {
+          playback_position_ms.set(clamped_position)
         }
       }
       _ => ()
@@ -175,7 +170,7 @@ pub fn render_falling_notes_canvas(
 
   // Redraw when position or notes change
   let _ = @signal.effect(fn() {
-    let pos = position_ms()
+    let pos = playback_position_ms.get()
     let positions = note_positions()
 
     // Update canvas width to match displayed width

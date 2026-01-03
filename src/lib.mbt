@@ -5,15 +5,14 @@ fn main {
   let audio_ctx = @web_audio.AudioContext::new()
 
   // Individual signals (sources of truth)
-  let mode : @signal.Signal[@ui.PlaybackMode] = @signal.signal(
-    @ui.PlaybackMode::stopped(0),
-  )
+  let is_playing = @signal.signal(false)
+  let playback_position_ms = @signal.signal(0)
   let note_values : @signal.Signal[Array[@music.NoteValue]] = @signal.signal([])
   let chord_input = @signal.signal("Cm7 F7 Bbmaj7 Ebmaj7")
   let tempo = @signal.signal(200)
   let volume = @signal.signal(0.3)
 
-  // Track playback session (only used when Playing)
+  // Track playback session (only used when playing)
   let playback_started_at_raf_time = @signal.signal(0.0)
   let playback_started_from_position = @signal.signal(0)
   let pending_start_position : Ref[Int?] = { val: None }
@@ -22,17 +21,13 @@ fn main {
   fn start_playing(position_ms : Int) -> Unit {
     // Set flag to start on next RAF tick (to capture RAF time)
     pending_start_position.val = Some(position_ms)
-    mode.set(@ui.PlaybackMode::playing(position_ms))
+    playback_position_ms.set(position_ms)
+    is_playing.set(true)
   }
 
   // Helper function to stop playback
   fn stop_playing() -> Unit {
-    // Get current position from mode
-    match mode.get() {
-      @ui.PlaybackMode::Playing(position_ms~) =>
-        mode.set(@ui.PlaybackMode::stopped(position_ms))
-      _ => ()
-    }
+    is_playing.set(false)
   }
 
   // Reactive note generation when chord input changes
@@ -63,35 +58,33 @@ fn main {
       }
       None => ()
     }
-    match mode.get() {
-      Stopped(..) => () // No-op when stopped
-      Playing(..) => {
-        // Calculate current position from RAF time
-        let elapsed_ms = (raf_time - playback_started_at_raf_time.get()).to_int()
-        let current_pos = playback_started_from_position.get() + elapsed_ms
+    if is_playing.get() {
+      // Calculate current position from RAF time
+      let elapsed_ms = (raf_time - playback_started_at_raf_time.get()).to_int()
+      let current_pos = playback_started_from_position.get() + elapsed_ms
 
-        // Update mode with current position
-        mode.set(@ui.PlaybackMode::playing(current_pos))
+      // Update position
+      playback_position_ms.set(current_pos)
 
-        // Schedule audio in lookahead window
-        @audio.schedule_notes_in_window(
-          audio_ctx,
-          note_values.get(),
-          tempo.get(),
-          current_pos,
-          100,
-          volume.get(),
-        )
+      // Schedule audio in lookahead window
+      @audio.schedule_notes_in_window(
+        audio_ctx,
+        note_values.get(),
+        tempo.get(),
+        current_pos,
+        100,
+        volume.get(),
+      )
 
-        // Check for end of playback
-        let total_duration = if note_values.get().length() > 0 {
-          @audio.calculate_total_duration(note_values.get(), tempo.get())
-        } else {
-          0
-        }
-        if current_pos >= total_duration {
-          mode.set(@ui.PlaybackMode::stopped(total_duration))
-        }
+      // Check for end of playback
+      let total_duration = if note_values.get().length() > 0 {
+        @audio.calculate_total_duration(note_values.get(), tempo.get())
+      } else {
+        0
+      }
+      if current_pos >= total_duration {
+        playback_position_ms.set(total_duration)
+        is_playing.set(false)
       }
     }
   }
@@ -126,11 +119,14 @@ fn main {
                 ]),
                 @luna_dom.div(class="flex gap-4 items-baseline p-1", [
                   @ui.render_play_pause_button(
-                    note_values, mode, tempo, start_playing, stop_playing,
+                    note_values, is_playing, playback_position_ms, tempo, start_playing,
+                    stop_playing,
                   ),
                   @ui.render_volume_control(volume),
                   @luna_dom.div(class="w-full", [
-                    @ui.render_seek_bar(note_values, mode, tempo, start_playing),
+                    @ui.render_seek_bar(
+                      note_values, is_playing, playback_position_ms, tempo, start_playing,
+                    ),
                   ]),
                 ]),
               ]),
@@ -141,9 +137,11 @@ fn main {
             attrs=[("aria-label", @luna_dom.Attr::AttrString("visualization"))],
             [
               @ui.render_falling_notes_canvas(
-                note_values, mode, tempo, start_playing,
+                note_values, is_playing, playback_position_ms, tempo, start_playing,
               ),
-              @ui.render_keyboard_canvas(note_values, mode, tempo),
+              @ui.render_keyboard_canvas(
+                note_values, playback_position_ms, tempo,
+              ),
             ],
           ),
         ],
