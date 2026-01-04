@@ -19,7 +19,7 @@ fn schedule_note(
   osc.set_frequency(frequency)
 
   // Connect nodes
-  osc.connect(gain.as_any())
+  osc.connect(gain.as_audio_node())
   gain.connect(ctx.destination())
 
   // Envelope

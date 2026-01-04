@@ -33,8 +33,8 @@ pub fn AudioContext::current_time(self : Self) -> Double {
 /// [destination](https://developer.mozilla.org/en-US/docs/Web/API/BaseAudioContext/destination)
 ///
 /// Get destination (speakers)
-pub fn AudioContext::destination(self : Self) -> @js.Any {
-  self.as_any()._get("destination")
+pub fn AudioContext::destination(self : Self) -> AudioNode {
+  self.as_any()._get("destination").cast()
 }
 
 // OscillatorNode wrapper
@@ -75,7 +75,7 @@ pub fn OscillatorNode::set_frequency(self : Self, freq : Double) -> Unit {
 /// [connect()](https://developer.mozilla.org/en-US/docs/Web/API/AudioNode/connect)
 ///
 /// Connect oscillator to a target node
-pub fn OscillatorNode::connect(self : Self, target : @js.Any) -> Unit {
+pub fn OscillatorNode::connect(self : Self, target : AudioNode) -> Unit {
   self.as_any()._call("connect", [@js.any(target)]) |> ignore
 }
 
@@ -95,12 +95,22 @@ pub fn OscillatorNode::stop(self : Self, time : Double) -> Unit {
   self.as_any()._call("stop", [@js.any(time)]) |> ignore
 }
 
+///|
+#external
+pub type AudioNode
+
+///|
+pub fn AudioNode::as_any(self : AudioNode) -> @js.Any = "%identity"
+
 // GainNode wrapper
 
 ///|
 /// [GainNode](https://developer.mozilla.org/en-US/docs/Web/API/GainNode)
 #external
 pub type GainNode
+
+///|
+pub fn GainNode::as_audio_node(self : GainNode) -> AudioNode = "%identity"
 
 ///|
 pub fn GainNode::as_any(self : GainNode) -> @js.Any = "%identity"
@@ -117,7 +127,7 @@ pub fn AudioContext::create_gain(self : Self) -> GainNode {
 /// [connect()](https://developer.mozilla.org/en-US/docs/Web/API/AudioNode/connect)
 ///
 /// Connect gain node to a target node
-pub fn GainNode::connect(self : Self, target : @js.Any) -> Unit {
+pub fn GainNode::connect(self : Self, target : AudioNode) -> Unit {
   self.as_any()._call("connect", [@js.any(target)]) |> ignore
 }
 
