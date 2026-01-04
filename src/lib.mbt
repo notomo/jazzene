@@ -1,10 +1,6 @@
 ///|
 /// Jazzene - Jazz Improvisation Web App (Tick-based Architecture)
 fn main {
-  // Create audio context
-  let audio_ctx = @web_audio.AudioContext::new()
-
-  // Individual signals (sources of truth)
   let is_playing = @signal.signal(false)
   let playback_position_ms = @signal.signal(0)
   let note_values : @signal.Signal[Array[@music.NoteValue]] = @signal.signal([])
@@ -22,18 +18,14 @@ fn main {
   let playback_started_at_raf_time = @signal.signal(0.0)
   let playback_started_from_position = @signal.signal(0)
   let pending_start_position : Ref[Int?] = { val: None }
-
-  // Helper function to start playback
   fn start_playing(position_ms : Int) -> Unit {
-    // Set flag to start on next RAF tick (to capture RAF time)
     pending_start_position.val = Some(position_ms)
     playback_position_ms.set(position_ms)
     is_playing.set(true)
   }
 
-  // Tick-based main loop
+  let audio_ctx = @web_audio.AudioContext::new()
   fn tick(raf_time : Double) -> Unit {
-    // Handle pending playback start
     match pending_start_position.val {
       Some(pos) => {
         playback_started_at_raf_time.set(raf_time)
@@ -42,31 +34,28 @@ fn main {
       }
       None => ()
     }
-    if is_playing.get() {
-      // Calculate current position from RAF time
-      let elapsed_ms = (raf_time - playback_started_at_raf_time.get()).to_int()
-      let current_pos = playback_started_from_position.get() + elapsed_ms
+    if not(is_playing.get()) {
+      return
+    }
+    let elapsed_ms = (raf_time - playback_started_at_raf_time.get()).to_int()
+    let current_pos = playback_started_from_position.get() + elapsed_ms
 
-      // Update position
-      playback_position_ms.set(current_pos)
-
-      // Schedule audio in lookahead window
-      @audio.schedule_notes_in_window(
-        audio_ctx,
-        note_values.get(),
-        tempo.get(),
-        current_pos,
-        100,
-        volume.get(),
-      )
-      let total_duration = @music.calculate_total_duration(
-        note_values.get(),
-        tempo.get(),
-      )
-      if current_pos >= total_duration {
-        playback_position_ms.set(total_duration)
-        is_playing.set(false)
-      }
+    // Schedule audio in lookahead window
+    @audio.schedule_notes_in_window(
+      audio_ctx,
+      note_values.get(),
+      tempo.get(),
+      current_pos,
+      100,
+      volume.get(),
+    )
+    let total_duration = @music.calculate_total_duration(
+      note_values.get(),
+      tempo.get(),
+    )
+    playback_position_ms.set(@cmp.minimum(current_pos, total_duration))
+    if current_pos >= total_duration {
+      is_playing.set(false)
     }
   }
 
