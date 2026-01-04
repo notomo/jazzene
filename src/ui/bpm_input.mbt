@@ -1,13 +1,12 @@
 ///|
-/// Render BPM/tempo input control
-pub fn bpm_input(tempo : @signal.Signal[Int]) -> @luna_dom.DomNode {
-  // Event handler
-  let on_tempo_change : @luna_dom.InputHandler = fn(e) {
+/// Render BPM input control
+pub fn bpm_input(bpm : @signal.Signal[Int]) -> @luna_dom.DomNode {
+  let on_input : @luna_dom.InputHandler = fn(e) {
     let target = e.target()
     let event_target = target.as_event_target()
     let value = event_target.as_any()._get("value").to_string()
     match @js_global.parseInt(value) {
-      Some(bpm) => if bpm >= 30 && bpm <= 300 { tempo.set(bpm) }
+      Some(x) => if x >= 30 && x <= 300 { bpm.set(x) }
       None => ()
     }
   }
@@ -20,8 +19,8 @@ pub fn bpm_input(tempo : @signal.Signal[Int]) -> @luna_dom.DomNode {
         ("min", @luna_dom.Attr::AttrInt(30)),
         ("max", @luna_dom.Attr::AttrInt(300)),
       ],
-      dyn_value=fn() { tempo.get().to_string() },
-      on=@luna_dom.events().input(on_tempo_change),
+      dyn_value=fn() { bpm.get().to_string() },
+      on=@luna_dom.events().input(on_input),
     ),
   ])
 }

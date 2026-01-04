@@ -16,14 +16,12 @@ pub fn seek_bar(
   note_values : @signal.Signal[Array[@music.NoteValue]],
   is_playing : @signal.Signal[Bool],
   playback_position_ms : @signal.Signal[Int],
-  tempo : @signal.Signal[Int],
+  bpm : @signal.Signal[Int],
   start_playing : (Int) -> Unit,
 ) -> @luna_dom.DomNode {
   let total_duration_ms = @signal.memo(fn() {
-    @music.calculate_total_duration(note_values.get(), tempo.get())
+    @music.calculate_total_duration(note_values.get(), bpm.get())
   })
-
-  // Event handler
   let on_seek : @luna_dom.InputHandler = fn(e) {
     if note_values.get().length() == 0 {
       return
@@ -37,10 +35,8 @@ pub fn seek_bar(
         100.0 *
         total_duration_ms().to_double()).to_int()
         if is_playing.get() {
-          // Restart from new position
           start_playing(new_position_ms)
         } else {
-          // Just update position
           playback_position_ms.set(new_position_ms)
         }
       }
@@ -48,7 +44,6 @@ pub fn seek_bar(
     }
   }
   @luna_dom.div(class="flex gap-2 items-baseline bg-slate-800", [
-    // Time display: "0:00 / 2:30"
     @luna_dom.div(
       class="flex justify-between text-sm text-slate-400 mb-2 text-nowrap",
       attrs=[("aria-label", @luna_dom.Attr::AttrString("time display"))],
@@ -60,8 +55,6 @@ pub fn seek_bar(
         }),
       ],
     ),
-
-    // Range slider with Tailwind styling
     @luna_dom.input(
       type_="range",
       class="w-full h-2 bg-slate-700 rounded-lg cursor-pointer accent-blue-500 disabled:opacity-50 disabled:cursor-not-allowed",

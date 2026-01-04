@@ -11,7 +11,7 @@ pub struct ScheduledSound {
 /// Returns only Note events (not Rests) that fall within the lookahead window
 pub fn extract_sounds_in_window(
   note_values : Array[NoteValue],
-  tempo_bpm : Int,
+  bpm : Int,
   current_pos_ms : Int,
   lookahead_ms : Int,
   current_time : Double,
@@ -20,7 +20,7 @@ pub fn extract_sounds_in_window(
   let sounds = []
   let mut position_ms = 0
   for note_value in note_values {
-    let duration_ms = note_value.duration().to_ms(tempo_bpm)
+    let duration_ms = note_value.duration().to_ms(bpm)
     let end_ms = position_ms + duration_ms
 
     // Extract only actual notes (skip rests) within the window

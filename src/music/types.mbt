@@ -17,9 +17,9 @@ pub fn NoteDuration::to_beats(self : NoteDuration) -> Double {
 }
 
 ///|
-/// Convert note duration to milliseconds based on tempo
-pub fn NoteDuration::to_ms(self : NoteDuration, tempo_bpm : Int) -> Int {
-  let ms_per_beat = 60000 / tempo_bpm
+/// Convert note duration to milliseconds based on BPM
+pub fn NoteDuration::to_ms(self : NoteDuration, bpm : Int) -> Int {
+  let ms_per_beat = 60000 / bpm
   (self.to_beats() * ms_per_beat.to_double()).to_int()
 }
 
@@ -198,11 +198,11 @@ pub fn NoteValue::midi(self : NoteValue) -> MidiNumber? {
 /// Calculate total duration of a note sequence in milliseconds
 pub fn calculate_total_duration(
   note_values : Array[NoteValue],
-  tempo_bpm : Int,
+  bpm : Int,
 ) -> Int {
   let mut total_ms = 0
   for note_value in note_values {
-    total_ms = total_ms + note_value.duration().to_ms(tempo_bpm)
+    total_ms = total_ms + note_value.duration().to_ms(bpm)
   }
   total_ms
 }

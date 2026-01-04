@@ -53,7 +53,7 @@ pub fn note_display(
   note_values : @signal.Signal[Array[@music.NoteValue]],
   is_playing : @signal.Signal[Bool],
   playback_position_ms : @signal.Signal[Int],
-  tempo : @signal.Signal[Int],
+  bpm : @signal.Signal[Int],
   start_playing : (Int) -> Unit,
 ) -> @luna_dom.DomNode {
   let canvas_elem = @js_dom.document().createElement("canvas")
@@ -65,11 +65,11 @@ pub fn note_display(
   // Pre-calculate note positions (immutable list with start times)
   let note_positions = @signal.memo(fn() {
     let note_value_list = note_values.get()
-    let tempo_val = tempo.get()
+    let bpm_val = bpm.get()
     let mut current_pos = 0
     let positions : Array[(Int, Int, Int)] = [] // (midi, start_ms, duration_ms)
     for note_value in note_value_list {
-      let duration_ms = note_value.duration().to_ms(tempo_val)
+      let duration_ms = note_value.duration().to_ms(bpm_val)
       // Only track positions for actual notes (rests are invisible gaps)
       match note_value {
         Note(midi=midi_val, ..) =>
@@ -83,7 +83,7 @@ pub fn note_display(
 
   // Calculate total duration
   let total_duration_ms = @signal.memo(fn() {
-    @music.calculate_total_duration(note_values.get(), tempo.get())
+    @music.calculate_total_duration(note_values.get(), bpm.get())
   })
 
   // Add wheel event listener for seeking
@@ -180,7 +180,7 @@ pub fn note_display(
       canvas.height.to_double(),
       positions,
       pos,
-      tempo.get(),
+      bpm.get(),
     )
   })
 
@@ -205,7 +205,7 @@ fn draw_notes(
   height : Double,
   note_positions : Array[(Int, Int, Int)],
   current_pos : Int,
-  tempo : Int,
+  bpm : Int,
 ) -> Unit {
   // Clear canvas
   ctx.clearRect(0.0, 0.0, width, height)
@@ -277,9 +277,9 @@ fn draw_notes(
     }
   }
 
-  // Draw horizontal lines for each measure (1小節ごとの横線)
+  // Draw horizontal lines for each measure
   // In 4/4 time, one measure = 4 quarter notes
-  let measure_ms = 60000 * 4 / tempo // (60000ms/BPM) * 4 beats
+  let measure_ms = 60000 * 4 / bpm // (60000ms/BPM) * 4 beats
 
   // Find the first measure line visible in the window
   let first_measure = current_pos / measure_ms

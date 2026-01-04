@@ -4,11 +4,10 @@ pub fn play_pause_button(
   note_values : @signal.Signal[Array[@music.NoteValue]],
   is_playing : @signal.Signal[Bool],
   playback_position_ms : @signal.Signal[Int],
-  tempo : @signal.Signal[Int],
+  bpm : @signal.Signal[Int],
   start_playing : (Int) -> Unit,
 ) -> @luna_dom.DomNode {
-  // Event handler
-  let on_play_pause : @luna_dom.MouseHandler = fn(_) {
+  let on_click : @luna_dom.MouseHandler = fn(_) {
     if note_values.get().length() == 0 {
       return
     }
@@ -17,7 +16,7 @@ pub fn play_pause_button(
     } else {
       let total_duration = @music.calculate_total_duration(
         note_values.get(),
-        tempo.get(),
+        bpm.get(),
       )
       // If at the end, restart from beginning
       let position = playback_position_ms.get()
@@ -33,7 +32,7 @@ pub fn play_pause_button(
         "px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition-colors shadow-lg"
       }
     },
-    on=@luna_dom.events().click(on_play_pause),
+    on=@luna_dom.events().click(on_click),
     [@luna_dom.text_dyn(fn() { if is_playing.get() { "■" } else { "▶" } })],
   )
 }

@@ -3,12 +3,12 @@
 fn main {
   let is_playing = @signal.signal(false)
   let playback_position_ms = @signal.signal(0)
-  let note_values : @signal.Signal[Array[@music.NoteValue]] = @signal.signal([])
-  let chord_input = @signal.signal("Cm7 F7 Bbmaj7 Ebmaj7")
-  let tempo = @signal.signal(200)
+  let bpm = @signal.signal(200)
   let volume = @signal.signal(0.3)
+  let raw_chord_progression = @signal.signal("Cm7 F7 Bbmaj7 Ebmaj7")
+  let note_values : @signal.Signal[Array[@music.NoteValue]] = @signal.signal([])
   let _ = @signal.effect(fn() {
-    let x = chord_input.get()
+    let x = raw_chord_progression.get()
       |> @music.parse_chord_progression
       |> @music.generate_improvisation(@music.ImprovisationSettings::default())
     note_values.set(x)
@@ -44,14 +44,14 @@ fn main {
     @audio.schedule_notes_in_window(
       audio_ctx,
       note_values.get(),
-      tempo.get(),
+      bpm.get(),
       current_pos,
       100,
       volume.get(),
     )
     let total_duration = @music.calculate_total_duration(
       note_values.get(),
-      tempo.get(),
+      bpm.get(),
     )
     playback_position_ms.set(@cmp.minimum(current_pos, total_duration))
     if current_pos >= total_duration {
@@ -74,17 +74,17 @@ fn main {
             [
               @luna_dom.div([
                 @luna_dom.div(class="flex gap-4 items-center p-1", [
-                  @ui.chord_input(chord_input),
-                  @ui.bpm_input(tempo),
+                  @ui.chord_progression_input(raw_chord_progression),
+                  @ui.bpm_input(bpm),
                 ]),
                 @luna_dom.div(class="flex gap-4 items-baseline p-1", [
                   @ui.play_pause_button(
-                    note_values, is_playing, playback_position_ms, tempo, start_playing,
+                    note_values, is_playing, playback_position_ms, bpm, start_playing,
                   ),
                   @ui.volume_input(volume),
                   @luna_dom.div(class="w-full", [
                     @ui.seek_bar(
-                      note_values, is_playing, playback_position_ms, tempo, start_playing,
+                      note_values, is_playing, playback_position_ms, bpm, start_playing,
                     ),
                   ]),
                 ]),
@@ -96,14 +96,14 @@ fn main {
             attrs=[("aria-label", @luna_dom.Attr::AttrString("visualization"))],
             [
               @ui.note_display(
-                note_values, is_playing, playback_position_ms, tempo, start_playing,
+                note_values, is_playing, playback_position_ms, bpm, start_playing,
               ),
-              @ui.keyboard(note_values, playback_position_ms, tempo),
+              @ui.keyboard(note_values, playback_position_ms, bpm),
             ],
           ),
         ],
       )
-      @luna_dom.render(el |> @luna_dom.DomElement::from_dom, app)
+      el |> @luna_dom.DomElement::from_dom |> @luna_dom.render(app)
     }
     None => ()
   }

@@ -44,14 +44,14 @@ fn schedule_note(
 pub fn schedule_notes_in_window(
   ctx : @web_audio.AudioContext,
   note_values : Array[@music.NoteValue],
-  tempo_bpm : Int,
+  bpm : Int,
   current_pos_ms : Int,
   lookahead_ms : Int,
   volume : Double,
 ) -> Unit {
   let sounds = @music.extract_sounds_in_window(
     note_values,
-    tempo_bpm,
+    bpm,
     current_pos_ms,
     lookahead_ms,
     ctx.current_time(),

@@ -3,7 +3,7 @@
 pub fn keyboard(
   note_values : @signal.Signal[Array[@music.NoteValue]],
   playback_position_ms : @signal.Signal[Int],
-  tempo : @signal.Signal[Int],
+  bpm : @signal.Signal[Int],
 ) -> @luna_dom.DomNode {
   let canvas_elem = @js_dom.document().createElement("canvas")
   let canvas = cast_to_canvas(canvas_elem)
@@ -16,7 +16,7 @@ pub fn keyboard(
     @music.calculate_active_midi_notes(
       note_values.get(),
       playback_position_ms.get(),
-      tempo.get(),
+      bpm.get(),
     )
   })
 
@@ -37,8 +37,6 @@ pub fn keyboard(
 
   // Convert canvas to DomNode using ToDomNode trait
   let canvas_dom_node = @luna_dom.ToDomNode::to_dom_node(canvas.as_node())
-
-  // Wrap in div with aria-label for E2E tests
   @luna_dom.div(
     class="w-full",
     attrs=[("aria-label", @luna_dom.Attr::AttrString("keyboard canvas"))],
@@ -54,10 +52,7 @@ fn draw_keyboard(
   height : Double,
   playing_notes : Array[Int],
 ) -> Unit {
-  // Clear canvas
   ctx.clearRect(0.0, 0.0, width, height)
-
-  // Background
   ctx.fillStyle = "#0f172a"
   ctx.fillRect(0.0, 0.0, width, height)
   let rect = { left: 0.0, top: 0.0, width, height }
