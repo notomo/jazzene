@@ -12,7 +12,7 @@ fn format_time(ms : Int) -> String {
 
 ///|
 /// Render seek_bar UI component
-pub fn render_seek_bar(
+pub fn seek_bar(
   note_values : @signal.Signal[Array[@music.NoteValue]],
   is_playing : @signal.Signal[Bool],
   playback_position_ms : @signal.Signal[Int],

@@ -1,6 +1,6 @@
 ///|
 /// Render piano keyboard component using Canvas API
-pub fn render_keyboard_canvas(
+pub fn keyboard(
   note_values : @signal.Signal[Array[@music.NoteValue]],
   playback_position_ms : @signal.Signal[Int],
   tempo : @signal.Signal[Int],

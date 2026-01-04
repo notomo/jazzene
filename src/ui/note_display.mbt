@@ -49,7 +49,7 @@ extern "js" fn add_drag_listeners_notes(
 
 ///|
 /// Render falling notes display component using Canvas API
-pub fn render_falling_notes_canvas(
+pub fn note_display(
   note_values : @signal.Signal[Array[@music.NoteValue]],
   is_playing : @signal.Signal[Bool],
   playback_position_ms : @signal.Signal[Int],

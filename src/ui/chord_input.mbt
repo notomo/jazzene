@@ -1,8 +1,6 @@
 ///|
 /// Render chord input textarea
-pub fn render_chord_input(
-  chord_input : @signal.Signal[String],
-) -> @luna_dom.DomNode {
+pub fn chord_input(chord_input : @signal.Signal[String]) -> @luna_dom.DomNode {
   let on_input : @luna_dom.InputHandler = fn(e) {
     let target = e.target()
     let event_target = target.as_event_target()

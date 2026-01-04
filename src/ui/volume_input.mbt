@@ -1,12 +1,7 @@
 ///|
 /// Render volume control with popup
-pub fn render_volume_control(
-  volume : @signal.Signal[Double],
-) -> @luna_dom.DomNode {
-  // Volume popup state
+pub fn volume_input(volume : @signal.Signal[Double]) -> @luna_dom.DomNode {
   let show_volume_popup = @signal.signal(false)
-
-  // Event handlers
   let on_volume_change : @luna_dom.InputHandler = fn(e) {
     let target = e.target()
     let event_target = target.as_event_target()
@@ -25,7 +20,6 @@ pub fn render_volume_control(
       attrs=[("aria-label", @luna_dom.Attr::AttrString("Volume control"))],
       [@luna_dom.text("🔊")],
     ),
-    // Volume popup (vertical slider)
     @luna_dom.div(
       dyn_class=fn() {
         if show_volume_popup.get() {

@@ -1,6 +1,6 @@
 ///|
 /// Render BPM/tempo input control
-pub fn render_bpm_input(tempo : @signal.Signal[Int]) -> @luna_dom.DomNode {
+pub fn bpm_input(tempo : @signal.Signal[Int]) -> @luna_dom.DomNode {
   // Event handler
   let on_tempo_change : @luna_dom.InputHandler = fn(e) {
     let target = e.target()

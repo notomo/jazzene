@@ -85,16 +85,16 @@ fn main {
             [
               @luna_dom.div([
                 @luna_dom.div(class="flex gap-4 items-center p-1", [
-                  @ui.render_chord_input(chord_input),
-                  @ui.render_bpm_input(tempo),
+                  @ui.chord_input(chord_input),
+                  @ui.bpm_input(tempo),
                 ]),
                 @luna_dom.div(class="flex gap-4 items-baseline p-1", [
-                  @ui.render_play_pause_button(
+                  @ui.play_pause_button(
                     note_values, is_playing, playback_position_ms, tempo, start_playing,
                   ),
-                  @ui.render_volume_control(volume),
+                  @ui.volume_input(volume),
                   @luna_dom.div(class="w-full", [
-                    @ui.render_seek_bar(
+                    @ui.seek_bar(
                       note_values, is_playing, playback_position_ms, tempo, start_playing,
                     ),
                   ]),
@@ -106,12 +106,10 @@ fn main {
             class="bg-slate-950 shadow-2xl border-slate-700 h-full grid grid-rows-[80%_20%]",
             attrs=[("aria-label", @luna_dom.Attr::AttrString("visualization"))],
             [
-              @ui.render_falling_notes_canvas(
+              @ui.note_display(
                 note_values, is_playing, playback_position_ms, tempo, start_playing,
               ),
-              @ui.render_keyboard_canvas(
-                note_values, playback_position_ms, tempo,
-              ),
+              @ui.keyboard(note_values, playback_position_ms, tempo),
             ],
           ),
         ],
