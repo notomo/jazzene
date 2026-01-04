@@ -51,11 +51,9 @@ extern "js" fn add_drag_listeners_notes(
 /// Render falling notes display component using Canvas API
 pub fn note_display(
   note_values : @signal.Signal[Array[@music.NoteValue]],
-  is_playing : @signal.Signal[Bool],
   playback_position_ms : @signal.Signal[Int],
   bpm : @signal.Signal[Int],
   total_duration : () -> Int,
-  start_playing : (Int) -> Unit,
 ) -> @luna_dom.DomNode {
   let canvas_elem = @js_dom.document().createElement("canvas")
   let canvas = cast_to_canvas(canvas_elem)
@@ -99,11 +97,7 @@ pub fn note_display(
       0,
       @cmp.minimum(new_position_ms, total_duration()),
     )
-    if is_playing.get() {
-      start_playing(clamped_position)
-    } else {
-      playback_position_ms.set(clamped_position)
-    }
+    playback_position_ms.set(clamped_position)
   }
   add_wheel_listener_notes(canvas, on_wheel)
 
@@ -131,11 +125,7 @@ pub fn note_display(
           0,
           @cmp.minimum(new_position_ms, total_duration()),
         )
-        if is_playing.get() {
-          start_playing(clamped_position)
-        } else {
-          playback_position_ms.set(clamped_position)
-        }
+        playback_position_ms.set(clamped_position)
       }
       _ => ()
     }

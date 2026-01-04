@@ -4,21 +4,17 @@ pub fn play_pause_button(
   is_playing : @signal.Signal[Bool],
   playback_position_ms : @signal.Signal[Int],
   total_duration : () -> Int,
-  start_playing : (Int) -> Unit,
 ) -> @luna_dom.DomNode {
   let on_click : @luna_dom.MouseHandler = fn(_) {
     if is_playing.get() {
       is_playing.set(false)
-    } else {
-      // If at the end, restart from beginning
-      let position = playback_position_ms.get()
-      let start_position = if position >= total_duration() {
-        0
-      } else {
-        position
-      }
-      start_playing(start_position)
+      return
     }
+    // If at the end, restart from beginning
+    let position = playback_position_ms.get()
+    let start_position = if position >= total_duration() { 0 } else { position }
+    is_playing.set(true)
+    playback_position_ms.set(start_position)
   }
   @luna_dom.button(
     dyn_class=fn() {

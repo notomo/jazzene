@@ -16,46 +16,19 @@ fn main {
   let total_duration = @signal.memo(fn() {
     @music.calculate_total_duration(note_values.get(), bpm.get())
   })
-
-  // Track playback session (only used when playing)
-  let playback_started_at_raf_time : Ref[Double] = { val: 0.0 }
-  let playback_started_from_position : Ref[Int] = { val: 0 }
-  let pending_start_position : Ref[Int?] = { val: None }
-  fn start_playing(position_ms : Int) -> Unit {
-    pending_start_position.val = Some(position_ms)
-    playback_position_ms.set(position_ms)
-    is_playing.set(true)
-  }
-
   let audio_ctx = @web_audio.AudioContext::new()
-  fn tick(raf_time : Double) -> Unit {
-    match pending_start_position.val {
-      Some(pos) => {
-        playback_started_at_raf_time.val = raf_time
-        playback_started_from_position.val = pos
-        pending_start_position.val = None
-      }
-      None => ()
-    }
-    if not(is_playing.get()) {
-      return
-    }
-    let elapsed_ms = (raf_time - playback_started_at_raf_time.val).to_int()
-    let current_pos = playback_started_from_position.val + elapsed_ms
-
-    // Schedule audio in lookahead window
+  fn tick(elapsed_ms : Int) -> Bool {
+    let pos = playback_position_ms.get() + elapsed_ms
+    let current_pos = @cmp.minimum(pos, total_duration())
     @audio.schedule_notes_in_window(
       audio_ctx,
       note_values.get(),
       bpm.get(),
       current_pos,
-      100,
       volume.get(),
     )
-    playback_position_ms.set(@cmp.minimum(current_pos, total_duration()))
-    if current_pos >= total_duration() {
-      is_playing.set(false)
-    }
+    playback_position_ms.set(current_pos)
+    current_pos >= total_duration()
   }
 
   setup_loop(is_playing, tick)
@@ -78,13 +51,11 @@ fn main {
                 ]),
                 @luna_dom.div(class="flex gap-4 items-baseline p-1", [
                   @ui.play_pause_button(
-                    is_playing, playback_position_ms, total_duration, start_playing,
+                    is_playing, playback_position_ms, total_duration,
                   ),
                   @ui.volume_input(volume),
                   @luna_dom.div(class="w-full", [
-                    @ui.seek_bar(
-                      is_playing, playback_position_ms, total_duration, start_playing,
-                    ),
+                    @ui.seek_bar(playback_position_ms, total_duration),
                   ]),
                 ]),
               ]),
@@ -95,8 +66,7 @@ fn main {
             attrs=[("aria-label", @luna_dom.Attr::AttrString("visualization"))],
             [
               @ui.note_display(
-                note_values, is_playing, playback_position_ms, bpm, total_duration,
-                start_playing,
+                note_values, playback_position_ms, bpm, total_duration,
               ),
               @ui.keyboard(note_values, playback_position_ms, bpm),
             ],
@@ -110,28 +80,38 @@ fn main {
 }
 
 ///|
-fn setup_loop(
-  is_playing : @signal.Signal[Bool],
-  tick : (Double) -> Unit,
-) -> Unit {
+fn setup_loop(is_playing : @signal.Signal[Bool], tick : (Int) -> Bool) -> Unit {
   let request_id : Ref[Int?] = { val: None }
-  let _ = @signal.effect(fn() {
-    if is_playing.get() {
-      fn loop_fn(time : Double) -> Unit {
-        tick(time)
-        request_id.val = Some(@js_dom.window().requestAnimationFrame(loop_fn))
-      }
-
-      request_id.val = Some(@js_dom.window().requestAnimationFrame(loop_fn))
-      return
-    }
+  let previous_time : Ref[Double?] = { val: None }
+  fn cancel() -> Unit {
     match request_id.val {
       Some(id) => {
         @js_dom.window().cancelAnimationFrame(id)
         request_id.val = None
+        previous_time.val = None
       }
       None => ()
     }
+  }
+
+  let _ = @signal.effect(fn() {
+    if not(is_playing.get()) {
+      cancel()
+      return
+    }
+    fn loop_fn(current_time : Double) -> Unit {
+      let elapsed_ms = (current_time - previous_time.val.unwrap_or(current_time)).to_int()
+      let stopped = tick(elapsed_ms)
+      if stopped {
+        cancel()
+        is_playing.set(false)
+        return
+      }
+      request_id.val = Some(@js_dom.window().requestAnimationFrame(loop_fn))
+      previous_time.val = Some(current_time)
+    }
+
+    request_id.val = Some(@js_dom.window().requestAnimationFrame(loop_fn))
   })
 
 }

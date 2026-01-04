@@ -13,10 +13,8 @@ fn format_time(ms : Int) -> String {
 ///|
 /// Render seek_bar UI component
 pub fn seek_bar(
-  is_playing : @signal.Signal[Bool],
   playback_position_ms : @signal.Signal[Int],
   total_duration : () -> Int,
-  start_playing : (Int) -> Unit,
 ) -> @luna_dom.DomNode {
   let on_seek : @luna_dom.InputHandler = fn(e) {
     if total_duration() == 0 {
@@ -30,11 +28,7 @@ pub fn seek_bar(
         let new_position_ms = (position_percent /
         100.0 *
         total_duration().to_double()).to_int()
-        if is_playing.get() {
-          start_playing(new_position_ms)
-        } else {
-          playback_position_ms.set(new_position_ms)
-        }
+        playback_position_ms.set(new_position_ms)
       }
       None => ()
     }
