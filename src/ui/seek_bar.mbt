@@ -13,17 +13,13 @@ fn format_time(ms : Int) -> String {
 ///|
 /// Render seek_bar UI component
 pub fn seek_bar(
-  note_values : @signal.Signal[Array[@music.NoteValue]],
   is_playing : @signal.Signal[Bool],
   playback_position_ms : @signal.Signal[Int],
-  bpm : @signal.Signal[Int],
+  total_duration : () -> Int,
   start_playing : (Int) -> Unit,
 ) -> @luna_dom.DomNode {
-  let total_duration_ms = @signal.memo(fn() {
-    @music.calculate_total_duration(note_values.get(), bpm.get())
-  })
   let on_seek : @luna_dom.InputHandler = fn(e) {
-    if note_values.get().length() == 0 {
+    if total_duration() == 0 {
       return
     }
     let target = e.target()
@@ -33,7 +29,7 @@ pub fn seek_bar(
       Some(position_percent) => {
         let new_position_ms = (position_percent /
         100.0 *
-        total_duration_ms().to_double()).to_int()
+        total_duration().to_double()).to_int()
         if is_playing.get() {
           start_playing(new_position_ms)
         } else {
@@ -51,7 +47,7 @@ pub fn seek_bar(
         @luna_dom.text_dyn(fn() {
           format_time(playback_position_ms.get()) +
           " / " +
-          format_time(total_duration_ms())
+          format_time(total_duration())
         }),
       ],
     ),
@@ -65,17 +61,16 @@ pub fn seek_bar(
         ("aria-label", @luna_dom.Attr::AttrString("playback position")),
       ],
       dyn_value=fn() {
-        let total = total_duration_ms()
-        if total == 0 {
+        if total_duration() == 0 {
           "0"
         } else {
           let percent = playback_position_ms.get().to_double() /
-            total.to_double() *
+            total_duration().to_double() *
             100.0
           percent.to_int().to_string()
         }
       },
-      dyn_disabled=fn() { not(note_values.get().length() > 0) },
+      dyn_disabled=fn() { total_duration() == 0 },
       on=@luna_dom.events().input(on_seek),
     ),
   ])

@@ -54,6 +54,7 @@ pub fn note_display(
   is_playing : @signal.Signal[Bool],
   playback_position_ms : @signal.Signal[Int],
   bpm : @signal.Signal[Int],
+  total_duration : () -> Int,
   start_playing : (Int) -> Unit,
 ) -> @luna_dom.DomNode {
   let canvas_elem = @js_dom.document().createElement("canvas")
@@ -81,11 +82,6 @@ pub fn note_display(
     positions
   })
 
-  // Calculate total duration
-  let total_duration_ms = @signal.memo(fn() {
-    @music.calculate_total_duration(note_values.get(), bpm.get())
-  })
-
   // Add wheel event listener for seeking
   let on_wheel : (@js_dom.WheelEvent) -> Unit = fn(e) {
     if note_values.get().length() == 0 {
@@ -95,21 +91,14 @@ pub fn note_display(
     let current_pos = playback_position_ms.get()
     let seek_amount = 500 // milliseconds per wheel tick
     let new_position_ms = if e.deltaY > 0.0 {
-      // Wheel down: move forward
       current_pos + seek_amount
     } else {
-      // Wheel up: move backward
       current_pos - seek_amount
     }
-    // Clamp position to valid range
-    let clamped_position = if new_position_ms < 0 {
-      0
-    } else if new_position_ms > total_duration_ms() {
-      total_duration_ms()
-    } else {
-      new_position_ms
-    }
-    // Update position
+    let clamped_position = @cmp.maximum(
+      0,
+      @cmp.minimum(new_position_ms, total_duration()),
+    )
     if is_playing.get() {
       start_playing(clamped_position)
     } else {
@@ -138,17 +127,10 @@ pub fn note_display(
         // 10 pixels = 100ms (adjustable sensitivity)
         let seek_amount = (delta_y * 10.0).to_int()
         let new_position_ms = start_pos + seek_amount
-
-        // Clamp position to valid range
-        let clamped_position = if new_position_ms < 0 {
-          0
-        } else if new_position_ms > total_duration_ms() {
-          total_duration_ms()
-        } else {
-          new_position_ms
-        }
-
-        // Update position
+        let clamped_position = @cmp.maximum(
+          0,
+          @cmp.minimum(new_position_ms, total_duration()),
+        )
         if is_playing.get() {
           start_playing(clamped_position)
         } else {

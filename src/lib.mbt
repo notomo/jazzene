@@ -3,8 +3,8 @@
 fn main {
   let is_playing = @signal.signal(false)
   let playback_position_ms = @signal.signal(0)
-  let bpm = @signal.signal(200)
   let volume = @signal.signal(0.3)
+  let bpm = @signal.signal(200)
   let raw_chord_progression = @signal.signal("Cm7 F7 Bbmaj7 Ebmaj7")
   let note_values : @signal.Signal[Array[@music.NoteValue]] = @signal.signal([])
   let _ = @signal.effect(fn() {
@@ -12,6 +12,9 @@ fn main {
       |> @music.parse_chord_progression
       |> @music.generate_improvisation(@music.ImprovisationSettings::default())
     note_values.set(x)
+  })
+  let total_duration = @signal.memo(fn() {
+    @music.calculate_total_duration(note_values.get(), bpm.get())
   })
 
   // Track playback session (only used when playing)
@@ -49,12 +52,8 @@ fn main {
       100,
       volume.get(),
     )
-    let total_duration = @music.calculate_total_duration(
-      note_values.get(),
-      bpm.get(),
-    )
-    playback_position_ms.set(@cmp.minimum(current_pos, total_duration))
-    if current_pos >= total_duration {
+    playback_position_ms.set(@cmp.minimum(current_pos, total_duration()))
+    if current_pos >= total_duration() {
       is_playing.set(false)
     }
   }
@@ -79,12 +78,12 @@ fn main {
                 ]),
                 @luna_dom.div(class="flex gap-4 items-baseline p-1", [
                   @ui.play_pause_button(
-                    note_values, is_playing, playback_position_ms, bpm, start_playing,
+                    is_playing, playback_position_ms, total_duration, start_playing,
                   ),
                   @ui.volume_input(volume),
                   @luna_dom.div(class="w-full", [
                     @ui.seek_bar(
-                      note_values, is_playing, playback_position_ms, bpm, start_playing,
+                      is_playing, playback_position_ms, total_duration, start_playing,
                     ),
                   ]),
                 ]),
@@ -96,7 +95,8 @@ fn main {
             attrs=[("aria-label", @luna_dom.Attr::AttrString("visualization"))],
             [
               @ui.note_display(
-                note_values, is_playing, playback_position_ms, bpm, start_playing,
+                note_values, is_playing, playback_position_ms, bpm, total_duration,
+                start_playing,
               ),
               @ui.keyboard(note_values, playback_position_ms, bpm),
             ],

@@ -1,26 +1,22 @@
 ///|
 /// Render play/pause button
 pub fn play_pause_button(
-  note_values : @signal.Signal[Array[@music.NoteValue]],
   is_playing : @signal.Signal[Bool],
   playback_position_ms : @signal.Signal[Int],
-  bpm : @signal.Signal[Int],
+  total_duration : () -> Int,
   start_playing : (Int) -> Unit,
 ) -> @luna_dom.DomNode {
   let on_click : @luna_dom.MouseHandler = fn(_) {
-    if note_values.get().length() == 0 {
-      return
-    }
     if is_playing.get() {
       is_playing.set(false)
     } else {
-      let total_duration = @music.calculate_total_duration(
-        note_values.get(),
-        bpm.get(),
-      )
       // If at the end, restart from beginning
       let position = playback_position_ms.get()
-      let start_position = if position >= total_duration { 0 } else { position }
+      let start_position = if position >= total_duration() {
+        0
+      } else {
+        position
+      }
       start_playing(start_position)
     }
   }
