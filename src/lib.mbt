@@ -18,8 +18,8 @@ fn main {
   })
 
   // Track playback session (only used when playing)
-  let playback_started_at_raf_time = @signal.signal(0.0)
-  let playback_started_from_position = @signal.signal(0)
+  let playback_started_at_raf_time : Ref[Double] = { val: 0.0 }
+  let playback_started_from_position : Ref[Int] = { val: 0 }
   let pending_start_position : Ref[Int?] = { val: None }
   fn start_playing(position_ms : Int) -> Unit {
     pending_start_position.val = Some(position_ms)
@@ -31,8 +31,8 @@ fn main {
   fn tick(raf_time : Double) -> Unit {
     match pending_start_position.val {
       Some(pos) => {
-        playback_started_at_raf_time.set(raf_time)
-        playback_started_from_position.set(pos)
+        playback_started_at_raf_time.val = raf_time
+        playback_started_from_position.val = pos
         pending_start_position.val = None
       }
       None => ()
@@ -40,8 +40,8 @@ fn main {
     if not(is_playing.get()) {
       return
     }
-    let elapsed_ms = (raf_time - playback_started_at_raf_time.get()).to_int()
-    let current_pos = playback_started_from_position.get() + elapsed_ms
+    let elapsed_ms = (raf_time - playback_started_at_raf_time.val).to_int()
+    let current_pos = playback_started_from_position.val + elapsed_ms
 
     // Schedule audio in lookahead window
     @audio.schedule_notes_in_window(
