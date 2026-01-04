@@ -58,7 +58,7 @@ fn main {
     }
   }
 
-  start_loop(tick)
+  setup_loop(is_playing, tick)
 
   // Render app
   let doc = @js_dom.document()
@@ -110,11 +110,28 @@ fn main {
 }
 
 ///|
-fn start_loop(tick : (Double) -> Unit) -> Unit {
-  fn loop_fn(time : Double) -> Unit {
-    tick(time)
-    @js_dom.window().requestAnimationFrame(loop_fn) |> ignore
-  }
+fn setup_loop(
+  is_playing : @signal.Signal[Bool],
+  tick : (Double) -> Unit,
+) -> Unit {
+  let request_id : Ref[Int?] = { val: None }
+  let _ = @signal.effect(fn() {
+    if is_playing.get() {
+      fn loop_fn(time : Double) -> Unit {
+        tick(time)
+        request_id.val = Some(@js_dom.window().requestAnimationFrame(loop_fn))
+      }
 
-  @js_dom.window().requestAnimationFrame(loop_fn) |> ignore
+      request_id.val = Some(@js_dom.window().requestAnimationFrame(loop_fn))
+      return
+    }
+    match request_id.val {
+      Some(id) => {
+        @js_dom.window().cancelAnimationFrame(id)
+        request_id.val = None
+      }
+      None => ()
+    }
+  })
+
 }
