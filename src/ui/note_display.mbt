@@ -51,7 +51,7 @@ extern "js" fn add_drag_listeners_notes(
 /// Render falling notes display component using Canvas API
 pub fn note_display(
   note_values : @signal.Signal[Array[@music.NoteValue]],
-  playback_position_ms : @signal.Signal[Int],
+  playback_position : @signal.Signal[@music.Duration],
   bpm : @signal.Signal[Int],
   total_duration : () -> Int,
 ) -> @luna_dom.DomNode {
@@ -86,7 +86,7 @@ pub fn note_display(
       return
     }
     e.preventDefault()
-    let current_pos = playback_position_ms.get()
+    let current_pos = playback_position.get().to_milliseconds()
     let seek_amount = 500 // milliseconds per wheel tick
     let new_position_ms = if e.deltaY > 0.0 {
       current_pos + seek_amount
@@ -97,7 +97,7 @@ pub fn note_display(
       0,
       @cmp.minimum(new_position_ms, total_duration()),
     )
-    playback_position_ms.set(clamped_position)
+    playback_position.set(@music.Duration::from_milliseconds(clamped_position))
   }
   add_wheel_listener_notes(canvas, on_wheel)
 
@@ -109,7 +109,7 @@ pub fn note_display(
       return
     }
     drag_start_y.val = Some(e.clientY)
-    drag_start_position_ms.val = Some(playback_position_ms.get())
+    drag_start_position_ms.val = Some(playback_position.get().to_milliseconds())
   }
   let on_drag_move : (@js_dom.MouseEvent) -> Unit = fn(e) {
     match (drag_start_y.val, drag_start_position_ms.val) {
@@ -125,7 +125,9 @@ pub fn note_display(
           0,
           @cmp.minimum(new_position_ms, total_duration()),
         )
-        playback_position_ms.set(clamped_position)
+        playback_position.set(
+          @music.Duration::from_milliseconds(clamped_position),
+        )
       }
       _ => ()
     }
@@ -138,7 +140,7 @@ pub fn note_display(
 
   // Redraw when position or notes change
   let _ = @signal.effect(fn() {
-    let pos = playback_position_ms.get()
+    let pos = playback_position.get().to_milliseconds()
     let positions = note_positions()
 
     // Update canvas width to match displayed width

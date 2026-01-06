@@ -2,7 +2,7 @@
 /// Jazzene - Jazz Improvisation Web App (Tick-based Architecture)
 fn main {
   let is_playing = @signal.signal(false)
-  let playback_position_ms = @signal.signal(0)
+  let playback_position = @signal.signal(@music.Duration::from_milliseconds(0))
   let volume = @signal.signal(0.3)
   let bpm = @signal.signal(200)
   let raw_chord_progression = @signal.signal("Cm7 F7 Bbmaj7 Ebmaj7")
@@ -18,17 +18,25 @@ fn main {
   })
   let audio_ctx = @web_audio.AudioContext::new()
   fn tick(elapsed_ms : Int) -> Bool {
-    let pos = playback_position_ms.get() + elapsed_ms
-    let current_pos = @cmp.minimum(pos, total_duration())
+    let pos = playback_position
+      .get()
+      .op_add(@music.Duration::from_milliseconds(elapsed_ms))
+    let total_dur_ms = total_duration()
+    let total_dur = @music.Duration::from_milliseconds(total_dur_ms)
+    let current_pos = if pos.to_milliseconds() < total_dur_ms {
+      pos
+    } else {
+      total_dur
+    }
     @audio.schedule_notes_in_window(
       audio_ctx,
       note_values.get(),
       bpm.get(),
-      current_pos,
+      current_pos.to_milliseconds(),
       volume.get(),
     )
-    playback_position_ms.set(current_pos)
-    current_pos >= total_duration()
+    playback_position.set(current_pos)
+    current_pos.to_milliseconds() >= total_dur_ms
   }
 
   setup_loop(is_playing, tick)
@@ -51,11 +59,11 @@ fn main {
                 ]),
                 @luna_dom.div(class="flex gap-4 items-baseline p-1", [
                   @ui.play_pause_button(
-                    is_playing, playback_position_ms, total_duration,
+                    is_playing, playback_position, total_duration,
                   ),
                   @ui.volume_input(volume),
                   @luna_dom.div(class="w-full", [
-                    @ui.seek_bar(playback_position_ms, total_duration),
+                    @ui.seek_bar(playback_position, total_duration),
                   ]),
                 ]),
               ]),
@@ -66,9 +74,9 @@ fn main {
             attrs=[("aria-label", @luna_dom.Attr::AttrString("visualization"))],
             [
               @ui.note_display(
-                note_values, playback_position_ms, bpm, total_duration,
+                note_values, playback_position, bpm, total_duration,
               ),
-              @ui.keyboard(note_values, playback_position_ms, bpm),
+              @ui.keyboard(note_values, playback_position, bpm),
             ],
           ),
         ],
