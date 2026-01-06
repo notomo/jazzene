@@ -37,7 +37,32 @@ pub fn Duration::op_add(self : Duration, other : Duration) -> Duration {
 }
 
 ///|
-/// Compare durations
+/// Compare durations for equality
 pub fn Duration::op_equal(self : Duration, other : Duration) -> Bool {
   self.seconds == other.seconds
+}
+
+///|
+/// Compare two durations
+/// Returns: zero if equal, negative if self < other, positive if self > other
+pub fn Duration::compare(self : Duration, other : Duration) -> Int {
+  if self.seconds < other.seconds {
+    -1
+  } else if self.seconds > other.seconds {
+    1
+  } else {
+    0
+  }
+}
+
+///|
+/// Implement Compare trait for Duration
+pub impl Compare for Duration with compare(self, other) {
+  self.compare(other)
+}
+
+///|
+/// Implement Add trait for Duration
+pub impl Add for Duration with add(self, other) {
+  self.op_add(other)
 }

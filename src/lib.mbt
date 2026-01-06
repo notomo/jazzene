@@ -18,16 +18,10 @@ fn main {
   })
   let audio_ctx = @web_audio.AudioContext::new()
   fn tick(elapsed_ms : Int) -> Bool {
-    let pos = playback_position
-      .get()
-      .op_add(@music.Duration::from_milliseconds(elapsed_ms))
-    let total_dur_ms = total_duration()
-    let total_dur = @music.Duration::from_milliseconds(total_dur_ms)
-    let current_pos = if pos.to_milliseconds() < total_dur_ms {
-      pos
-    } else {
-      total_dur
-    }
+    let pos = playback_position.get() +
+      @music.Duration::from_milliseconds(elapsed_ms)
+    let total_dur = @music.Duration::from_milliseconds(total_duration())
+    let current_pos = if pos < total_dur { pos } else { total_dur }
     @audio.schedule_notes_in_window(
       audio_ctx,
       note_values.get(),
@@ -36,7 +30,7 @@ fn main {
       volume.get(),
     )
     playback_position.set(current_pos)
-    current_pos.to_milliseconds() >= total_dur_ms
+    current_pos >= total_dur
   }
 
   setup_loop(is_playing, tick)
