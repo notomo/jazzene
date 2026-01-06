@@ -53,7 +53,7 @@ pub fn note_display(
   note_values : @signal.Signal[Array[@music.NoteValue]],
   playback_position : @signal.Signal[@music.Duration],
   bpm : @signal.Signal[Int],
-  total_duration : () -> Int,
+  total_duration : () -> @music.Duration,
 ) -> @luna_dom.DomNode {
   let canvas_elem = @js_dom.document().createElement("canvas")
   let canvas = cast_to_canvas(canvas_elem)
@@ -95,7 +95,7 @@ pub fn note_display(
     }
     let clamped_position = @cmp.maximum(
       0,
-      @cmp.minimum(new_position_ms, total_duration()),
+      @cmp.minimum(new_position_ms, total_duration().to_milliseconds()),
     )
     playback_position.set(@music.Duration::from_milliseconds(clamped_position))
   }
@@ -123,7 +123,7 @@ pub fn note_display(
         let new_position_ms = start_pos + seek_amount
         let clamped_position = @cmp.maximum(
           0,
-          @cmp.minimum(new_position_ms, total_duration()),
+          @cmp.minimum(new_position_ms, total_duration().to_milliseconds()),
         )
         playback_position.set(
           @music.Duration::from_milliseconds(clamped_position),

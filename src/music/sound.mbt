@@ -12,11 +12,12 @@ pub struct ScheduledSound {
 pub fn extract_sounds_in_window(
   note_values : Array[NoteValue],
   bpm : Int,
-  current_pos_ms : Int,
-  lookahead_ms : Int,
+  current_pos : Duration,
+  lookahead : Duration,
   current_time : Double,
 ) -> Array[ScheduledSound] {
-  let window_end_ms = current_pos_ms + lookahead_ms
+  let current_pos_ms = current_pos.to_milliseconds()
+  let window_end_ms = current_pos_ms + lookahead.to_milliseconds()
   let sounds = []
   let mut position_ms = 0
   for note_value in note_values {

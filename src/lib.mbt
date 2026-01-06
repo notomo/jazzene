@@ -20,13 +20,13 @@ fn main {
   fn tick(elapsed_ms : Int) -> Bool {
     let pos = playback_position.get() +
       @music.Duration::from_milliseconds(elapsed_ms)
-    let total_dur = @music.Duration::from_milliseconds(total_duration())
+    let total_dur = total_duration()
     let current_pos = if pos < total_dur { pos } else { total_dur }
     @audio.schedule_notes_in_window(
       audio_ctx,
       note_values.get(),
       bpm.get(),
-      current_pos.to_milliseconds(),
+      current_pos,
       volume.get(),
     )
     playback_position.set(current_pos)

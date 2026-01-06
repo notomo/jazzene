@@ -195,14 +195,14 @@ pub fn NoteValue::midi(self : NoteValue) -> MidiNumber? {
 }
 
 ///|
-/// Calculate total duration of a note sequence in milliseconds
+/// Calculate total duration of a note sequence
 pub fn calculate_total_duration(
   note_values : Array[NoteValue],
   bpm : Int,
-) -> Int {
+) -> Duration {
   let mut total_ms = 0
   for note_value in note_values {
     total_ms = total_ms + note_value.duration().to_ms(bpm)
   }
-  total_ms
+  Duration::from_milliseconds(total_ms)
 }

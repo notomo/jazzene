@@ -3,7 +3,7 @@
 pub fn play_pause_button(
   is_playing : @signal.Signal[Bool],
   playback_position : @signal.Signal[@music.Duration],
-  total_duration : () -> Int,
+  total_duration : () -> @music.Duration,
 ) -> @luna_dom.DomNode {
   let on_click : @luna_dom.MouseHandler = fn(_) {
     if is_playing.get() {
@@ -12,7 +12,7 @@ pub fn play_pause_button(
     }
     // If at the end, restart from beginning
     let position = playback_position.get()
-    let start_position = if position.to_milliseconds() >= total_duration() {
+    let start_position = if position >= total_duration() {
       @music.Duration::from_milliseconds(0)
     } else {
       position

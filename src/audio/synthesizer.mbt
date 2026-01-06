@@ -47,15 +47,15 @@ pub fn schedule_notes_in_window(
   ctx : @web_audio.AudioContext,
   note_values : Array[@music.NoteValue],
   bpm : Int,
-  current_pos_ms : Int,
-  lookahead_ms? : Int = 100,
+  current_pos : @music.Duration,
+  lookahead? : @music.Duration = @music.Duration::from_milliseconds(100),
   volume : Double,
 ) -> Unit {
   let sounds = @music.extract_sounds_in_window(
     note_values,
     bpm,
-    current_pos_ms,
-    lookahead_ms,
+    current_pos,
+    lookahead,
     ctx.current_time(),
   )
   for sound in sounds {
