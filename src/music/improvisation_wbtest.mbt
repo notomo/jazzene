@@ -10,7 +10,7 @@ test "generate improvisation from single chord" {
 
   // All note values should have valid durations
   for note_value in note_values {
-    match note_value.duration() {
+    match note_value.note_duration() {
       Eighth | Quarter | Half => ()
       // Compiler ensures exhaustiveness
     }
@@ -19,7 +19,7 @@ test "generate improvisation from single chord" {
   // Verify total beats match expected (4 beats per measure + 4 beats of initial rests)
   let mut total_beats = 0.0
   for note_value in note_values {
-    total_beats = total_beats + note_value.duration().to_beats()
+    total_beats = total_beats + note_value.note_duration().to_beats()
   }
   inspect(total_beats, content="8")
 }
@@ -37,7 +37,7 @@ test "generate improvisation from chord progression" {
   // Verify total beats match expected (3 chords * 4 beats + 4 beats of initial rests = 16 beats)
   let mut total_beats = 0.0
   for note_value in note_values {
-    total_beats = total_beats + note_value.duration().to_beats()
+    total_beats = total_beats + note_value.note_duration().to_beats()
   }
   inspect(total_beats, content="16")
 }
@@ -51,7 +51,7 @@ test "improvisation with custom settings" {
   // Verify total beats match expected (8 beats per measure + 4 beats of initial rests = 12 beats)
   let mut total_beats = 0.0
   for note_value in note_values {
-    total_beats = total_beats + note_value.duration().to_beats()
+    total_beats = total_beats + note_value.note_duration().to_beats()
   }
   inspect(total_beats, content="12")
 }
@@ -67,7 +67,7 @@ test "notes have varying durations" {
   let mut quarter_count = 0
   let mut half_count = 0
   for note_value in note_values {
-    match note_value.duration() {
+    match note_value.note_duration() {
       Eighth => eighth_count = eighth_count + 1
       Quarter => quarter_count = quarter_count + 1
       Half => half_count = half_count + 1

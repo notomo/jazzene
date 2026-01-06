@@ -177,12 +177,18 @@ pub enum NoteValue {
 } derive(Eq, Show)
 
 ///|
-/// Get duration from either Note or Rest
-pub fn NoteValue::duration(self : NoteValue) -> NoteDuration {
+/// Get note duration from either Note or Rest
+pub fn NoteValue::note_duration(self : NoteValue) -> NoteDuration {
   match self {
     Note(duration=d, ..) => d
     Rest(duration=d) => d
   }
+}
+
+///|
+/// Get duration from either Note or Rest with BPM conversion
+pub fn NoteValue::duration(self : NoteValue, bpm : Int) -> Duration {
+  Duration::from_milliseconds(self.note_duration().to_ms(bpm))
 }
 
 ///|
@@ -200,9 +206,7 @@ pub fn calculate_total_duration(
   note_values : Array[NoteValue],
   bpm : Int,
 ) -> Duration {
-  let mut total_ms = 0
-  for note_value in note_values {
-    total_ms = total_ms + note_value.duration().to_ms(bpm)
-  }
-  Duration::from_milliseconds(total_ms)
+  let total = @list.from_array(note_values).fold(init=0, (acc, x) => acc +
+    x.duration(bpm).to_milliseconds())
+  Duration::from_milliseconds(total)
 }

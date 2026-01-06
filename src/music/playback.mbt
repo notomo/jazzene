@@ -8,7 +8,7 @@ pub fn calculate_active_midi_notes(
   let mut current_pos = 0
   let active_midi_notes : Array[Int] = []
   for note_value in note_values {
-    let duration_ms = note_value.duration().to_ms(bpm)
+    let duration_ms = note_value.duration(bpm).to_milliseconds()
     let start_ms = current_pos
     let end_ms = current_pos + duration_ms
     match note_value {

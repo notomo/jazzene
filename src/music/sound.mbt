@@ -16,34 +16,37 @@ pub fn extract_sounds_in_window(
   lookahead : Duration,
   current_time : Double,
 ) -> Array[ScheduledSound] {
-  let current_pos_ms = current_pos.to_milliseconds()
-  let window_end_ms = current_pos_ms + lookahead.to_milliseconds()
+  let window_end = current_pos + lookahead
   let sounds = []
-  let mut position_ms = 0
+  let mut position = Duration::from_milliseconds(0)
   for note_value in note_values {
-    let duration_ms = note_value.duration().to_ms(bpm)
-    let end_ms = position_ms + duration_ms
+    let duration = note_value.duration(bpm)
+    let end_pos = position + duration
 
     // Extract only actual notes (skip rests) within the window
     match note_value {
       Note(midi=midi_val, ..) =>
-        if position_ms >= current_pos_ms && position_ms < window_end_ms {
+        if position.compare(current_pos) >= 0 &&
+          position.compare(window_end) < 0 {
           // Convert to audio context time
-          let audio_start_time_sec = current_time +
-            (position_ms - current_pos_ms).to_double() / 1000.0
-          let duration_sec = duration_ms.to_double() / 1000.0
+          let offset = Duration::from_seconds(
+            position.to_seconds() - current_pos.to_seconds(),
+          )
+          let audio_start_time = Duration::from_seconds(
+            current_time + offset.to_seconds(),
+          )
           sounds.push(ScheduledSound::{
             midi: midi_val.value,
-            audio_start_time: Duration::from_seconds(audio_start_time_sec),
-            duration: Duration::from_seconds(duration_sec),
+            audio_start_time,
+            duration,
           })
         }
       Rest(..) => () // Rests advance time but produce no sound
     }
-    position_ms = end_ms
+    position = end_pos
 
     // Stop if we've passed the window
-    if position_ms >= window_end_ms {
+    if position.compare(window_end) >= 0 {
       break
     }
   }

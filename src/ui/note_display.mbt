@@ -68,7 +68,7 @@ pub fn note_display(
     let mut current_pos = 0
     let positions : Array[(Int, Int, Int)] = [] // (midi, start_ms, duration_ms)
     for note_value in note_value_list {
-      let duration_ms = note_value.duration().to_ms(bpm_val)
+      let duration_ms = note_value.duration(bpm_val).to_milliseconds()
       // Only track positions for actual notes (rests are invisible gaps)
       match note_value {
         Note(midi=midi_val, ..) =>

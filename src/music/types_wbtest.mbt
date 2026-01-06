@@ -6,11 +6,22 @@ test "NoteDuration to_beats" {
 }
 
 ///|
-test "NoteDuration to_ms with bpm 120" {
+test "NoteValue duration with bpm 120" {
   let bpm = 120
-  inspect(Eighth.to_ms(bpm), content="250")
-  inspect(Quarter.to_ms(bpm), content="500")
-  inspect(Half.to_ms(bpm), content="1000")
+  let midi = MidiNumber::new(60).unwrap()
+  inspect(
+    Note(midi~, duration=Eighth).duration(bpm).to_milliseconds(),
+    content="250",
+  )
+  inspect(
+    Note(midi~, duration=Quarter).duration(bpm).to_milliseconds(),
+    content="500",
+  )
+  inspect(
+    Note(midi~, duration=Half).duration(bpm).to_milliseconds(),
+    content="1000",
+  )
+  inspect(Rest(duration=Quarter).duration(bpm).to_milliseconds(), content="500")
 }
 
 ///|
