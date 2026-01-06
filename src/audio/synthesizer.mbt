@@ -3,8 +3,8 @@
 fn schedule_note(
   ctx : @web_audio.AudioContext,
   midi : Int,
-  start_time : Double,
-  duration_sec : Double,
+  start_time : @music.Duration,
+  duration : @music.Duration,
   volume : Double,
 ) -> Unit {
   // Convert MIDI to frequency: f = 440 * 2^((n-69)/12)
@@ -25,17 +25,19 @@ fn schedule_note(
   // Envelope
   let attack_time = 0.01
   let release_time = 0.1
+  let start_time_sec = start_time.to_seconds()
+  let duration_sec = duration.to_seconds()
   let gain_param = gain.gain()
-  gain_param.set_value_at_time(0.0, start_time)
-  gain_param.linear_ramp_to_value_at_time(volume, start_time + attack_time)
+  gain_param.set_value_at_time(0.0, start_time_sec)
+  gain_param.linear_ramp_to_value_at_time(volume, start_time_sec + attack_time)
   gain_param.exponential_ramp_to_value_at_time(
     0.01,
-    start_time + duration_sec - release_time,
+    start_time_sec + duration_sec - release_time,
   )
 
   // Schedule start/stop
-  osc.start(start_time)
-  osc.stop(start_time + duration_sec)
+  osc.start(start_time_sec)
+  osc.stop(start_time_sec + duration_sec)
 }
 
 ///|
@@ -61,7 +63,7 @@ pub fn schedule_notes_in_window(
       ctx,
       sound.midi,
       sound.audio_start_time,
-      sound.duration_sec,
+      sound.duration,
       volume,
     )
   }

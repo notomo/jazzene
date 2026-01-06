@@ -2,8 +2,8 @@
 /// Scheduled sound with timing information for playback
 pub struct ScheduledSound {
   midi : Int
-  audio_start_time : Double // Audio context time (seconds)
-  duration_sec : Double // Duration in seconds
+  audio_start_time : Duration // Audio context time
+  duration : Duration // Duration
 } derive(Eq, Show)
 
 ///|
@@ -28,13 +28,13 @@ pub fn extract_sounds_in_window(
       Note(midi=midi_val, ..) =>
         if position_ms >= current_pos_ms && position_ms < window_end_ms {
           // Convert to audio context time
-          let audio_start_time = current_time +
+          let audio_start_time_sec = current_time +
             (position_ms - current_pos_ms).to_double() / 1000.0
           let duration_sec = duration_ms.to_double() / 1000.0
           sounds.push(ScheduledSound::{
             midi: midi_val.value,
-            audio_start_time,
-            duration_sec,
+            audio_start_time: Duration::from_seconds(audio_start_time_sec),
+            duration: Duration::from_seconds(duration_sec),
           })
         }
       Rest(..) => () // Rests advance time but produce no sound
