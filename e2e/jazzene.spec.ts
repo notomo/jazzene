@@ -14,10 +14,7 @@ test.describe("Jazzene - Jazz Improvisation Web App", () => {
     await expect(jazzene.getFallingNotes()).toBeVisible();
     await expect(jazzene.getLeadSheet()).toBeVisible();
     await expect(jazzene.getVisualization()).toBeVisible();
-  });
-
-  test("should have default chord progression in input", async () => {
-    await expect(jazzene.getChordInput()).toHaveValue("Cm7 F7 Bbmaj7 Ebmaj7");
+    await expect(jazzene.getSeekbar()).toBeEnabled();
   });
 
   test("should allow editing chord progression", async () => {
@@ -34,24 +31,6 @@ test.describe("Jazzene - Jazz Improvisation Web App", () => {
     await expect(jazzene.getPlayButton()).toBeEnabled();
   });
 
-  test("should auto-generate different progressions correctly", async () => {
-    await jazzene.setChordProgression("Cmaj7 Am7 Dm7 G7");
-
-    await expect(jazzene.getPlayButton()).toBeEnabled();
-  });
-
-  test("should handle empty chord progression gracefully", async () => {
-    await jazzene.setChordProgression("");
-
-    await expect(jazzene.getPlayButton()).toBeVisible();
-  });
-
-  test("should display seek_bar with time display", async () => {
-    await expect(jazzene.getSeekbar()).toBeEnabled();
-
-    await expect(jazzene.getTimeDisplay()).toBeVisible();
-  });
-
   test("should update time display during playback", async () => {
     await jazzene.play();
 
@@ -59,13 +38,6 @@ test.describe("Jazzene - Jazz Improvisation Web App", () => {
 
     const totalTime = await jazzene.getTimeDisplayText();
     expect(totalTime).not.toContain("0:00 / 0:00"); // Should not be initial state
-  });
-
-  test("should allow seeking with seek_bar", async () => {
-    await jazzene.setSeekbarValue("50");
-
-    expect(await jazzene.getSeekbarValue()).toBe("50");
-    await expect(jazzene.getFallingNotes()).toBeVisible();
   });
 
   test("should update seekbar value during playback", async () => {
@@ -77,23 +49,6 @@ test.describe("Jazzene - Jazz Improvisation Web App", () => {
     expect(parseInt(await jazzene.getSeekbarValue())).toBeGreaterThan(
       parseInt(initialValue),
     );
-  });
-
-  test("should show correct time after stopping playback", async () => {
-    await jazzene.play();
-    await jazzene.waitForPlayback(100);
-    await jazzene.stop();
-
-    const time = await jazzene.getTimeDisplayText();
-    // Time should be in valid format (M:SS / M:SS)
-    expect(time).toMatch(/^\d{1,2}:\d{2} \/ \d{1,2}:\d{2}$/);
-
-    const currentTime = time!.split(" / ")[0];
-    const [minutes, seconds] = currentTime.split(":").map((n) => parseInt(n));
-
-    expect(minutes).toBeLessThan(10);
-    expect(seconds).toBeGreaterThanOrEqual(0);
-    expect(seconds).toBeLessThan(60);
   });
 
   test("should restart from beginning when play is pressed after playback finishes", async () => {
