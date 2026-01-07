@@ -6,11 +6,14 @@ test "extract_sounds_in_window extracts notes in range" {
     Note(midi=MidiNumber::{ value: 64 }, duration=Quarter), // 1000ms - 1500ms
   ]
   let bpm = 120
+  let sounds_list = note_values.map(fn(nv) {
+    NoteValueSound::from_note_value(nv, bpm)
+  })
   let current_pos = Duration::from_milliseconds(500)
   let lookahead = Duration::from_milliseconds(1000)
   let current_time = 10.0
   let sounds = extract_sounds_in_window(
-    note_values, bpm, current_pos, lookahead, current_time,
+    sounds_list, current_pos, lookahead, current_time,
   )
   inspect(sounds.length(), content="2")
   inspect(sounds[0].midi, content="62")
@@ -29,11 +32,14 @@ test "extract_sounds_in_window skips rests" {
     Note(midi=MidiNumber::{ value: 64 }, duration=Quarter), // 1000ms - 1500ms
   ]
   let bpm = 120
+  let sounds_list = note_values.map(fn(nv) {
+    NoteValueSound::from_note_value(nv, bpm)
+  })
   let current_pos = Duration::from_milliseconds(0)
   let lookahead = Duration::from_milliseconds(1500)
   let current_time = 5.0
   let sounds = extract_sounds_in_window(
-    note_values, bpm, current_pos, lookahead, current_time,
+    sounds_list, current_pos, lookahead, current_time,
   )
   inspect(sounds.length(), content="2")
   inspect(sounds[0].midi, content="60")
@@ -49,11 +55,14 @@ test "extract_sounds_in_window excludes notes outside range" {
     Note(midi=MidiNumber::{ value: 65 }, duration=Quarter), // 1500ms - 2000ms
   ]
   let bpm = 120
+  let sounds_list = note_values.map(fn(nv) {
+    NoteValueSound::from_note_value(nv, bpm)
+  })
   let current_pos = Duration::from_milliseconds(500)
   let lookahead = Duration::from_milliseconds(1000)
   let current_time = 3.0
   let sounds = extract_sounds_in_window(
-    note_values, bpm, current_pos, lookahead, current_time,
+    sounds_list, current_pos, lookahead, current_time,
   )
   inspect(sounds.length(), content="2")
   inspect(sounds[0].midi, content="62")
@@ -64,11 +73,14 @@ test "extract_sounds_in_window excludes notes outside range" {
 test "extract_sounds_in_window returns empty for empty input" {
   let note_values : Array[NoteValue] = []
   let bpm = 120
+  let sounds_list = note_values.map(fn(nv) {
+    NoteValueSound::from_note_value(nv, bpm)
+  })
   let current_pos = Duration::from_milliseconds(0)
   let lookahead = Duration::from_milliseconds(1000)
   let current_time = 0.0
   let sounds = extract_sounds_in_window(
-    note_values, bpm, current_pos, lookahead, current_time,
+    sounds_list, current_pos, lookahead, current_time,
   )
   inspect(sounds.length(), content="0")
 }
@@ -80,11 +92,14 @@ test "extract_sounds_in_window returns empty when all notes outside range" {
     Note(midi=MidiNumber::{ value: 62 }, duration=Quarter), // 500ms - 1000ms
   ]
   let bpm = 120
+  let sounds_list = note_values.map(fn(nv) {
+    NoteValueSound::from_note_value(nv, bpm)
+  })
   let current_pos = Duration::from_milliseconds(1000)
   let lookahead = Duration::from_milliseconds(500)
   let current_time = 1.0
   let sounds = extract_sounds_in_window(
-    note_values, bpm, current_pos, lookahead, current_time,
+    sounds_list, current_pos, lookahead, current_time,
   )
   inspect(sounds.length(), content="0")
 }
@@ -99,11 +114,14 @@ test "extract_sounds_in_window stops early when past window" {
     Note(midi=MidiNumber::{ value: 67 }, duration=Quarter), // 2000ms - 2500ms
   ]
   let bpm = 120
+  let sounds_list = note_values.map(fn(nv) {
+    NoteValueSound::from_note_value(nv, bpm)
+  })
   let current_pos = Duration::from_milliseconds(0)
   let lookahead = Duration::from_milliseconds(1000)
   let current_time = 2.0
   let sounds = extract_sounds_in_window(
-    note_values, bpm, current_pos, lookahead, current_time,
+    sounds_list, current_pos, lookahead, current_time,
   )
 
   // Should only process first two notes and break early

@@ -8,15 +8,21 @@ fn main {
   let volume = @signal.signal(0.3)
   let bpm = @signal.signal(200)
   let raw_chord_progression = @signal.signal("Cm7 F7 Bbmaj7 Ebmaj7")
-  let note_values : @signal.Signal[Array[@music.NoteValue]] = @signal.signal([])
+  let sounds : @signal.Signal[Array[@music.NoteValueSound]] = @signal.signal([])
   let _ = @signal.effect(fn() {
-    let x = raw_chord_progression.get()
+    let note_vals = raw_chord_progression.get()
       |> @music.parse_chord_progression
       |> @music.generate_improvisation(@music.ImprovisationSettings::default())
-    note_values.set(x)
+
+    // Pre-calculate durations with current BPM
+    let current_bpm = bpm.get()
+    let sound_list = note_vals.map(fn(nv) {
+      @music.NoteValueSound::from_note_value(nv, current_bpm)
+    })
+    sounds.set(sound_list)
   })
   let total_duration = @signal.memo(fn() {
-    @music.calculate_total_duration(note_values.get(), bpm.get())
+    @music.calculate_total_duration(sounds.get())
   })
   let audio_ctx = @web_audio.AudioContext::new()
   fn tick(elapsed_ms : Double) -> Bool {
@@ -26,8 +32,7 @@ fn main {
     let current_pos = if pos < total_dur { pos } else { total_dur }
     @audio.schedule_notes_in_window(
       audio_ctx,
-      note_values.get(),
-      bpm.get(),
+      sounds.get(),
       current_pos,
       volume.get(),
     )
@@ -69,10 +74,8 @@ fn main {
             class="bg-slate-950 shadow-2xl border-slate-700 h-full grid grid-rows-[80%_20%]",
             attrs=[("aria-label", @luna_dom.Attr::AttrString("visualization"))],
             [
-              @ui.note_display(
-                note_values, playback_position, bpm, total_duration,
-              ),
-              @ui.keyboard(note_values, playback_position, bpm),
+              @ui.note_display(sounds, playback_position, bpm, total_duration),
+              @ui.keyboard(sounds, playback_position),
             ],
           ),
         ],

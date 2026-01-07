@@ -195,12 +195,40 @@ pub fn NoteValue::midi(self : NoteValue) -> MidiNumber? {
 }
 
 ///|
-/// Calculate total duration of a note sequence
-pub fn calculate_total_duration(
-  note_values : Array[NoteValue],
+/// NoteValue with pre-calculated duration based on BPM
+pub struct NoteValueSound {
+  note_value : NoteValue
+  duration : Duration
+} derive(Eq, Show)
+
+///|
+/// Create NoteValueSound from NoteValue with BPM
+pub fn NoteValueSound::from_note_value(
+  note_value : NoteValue,
   bpm : Int,
-) -> Duration {
-  let total = @list.from_array(note_values).fold(init=0.0, (acc, x) => acc +
-    x.duration(bpm).to_milliseconds())
+) -> NoteValueSound {
+  NoteValueSound::{ note_value, duration: note_value.duration(bpm) }
+}
+
+///|
+/// Get MIDI value if this is a Note sound
+pub fn NoteValueSound::midi(self : NoteValueSound) -> MidiNumber? {
+  self.note_value.midi()
+}
+
+///|
+/// Check if this is a Rest sound
+pub fn NoteValueSound::is_rest(self : NoteValueSound) -> Bool {
+  match self.note_value {
+    Rest(..) => true
+    Note(..) => false
+  }
+}
+
+///|
+/// Calculate total duration of a note sequence
+pub fn calculate_total_duration(sounds : Array[NoteValueSound]) -> Duration {
+  let total = @list.from_array(sounds).fold(init=0.0, (acc, sound) => acc +
+    sound.duration.to_milliseconds())
   Duration::from_milliseconds(total)
 }

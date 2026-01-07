@@ -1,9 +1,8 @@
 ///|
 /// Render piano keyboard component using Canvas API
 pub fn keyboard(
-  note_values : @signal.Signal[Array[@music.NoteValue]],
+  sounds : @signal.Signal[Array[@music.NoteValueSound]],
   playback_position : @signal.Signal[@music.Duration],
-  bpm : @signal.Signal[Int],
 ) -> @luna_dom.DomNode {
   let canvas_elem = @js_dom.document().createElement("canvas")
   let canvas = cast_to_canvas(canvas_elem)
@@ -14,9 +13,8 @@ pub fn keyboard(
   // Calculate currently playing notes
   let playing_notes = @signal.memo(fn() {
     @music.calculate_active_midi_notes(
-      note_values.get(),
+      sounds.get(),
       playback_position.get().to_milliseconds(),
-      bpm.get(),
     )
   })
 

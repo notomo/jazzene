@@ -45,20 +45,18 @@ fn schedule_note(
 /// This avoids setTimeout drift by using WebAudio's precise scheduling
 pub fn schedule_notes_in_window(
   ctx : @web_audio.AudioContext,
-  note_values : Array[@music.NoteValue],
-  bpm : Int,
+  sounds : Array[@music.NoteValueSound],
   current_pos : @music.Duration,
   lookahead? : @music.Duration = @music.Duration::from_milliseconds(100),
   volume : Double,
 ) -> Unit {
-  let sounds = @music.extract_sounds_in_window(
-    note_values,
-    bpm,
+  let scheduled_sounds = @music.extract_sounds_in_window(
+    sounds,
     current_pos,
     lookahead,
     ctx.current_time(),
   )
-  for sound in sounds {
+  for sound in scheduled_sounds {
     schedule_note(ctx, sound.midi, sound.start_time, sound.duration, volume)
   }
 }

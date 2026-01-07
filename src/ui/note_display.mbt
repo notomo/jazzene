@@ -50,7 +50,7 @@ extern "js" fn add_drag_listeners_notes(
 ///|
 /// Render falling notes display component using Canvas API
 pub fn note_display(
-  note_values : @signal.Signal[Array[@music.NoteValue]],
+  sounds : @signal.Signal[Array[@music.NoteValueSound]],
   playback_position : @signal.Signal[@music.Duration],
   bpm : @signal.Signal[Int],
   total_duration : () -> @music.Duration,
@@ -63,14 +63,13 @@ pub fn note_display(
 
   // Pre-calculate note positions (immutable list with start times)
   let note_positions = @signal.memo(fn() {
-    let note_value_list = note_values.get()
-    let bpm_val = bpm.get()
+    let sound_list = sounds.get()
     let mut current_pos = 0.0
     let positions : Array[(Int, Double, Double)] = [] // (midi, start_ms, duration_ms)
-    for note_value in note_value_list {
-      let duration_ms = note_value.duration(bpm_val).to_milliseconds()
+    for sound in sound_list {
+      let duration_ms = sound.duration.to_milliseconds()
       // Only track positions for actual notes (rests are invisible gaps)
-      match note_value {
+      match sound.note_value {
         Note(midi=midi_val, ..) =>
           positions.push((midi_val.value, current_pos, duration_ms))
         Rest(..) => () // Rests don't render but advance timing
@@ -82,7 +81,7 @@ pub fn note_display(
 
   // Add wheel event listener for seeking
   let on_wheel : (@js_dom.WheelEvent) -> Unit = fn(e) {
-    if note_values.get().length() == 0 {
+    if sounds.get().length() == 0 {
       return
     }
     e.preventDefault()
@@ -105,7 +104,7 @@ pub fn note_display(
   let drag_start_y : Ref[Double?] = { val: None }
   let drag_start_position_ms : Ref[Double?] = { val: None }
   let on_drag_start : (@js_dom.MouseEvent) -> Unit = fn(e) {
-    if note_values.get().length() == 0 {
+    if sounds.get().length() == 0 {
       return
     }
     drag_start_y.val = Some(e.clientY)

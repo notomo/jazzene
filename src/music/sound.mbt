@@ -10,21 +10,20 @@ pub struct ScheduledSound {
 /// Extract sounds from note values within a time window
 /// Returns only Note events (not Rests) that fall within the lookahead window
 pub fn extract_sounds_in_window(
-  note_values : Array[NoteValue],
-  bpm : Int,
+  sounds : Array[NoteValueSound],
   current_pos : Duration,
   lookahead : Duration,
   current_time : Double,
 ) -> Array[ScheduledSound] {
   let window_end = current_pos + lookahead
-  let sounds = []
+  let scheduled_sounds = []
   let mut position = Duration::from_milliseconds(0)
-  for note_value in note_values {
-    let duration = note_value.duration(bpm)
+  for sound in sounds {
+    let duration = sound.duration
     let end_pos = position + duration
 
     // Extract only actual notes (skip rests) within the window
-    match note_value {
+    match sound.note_value {
       Note(midi=midi_val, ..) =>
         if position.compare(current_pos) >= 0 &&
           position.compare(window_end) < 0 {
@@ -35,7 +34,7 @@ pub fn extract_sounds_in_window(
           let audio_start_time = Duration::from_seconds(
             current_time + offset.to_seconds(),
           )
-          sounds.push(ScheduledSound::{
+          scheduled_sounds.push(ScheduledSound::{
             midi: midi_val.value,
             start_time: audio_start_time,
             duration,
@@ -50,5 +49,5 @@ pub fn extract_sounds_in_window(
       break
     }
   }
-  sounds
+  scheduled_sounds
 }
