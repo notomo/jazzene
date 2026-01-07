@@ -17,13 +17,6 @@ pub fn NoteDuration::to_beats(self : NoteDuration) -> Double {
 }
 
 ///|
-/// Convert note duration to milliseconds based on BPM
-pub fn NoteDuration::to_ms(self : NoteDuration, bpm : Int) -> Double {
-  let ms_per_beat = 60000.0 / bpm.to_double()
-  self.to_beats() * ms_per_beat
-}
-
-///|
 /// MIDI number newtype with validation (0-127)
 pub struct MidiNumber {
   value : Int
@@ -188,7 +181,8 @@ pub fn NoteValue::note_duration(self : NoteValue) -> NoteDuration {
 ///|
 /// Get duration from either Note or Rest with BPM conversion
 pub fn NoteValue::duration(self : NoteValue, bpm : Int) -> Duration {
-  Duration::from_milliseconds(self.note_duration().to_ms(bpm))
+  let ms_per_beat = 60000.0 / bpm.to_double()
+  (self.note_duration().to_beats() * ms_per_beat) |> Duration::from_milliseconds
 }
 
 ///|
