@@ -18,9 +18,9 @@ pub fn NoteDuration::to_beats(self : NoteDuration) -> Double {
 
 ///|
 /// Convert note duration to milliseconds based on BPM
-pub fn NoteDuration::to_ms(self : NoteDuration, bpm : Int) -> Int {
-  let ms_per_beat = 60000 / bpm
-  (self.to_beats() * ms_per_beat.to_double()).to_int()
+pub fn NoteDuration::to_ms(self : NoteDuration, bpm : Int) -> Double {
+  let ms_per_beat = 60000.0 / bpm.to_double()
+  self.to_beats() * ms_per_beat
 }
 
 ///|
@@ -206,7 +206,7 @@ pub fn calculate_total_duration(
   note_values : Array[NoteValue],
   bpm : Int,
 ) -> Duration {
-  let total = @list.from_array(note_values).fold(init=0, (acc, x) => acc +
+  let total = @list.from_array(note_values).fold(init=0.0, (acc, x) => acc +
     x.duration(bpm).to_milliseconds())
   Duration::from_milliseconds(total)
 }

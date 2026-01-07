@@ -1,7 +1,7 @@
 ///|
 /// Format milliseconds as "M:SS"
-fn format_time(ms : Int) -> String {
-  let total_seconds = ms / 1000
+fn format_time(ms : Double) -> String {
+  let total_seconds = (ms / 1000.0).to_int()
   let minutes = total_seconds / 60
   let seconds = total_seconds % 60
   minutes.to_string() +
@@ -18,7 +18,7 @@ pub fn seek_bar(
 ) -> @luna_dom.DomNode {
   let on_seek : @luna_dom.InputHandler = fn(e) {
     let total_dur_ms = total_duration().to_milliseconds()
-    if total_dur_ms == 0 {
+    if total_dur_ms == 0.0 {
       return
     }
     let target = e.target()
@@ -26,9 +26,7 @@ pub fn seek_bar(
     let value = event_target.as_any()._get("value").to_string()
     match @js_global.parseFloat(value) {
       Some(position_percent) => {
-        let new_position_ms = (position_percent /
-        100.0 *
-        total_dur_ms.to_double()).to_int()
+        let new_position_ms = position_percent / 100.0 * total_dur_ms
         playback_position.set(
           @music.Duration::from_milliseconds(new_position_ms),
         )
@@ -59,16 +57,16 @@ pub fn seek_bar(
       ],
       dyn_value=fn() {
         let total_dur_ms = total_duration().to_milliseconds()
-        if total_dur_ms == 0 {
+        if total_dur_ms == 0.0 {
           "0"
         } else {
-          let percent = playback_position.get().to_milliseconds().to_double() /
-            total_dur_ms.to_double() *
+          let percent = playback_position.get().to_milliseconds() /
+            total_dur_ms *
             100.0
           percent.to_int().to_string()
         }
       },
-      dyn_disabled=fn() { total_duration().to_milliseconds() == 0 },
+      dyn_disabled=fn() { total_duration().to_milliseconds() == 0.0 },
       on=@luna_dom.events().input(on_seek),
     ),
   ])

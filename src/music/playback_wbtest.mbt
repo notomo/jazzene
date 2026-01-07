@@ -132,12 +132,15 @@ test "calculate_active_notes - different bpm" {
   let notes = [Note(midi~, duration=Quarter)]
 
   // bpm 120: Quarter note = 500ms
-  inspect(calculate_active_midi_notes(notes, 250, 120), content="[60]")
-  inspect(calculate_active_midi_notes(notes, 500, 120), content="[]")
+  inspect(calculate_active_midi_notes(notes, 250.0, 120), content="[60]")
+  inspect(calculate_active_midi_notes(notes, 500.0, 120), content="[]")
 
-  // bpm 90: Quarter note = 666ms
-  inspect(calculate_active_midi_notes(notes, 250, 90), content="[60]")
-  inspect(calculate_active_midi_notes(notes, 666, 90), content="[]")
+  // bpm 90: Quarter note = 666.666...ms
+  inspect(calculate_active_midi_notes(notes, 250.0, 90), content="[60]")
+  inspect(
+    calculate_active_midi_notes(notes, 666.6666666666666, 90),
+    content="[]",
+  )
 }
 
 ///|

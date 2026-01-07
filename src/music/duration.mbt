@@ -5,9 +5,9 @@ pub struct Duration {
 } derive(Eq, Show)
 
 ///|
-/// Create a Duration from milliseconds (as Int)
-pub fn Duration::from_milliseconds(milliseconds : Int) -> Duration {
-  { seconds: milliseconds.to_double() / 1000.0 }
+/// Create a Duration from milliseconds (as Double)
+pub fn Duration::from_milliseconds(milliseconds : Double) -> Duration {
+  { seconds: milliseconds / 1000.0 }
 }
 
 ///|
@@ -25,9 +25,9 @@ pub fn Duration::to_seconds(self : Duration) -> Double {
 }
 
 ///|
-/// Convert Duration to milliseconds (as Int)
-pub fn Duration::to_milliseconds(self : Duration) -> Int {
-  (self.seconds * 1000.0).to_int()
+/// Convert Duration to milliseconds (as Double)
+pub fn Duration::to_milliseconds(self : Duration) -> Double {
+  self.seconds * 1000.0
 }
 
 ///|

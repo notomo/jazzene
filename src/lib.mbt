@@ -2,7 +2,9 @@
 /// Jazzene - Jazz Improvisation Web App (Tick-based Architecture)
 fn main {
   let is_playing = @signal.signal(false)
-  let playback_position = @signal.signal(@music.Duration::from_milliseconds(0))
+  let playback_position = @signal.signal(
+    @music.Duration::from_milliseconds(0.0),
+  )
   let volume = @signal.signal(0.3)
   let bpm = @signal.signal(200)
   let raw_chord_progression = @signal.signal("Cm7 F7 Bbmaj7 Ebmaj7")
@@ -17,7 +19,7 @@ fn main {
     @music.calculate_total_duration(note_values.get(), bpm.get())
   })
   let audio_ctx = @web_audio.AudioContext::new()
-  fn tick(elapsed_ms : Int) -> Bool {
+  fn tick(elapsed_ms : Double) -> Bool {
     let pos = playback_position.get() +
       @music.Duration::from_milliseconds(elapsed_ms)
     let total_dur = total_duration()
@@ -82,7 +84,10 @@ fn main {
 }
 
 ///|
-fn setup_loop(is_playing : @signal.Signal[Bool], tick : (Int) -> Bool) -> Unit {
+fn setup_loop(
+  is_playing : @signal.Signal[Bool],
+  tick : (Double) -> Bool,
+) -> Unit {
   let request_id : Ref[Int?] = { val: None }
   let previous_time : Ref[Double?] = { val: None }
   fn cancel() -> Unit {
@@ -102,7 +107,7 @@ fn setup_loop(is_playing : @signal.Signal[Bool], tick : (Int) -> Bool) -> Unit {
       return
     }
     fn loop_fn(current_time : Double) -> Unit {
-      let elapsed_ms = (current_time - previous_time.val.unwrap_or(current_time)).to_int()
+      let elapsed_ms = current_time - previous_time.val.unwrap_or(current_time)
       let stopped = tick(elapsed_ms)
       if stopped {
         cancel()

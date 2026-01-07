@@ -65,8 +65,8 @@ pub fn note_display(
   let note_positions = @signal.memo(fn() {
     let note_value_list = note_values.get()
     let bpm_val = bpm.get()
-    let mut current_pos = 0
-    let positions : Array[(Int, Int, Int)] = [] // (midi, start_ms, duration_ms)
+    let mut current_pos = 0.0
+    let positions : Array[(Int, Double, Double)] = [] // (midi, start_ms, duration_ms)
     for note_value in note_value_list {
       let duration_ms = note_value.duration(bpm_val).to_milliseconds()
       // Only track positions for actual notes (rests are invisible gaps)
@@ -87,14 +87,14 @@ pub fn note_display(
     }
     e.preventDefault()
     let current_pos = playback_position.get().to_milliseconds()
-    let seek_amount = 500 // milliseconds per wheel tick
+    let seek_amount = 500.0 // milliseconds per wheel tick
     let new_position_ms = if e.deltaY > 0.0 {
       current_pos + seek_amount
     } else {
       current_pos - seek_amount
     }
     let clamped_position = @cmp.maximum(
-      0,
+      0.0,
       @cmp.minimum(new_position_ms, total_duration().to_milliseconds()),
     )
     playback_position.set(@music.Duration::from_milliseconds(clamped_position))
@@ -103,7 +103,7 @@ pub fn note_display(
 
   // Add drag event listeners for seeking
   let drag_start_y : Ref[Double?] = { val: None }
-  let drag_start_position_ms : Ref[Int?] = { val: None }
+  let drag_start_position_ms : Ref[Double?] = { val: None }
   let on_drag_start : (@js_dom.MouseEvent) -> Unit = fn(e) {
     if note_values.get().length() == 0 {
       return
@@ -119,10 +119,10 @@ pub fn note_display(
 
         // Calculate seek amount based on drag distance
         // 10 pixels = 100ms (adjustable sensitivity)
-        let seek_amount = (delta_y * 10.0).to_int()
+        let seek_amount = delta_y * 10.0
         let new_position_ms = start_pos + seek_amount
         let clamped_position = @cmp.maximum(
-          0,
+          0.0,
           @cmp.minimum(new_position_ms, total_duration().to_milliseconds()),
         )
         playback_position.set(
@@ -177,8 +177,8 @@ fn draw_notes(
   ctx : @canvas.CanvasRenderingContext2D,
   width : Double,
   height : Double,
-  note_positions : Array[(Int, Int, Int)],
-  current_pos : Int,
+  note_positions : Array[(Int, Double, Double)],
+  current_pos : Double,
   bpm : Int,
 ) -> Unit {
   // Clear canvas
@@ -189,7 +189,7 @@ fn draw_notes(
   ctx.fillRect(0.0, 0.0, width, height)
   let rect = { left: 0.0, top: 0.0, width, height }
   let key_areas = calc_key_areas(rect, 36, 96)
-  let window_ms = 3000
+  let window_ms = 3000.0
 
   // Draw notes
   for note_data in note_positions {
@@ -199,7 +199,7 @@ fn draw_notes(
     let end_offset = end_ms - current_pos
 
     // Check if note is visible in 3-second window
-    if end_offset < 0 || start_offset > window_ms {
+    if end_offset < 0.0 || start_offset > window_ms {
       continue
     }
 
@@ -213,10 +213,8 @@ fn draw_notes(
     // Calculate vertical position (inverted: future at top, now at bottom)
     // bottom is where the note starts (closer to now)
     // top is where the note ends (further from now)
-    let bottom_percent = 100.0 -
-      start_offset.to_double() / window_ms.to_double() * 100.0
-    let top_percent = 100.0 -
-      end_offset.to_double() / window_ms.to_double() * 100.0
+    let bottom_percent = 100.0 - start_offset / window_ms * 100.0
+    let top_percent = 100.0 - end_offset / window_ms * 100.0
     let bottom_y = height * bottom_percent / 100.0
     let top_y = height * top_percent / 100.0
 
@@ -253,19 +251,19 @@ fn draw_notes(
 
   // Draw horizontal lines for each measure
   // In 4/4 time, one measure = 4 quarter notes
-  let measure_ms = 60000 * 4 / bpm // (60000ms/BPM) * 4 beats
+  let measure_ms = (60000 * 4 / bpm).to_double() // (60000ms/BPM) * 4 beats
 
   // Find the first measure line visible in the window
-  let first_measure = current_pos / measure_ms
-  let last_measure = (current_pos + window_ms) / measure_ms + 1
+  let first_measure = (current_pos / measure_ms).to_int()
+  let last_measure = ((current_pos + window_ms) / measure_ms).to_int() + 1
   for i = first_measure; i <= last_measure; i = i + 1 {
-    let measure_pos_ms = i * measure_ms
+    let measure_pos_ms = i.to_double() * measure_ms
     let offset = measure_pos_ms - current_pos
 
     // Check if this measure line is visible
-    if offset >= 0 && offset <= window_ms {
+    if offset >= 0.0 && offset <= window_ms {
       // Calculate y position (inverted: future at top, now at bottom)
-      let percent = 100.0 - offset.to_double() / window_ms.to_double() * 100.0
+      let percent = 100.0 - offset / window_ms * 100.0
       let y = height * percent / 100.0
       ctx.fillStyle = "rgba(255, 255, 255, 0.3)"
       ctx.fillRect(0.0, y, width, 1.0)

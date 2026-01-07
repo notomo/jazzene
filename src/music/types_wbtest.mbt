@@ -132,15 +132,18 @@ test "calculate_total_duration with bpm 90" {
   let bpm = 90
   let midi = MidiNumber::new(60).unwrap()
 
-  // Quarter note at 90 bpm: 60000/90 = 666.67ms ≈ 666ms
+  // Quarter note at 90 bpm: 60000/90 = 666.6666666666666ms
   let notes = [Note(midi~, duration=Quarter)]
-  inspect(calculate_total_duration(notes, bpm).to_milliseconds(), content="666")
+  inspect(
+    calculate_total_duration(notes, bpm).to_milliseconds(),
+    content="666.6666666666666",
+  )
 
-  // Half note: 2 beats = 1332ms (60000/90 * 2 = 666 * 2 = 1332 due to integer division)
+  // Half note: 2 beats = 1333.3333333333333ms (60000/90 * 2)
   let notes2 = [Note(midi~, duration=Half)]
   inspect(
     calculate_total_duration(notes2, bpm).to_milliseconds(),
-    content="1332",
+    content="1333.3333333333333",
   )
 }
 
