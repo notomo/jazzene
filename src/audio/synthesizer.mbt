@@ -59,12 +59,6 @@ pub fn schedule_notes_in_window(
     ctx.current_time(),
   )
   for sound in sounds {
-    schedule_note(
-      ctx,
-      sound.midi,
-      sound.audio_start_time,
-      sound.duration,
-      volume,
-    )
+    schedule_note(ctx, sound.midi, sound.start_time, sound.duration, volume)
   }
 }

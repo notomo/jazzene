@@ -2,7 +2,7 @@
 /// Scheduled sound with timing information for playback
 pub struct ScheduledSound {
   midi : Int
-  audio_start_time : Duration // Audio context time
+  start_time : Duration // Audio context time
   duration : Duration // Duration
 } derive(Eq, Show)
 
@@ -37,7 +37,7 @@ pub fn extract_sounds_in_window(
           )
           sounds.push(ScheduledSound::{
             midi: midi_val.value,
-            audio_start_time,
+            start_time: audio_start_time,
             duration,
           })
         }
