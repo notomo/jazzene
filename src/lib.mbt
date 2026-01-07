@@ -8,15 +8,15 @@ fn main {
   let volume = @signal.signal(0.3)
   let bpm = @signal.signal(200)
   let raw_chord_progression = @signal.signal("Cm7 F7 Bbmaj7 Ebmaj7")
+  let note_values = @signal.memo(fn() {
+    raw_chord_progression.get()
+    |> @music.parse_chord_progression
+    |> @music.generate_improvisation(@music.ImprovisationSettings::default())
+  })
   let sounds : @signal.Signal[Array[@music.NoteValueSound]] = @signal.signal([])
   let _ = @signal.effect(fn() {
-    let note_vals = raw_chord_progression.get()
-      |> @music.parse_chord_progression
-      |> @music.generate_improvisation(@music.ImprovisationSettings::default())
-
-    // Pre-calculate durations with current BPM
     let current_bpm = bpm.get()
-    let sound_list = note_vals.map(fn(nv) {
+    let sound_list = note_values().map(fn(nv) {
       @music.NoteValueSound::from_note_value(nv, current_bpm)
     })
     sounds.set(sound_list)
