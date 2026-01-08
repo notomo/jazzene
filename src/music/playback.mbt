@@ -4,12 +4,15 @@ pub fn calculate_active_midi_notes(
   sounds : Array[NoteValueSound],
   playback_position_ms : Double,
 ) -> Array[Int] {
-  let mut current_pos = 0.0
   let active_midi_notes : Array[Int] = []
   for sound in sounds {
-    let duration_ms = sound.duration.to_milliseconds()
-    let start_ms = current_pos
-    let end_ms = current_pos + duration_ms
+    let start_ms = sound.start_time.to_milliseconds()
+    let end_ms = start_ms + sound.duration.to_milliseconds()
+
+    // Early exit optimization (sounds are chronologically ordered)
+    if start_ms > playback_position_ms {
+      break
+    }
     match sound.note_value {
       Note(midi=midi_val, ..) =>
         if playback_position_ms >= start_ms && playback_position_ms < end_ms {
@@ -17,7 +20,6 @@ pub fn calculate_active_midi_notes(
         }
       Rest(..) => ()
     }
-    current_pos = current_pos + duration_ms
   }
   active_midi_notes
 }

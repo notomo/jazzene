@@ -17,10 +17,13 @@ pub fn extract_sounds_in_window(
 ) -> Array[ScheduledSound] {
   let window_end = current_pos + lookahead
   let scheduled_sounds = []
-  let mut position = Duration::from_milliseconds(0)
   for sound in sounds {
-    let duration = sound.duration
-    let end_pos = position + duration
+    let position = sound.start_time
+
+    // Early exit if past window
+    if position.compare(window_end) >= 0 {
+      break
+    }
 
     // Extract only actual notes (skip rests) within the window
     match sound.note_value {
@@ -37,16 +40,10 @@ pub fn extract_sounds_in_window(
           scheduled_sounds.push(ScheduledSound::{
             midi: midi_val.value,
             start_time: audio_start_time,
-            duration,
+            duration: sound.duration,
           })
         }
       Rest(..) => () // Rests advance time but produce no sound
-    }
-    position = end_pos
-
-    // Stop if we've passed the window
-    if position.compare(window_end) >= 0 {
-      break
     }
   }
   scheduled_sounds

@@ -16,9 +16,10 @@ fn main {
   let sounds : @signal.Signal[Array[@music.NoteValueSound]] = @signal.signal([])
   let _ = @signal.effect(fn() {
     let current_bpm = bpm.get()
-    let sound_list = note_values().map(fn(nv) {
-      @music.NoteValueSound::from_note_value(nv, current_bpm)
-    })
+    let sound_list = @music.NoteValueSound::from_note_values(
+      note_values(),
+      current_bpm,
+    )
     sounds.set(sound_list)
   })
   let total_duration = @signal.memo(fn() {

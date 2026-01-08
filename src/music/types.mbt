@@ -195,19 +195,30 @@ pub fn NoteValue::midi(self : NoteValue) -> MidiNumber? {
 }
 
 ///|
-/// NoteValue with pre-calculated duration based on BPM
+/// NoteValue with pre-calculated duration and start time based on BPM
 pub struct NoteValueSound {
   note_value : NoteValue
   duration : Duration
+  start_time : Duration
 } derive(Eq, Show)
 
 ///|
-/// Create NoteValueSound from NoteValue with BPM
-pub fn NoteValueSound::from_note_value(
-  note_value : NoteValue,
+/// Create array of NoteValueSound with pre-calculated start times
+pub fn NoteValueSound::from_note_values(
+  note_values : Array[NoteValue],
   bpm : Int,
-) -> NoteValueSound {
-  NoteValueSound::{ note_value, duration: note_value.duration(bpm) }
+) -> Array[NoteValueSound] {
+  let mut current_time = 0.0
+  note_values.map(fn(nv) {
+    let dur = nv.duration(bpm)
+    let sound = NoteValueSound::{
+      note_value: nv,
+      duration: dur,
+      start_time: Duration::from_milliseconds(current_time),
+    }
+    current_time = current_time + dur.to_milliseconds()
+    sound
+  })
 }
 
 ///|

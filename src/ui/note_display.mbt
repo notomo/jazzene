@@ -64,17 +64,20 @@ pub fn note_display(
   // Pre-calculate note positions (immutable list with start times)
   let note_positions = @signal.memo(fn() {
     let sound_list = sounds.get()
-    let mut current_pos = 0.0
     let positions : Array[(Int, Double, Double)] = [] // (midi, start_ms, duration_ms)
     for sound in sound_list {
-      let duration_ms = sound.duration.to_milliseconds()
       // Only track positions for actual notes (rests are invisible gaps)
       match sound.note_value {
         Note(midi=midi_val, ..) =>
-          positions.push((midi_val.value, current_pos, duration_ms))
+          positions.push(
+            (
+              midi_val.value,
+              sound.start_time.to_milliseconds(),
+              sound.duration.to_milliseconds(),
+            ),
+          )
         Rest(..) => () // Rests don't render but advance timing
       }
-      current_pos = current_pos + duration_ms
     }
     positions
   })

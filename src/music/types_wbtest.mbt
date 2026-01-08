@@ -92,12 +92,12 @@ test "calculate_total_duration with bpm 120" {
 
   // Single quarter note: 500ms
   let notes1 = [Note(midi~, duration=Quarter)]
-  let sounds1 = notes1.map(fn(nv) { NoteValueSound::from_note_value(nv, bpm) })
+  let sounds1 = NoteValueSound::from_note_values(notes1, bpm)
   inspect(calculate_total_duration(sounds1).to_milliseconds(), content="500")
 
   // Two quarter notes: 1000ms
   let notes2 = [Note(midi~, duration=Quarter), Note(midi~, duration=Quarter)]
-  let sounds2 = notes2.map(fn(nv) { NoteValueSound::from_note_value(nv, bpm) })
+  let sounds2 = NoteValueSound::from_note_values(notes2, bpm)
   inspect(calculate_total_duration(sounds2).to_milliseconds(), content="1000")
 
   // Mixed durations: Half + Quarter + Eighth = 2 + 1 + 0.5 beats = 1750ms
@@ -106,7 +106,7 @@ test "calculate_total_duration with bpm 120" {
     Note(midi~, duration=Quarter),
     Note(midi~, duration=Eighth),
   ]
-  let sounds3 = notes3.map(fn(nv) { NoteValueSound::from_note_value(nv, bpm) })
+  let sounds3 = NoteValueSound::from_note_values(notes3, bpm)
   inspect(calculate_total_duration(sounds3).to_milliseconds(), content="1750")
 
   // With rests
@@ -115,7 +115,7 @@ test "calculate_total_duration with bpm 120" {
     Rest(duration=Quarter),
     Note(midi~, duration=Quarter),
   ]
-  let sounds4 = notes4.map(fn(nv) { NoteValueSound::from_note_value(nv, bpm) })
+  let sounds4 = NoteValueSound::from_note_values(notes4, bpm)
   inspect(calculate_total_duration(sounds4).to_milliseconds(), content="1500")
 }
 
@@ -126,7 +126,7 @@ test "calculate_total_duration with bpm 90" {
 
   // Quarter note at 90 bpm: 60000/90 = 666.6666666666666ms
   let notes = [Note(midi~, duration=Quarter)]
-  let sounds = notes.map(fn(nv) { NoteValueSound::from_note_value(nv, bpm) })
+  let sounds = NoteValueSound::from_note_values(notes, bpm)
   inspect(
     calculate_total_duration(sounds).to_milliseconds(),
     content="666.6666666666666",
@@ -134,7 +134,7 @@ test "calculate_total_duration with bpm 90" {
 
   // Half note: 2 beats = 1333.3333333333333ms (60000/90 * 2)
   let notes2 = [Note(midi~, duration=Half)]
-  let sounds2 = notes2.map(fn(nv) { NoteValueSound::from_note_value(nv, bpm) })
+  let sounds2 = NoteValueSound::from_note_values(notes2, bpm)
   inspect(
     calculate_total_duration(sounds2).to_milliseconds(),
     content="1333.3333333333333",
@@ -144,6 +144,6 @@ test "calculate_total_duration with bpm 90" {
 ///|
 test "calculate_total_duration empty array" {
   let notes : Array[NoteValue] = []
-  let sounds = notes.map(fn(nv) { NoteValueSound::from_note_value(nv, 120) })
+  let sounds = NoteValueSound::from_note_values(notes, 120)
   inspect(calculate_total_duration(sounds).to_milliseconds(), content="0")
 }
