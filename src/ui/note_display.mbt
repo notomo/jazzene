@@ -81,9 +81,6 @@ pub fn note_display(
 
   // Add wheel event listener for seeking
   let on_wheel : (@js_dom.WheelEvent) -> Unit = fn(e) {
-    if sounds.get().length() == 0 {
-      return
-    }
     e.preventDefault()
     let current_pos = playback_position.get().to_milliseconds()
     let seek_amount = 500.0 // milliseconds per wheel tick
@@ -104,9 +101,6 @@ pub fn note_display(
   let drag_start_y : Ref[Double?] = { val: None }
   let drag_start_position_ms : Ref[Double?] = { val: None }
   let on_drag_start : (@js_dom.MouseEvent) -> Unit = fn(e) {
-    if sounds.get().length() == 0 {
-      return
-    }
     drag_start_y.val = Some(e.clientY)
     drag_start_position_ms.val = Some(playback_position.get().to_milliseconds())
   }

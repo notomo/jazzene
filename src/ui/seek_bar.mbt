@@ -17,16 +17,14 @@ pub fn seek_bar(
   total_duration : () -> @music.Duration,
 ) -> @luna_dom.DomNode {
   let on_seek : @luna_dom.InputHandler = fn(e) {
-    let total_dur_ms = total_duration().to_milliseconds()
-    if total_dur_ms == 0.0 {
-      return
-    }
     let target = e.target()
     let event_target = target.as_event_target()
     let value = event_target.as_any()._get("value").to_string()
     match @js_global.parseFloat(value) {
       Some(position_percent) => {
-        let new_position_ms = position_percent / 100.0 * total_dur_ms
+        let new_position_ms = position_percent /
+          100.0 *
+          total_duration().to_milliseconds()
         playback_position.set(
           @music.Duration::from_milliseconds(new_position_ms),
         )
@@ -56,17 +54,11 @@ pub fn seek_bar(
         ("aria-label", @luna_dom.Attr::AttrString("playback position")),
       ],
       dyn_value=fn() {
-        let total_dur_ms = total_duration().to_milliseconds()
-        if total_dur_ms == 0.0 {
-          "0"
-        } else {
-          let percent = playback_position.get().to_milliseconds() /
-            total_dur_ms *
-            100.0
-          percent.to_int().to_string()
-        }
+        let percent = playback_position.get().to_milliseconds() /
+          total_duration().to_milliseconds() *
+          100.0
+        percent.to_int().to_string()
       },
-      dyn_disabled=fn() { total_duration().to_milliseconds() == 0.0 },
       on=@luna_dom.events().input(on_seek),
     ),
   ])

@@ -217,15 +217,6 @@ pub fn NoteValueSound::midi(self : NoteValueSound) -> MidiNumber? {
 }
 
 ///|
-/// Check if this is a Rest sound
-pub fn NoteValueSound::is_rest(self : NoteValueSound) -> Bool {
-  match self.note_value {
-    Rest(..) => true
-    Note(..) => false
-  }
-}
-
-///|
 /// Calculate total duration of a note sequence
 pub fn calculate_total_duration(sounds : Array[NoteValueSound]) -> Duration {
   let total = @list.from_array(sounds).fold(init=0.0, (acc, sound) => acc +
