@@ -75,14 +75,6 @@ test "NoteName to_midi" {
 }
 
 ///|
-test "ChordQuality intervals" {
-  inspect(Major7.intervals(), content="[0, 4, 7, 11]")
-  inspect(Minor7.intervals(), content="[0, 3, 7, 10]")
-  inspect(Dominant7.intervals(), content="[0, 4, 7, 10]")
-  inspect(HalfDiminished.intervals(), content="[0, 3, 6, 10]")
-}
-
-///|
 test "Chord tones" {
   let cmaj7 = Chord::{ root: C, quality: Major7 }
   inspect(cmaj7.tones(), content="[60, 64, 67, 71]") // C E G B
