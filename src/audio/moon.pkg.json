@@ -9,7 +9,7 @@
       "alias": "music"
     },
     {
-      "path": "internal/jazzene/web-audio-api",
+      "path": "internal/jazzene/audio/web-audio-api",
       "alias": "web_audio"
     }
   ]

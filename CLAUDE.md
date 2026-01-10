@@ -76,15 +76,56 @@ let doubled = @signal.memo(fn() { count.get() * 2 })
 
 ```
 src/
-├── lib.mbt          # Main MoonBit app logic
-├── moon.pkg.json    # Package config with Luna imports
-└── global.css       # Tailwind imports
+├── lib.mbt          # Main entry point (state management)
+├── moon.pkg.json    # Main package config
+├── global.css       # Tailwind imports
+├── music/           # Music theory package
+├── audio/           # Audio synthesis package
+│   └── web-audio-api/  # Web Audio API FFI
+└── ui/              # UI components package
+    └── app.mbt      # Main application UI and rendering
 
 main.ts              # JavaScript entry (imports compiled MoonBit)
 index.html           # HTML template with #app mount point
 target/js/           # MoonBit build output (gitignored)
 .mooncakes/          # MoonBit package cache (like node_modules)
 ```
+
+### Package Dependency Rules
+
+**CRITICAL**: The main package (`src/moon.pkg.json`) should ONLY depend on:
+- `internal/jazzene/music` - Music theory and primitives
+- `internal/jazzene/audio` - Audio synthesis and Web Audio API
+- `internal/jazzene/ui` - UI components and browser APIs
+- `mizchi/luna/luna/signal` - Reactive state management (exception for core framework)
+
+**Dependency Hierarchy:**
+```
+src/ (main)
+├─→ mizchi/luna/luna/signal (Signal only)
+├─→ internal/jazzene/music (no dependencies)
+├─→ internal/jazzene/audio
+│   └─→ internal/jazzene/audio/web-audio-api
+│       └─→ mizchi/js/core
+└─→ internal/jazzene/ui
+    ├─→ mizchi/luna/luna/signal
+    ├─→ mizchi/luna/luna/dom/element
+    ├─→ mizchi/js/browser/dom
+    └─→ internal/jazzene/music
+```
+
+**Package Responsibilities:**
+- **music**: Pure music theory logic (chords, notes, MIDI, improvisation)
+- **audio/web-audio-api**: Low-level Web Audio API FFI wrappers
+- **audio**: Audio synthesis, scheduling, AudioContext management
+- **ui**: All UI components, DOM construction, browser API wrappers
+
+**When adding new code:**
+- Music theory logic → `src/music/`
+- Web Audio API bindings → `src/audio/web-audio-api/`
+- Audio synthesis logic → `src/audio/`
+- UI components or browser APIs → `src/ui/`
+- Application composition → `src/lib.mbt` (state management only)
 
 ## Rendering Flow
 
@@ -118,4 +159,4 @@ Apply utility classes directly in MoonBit:
 - **No Hot Reload for MoonBit**: Changes to `.mbt` files require full rebuild (handled by vite-plugin-moonbit)
 - **Package Format**: ESM only (`"type": "module"` in package.json, `"format": "esm"` in moon.pkg.json)
 - **Main Entry**: `src/moon.pkg.json` has `"is-main": true` - this package exports the main function
-- **Web Audio API**: All Web Audio API access must go through the `src/web-audio-api` package. Never use raw JavaScript FFI for Web Audio APIs outside this package.
+- **Web Audio API**: All Web Audio API access must go through `src/audio/web-audio-api/`. Other packages should use wrappers in `src/audio/`. Never use raw JavaScript FFI for Web Audio APIs outside this package.

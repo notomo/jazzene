@@ -1,4 +1,10 @@
 ///|
+/// Create a new AudioContext
+pub fn create_context() -> @web_audio.AudioContext {
+  @web_audio.AudioContext::new()
+}
+
+///|
 /// Schedule a single note to play at a specific time
 fn schedule_note(
   ctx : @web_audio.AudioContext,
