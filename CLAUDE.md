@@ -81,7 +81,6 @@ src/
 ├── global.css       # Tailwind imports
 ├── music/           # Music theory package
 ├── audio/           # Audio synthesis package
-│   └── web-audio-api/  # Web Audio API FFI
 └── ui/              # UI components package
     └── app.mbt      # Main application UI and rendering
 
@@ -105,7 +104,8 @@ src/ (main)
 ├─→ mizchi/luna/luna/signal (Signal only)
 ├─→ internal/jazzene/music (no dependencies)
 ├─→ internal/jazzene/audio
-│   └─→ internal/jazzene/audio/web-audio-api
+│   └── web_audio_api/  # Web Audio API FFI
+│   └─→ internal/jazzene/audio/web_audio_api
 │       └─→ mizchi/js/core
 └─→ internal/jazzene/ui
     ├─→ mizchi/luna/luna/signal
@@ -116,13 +116,13 @@ src/ (main)
 
 **Package Responsibilities:**
 - **music**: Pure music theory logic (chords, notes, MIDI, improvisation)
-- **audio/web-audio-api**: Low-level Web Audio API FFI wrappers
+- **audio/web_audio_api**: Low-level Web Audio API FFI wrappers
 - **audio**: Audio synthesis, scheduling, AudioContext management
 - **ui**: All UI components, DOM construction, browser API wrappers
 
 **When adding new code:**
 - Music theory logic → `src/music/`
-- Web Audio API bindings → `src/audio/web-audio-api/`
+- Web Audio API bindings → `src/audio/web_audio_api/`
 - Audio synthesis logic → `src/audio/`
 - UI components or browser APIs → `src/ui/`
 - Application composition → `src/lib.mbt` (state management only)
@@ -159,4 +159,4 @@ Apply utility classes directly in MoonBit:
 - **No Hot Reload for MoonBit**: Changes to `.mbt` files require full rebuild (handled by vite-plugin-moonbit)
 - **Package Format**: ESM only (`"type": "module"` in package.json, `"format": "esm"` in moon.pkg.json)
 - **Main Entry**: `src/moon.pkg.json` has `"is-main": true` - this package exports the main function
-- **Web Audio API**: All Web Audio API access must go through `src/audio/web-audio-api/`. Other packages should use wrappers in `src/audio/`. Never use raw JavaScript FFI for Web Audio APIs outside this package.
+- **Web Audio API**: All Web Audio API access must go through `src/audio/web_audio_api/`. Other packages should use wrappers in `src/audio/`. Never use raw JavaScript FFI for Web Audio APIs outside this package.
