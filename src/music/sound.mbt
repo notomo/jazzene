@@ -1,7 +1,7 @@
 ///|
 /// Scheduled sound with timing information for playback
 pub struct ScheduledSound {
-  midi : Int
+  midi : MidiNumber
   start_time : Duration // Audio context time
   duration : Duration // Duration
 } derive(Eq, Show)
@@ -21,14 +21,10 @@ pub fn extract_sounds_in_window(
   .filter(fn(sound) { sound.start_time >= current_pos })
   .filter_map(fn(sound) {
     match sound.note_value {
-      Note(midi=midi_val, ..) => {
+      Note(midi~, ..) => {
         let offset = sound.start_time - current_pos
         let start_time = current_time + offset
-        Some(ScheduledSound::{
-          midi: midi_val.value,
-          start_time,
-          duration: sound.duration,
-        })
+        Some(ScheduledSound::{ midi, start_time, duration: sound.duration })
       }
       Rest(..) => None
     }

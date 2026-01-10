@@ -2,13 +2,12 @@
 /// Schedule a single note to play at a specific time
 fn schedule_note(
   ctx : @web_audio.AudioContext,
-  midi : Int,
+  midi : @music.MidiNumber,
   start_time : @music.Duration,
   duration : @music.Duration,
   volume : Double,
 ) -> Unit {
-  // Convert MIDI to frequency: f = 440 * 2^((n-69)/12)
-  let frequency = 440.0 * @math.pow(2.0, (midi.to_double() - 69.0) / 12.0)
+  let frequency = midi.to_frequency()
 
   // Create nodes
   let osc = ctx.create_oscillator()

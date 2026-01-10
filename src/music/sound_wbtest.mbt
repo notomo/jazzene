@@ -14,10 +14,10 @@ test "extract_sounds_in_window extracts notes in range" {
     sounds_list, current_pos, lookahead, current_time,
   )
   inspect(sounds.length(), content="2")
-  inspect(sounds[0].midi, content="62")
+  inspect(sounds[0].midi, content="{value: 62}")
   inspect(sounds[0].start_time.to_seconds(), content="10")
   inspect(sounds[0].duration.to_seconds(), content="0.5")
-  inspect(sounds[1].midi, content="64")
+  inspect(sounds[1].midi, content="{value: 64}")
   inspect(sounds[1].start_time.to_seconds(), content="10.5")
   inspect(sounds[1].duration.to_seconds(), content="0.5")
 }
@@ -38,8 +38,8 @@ test "extract_sounds_in_window skips rests" {
     sounds_list, current_pos, lookahead, current_time,
   )
   inspect(sounds.length(), content="2")
-  inspect(sounds[0].midi, content="60")
-  inspect(sounds[1].midi, content="64")
+  inspect(sounds[0].midi, content="{value: 60}")
+  inspect(sounds[1].midi, content="{value: 64}")
 }
 
 ///|
@@ -59,8 +59,8 @@ test "extract_sounds_in_window excludes notes outside range" {
     sounds_list, current_pos, lookahead, current_time,
   )
   inspect(sounds.length(), content="2")
-  inspect(sounds[0].midi, content="62")
-  inspect(sounds[1].midi, content="64")
+  inspect(sounds[0].midi, content="{value: 62}")
+  inspect(sounds[1].midi, content="{value: 64}")
 }
 
 ///|
@@ -114,6 +114,6 @@ test "extract_sounds_in_window stops early when past window" {
 
   // Should only process first two notes and break early
   inspect(sounds.length(), content="2")
-  inspect(sounds[0].midi, content="60")
-  inspect(sounds[1].midi, content="62")
+  inspect(sounds[0].midi, content="{value: 60}")
+  inspect(sounds[1].midi, content="{value: 62}")
 }
