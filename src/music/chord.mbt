@@ -1,4 +1,107 @@
 ///|
+/// Note name enum for type-safe chord roots
+pub enum NoteName {
+  C
+  CSharp // C# / Db
+  D
+  DSharp // D# / Eb
+  E
+  F
+  FSharp // F# / Gb
+  G
+  GSharp // G# / Ab
+  A
+  ASharp // A# / Bb
+  B
+} derive(Eq, Show)
+
+///|
+/// Parse string to note name
+pub fn NoteName::from_string(s : String) -> NoteName? {
+  match s {
+    "C" => Some(C)
+    "C#" | "Db" => Some(CSharp)
+    "D" => Some(D)
+    "D#" | "Eb" => Some(DSharp)
+    "E" => Some(E)
+    "F" => Some(F)
+    "F#" | "Gb" => Some(FSharp)
+    "G" => Some(G)
+    "G#" | "Ab" => Some(GSharp)
+    "A" => Some(A)
+    "A#" | "Bb" => Some(ASharp)
+    "B" => Some(B)
+    _ => None
+  }
+}
+
+///|
+/// Convert note name to MIDI number (octave 4)
+pub fn NoteName::to_midi(self : NoteName) -> Int {
+  let base_octave = 60 // C4
+  base_octave +
+  (match self {
+    C => 0
+    CSharp => 1
+    D => 2
+    DSharp => 3
+    E => 4
+    F => 5
+    FSharp => 6
+    G => 7
+    GSharp => 8
+    A => 9
+    ASharp => 10
+    B => 11
+  })
+}
+
+///|
+/// Chord quality enum for exhaustive matching
+pub enum ChordQuality {
+  Major7
+  Minor7
+  Dominant7
+  HalfDiminished // m7b5
+  Diminished7
+  Augmented
+  Sus4
+  Major
+  Minor
+} derive(Eq, Show)
+
+///|
+/// Get chord tone intervals for a quality
+pub fn ChordQuality::intervals(self : ChordQuality) -> Array[Int] {
+  match self {
+    Major7 => [0, 4, 7, 11]
+    Minor7 => [0, 3, 7, 10]
+    Dominant7 => [0, 4, 7, 10]
+    Diminished7 => [0, 3, 6, 9]
+    HalfDiminished => [0, 3, 6, 10]
+    Augmented => [0, 4, 8]
+    Sus4 => [0, 5, 7]
+    Major => [0, 4, 7]
+    Minor => [0, 3, 7]
+  }
+}
+
+///|
+/// Chord with type-safe root and quality
+pub struct Chord {
+  root : NoteName
+  quality : ChordQuality
+} derive(Eq, Show)
+
+///|
+/// Get MIDI numbers for chord tones
+pub fn Chord::tones(self : Chord) -> Array[Int] {
+  let root_midi = self.root.to_midi()
+  let intervals = self.quality.intervals()
+  intervals.map(fn(interval) { root_midi + interval })
+}
+
+///|
 /// Parse a single chord string into a Chord struct
 /// Examples: "Cm7" -> Chord { root: C, quality: Minor7 }
 ///           "F#maj7" -> Chord { root: FSharp, quality: Major7 }
