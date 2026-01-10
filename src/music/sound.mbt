@@ -16,35 +16,26 @@ pub fn extract_sounds_in_window(
   current_time : Double,
 ) -> Array[ScheduledSound] {
   let window_end = current_pos + lookahead
-  let scheduled_sounds = []
-  for sound in sounds {
-    let position = sound.start_time
-
-    // Early exit if past window
-    if position.compare(window_end) >= 0 {
-      break
-    }
-
-    // Extract only actual notes (skip rests) within the window
+  @list.from_array(sounds)
+  .take_while(fn(sound) { sound.start_time < window_end })
+  .filter(fn(sound) { sound.start_time >= current_pos })
+  .filter_map(fn(sound) {
     match sound.note_value {
-      Note(midi=midi_val, ..) =>
-        if position.compare(current_pos) >= 0 &&
-          position.compare(window_end) < 0 {
-          // Convert to audio context time
-          let offset = Duration::from_seconds(
-            position.to_seconds() - current_pos.to_seconds(),
-          )
-          let audio_start_time = Duration::from_seconds(
-            current_time + offset.to_seconds(),
-          )
-          scheduled_sounds.push(ScheduledSound::{
-            midi: midi_val.value,
-            start_time: audio_start_time,
-            duration: sound.duration,
-          })
-        }
-      Rest(..) => () // Rests advance time but produce no sound
+      Note(midi=midi_val, ..) => {
+        let offset = Duration::from_seconds(
+          sound.start_time.to_seconds() - current_pos.to_seconds(),
+        )
+        let audio_start_time = Duration::from_seconds(
+          current_time + offset.to_seconds(),
+        )
+        Some(ScheduledSound::{
+          midi: midi_val.value,
+          start_time: audio_start_time,
+          duration: sound.duration,
+        })
+      }
+      Rest(..) => None // Rests advance time but produce no sound
     }
-  }
-  scheduled_sounds
+  })
+  .to_array()
 }
