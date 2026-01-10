@@ -17,33 +17,6 @@ pub fn NoteDuration::to_beats(self : NoteDuration) -> Double {
 }
 
 ///|
-/// Musical note with MIDI number and duration
-pub struct Note {
-  midi : MidiNumber
-  duration : NoteDuration
-} derive(Eq, Show)
-
-///|
-/// Create note from MIDI number and duration
-pub fn Note::new(midi_value : Int, duration : NoteDuration) -> Note? {
-  match MidiNumber::new(midi_value) {
-    Some(midi) => Some(Note::{ midi, duration })
-    None => None
-  }
-}
-
-///|
-/// Convert MIDI number to note name with octave
-pub fn Note::name(self : Note) -> String {
-  let note_names = [
-    "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B",
-  ]
-  let octave = self.midi.value / 12 - 1
-  let note_index = self.midi.value % 12
-  note_names[note_index] + octave.to_string()
-}
-
-///|
 /// Musical event - either a note or a rest
 pub enum NoteValue {
   Note(midi~ : MidiNumber, duration~ : NoteDuration)

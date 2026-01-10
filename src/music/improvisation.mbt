@@ -29,15 +29,10 @@ pub fn generate_improvisation(
     let mut remaining_beats = beats_per_measure
     while remaining_beats > 0.0 {
       let midi_number = random_midi_from_chord(chord)
-      // Get duration that fits within remaining beats
       let duration = random_duration_with_limit(remaining_beats)
-
-      // Create note with validation
-      match Note::new(midi_number, duration) {
-        Some(note) => {
-          note_values.push(
-            NoteValue::Note(midi=note.midi, duration=note.duration),
-          )
+      match MidiNumber::new(midi_number) {
+        Some(x) => {
+          note_values.push(NoteValue::Note(midi=x, duration~))
           remaining_beats = remaining_beats - duration.to_beats()
         }
         None => () // Skip invalid notes

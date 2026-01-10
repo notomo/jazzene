@@ -25,22 +25,6 @@ test "NoteValue duration with bpm 120" {
 }
 
 ///|
-test "Note creation" {
-  let note = Note::new(60, Quarter)
-  inspect(note, content="Some({midi: {value: 60}, duration: Quarter})")
-  let invalid = Note::new(128, Quarter)
-  inspect(invalid, content="None")
-}
-
-///|
-test "Note name" {
-  let c4 = Note::new(60, Quarter).unwrap()
-  inspect(c4.name(), content="C4")
-  let a4 = Note::new(69, Quarter).unwrap()
-  inspect(a4.name(), content="A4")
-}
-
-///|
 test "calculate_total_duration with bpm 120" {
   let bpm = 120
   let midi = MidiNumber::new(60).unwrap()
