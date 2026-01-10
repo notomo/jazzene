@@ -57,24 +57,6 @@ test "parse empty progression" {
 }
 
 ///|
-test "NoteName from_string" {
-  inspect(NoteName::from_string("C"), content="Some(C)")
-  inspect(NoteName::from_string("C#"), content="Some(CSharp)")
-  inspect(NoteName::from_string("Db"), content="Some(CSharp)")
-  inspect(NoteName::from_string("F#"), content="Some(FSharp)")
-  inspect(NoteName::from_string("Gb"), content="Some(FSharp)")
-  inspect(NoteName::from_string("Invalid"), content="None")
-}
-
-///|
-test "NoteName to_midi" {
-  inspect(C.to_midi(), content="60") // C4
-  inspect(CSharp.to_midi(), content="61")
-  inspect(A.to_midi(), content="69") // A4 = 440Hz
-  inspect(B.to_midi(), content="71")
-}
-
-///|
 test "Chord tones" {
   let cmaj7 = Chord::{ root: C, quality: Major7 }
   inspect(cmaj7.tones(), content="[60, 64, 67, 71]") // C E G B

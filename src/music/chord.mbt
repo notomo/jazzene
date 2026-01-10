@@ -1,72 +1,14 @@
 ///|
-/// Note name enum for type-safe chord roots
-pub enum NoteName {
-  C
-  CSharp // C# / Db
-  D
-  DSharp // D# / Eb
-  E
-  F
-  FSharp // F# / Gb
-  G
-  GSharp // G# / Ab
-  A
-  ASharp // A# / Bb
-  B
-} derive(Eq, Show)
-
-///|
-/// Parse string to note name
-pub fn NoteName::from_string(s : String) -> NoteName? {
-  match s {
-    "C" => Some(C)
-    "C#" | "Db" => Some(CSharp)
-    "D" => Some(D)
-    "D#" | "Eb" => Some(DSharp)
-    "E" => Some(E)
-    "F" => Some(F)
-    "F#" | "Gb" => Some(FSharp)
-    "G" => Some(G)
-    "G#" | "Ab" => Some(GSharp)
-    "A" => Some(A)
-    "A#" | "Bb" => Some(ASharp)
-    "B" => Some(B)
-    _ => None
-  }
-}
-
-///|
-/// Convert note name to MIDI number (octave 4)
-pub fn NoteName::to_midi(self : NoteName) -> Int {
-  let base_octave = 60 // C4
-  base_octave +
-  (match self {
-    C => 0
-    CSharp => 1
-    D => 2
-    DSharp => 3
-    E => 4
-    F => 5
-    FSharp => 6
-    G => 7
-    GSharp => 8
-    A => 9
-    ASharp => 10
-    B => 11
-  })
-}
-
-///|
 /// Chord with type-safe root and quality
 pub struct Chord {
-  root : NoteName
+  root : ChordRoot
   quality : ChordQuality
 } derive(Eq, Show)
 
 ///|
 /// Get MIDI numbers for chord tones
 pub fn Chord::tones(self : Chord) -> Array[Int] {
-  let root_midi = self.root.to_midi()
+  let root_midi = self.root.midi()
   let intervals = self.quality.intervals()
   intervals.map(fn(interval) { root_midi + interval })
 }
@@ -100,7 +42,7 @@ pub fn parse_chord(input : String) -> Result[Chord, String] {
   }
 
   // Convert root string to NoteName
-  let root = match NoteName::from_string(root_str) {
+  let root = match ChordRoot::from_string(root_str) {
     Some(name) => name
     None => return Err("Invalid root note: " + root_str)
   }
