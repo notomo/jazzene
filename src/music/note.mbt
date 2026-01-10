@@ -82,9 +82,31 @@ pub fn NoteValueSound::midi(self : NoteValueSound) -> MidiNumber? {
 }
 
 ///|
+/// Check if this note is playing at the given position
+pub fn NoteValueSound::in_range(
+  self : NoteValueSound,
+  position : Duration,
+) -> Bool {
+  let end = self.start_time + self.duration
+  position >= self.start_time && position < end
+}
+
+///|
 /// Calculate total duration of a note sequence
 pub fn calculate_total_duration(sounds : Array[NoteValueSound]) -> Duration {
   let total = @list.from_array(sounds).fold(init=0.0, (acc, sound) => acc +
     sound.duration.to_milliseconds())
   Duration::from_milliseconds(total)
+}
+
+///|
+/// Calculate which notes are currently playing at a given playback position
+pub fn calculate_playing_notes(
+  sounds : Array[NoteValueSound],
+  position : Duration,
+) -> Array[NoteValueSound] {
+  @list.from_array(sounds)
+  .take_while(fn(s) { s.start_time <= position })
+  .filter(fn(s) { s.in_range(position) })
+  .to_array()
 }

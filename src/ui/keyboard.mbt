@@ -12,10 +12,9 @@ pub fn keyboard(
 
   // Calculate currently playing notes
   let playing_notes = @signal.memo(fn() {
-    @music.calculate_active_midi_notes(
-      sounds.get(),
-      playback_position.get().to_milliseconds(),
-    )
+    @music.calculate_playing_notes(sounds.get(), playback_position.get())
+    .filter_map(fn(s) { s.midi() })
+    .map(fn(m) { m.value })
   })
 
   // Redraw when playing notes change
