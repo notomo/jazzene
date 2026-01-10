@@ -15,10 +15,9 @@ fn main {
   })
   let sounds : @signal.Signal[Array[@music.NoteValueSound]] = @signal.signal([])
   let _ = @signal.effect(fn() {
-    let current_bpm = bpm.get()
     let sound_list = @music.NoteValueSound::from_note_values(
       note_values(),
-      current_bpm,
+      bpm.get(),
     )
     sounds.set(sound_list)
   })
@@ -29,16 +28,13 @@ fn main {
   fn tick(elapsed_ms : Double) -> Bool {
     let pos = playback_position.get() +
       @music.Duration::from_milliseconds(elapsed_ms)
-    let total_dur = total_duration()
-    let current_pos = if pos < total_dur { pos } else { total_dur }
-    @audio.schedule_notes_in_window(
-      audio_ctx,
-      sounds.get(),
-      current_pos,
-      volume.get(),
-    )
+    let total = total_duration()
+    let current_pos = if pos < total { pos } else { total }
+    let lookahead = @music.Duration::from_milliseconds(100)
+    @music.slice_notes(sounds.get(), current_pos, lookahead)
+    |> @audio.schedule_notes(audio_ctx, current_pos, volume.get())
     playback_position.set(current_pos)
-    current_pos >= total_dur
+    current_pos >= total
   }
 
   setup_loop(is_playing, tick)

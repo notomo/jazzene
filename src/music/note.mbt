@@ -87,8 +87,7 @@ pub fn NoteValueSound::in_range(
   self : NoteValueSound,
   position : Duration,
 ) -> Bool {
-  let end = self.start_time + self.duration
-  position >= self.start_time && position < end
+  self.start_time <= position && position < self.start_time + self.duration
 }
 
 ///|
@@ -106,7 +105,22 @@ pub fn calculate_playing_notes(
   position : Duration,
 ) -> Array[NoteValueSound] {
   @list.from_array(sounds)
-  .take_while(fn(s) { s.start_time <= position })
-  .filter(fn(s) { s.in_range(position) })
+  .take_while(fn(sound) { sound.start_time <= position })
+  .filter(fn(sound) { sound.in_range(position) })
+  .to_array()
+}
+
+///|
+/// Slice notes within a time window for lookahead scheduling
+/// Returns all sounds (both Note and Rest) within [position, position + lookahead)
+pub fn slice_notes(
+  sounds : Array[NoteValueSound],
+  position : Duration,
+  lookahead : Duration,
+) -> Array[NoteValueSound] {
+  let window_end = position + lookahead
+  @list.from_array(sounds)
+  .take_while(fn(sound) { sound.start_time < window_end })
+  .filter(fn(sound) { sound.start_time >= position })
   .to_array()
 }

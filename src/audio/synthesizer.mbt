@@ -40,22 +40,23 @@ fn schedule_note(
 }
 
 ///|
-/// Schedule notes in a lookahead window for smooth playback
-/// This avoids setTimeout drift by using WebAudio's precise scheduling
-pub fn schedule_notes_in_window(
-  ctx : @web_audio.AudioContext,
+/// Schedule pre-filtered notes for playback
+/// Calculates audio context timing internally
+pub fn schedule_notes(
   sounds : Array[@music.NoteValueSound],
+  ctx : @web_audio.AudioContext,
   current_pos : @music.Duration,
-  lookahead? : @music.Duration = @music.Duration::from_milliseconds(100),
   volume : Double,
 ) -> Unit {
-  let scheduled_sounds = @music.extract_sounds_in_window(
-    sounds,
-    current_pos,
-    lookahead,
-    @music.Duration::from_seconds(ctx.current_time()),
-  )
-  for sound in scheduled_sounds {
-    schedule_note(ctx, sound.midi, sound.start_time, sound.duration, volume)
+  let current_time = @music.Duration::from_seconds(ctx.current_time())
+  for sound in sounds {
+    match sound.note_value {
+      @music.Note(midi~, ..) => {
+        let offset = sound.start_time - current_pos
+        let start_time = current_time + offset
+        schedule_note(ctx, midi, start_time, sound.duration, volume)
+      }
+      @music.Rest(..) => ()
+    }
   }
 }
