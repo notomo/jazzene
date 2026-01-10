@@ -54,7 +54,7 @@ pub fn schedule_notes_in_window(
     sounds,
     current_pos,
     lookahead,
-    ctx.current_time(),
+    @music.Duration::from_seconds(ctx.current_time()),
   )
   for sound in scheduled_sounds {
     schedule_note(ctx, sound.midi, sound.start_time, sound.duration, volume)

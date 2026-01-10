@@ -13,7 +13,7 @@ pub fn extract_sounds_in_window(
   sounds : Array[NoteValueSound],
   current_pos : Duration,
   lookahead : Duration,
-  current_time : Double,
+  current_time : Duration,
 ) -> Array[ScheduledSound] {
   let window_end = current_pos + lookahead
   @list.from_array(sounds)
@@ -22,19 +22,15 @@ pub fn extract_sounds_in_window(
   .filter_map(fn(sound) {
     match sound.note_value {
       Note(midi=midi_val, ..) => {
-        let offset = Duration::from_seconds(
-          sound.start_time.to_seconds() - current_pos.to_seconds(),
-        )
-        let audio_start_time = Duration::from_seconds(
-          current_time + offset.to_seconds(),
-        )
+        let offset = sound.start_time - current_pos
+        let start_time = current_time + offset
         Some(ScheduledSound::{
           midi: midi_val.value,
-          start_time: audio_start_time,
+          start_time,
           duration: sound.duration,
         })
       }
-      Rest(..) => None // Rests advance time but produce no sound
+      Rest(..) => None
     }
   })
   .to_array()

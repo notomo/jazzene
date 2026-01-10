@@ -47,3 +47,9 @@ pub impl Compare for Duration with compare(self, other) {
 pub impl Add for Duration with add(self, other) {
   { seconds: self.seconds + other.seconds }
 }
+
+///|
+/// Implement Sub trait for Duration
+pub impl Sub for Duration with sub(self, other) {
+  { seconds: self.seconds - other.seconds }
+}

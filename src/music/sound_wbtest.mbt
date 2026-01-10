@@ -9,7 +9,7 @@ test "extract_sounds_in_window extracts notes in range" {
   let sounds_list = NoteValueSound::from_note_values(note_values, bpm)
   let current_pos = Duration::from_milliseconds(500)
   let lookahead = Duration::from_milliseconds(1000)
-  let current_time = 10.0
+  let current_time = Duration::from_seconds(10.0)
   let sounds = extract_sounds_in_window(
     sounds_list, current_pos, lookahead, current_time,
   )
@@ -33,7 +33,7 @@ test "extract_sounds_in_window skips rests" {
   let sounds_list = NoteValueSound::from_note_values(note_values, bpm)
   let current_pos = Duration::from_milliseconds(0)
   let lookahead = Duration::from_milliseconds(1500)
-  let current_time = 5.0
+  let current_time = Duration::from_seconds(5.0)
   let sounds = extract_sounds_in_window(
     sounds_list, current_pos, lookahead, current_time,
   )
@@ -54,7 +54,7 @@ test "extract_sounds_in_window excludes notes outside range" {
   let sounds_list = NoteValueSound::from_note_values(note_values, bpm)
   let current_pos = Duration::from_milliseconds(500)
   let lookahead = Duration::from_milliseconds(1000)
-  let current_time = 3.0
+  let current_time = Duration::from_seconds(3.0)
   let sounds = extract_sounds_in_window(
     sounds_list, current_pos, lookahead, current_time,
   )
@@ -70,7 +70,7 @@ test "extract_sounds_in_window returns empty for empty input" {
   let sounds_list = NoteValueSound::from_note_values(note_values, bpm)
   let current_pos = Duration::from_milliseconds(0)
   let lookahead = Duration::from_milliseconds(1000)
-  let current_time = 0.0
+  let current_time = Duration::from_seconds(0.0)
   let sounds = extract_sounds_in_window(
     sounds_list, current_pos, lookahead, current_time,
   )
@@ -87,7 +87,7 @@ test "extract_sounds_in_window returns empty when all notes outside range" {
   let sounds_list = NoteValueSound::from_note_values(note_values, bpm)
   let current_pos = Duration::from_milliseconds(1000)
   let lookahead = Duration::from_milliseconds(500)
-  let current_time = 1.0
+  let current_time = Duration::from_seconds(1.0)
   let sounds = extract_sounds_in_window(
     sounds_list, current_pos, lookahead, current_time,
   )
@@ -107,7 +107,7 @@ test "extract_sounds_in_window stops early when past window" {
   let sounds_list = NoteValueSound::from_note_values(note_values, bpm)
   let current_pos = Duration::from_milliseconds(0)
   let lookahead = Duration::from_milliseconds(1000)
-  let current_time = 2.0
+  let current_time = Duration::from_seconds(2.0)
   let sounds = extract_sounds_in_window(
     sounds_list, current_pos, lookahead, current_time,
   )
