@@ -2,8 +2,8 @@
   "name": "internal/jazzene",
   "version": "0.0.1",
   "deps": {
-    "mizchi/luna": "0.3.5",
-    "mizchi/js": "0.10.6"
+    "mizchi/luna": "0.4.1",
+    "mizchi/js": "0.10.8"
   },
   "source": "src",
   "preferred-target": "js"
