@@ -225,6 +225,16 @@ fn draw_notes(
       key_area.rect.width,
       bottom_y - top_y,
     )
+
+    // Draw border to distinguish consecutive notes
+    ctx.strokeStyle = "#1e293b" // Dark border for separation
+    ctx.lineWidth = 1.0
+    ctx.strokeRect(
+      key_area.rect.left,
+      top_y,
+      key_area.rect.width,
+      bottom_y - top_y,
+    )
   }
 
   // Draw vertical lines for white keys (after notes, so they're visible)
