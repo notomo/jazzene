@@ -14,59 +14,25 @@ pub fn Chord::tones(self : Chord) -> Array[Int] {
 }
 
 ///|
-/// Helper to safely slice string with custom error message
-fn slice_to_string(
-  s : String,
-  start : Int,
-  end : Int,
-) -> Result[String, String] {
-  (try? s[start:end].to_string()).map_err(fn(e) { "Invalid string slice: \{e}" })
-}
-
-///|
 /// Parse a single chord string into a Chord struct
 pub fn parse_chord(input : String) -> Result[Chord, String] {
-  let (root_str, quality_start) = match input {
-    [_, '#', ..] | [_, 'b', ..] =>
-      // Two character root (e.g., "F#", "Bb")
-      try input[0:2] catch {
-        e => return Err("Invalid string slice: \{e}")
-      } noraise {
-        s => (s.to_string(), 2)
-      }
-    [_, ..] =>
-      // Single character root (e.g., "C", "F")
-      try input[0:1] catch {
-        e => return Err("Invalid string slice: \{e}")
-      } noraise {
-        s => (s.to_string(), 1)
-      }
+  let (root_str, quality_str) = match input {
+    [c1, c2, .. tail] if ['#', 'b'].contains(c2) =>
+      // e.g., "F#", "Bb"
+      (c1.to_string() + c2.to_string(), tail.to_string())
+    [c1, .. tail] =>
+      // e.g., "C", "F"
+      (c1.to_string(), tail.to_string())
     [] => return Err("Empty chord string")
   }
-
-  // Parse quality from the rest
-  let quality_str = if quality_start >= input.length() {
-    ""
-  } else {
-    match slice_to_string(input, quality_start, input.length()) {
-      Ok(s) => s
-      Err(e) => return Err(e)
-    }
-  }
-
-  // Convert root string to ChordRoot
   let root = match ChordRoot::from_string(root_str) {
     Ok(r) => r
     Err(e) => return Err(e)
   }
-
-  // Parse chord quality
   let quality = match parse_quality(quality_str) {
     Ok(q) => q
     Err(e) => return Err(e)
   }
-
-  // Create Chord
   Ok(Chord::{ root, quality })
 }
 
