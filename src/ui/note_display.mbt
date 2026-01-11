@@ -144,6 +144,10 @@ pub fn note_display(
     if client_width > 0 {
       canvas.width = client_width
     }
+    let client_height = canvas.clientHeight()
+    if client_height > 0 {
+      canvas.height = client_height
+    }
     draw_notes(
       ctx,
       canvas.width.to_double(),
@@ -156,15 +160,11 @@ pub fn note_display(
 
   // Convert canvas to DomNode using ToDomNode trait
   let canvas_dom_node = @luna_dom.ToDomNode::to_dom_node(canvas.as_node())
-
-  // Wrap in div with aria-label for E2E tests
-  @luna_dom.div(class="h-full flex flex-col", [
-    @luna_dom.div(
-      class="relative flex-1 bg-slate-900",
-      attrs=[("aria-label", @luna_dom.Attr::AttrString("falling notes"))],
-      [canvas_dom_node],
-    ),
-  ])
+  @luna_dom.div(
+    class="w-full h-full bg-slate-900",
+    attrs=[("aria-label", @luna_dom.Attr::AttrString("falling notes"))],
+    [canvas_dom_node],
+  )
 }
 
 ///|

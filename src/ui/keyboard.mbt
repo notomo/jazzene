@@ -24,6 +24,10 @@ pub fn keyboard(
     if client_width > 0 {
       canvas.width = client_width
     }
+    let client_height = canvas.clientHeight()
+    if client_height > 0 {
+      canvas.height = client_height
+    }
     draw_keyboard(
       ctx,
       canvas.width.to_double(),

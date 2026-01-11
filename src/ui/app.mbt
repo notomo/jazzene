@@ -56,10 +56,10 @@ pub fn render(
 
   // Build UI tree
   let app = @luna_dom.div(
-    class="h-dvh bg-gradient-to-br from-slate-950 to-slate-900 text-white grid grid-rows-[min-content_1fr]",
+    class="flex flex-col h-dvh overflow-hidden w-dvw bg-gradient-to-br from-slate-950 to-slate-900 text-white",
     [
       @luna_dom.div(
-        class="h-wit p-2 bg-slate-800 rounded-xl shadow-2xl border-2 border-slate-700",
+        class="p-2 bg-slate-800 border-2 border-slate-700",
         attrs=[("aria-label", @luna_dom.Attr::AttrString("lead sheet"))],
         [
           @luna_dom.div([
@@ -80,7 +80,7 @@ pub fn render(
         ],
       ),
       @luna_dom.div(
-        class="bg-slate-950 shadow-2xl border-slate-700 h-full grid grid-rows-[80%_20%]",
+        class="flex flex-col flex-1",
         attrs=[("aria-label", @luna_dom.Attr::AttrString("visualization"))],
         [
           note_display(sounds, playback_position, bpm, total_duration),
