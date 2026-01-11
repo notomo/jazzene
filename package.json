@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "check_all": "npm run format && npm run check && npm run test && npm run build && npm run test:e2e",
-    "check": "moon check && moon fmt --check",
+    "check": "moon check src && moon fmt --check",
     "format": "moon fmt",
     "test": "moon test -v -p internal/jazzene/music --target wasm-gc",
     "test:e2e": "playwright test",
