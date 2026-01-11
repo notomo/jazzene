@@ -3,7 +3,8 @@
 fn main {
   let bpm = @signal.signal(200)
   let raw_chord_progression = @signal.signal("Cm7 F7 Bbmaj7 Ebmaj7")
-  let sounds = make_sounds(raw_chord_progression, bpm)
+  let seed = @signal.signal(0)
+  let sounds = make_sounds(raw_chord_progression, seed, bpm)
   let total_duration = @signal.memo(fn() {
     @music.calculate_total_duration(sounds.get())
   })
@@ -15,19 +16,25 @@ fn main {
   let is_playing = @signal.signal(false)
   @ui.setup_loop(is_playing, tick)
   @ui.render(
-    is_playing, playback_position, volume, bpm, raw_chord_progression, sounds, total_duration,
+    is_playing, playback_position, volume, bpm, raw_chord_progression, seed, sounds,
+    total_duration,
   )
 }
 
 ///|
 fn make_sounds(
   raw_chord_progression : @signal.Signal[String],
+  seed : @signal.Signal[Int],
   bpm : @signal.Signal[Int],
 ) -> @signal.Signal[Array[@music.NoteValueSound]] {
   let note_values = @signal.memo(fn() {
+    let settings = @music.ImprovisationSettings::{
+      notes_per_measure: 4,
+      seed: seed.get(),
+    }
     raw_chord_progression.get()
     |> @music.parse_chord_progression
-    |> @music.generate_improvisation(@music.ImprovisationSettings::default())
+    |> @music.generate_improvisation(settings)
   })
   let sounds : @signal.Signal[Array[@music.NoteValueSound]] = @signal.signal([])
   let _ = @signal.effect(fn() {

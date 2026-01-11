@@ -47,6 +47,7 @@ pub fn render(
   volume : @signal.Signal[Double],
   bpm : @signal.Signal[Int],
   raw_chord_progression : @signal.Signal[String],
+  seed : @signal.Signal[Int],
   sounds : @signal.Signal[Array[@music.NoteValueSound]],
   total_duration : () -> @music.Duration,
 ) -> Unit {
@@ -62,6 +63,7 @@ pub fn render(
           @luna_dom.div([
             @luna_dom.div(class="flex gap-4 items-center p-1", [
               chord_progression_input(raw_chord_progression),
+              seed_input(seed),
               bpm_input(bpm),
             ]),
             @luna_dom.div(class="flex gap-4 items-baseline p-1", [

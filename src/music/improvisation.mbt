@@ -1,23 +1,46 @@
 ///|
-/// Settings for improvisation generation
-pub struct ImprovisationSettings {
-  notes_per_measure : Int
-} derive(Eq, Show)
+/// Convert an integer seed to a 32-byte seed for ChaCha8 RNG
+/// The seed is distributed across the 32 bytes using little-endian encoding
+fn seed_to_bytes(seed : Int) -> Bytes {
+  let seed_bytes = FixedArray::make(32, b'\x00')
+  let seed_uint = seed.reinterpret_as_uint()
 
-///|
-/// Default settings: 4 notes per measure
-pub fn ImprovisationSettings::default() -> ImprovisationSettings {
-  ImprovisationSettings::{ notes_per_measure: 4 }
+  // Write the seed as 8 consecutive 32-bit integers (little-endian)
+  // This ensures good distribution even for small seed values
+  for i = 0; i < 8; {
+    seed_bytes.unsafe_write_uint32_le(
+      i * 4,
+      seed_uint + i.reinterpret_as_uint(),
+    )
+    continue i + 1
+  }
+  seed_bytes.unsafe_reinterpret_as_bytes()
 }
 
 ///|
-/// Generate improvisation from a chord progression
+/// Settings for improvisation generation
+pub(all) struct ImprovisationSettings {
+  notes_per_measure : Int
+  seed : Int
+} derive(Eq, Show)
+
+///|
+/// Default settings: 4 notes per measure, seed 0
+pub fn ImprovisationSettings::default() -> ImprovisationSettings {
+  ImprovisationSettings::{ notes_per_measure: 4, seed: 0 }
+}
+
+///|
+/// Generate improvisation from a chord progression with a specific seed
 /// Returns note values (notes and rests) with varying durations
 /// Notes are generated to fit exactly within measure boundaries
+/// Using the same seed with the same chords produces the same improvisation
 pub fn generate_improvisation(
   chords : Array[Chord],
   settings : ImprovisationSettings,
 ) -> Array[NoteValue] {
+  // Create a seeded RNG for deterministic generation
+  let rand = @random.Rand::chacha8(seed=seed_to_bytes(settings.seed))
   let note_values : Array[NoteValue] = []
   let beats_per_measure = settings.notes_per_measure.to_double()
 
@@ -28,8 +51,8 @@ pub fn generate_improvisation(
     // Track remaining beats in current measure
     let mut remaining_beats = beats_per_measure
     while remaining_beats > 0.0 {
-      let midi_number = random_midi_from_chord(chord)
-      let duration = random_duration_with_limit(remaining_beats)
+      let midi_number = random_midi_from_chord(chord, rand)
+      let duration = random_duration_with_limit(remaining_beats, rand)
       match MidiNumber::new(midi_number) {
         Some(x) => {
           note_values.push(NoteValue::Note(midi=x, duration~))
@@ -45,7 +68,10 @@ pub fn generate_improvisation(
 ///|
 /// Generate random duration that fits within the remaining beats
 /// Distribution: 20% eighth, 60% quarter, 20% half (adjusted based on remaining beats)
-fn random_duration_with_limit(remaining_beats : Double) -> NoteDuration {
+fn random_duration_with_limit(
+  remaining_beats : Double,
+  rand : @random.Rand,
+) -> NoteDuration {
   // Filter available durations based on remaining beats
   let available : Array[NoteDuration] = []
   if remaining_beats >= 2.0 {
@@ -69,7 +95,7 @@ fn random_duration_with_limit(remaining_beats : Double) -> NoteDuration {
   }
 
   // Prefer distribution: 20% eighth, 60% quarter, 20% half (when all available)
-  let r = global_rand.int(limit=100)
+  let r = rand.int(limit=100)
   if available.length() == 3 {
     // All durations available
     if r < 20 {
@@ -101,7 +127,7 @@ fn random_duration_with_limit(remaining_beats : Double) -> NoteDuration {
 ///|
 /// Generate a random MIDI number from chord tones
 /// Uses chord tones across multiple octaves (C3-C6, MIDI 48-84)
-fn random_midi_from_chord(chord : Chord) -> Int {
+fn random_midi_from_chord(chord : Chord, rand : @random.Rand) -> Int {
   let base_tones = chord.tones()
   if base_tones.length() == 0 {
     return 60 // Fallback to middle C
@@ -120,10 +146,6 @@ fn random_midi_from_chord(chord : Chord) -> Int {
   }
 
   // Select random note
-  let index = global_rand.int(limit=extended_tones.length())
+  let index = rand.int(limit=extended_tones.length())
   extended_tones[index]
 }
-
-///|
-/// Global random number generator
-let global_rand : @random.Rand = @random.Rand::chacha8()
