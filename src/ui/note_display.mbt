@@ -139,19 +139,25 @@ pub fn note_display(
     let pos = playback_position.get().to_milliseconds()
     let positions = note_positions()
 
-    // Update canvas width to match displayed width
+    // Update canvas size with devicePixelRatio for high-DPI displays
+    let dpr = get_device_pixel_ratio()
     let client_width = canvas.clientWidth()
-    if client_width > 0 {
-      canvas.width = client_width
-    }
     let client_height = canvas.clientHeight()
-    if client_height > 0 {
-      canvas.height = client_height
+    if client_width > 0 && client_height > 0 {
+      // Set canvas buffer size to physical pixels
+      canvas.width = (client_width.to_double() * dpr).to_int()
+      canvas.height = (client_height.to_double() * dpr).to_int()
+
+      // Reset transform and scale context to match devicePixelRatio
+      ctx.setTransform(1.0, 0.0, 0.0, 1.0, 0.0, 0.0)
+      ctx.scale(dpr, dpr)
     }
+
+    // Draw using logical (CSS) pixels
     draw_notes(
       ctx,
-      canvas.width.to_double(),
-      canvas.height.to_double(),
+      client_width.to_double(),
+      client_height.to_double(),
       positions,
       pos,
       bpm.get(),
@@ -161,7 +167,7 @@ pub fn note_display(
   // Convert canvas to DomNode using ToDomNode trait
   let canvas_dom_node = @luna_dom.ToDomNode::to_dom_node(canvas.as_node())
   @luna_dom.div(
-    class="w-full h-full bg-slate-900",
+    class="w-full flex-1 min-h-0 bg-slate-900",
     attrs=[("aria-label", @luna_dom.Attr::AttrString("falling notes"))],
     [canvas_dom_node],
   )

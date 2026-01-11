@@ -80,7 +80,7 @@ pub fn render(
         ],
       ),
       @luna_dom.div(
-        class="flex flex-col flex-1",
+        class="flex flex-col flex-1 min-h-0",
         attrs=[("aria-label", @luna_dom.Attr::AttrString("visualization"))],
         [
           note_display(sounds, playback_position, bpm, total_duration),

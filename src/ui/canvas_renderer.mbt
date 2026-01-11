@@ -94,6 +94,10 @@ fn is_black_key(note_in_octave : Int) -> Bool {
 }
 
 ///|
+extern "js" fn get_device_pixel_ratio() -> Double =
+  #|() => window.devicePixelRatio || 1
+
+///|
 extern "js" fn get_context_2d(
   canvas : @js_dom.HTMLCanvasElement,
 ) -> @canvas.CanvasRenderingContext2D =
