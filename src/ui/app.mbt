@@ -51,6 +51,7 @@ pub fn render(
   sounds : @signal.Signal[Array[@music.NoteValueSound]],
   total_duration : () -> @music.Duration,
   loop_state : LoopState,
+  chord_parse_error : @signal.Signal[String?],
 ) -> Unit {
 
   // Build UI tree
@@ -63,7 +64,7 @@ pub fn render(
         [
           @luna_dom.div([
             @luna_dom.div(class="flex gap-4 items-center p-1", [
-              chord_progression_input(raw_chord_progression),
+              chord_progression_input(raw_chord_progression, chord_parse_error),
               seed_input(seed),
               bpm_input(bpm),
             ]),

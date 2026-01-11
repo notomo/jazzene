@@ -36,24 +36,54 @@ test "parse dominant 7th chord" {
 
 ///|
 test "parse chord progression" {
-  let chords = parse_chord_progression("Cm7 F7 Bbmaj7 Ebmaj7")
-  inspect(chords.length(), content="4")
+  let result = parse_chord_progression("Cm7 F7 Bbmaj7 Ebmaj7")
+  match result {
+    Ok(chords) => {
+      inspect(chords.length(), content="4")
 
-  // Check first chord
-  let c = chords[0]
-  inspect(c.root, content="C")
-  inspect(c.quality, content="Minor7")
+      // Check first chord
+      let c = chords[0]
+      inspect(c.root, content="C")
+      inspect(c.quality, content="Minor7")
 
-  // Check last chord
-  let eb = chords[3]
-  inspect(eb.root, content="DSharp")
-  inspect(eb.quality, content="Major7")
+      // Check last chord
+      let eb = chords[3]
+      inspect(eb.root, content="DSharp")
+      inspect(eb.quality, content="Major7")
+    }
+    Err(e) => abort("Failed to parse progression: " + e)
+  }
 }
 
 ///|
 test "parse empty progression" {
-  let chords = parse_chord_progression("")
-  inspect(chords.length(), content="0")
+  let result = parse_chord_progression("")
+  match result {
+    Ok(chords) => inspect(chords.length(), content="0")
+    Err(e) => abort("Failed to parse empty progression: " + e)
+  }
+}
+
+///|
+test "parse chord progression with invalid chord" {
+  let result = parse_chord_progression("Cm7 InvalidChord F7")
+  match result {
+    Ok(_) => abort("Expected error for invalid chord")
+    Err(e) =>
+      inspect(e.contains("Failed to parse 'InvalidChord'"), content="true")
+  }
+}
+
+///|
+test "parse chord progression with mixed valid and invalid" {
+  let result = parse_chord_progression("Cm7 XYZ F7 ABC")
+  match result {
+    Ok(_) => abort("Expected error for invalid chords")
+    Err(e) => {
+      inspect(e.contains("Failed to parse 'XYZ'"), content="true")
+      inspect(e.contains("Failed to parse 'ABC'"), content="true")
+    }
+  }
 }
 
 ///|
