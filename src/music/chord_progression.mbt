@@ -24,32 +24,22 @@ fn slice_to_string(
 }
 
 ///|
-/// Helper to convert Option to Result with custom error message
-fn[T] option_to_result(opt : T?, error : String) -> Result[T, String] {
-  match opt {
-    Some(v) => Ok(v)
-    None => Err(error)
-  }
-}
-
-///|
 /// Parse a single chord string into a Chord struct
-/// Examples: "Cm7" -> Chord { root: C, quality: Minor7 }
-///           "F#maj7" -> Chord { root: FSharp, quality: Major7 }
 pub fn parse_chord(input : String) -> Result[Chord, String] {
-  // Parse root note (1 or 2 characters) using pattern matching
   let (root_str, quality_start) = match input {
     [_, '#', ..] | [_, 'b', ..] =>
       // Two character root (e.g., "F#", "Bb")
-      match slice_to_string(input, 0, 2) {
-        Ok(s) => (s, 2)
-        Err(e) => return Err(e)
+      try input[0:2] catch {
+        e => return Err("Invalid string slice: \{e}")
+      } noraise {
+        s => (s.to_string(), 2)
       }
     [_, ..] =>
       // Single character root (e.g., "C", "F")
-      match slice_to_string(input, 0, 1) {
-        Ok(s) => (s, 1)
-        Err(e) => return Err(e)
+      try input[0:1] catch {
+        e => return Err("Invalid string slice: \{e}")
+      } noraise {
+        s => (s.to_string(), 1)
       }
     [] => return Err("Empty chord string")
   }
@@ -65,17 +55,18 @@ pub fn parse_chord(input : String) -> Result[Chord, String] {
   }
 
   // Convert root string to ChordRoot
-  let root = match
-    option_to_result(
-      ChordRoot::from_string(root_str),
-      "Invalid root note: " + root_str,
-    ) {
+  let root = match ChordRoot::from_string(root_str) {
     Ok(r) => r
     Err(e) => return Err(e)
   }
 
+  // Parse chord quality
+  let quality = match parse_quality(quality_str) {
+    Ok(q) => q
+    Err(e) => return Err(e)
+  }
+
   // Create Chord
-  let quality = parse_quality(quality_str)
   Ok(Chord::{ root, quality })
 }
 

@@ -17,21 +17,21 @@ pub enum ChordRoot {
 
 ///|
 /// Parse string to note name
-pub fn ChordRoot::from_string(s : String) -> ChordRoot? {
+pub fn ChordRoot::from_string(s : String) -> Result[ChordRoot, String] {
   match s {
-    "C" => Some(C)
-    "C#" | "Db" => Some(CSharp)
-    "D" => Some(D)
-    "D#" | "Eb" => Some(DSharp)
-    "E" => Some(E)
-    "F" => Some(F)
-    "F#" | "Gb" => Some(FSharp)
-    "G" => Some(G)
-    "G#" | "Ab" => Some(GSharp)
-    "A" => Some(A)
-    "A#" | "Bb" => Some(ASharp)
-    "B" => Some(B)
-    _ => None
+    "C" => Ok(C)
+    "C#" | "Db" => Ok(CSharp)
+    "D" => Ok(D)
+    "D#" | "Eb" => Ok(DSharp)
+    "E" => Ok(E)
+    "F" => Ok(F)
+    "F#" | "Gb" => Ok(FSharp)
+    "G" => Ok(G)
+    "G#" | "Ab" => Ok(GSharp)
+    "A" => Ok(A)
+    "A#" | "Bb" => Ok(ASharp)
+    "B" => Ok(B)
+    _ => Err("Invalid chord root: " + s)
   }
 }
 

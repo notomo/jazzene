@@ -30,17 +30,17 @@ pub fn ChordQuality::intervals(self : ChordQuality) -> Array[Int] {
 
 ///|
 /// Parse quality string to ChordQuality enum
-pub fn parse_quality(quality : String) -> ChordQuality {
+pub fn parse_quality(quality : String) -> Result[ChordQuality, String] {
   match quality {
-    "maj7" | "M7" | "Δ7" | "△7" => Major7
-    "m7" | "min7" | "-7" => Minor7
-    "7" | "dom7" => Dominant7
-    "dim7" | "°7" => Diminished7
-    "m7b5" | "m7♭5" | "ø7" | "half-dim" => HalfDiminished
-    "aug" | "+" => Augmented
-    "sus4" | "sus" => Sus4
-    "m" | "min" | "-" => Minor
-    "" | "maj" | "M" => Major
-    _ => Major // default to major if unknown
+    "maj7" | "M7" | "Δ7" | "△7" => Ok(Major7)
+    "m7" | "min7" | "-7" => Ok(Minor7)
+    "7" | "dom7" => Ok(Dominant7)
+    "dim7" | "°7" => Ok(Diminished7)
+    "m7b5" | "m7♭5" | "ø7" | "half-dim" => Ok(HalfDiminished)
+    "aug" | "+" => Ok(Augmented)
+    "sus4" | "sus" => Ok(Sus4)
+    "m" | "min" | "-" => Ok(Minor)
+    "" | "maj" | "M" => Ok(Major)
+    _ => Err("Unknown chord quality: " + quality)
   }
 }

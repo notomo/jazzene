@@ -1,11 +1,14 @@
 ///|
 test "ChordRoot from_string" {
-  inspect(ChordRoot::from_string("C"), content="Some(C)")
-  inspect(ChordRoot::from_string("C#"), content="Some(CSharp)")
-  inspect(ChordRoot::from_string("Db"), content="Some(CSharp)")
-  inspect(ChordRoot::from_string("F#"), content="Some(FSharp)")
-  inspect(ChordRoot::from_string("Gb"), content="Some(FSharp)")
-  inspect(ChordRoot::from_string("Invalid"), content="None")
+  inspect(ChordRoot::from_string("C"), content="Ok(C)")
+  inspect(ChordRoot::from_string("C#"), content="Ok(CSharp)")
+  inspect(ChordRoot::from_string("Db"), content="Ok(CSharp)")
+  inspect(ChordRoot::from_string("F#"), content="Ok(FSharp)")
+  inspect(ChordRoot::from_string("Gb"), content="Ok(FSharp)")
+  inspect(
+    ChordRoot::from_string("Invalid"),
+    content="Err(\"Invalid chord root: Invalid\")",
+  )
 }
 
 ///|
