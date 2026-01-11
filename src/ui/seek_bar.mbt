@@ -1,16 +1,4 @@
 ///|
-/// Format milliseconds as "M:SS"
-fn format_time(ms : Double) -> String {
-  let total_seconds = (ms / 1000.0).to_int()
-  let minutes = total_seconds / 60
-  let seconds = total_seconds % 60
-  minutes.to_string() +
-  ":" +
-  (if seconds < 10 { "0" } else { "" }) +
-  seconds.to_string()
-}
-
-///|
 /// Render seek_bar UI component
 pub fn seek_bar(
   playback_position : @signal.Signal[@music.Duration],
@@ -32,7 +20,7 @@ pub fn seek_bar(
       None => ()
     }
   }
-  @luna_dom.div(class="flex gap-2 items-baseline bg-slate-800", [
+  @luna_dom.div(class="w-full flex gap-2 items-baseline bg-slate-800", [
     @luna_dom.div(
       class="flex justify-between text-sm text-slate-400 mb-2 text-nowrap",
       attrs=[("aria-label", @luna_dom.Attr::AttrString("time display"))],

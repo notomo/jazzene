@@ -50,6 +50,7 @@ pub fn render(
   seed : @signal.Signal[Int],
   sounds : @signal.Signal[Array[@music.NoteValueSound]],
   total_duration : () -> @music.Duration,
+  loop_state : LoopState,
 ) -> Unit {
 
   // Build UI tree
@@ -69,8 +70,9 @@ pub fn render(
             @luna_dom.div(class="flex gap-4 items-baseline p-1", [
               play_pause_button(is_playing, playback_position, total_duration),
               volume_input(volume),
-              @luna_dom.div(class="w-full", [
+              @luna_dom.div(class="flex gap-2 w-full items-center", [
                 seek_bar(playback_position, total_duration),
+                ab_loop(loop_state, total_duration),
               ]),
             ]),
           ]),

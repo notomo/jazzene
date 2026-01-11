@@ -12,12 +12,21 @@ fn main {
     @music.Duration::from_milliseconds(0.0),
   )
   let volume = @signal.signal(0.3)
-  let tick = make_tick(playback_position, volume, sounds, total_duration)
+  let loop_state = @ui.create_loop_state(total_duration)
+  let tick = make_tick(
+    playback_position, volume, sounds, total_duration, loop_state,
+  )
   let is_playing = @signal.signal(false)
+  let _ = @signal.effect(fn() {
+    let total = total_duration()
+    if not(loop_state.b_manually_set.get()) {
+      loop_state.b_time.set(total)
+    }
+  })
   @ui.setup_loop(is_playing, tick)
   @ui.render(
     is_playing, playback_position, volume, bpm, raw_chord_progression, seed, sounds,
-    total_duration,
+    total_duration, loop_state,
   )
 }
 
@@ -53,6 +62,7 @@ fn make_tick(
   volume : @signal.Signal[Double],
   sounds : @signal.Signal[Array[@music.NoteValueSound]],
   total_duration : () -> @music.Duration,
+  loop_state : @ui.LoopState,
 ) -> (Double) -> Bool {
   let audio_ctx = @audio.create_context()
   let lookahead = @music.Duration::from_milliseconds(100)
@@ -62,10 +72,31 @@ fn make_tick(
       playback_position.get() + @music.Duration::from_milliseconds(elapsed_ms),
       total,
     )
-    @music.slice_notes(sounds.get(), new_position, lookahead)
-    |> @audio.schedule_notes(audio_ctx, new_position, volume.get())
-    playback_position.set(new_position)
-    let stop = new_position == total
+    // Check loop boundaries
+    let final_position = {
+      let a_enabled = loop_state.a_enabled.get()
+      let b_enabled = loop_state.b_enabled.get()
+      let loop_end = if b_enabled { loop_state.b_time.get() } else { total }
+      let loop_start = if a_enabled {
+        loop_state.a_time.get()
+      } else {
+        @music.Duration::from_milliseconds(0.0)
+      }
+      // If exceeded loop end, jump to loop start
+      if new_position >= loop_end && (a_enabled || b_enabled) {
+        loop_start
+      } else {
+        new_position
+      }
+    }
+    @music.slice_notes(sounds.get(), final_position, lookahead)
+    |> @audio.schedule_notes(audio_ctx, final_position, volume.get())
+    playback_position.set(final_position)
+    let stop = if loop_state.a_enabled.get() || loop_state.b_enabled.get() {
+      false
+    } else {
+      final_position == total
+    }
     stop
   }
 }
