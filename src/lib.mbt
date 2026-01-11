@@ -11,20 +11,7 @@ fn main {
     @music.Duration::from_milliseconds(0.0),
   )
   let volume = @signal.signal(0.3)
-  let audio_ctx = @audio.create_context()
-  let lookahead = @music.Duration::from_milliseconds(100)
-  fn tick(elapsed_ms : Double) -> Bool {
-    let total = total_duration()
-    let new_position = @cmp.minimum(
-      playback_position.get() + @music.Duration::from_milliseconds(elapsed_ms),
-      total,
-    )
-    @music.slice_notes(sounds.get(), new_position, lookahead)
-    |> @audio.schedule_notes(audio_ctx, new_position, volume.get())
-    playback_position.set(new_position)
-    new_position == total
-  }
-
+  let tick = make_tick(playback_position, volume, sounds, total_duration)
   let is_playing = @signal.signal(false)
   @ui.setup_loop(is_playing, tick)
   @ui.render(
@@ -51,4 +38,27 @@ fn make_sounds(
     sounds.set(sound_list)
   })
   sounds
+}
+
+///|
+fn make_tick(
+  playback_position : @signal.Signal[@music.Duration],
+  volume : @signal.Signal[Double],
+  sounds : @signal.Signal[Array[@music.NoteValueSound]],
+  total_duration : () -> @music.Duration,
+) -> (Double) -> Bool {
+  let audio_ctx = @audio.create_context()
+  let lookahead = @music.Duration::from_milliseconds(100)
+  return fn(elapsed_ms : Double) -> Bool {
+    let total = total_duration()
+    let new_position = @cmp.minimum(
+      playback_position.get() + @music.Duration::from_milliseconds(elapsed_ms),
+      total,
+    )
+    @music.slice_notes(sounds.get(), new_position, lookahead)
+    |> @audio.schedule_notes(audio_ctx, new_position, volume.get())
+    playback_position.set(new_position)
+    let stop = new_position == total
+    stop
+  }
 }
