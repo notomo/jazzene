@@ -56,7 +56,7 @@ pub fn render(
 
   // Build UI tree
   let app = @luna_dom.div(
-    class="h-svh bg-gradient-to-br from-slate-950 to-slate-900 text-white grid grid-rows-[min-content_1fr]",
+    class="h-dvh bg-gradient-to-br from-slate-950 to-slate-900 text-white grid grid-rows-[min-content_1fr]",
     [
       @luna_dom.div(
         class="h-wit p-2 bg-slate-800 rounded-xl shadow-2xl border-2 border-slate-700",
