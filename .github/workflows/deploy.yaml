@@ -35,9 +35,7 @@ jobs:
           cache: 'npm'
       - run: npm ci
 
-      - uses: illusory0x0/setup-moonbit@v0.1.1
-        with:
-          version: stable
+      - uses: hustcer/setup-moonbit@v1.17
       - run: |
           moon update
           moon install
