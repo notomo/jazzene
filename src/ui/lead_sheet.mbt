@@ -2,7 +2,21 @@
 /// Lead Sheet Visualization Component
 /// Displays chord symbols, staff notation, and rhythm in SVG format
 
+// Color constants
+let color_background = "#111827"
+
+///|
+let color_foreground = "#f1f5f9"
+
+///|
+let color_highlight = "#3b82f6"
+
+///|
+let color_muted = "#9ca3af"
+
 // Layout constants
+
+///|
 let staff_top = 80.0
 
 ///|
@@ -45,7 +59,7 @@ fn render_staff_lines(x : Double, y : Double) -> @luna_dom.DomNode {
         y1=line_y.to_string(),
         x2=(x + measure_width).to_string(),
         y2=line_y.to_string(),
-        stroke="#1e293b",
+        stroke=color_foreground,
         stroke_width="1",
       ),
     )
@@ -62,7 +76,7 @@ fn render_treble_clef(x : Double, y : Double) -> @luna_dom.DomNode {
     y=(y + staff_line_spacing * 3.0).to_string(),
     font_size="48",
     font_family="serif",
-    fill="#1e293b",
+    fill=color_foreground,
     [@luna_dom.text("𝄞")],
   )
 }
@@ -75,7 +89,7 @@ fn render_bar_line(x : Double, y : Double) -> @luna_dom.DomNode {
     y1=y.to_string(),
     x2=x.to_string(),
     y2=(y + staff_line_spacing * 4.0).to_string(),
-    stroke="#1e293b",
+    stroke=color_foreground,
     stroke_width="2",
   )
 }
@@ -112,7 +126,6 @@ fn render_ledger_lines(
   midi : Int,
   note_x : Double,
   staff_y : Double,
-  is_current : () -> Bool,
 ) -> Array[@luna_dom.DomNode] {
   let step = midi_to_diatonic_step(midi)
   let lines = []
@@ -134,19 +147,8 @@ fn render_ledger_lines(
           y1=line_y.to_string(),
           x2=(note_x + line_half_width).to_string(),
           y2=line_y.to_string(),
+          stroke=color_foreground,
           stroke_width="1",
-          dyn_attrs=[
-            (
-              "stroke",
-              @luna_dom.AttrValue::Dynamic(fn() {
-                if is_current() {
-                  "#3b82f6"
-                } else {
-                  "#1e293b"
-                }
-              }),
-            ),
-          ],
         ),
       )
       current_step = current_step - 2
@@ -167,19 +169,8 @@ fn render_ledger_lines(
           y1=line_y.to_string(),
           x2=(note_x + line_half_width).to_string(),
           y2=line_y.to_string(),
+          stroke=color_foreground,
           stroke_width="1",
-          dyn_attrs=[
-            (
-              "stroke",
-              @luna_dom.AttrValue::Dynamic(fn() {
-                if is_current() {
-                  "#3b82f6"
-                } else {
-                  "#1e293b"
-                }
-              }),
-            ),
-          ],
         ),
       )
       current_step = current_step + 2
@@ -196,49 +187,6 @@ fn render_measure(
 ) -> @luna_dom.DomNode {
   let (x, y) = measure_position(measure.measure_index)
   let children : Array[@luna_dom.DomNode] = []
-
-  // Background highlight (dynamic based on current_measure_index)
-  children.push(
-    @luna_dom.svg_rect(
-      x=x.to_string(),
-      y=(y - 20.0).to_string(),
-      width=measure_width.to_string(),
-      height="180",
-      rx="4",
-      dyn_attrs=[
-        (
-          "fill",
-          @luna_dom.AttrValue::Dynamic(fn() {
-            if measure.measure_index == current_measure_index() {
-              "rgba(59, 130, 246, 0.1)"
-            } else {
-              "transparent"
-            }
-          }),
-        ),
-        (
-          "stroke",
-          @luna_dom.AttrValue::Dynamic(fn() {
-            if measure.measure_index == current_measure_index() {
-              "#3b82f6"
-            } else {
-              "#e2e8f0"
-            }
-          }),
-        ),
-        (
-          "stroke-width",
-          @luna_dom.AttrValue::Dynamic(fn() {
-            if measure.measure_index == current_measure_index() {
-              "2"
-            } else {
-              "1"
-            }
-          }),
-        ),
-      ],
-    ),
-  )
 
   // Staff lines
   children.push(render_staff_lines(x, y))
@@ -261,9 +209,9 @@ fn render_measure(
           "fill",
           @luna_dom.AttrValue::Dynamic(fn() {
             if measure.measure_index == current_measure_index() {
-              "#3b82f6"
+              color_highlight
             } else {
-              "#1e293b"
+              color_foreground
             }
           }),
         ),
@@ -291,10 +239,7 @@ fn render_measure(
         let note_y = @music.midi_to_staff_y(midi, y)
 
         // Ledger lines (for notes outside the staff)
-        let is_current = fn() {
-          measure.measure_index == current_measure_index()
-        }
-        let ledger_lines = render_ledger_lines(midi, note_x, y, is_current)
+        let ledger_lines = render_ledger_lines(midi, note_x, y)
         for line in ledger_lines {
           children.push(line)
         }
@@ -307,19 +252,8 @@ fn render_measure(
                 cx=note_x.to_string(),
                 cy=note_y.to_string(),
                 r="5",
+                fill=color_foreground,
                 stroke="none",
-                dyn_attrs=[
-                  (
-                    "fill",
-                    @luna_dom.AttrValue::Dynamic(fn() {
-                      if measure.measure_index == current_measure_index() {
-                        "#3b82f6"
-                      } else {
-                        "#000000"
-                      }
-                    }),
-                  ),
-                ],
               )
             Half =>
               @luna_dom.svg_circle(
@@ -327,19 +261,8 @@ fn render_measure(
                 cy=note_y.to_string(),
                 r="5",
                 fill="none",
+                stroke=color_foreground,
                 stroke_width="1.5",
-                dyn_attrs=[
-                  (
-                    "stroke",
-                    @luna_dom.AttrValue::Dynamic(fn() {
-                      if measure.measure_index == current_measure_index() {
-                        "#3b82f6"
-                      } else {
-                        "#000000"
-                      }
-                    }),
-                  ),
-                ],
               )
           },
         )
@@ -362,19 +285,8 @@ fn render_measure(
                 y1=y1.to_string(),
                 x2=stem_x.to_string(),
                 y2=y2.to_string(),
+                stroke=color_foreground,
                 stroke_width="1.5",
-                dyn_attrs=[
-                  (
-                    "stroke",
-                    @luna_dom.AttrValue::Dynamic(fn() {
-                      if measure.measure_index == current_measure_index() {
-                        "#3b82f6"
-                      } else {
-                        "#000000"
-                      }
-                    }),
-                  ),
-                ],
               ),
             )
 
@@ -398,19 +310,8 @@ fn render_measure(
                   @luna_dom.svg_path(
                     d=flag_d,
                     fill="none",
+                    stroke=color_foreground,
                     stroke_width="1.5",
-                    dyn_attrs=[
-                      (
-                        "stroke",
-                        @luna_dom.AttrValue::Dynamic(fn() {
-                          if measure.measure_index == current_measure_index() {
-                            "#3b82f6"
-                          } else {
-                            "#000000"
-                          }
-                        }),
-                      ),
-                    ],
                   ),
                 )
               }
@@ -433,8 +334,8 @@ fn render_measure(
                 " l 5 -10 l -5 -5 l 5 5 l -5 10 l 3 8"
               @luna_dom.svg_path(
                 d=path_d,
-                stroke="#000000",
-                fill="#000000",
+                stroke=color_foreground,
+                fill=color_foreground,
                 stroke_width="1",
               )
             }
@@ -444,7 +345,7 @@ fn render_measure(
                 y=(rest_y - 4.0).to_string(),
                 width="12",
                 height="4",
-                fill="#000000",
+                fill=color_foreground,
               )
             Eighth => {
               let path_d = "M " +
@@ -454,7 +355,7 @@ fn render_measure(
                 " l 3 -8 l 4 4"
               @luna_dom.svg_path(
                 d=path_d,
-                stroke="#000000",
+                stroke=color_foreground,
                 fill="none",
                 stroke_width="1.5",
               )
@@ -506,8 +407,16 @@ pub fn lead_sheet(
   })
 
   // Return container with SVG
-  @luna_dom.div(class="w-full h-full overflow-auto bg-white p-4", [
+  @luna_dom.div(class="w-full h-full overflow-auto bg-gray-900 p-4", [
     @luna_dom.svg(viewBox="0 0 1200 " + svg_height(), width="100%", [
+      // Dark background for the sheet
+      @luna_dom.svg_rect(
+        x="0",
+        y="0",
+        width="1200",
+        height=svg_height(),
+        fill=color_background,
+      ),
       // Empty state message
       @luna_dom.show(fn() { measures().length() == 0 }, fn() {
         @luna_dom.svg_text(
@@ -515,7 +424,7 @@ pub fn lead_sheet(
           y="200",
           text_anchor="middle",
           font_size="20",
-          fill="#6b7280",
+          fill=color_muted,
           [@luna_dom.text("Enter a chord progression to see the lead sheet")],
         )
       }),
