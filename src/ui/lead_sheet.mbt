@@ -81,6 +81,114 @@ fn render_bar_line(x : Double, y : Double) -> @luna_dom.DomNode {
 }
 
 ///|
+/// Calculate diatonic steps from E4 (bottom line of treble clef)
+fn midi_to_diatonic_step(midi : Int) -> Int {
+  let pitch_class = midi % 12
+  let octave = midi / 12 - 1
+
+  // E4 = pitch_class 4, octave 4
+  let e4_pitch_class = 4
+  let e4_octave = 4
+  let pitch_class_to_diatonic_step = fn(pc : Int) -> Int {
+    match pc {
+      0 | 1 => 0 // C, C#
+      2 | 3 => 1 // D, D#
+      4 => 2 // E
+      5 | 6 => 3 // F, F#
+      7 | 8 => 4 // G, G#
+      9 | 10 => 5 // A, A#
+      11 => 6 // B
+      _ => 0
+    }
+  }
+  let note_diatonic_step = pitch_class_to_diatonic_step(pitch_class)
+  let e4_diatonic_step = pitch_class_to_diatonic_step(e4_pitch_class)
+  (octave - e4_octave) * 7 + (note_diatonic_step - e4_diatonic_step)
+}
+
+///|
+/// Render ledger lines for notes outside the staff
+fn render_ledger_lines(
+  midi : Int,
+  note_x : Double,
+  staff_y : Double,
+  is_current : () -> Bool,
+) -> Array[@luna_dom.DomNode] {
+  let step = midi_to_diatonic_step(midi)
+  let lines = []
+
+  // Ledger line length (slightly longer than note head)
+  let line_half_width = 8.0
+
+  // Below staff (step < 0, even steps only)
+  if step < 0 {
+    let end_step = if step % 2 == 0 { step } else { step - 1 }
+    let mut current_step = -2 // First ledger line below staff
+    while current_step >= end_step {
+      let line_y = staff_y +
+        staff_line_spacing * 4.0 -
+        current_step.to_double() * (staff_line_spacing / 2.0)
+      lines.push(
+        @luna_dom.svg_line(
+          x1=(note_x - line_half_width).to_string(),
+          y1=line_y.to_string(),
+          x2=(note_x + line_half_width).to_string(),
+          y2=line_y.to_string(),
+          stroke_width="1",
+          dyn_attrs=[
+            (
+              "stroke",
+              @luna_dom.AttrValue::Dynamic(fn() {
+                if is_current() {
+                  "#3b82f6"
+                } else {
+                  "#1e293b"
+                }
+              }),
+            ),
+          ],
+        ),
+      )
+      current_step = current_step - 2
+    }
+  }
+
+  // Above staff (step > 8, even steps only)
+  if step > 8 {
+    let end_step = if step % 2 == 0 { step } else { step - 1 }
+    let mut current_step = 10 // First ledger line above F5
+    while current_step <= end_step {
+      let line_y = staff_y +
+        staff_line_spacing * 4.0 -
+        current_step.to_double() * (staff_line_spacing / 2.0)
+      lines.push(
+        @luna_dom.svg_line(
+          x1=(note_x - line_half_width).to_string(),
+          y1=line_y.to_string(),
+          x2=(note_x + line_half_width).to_string(),
+          y2=line_y.to_string(),
+          stroke_width="1",
+          dyn_attrs=[
+            (
+              "stroke",
+              @luna_dom.AttrValue::Dynamic(fn() {
+                if is_current() {
+                  "#3b82f6"
+                } else {
+                  "#1e293b"
+                }
+              }),
+            ),
+          ],
+        ),
+      )
+      current_step = current_step + 2
+    }
+  }
+  lines
+}
+
+///|
 /// Render a single measure with all its elements
 fn render_measure(
   measure : @music.Measure,
@@ -181,6 +289,15 @@ fn render_measure(
       Some(midi) => {
         // Render note
         let note_y = @music.midi_to_staff_y(midi, y)
+
+        // Ledger lines (for notes outside the staff)
+        let is_current = fn() {
+          measure.measure_index == current_measure_index()
+        }
+        let ledger_lines = render_ledger_lines(midi, note_x, y, is_current)
+        for line in ledger_lines {
+          children.push(line)
+        }
 
         // Note head
         children.push(
