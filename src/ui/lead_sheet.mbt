@@ -137,7 +137,7 @@ fn render_ledger_lines(
   let lines = []
 
   // Ledger line length (slightly longer than note head)
-  let line_half_width = 8.0
+  let line_half_width = 15.0
 
   // Below staff (step < 0, even steps only)
   if step < 0 {
@@ -348,17 +348,25 @@ fn render_measure(
         )
 
         // Stem and flag
-        let stem_height = 30.0
+        let stem_height = staff_line_spacing * 3.0 // 3 staff spaces
         let stem_up = midi < 71
         match note.duration {
           Eighth | Quarter => {
-            let stem_x = if stem_up { note_x + 4.0 } else { note_x - 4.0 }
-            let y1 = note_y
-            let y2 = if stem_up {
-              note_y - stem_height
+            // Calculate stem attachment point on rotated ellipse
+            // Ellipse is rotated -25 degrees
+            let rx = staff_line_spacing * 0.37894733 * 1.9
+            let cos_25 = 0.906308
+            let sin_25 = 0.422618
+            let (stem_x_offset, stem_y_offset) = if stem_up {
+              // Attach to right side of ellipse (0 degrees before rotation)
+              (rx * cos_25, -(rx * sin_25))
             } else {
-              note_y + stem_height
+              // Attach to left side of ellipse (180 degrees before rotation)
+              (-(rx * cos_25), rx * sin_25)
             }
+            let stem_x = note_x + stem_x_offset
+            let y1 = note_y + stem_y_offset
+            let y2 = if stem_up { y1 - stem_height } else { y1 + stem_height }
             children.push(
               @luna_dom.svg_line(
                 x1=stem_x.to_string(),
