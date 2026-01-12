@@ -34,25 +34,6 @@ fn measure_position(measure_index : Int) -> (Double, Double) {
 }
 
 ///|
-/// Render measure background highlight
-fn render_measure_background(
-  x : Double,
-  y : Double,
-  is_current : Bool,
-) -> @luna_dom.DomNode {
-  @luna_dom.svg_rect(
-    x=x.to_string(),
-    y=(y - 20.0).to_string(),
-    width=measure_width.to_string(),
-    height="180",
-    fill=if is_current { "rgba(59, 130, 246, 0.1)" } else { "transparent" },
-    stroke=if is_current { "#3b82f6" } else { "#e2e8f0" },
-    stroke_width=if is_current { "2" } else { "1" },
-    rx="4",
-  )
-}
-
-///|
 /// Render staff lines (5 horizontal lines)
 fn render_staff_lines(x : Double, y : Double) -> @luna_dom.DomNode {
   let lines = []
@@ -87,27 +68,6 @@ fn render_treble_clef(x : Double, y : Double) -> @luna_dom.DomNode {
 }
 
 ///|
-/// Render chord symbol
-fn render_chord_symbol(
-  x : Double,
-  chord : @music.Chord,
-  is_current : Bool,
-) -> @luna_dom.DomNode {
-  let fill_color = if is_current { "#3b82f6" } else { "#1e293b" }
-  let font_weight = if is_current { "bold" } else { "normal" }
-  @luna_dom.svg_text(
-    x=(x + 10.0).to_string(),
-    y="40",
-    text_anchor="start",
-    font_size="24",
-    font_family="serif",
-    fill=fill_color,
-    attrs=[("font-weight", @luna_dom.Attr::AttrString(font_weight))],
-    [@luna_dom.text(@music.format_chord(chord))],
-  )
-}
-
-///|
 /// Render bar line
 fn render_bar_line(x : Double, y : Double) -> @luna_dom.DomNode {
   @luna_dom.svg_line(
@@ -121,170 +81,276 @@ fn render_bar_line(x : Double, y : Double) -> @luna_dom.DomNode {
 }
 
 ///|
-/// Render note head (filled or hollow based on duration)
-fn render_note_head(
-  x : Double,
-  y : Double,
-  duration : @music.NoteDuration,
-  is_current : Bool,
+/// Render a single measure with all its elements
+fn render_measure(
+  measure : @music.Measure,
+  current_measure_index : () -> Int,
 ) -> @luna_dom.DomNode {
-  let fill_color = if is_current { "#3b82f6" } else { "#000000" }
-  match duration {
-    Eighth | Quarter =>
-      @luna_dom.svg_circle(
-        cx=x.to_string(),
-        cy=y.to_string(),
-        r="4",
-        fill=fill_color,
-        stroke="none",
-      )
-    Half =>
-      @luna_dom.svg_circle(
-        cx=x.to_string(),
-        cy=y.to_string(),
-        r="4",
-        fill="none",
-        stroke=fill_color,
-        stroke_width="1.5",
-      )
-  }
-}
+  let (x, y) = measure_position(measure.measure_index)
+  let children : Array[@luna_dom.DomNode] = []
 
-///|
-/// Render note stem and flag
-fn render_note_stem(
-  x : Double,
-  y : Double,
-  midi : Int,
-  duration : @music.NoteDuration,
-  is_current : Bool,
-) -> Array[@luna_dom.DomNode] {
-  let stroke_color = if is_current { "#3b82f6" } else { "#000000" }
-  let nodes = []
-  let stem_height = 30.0
-  let stem_up = midi < 71 // B4 and below: stem up
-  match duration {
-    Eighth | Quarter => {
-      // Render stem
-      let stem_x = if stem_up { x + 4.0 } else { x - 4.0 }
-      let y1 = y
-      let y2 = if stem_up { y - stem_height } else { y + stem_height }
-      nodes.push(
-        @luna_dom.svg_line(
-          x1=stem_x.to_string(),
-          y1=y1.to_string(),
-          x2=stem_x.to_string(),
-          y2=y2.to_string(),
-          stroke=stroke_color,
-          stroke_width="1.5",
+  // Background highlight (dynamic based on current_measure_index)
+  children.push(
+    @luna_dom.svg_rect(
+      x=x.to_string(),
+      y=(y - 20.0).to_string(),
+      width=measure_width.to_string(),
+      height="180",
+      rx="4",
+      dyn_attrs=[
+        (
+          "fill",
+          @luna_dom.AttrValue::Dynamic(fn() {
+            if measure.measure_index == current_measure_index() {
+              "rgba(59, 130, 246, 0.1)"
+            } else {
+              "transparent"
+            }
+          }),
         ),
-      )
+        (
+          "stroke",
+          @luna_dom.AttrValue::Dynamic(fn() {
+            if measure.measure_index == current_measure_index() {
+              "#3b82f6"
+            } else {
+              "#e2e8f0"
+            }
+          }),
+        ),
+        (
+          "stroke-width",
+          @luna_dom.AttrValue::Dynamic(fn() {
+            if measure.measure_index == current_measure_index() {
+              "2"
+            } else {
+              "1"
+            }
+          }),
+        ),
+      ],
+    ),
+  )
 
-      // Add flag for eighth notes
-      match duration {
-        Eighth => {
-          let flag_d = if stem_up {
-            "M " + stem_x.to_string() + " " + y2.to_string() + " q 8 3 8 10"
-          } else {
-            "M " + stem_x.to_string() + " " + y2.to_string() + " q -8 3 -8 10"
-          }
-          nodes.push(
-            @luna_dom.svg_path(
-              d=flag_d,
-              stroke=stroke_color,
-              fill="none",
-              stroke_width="1.5",
-            ),
-          )
-        }
-        _ => ()
-      }
-    }
-    Half => ()
+  // Staff lines
+  children.push(render_staff_lines(x, y))
+
+  // Treble clef (only on first measure of each row)
+  if measure.measure_index % measures_per_row == 0 {
+    children.push(render_treble_clef(x, y))
   }
-  nodes
-}
 
-///|
-/// Render a rest symbol
-fn render_rest(
-  x : Double,
-  y : Double,
-  duration : @music.NoteDuration,
-) -> @luna_dom.DomNode {
-  match duration {
-    Quarter => {
-      // Quarter rest (simplified zigzag)
-      let path_d = "M " +
-        x.to_string() +
-        " " +
-        y.to_string() +
-        " l 5 -10 l -5 -5 l 5 5 l -5 10 l 3 8"
-      @luna_dom.svg_path(
-        d=path_d,
-        stroke="#000000",
-        fill="#000000",
-        stroke_width="1",
-      )
-    }
-    Half =>
-      // Half rest (rectangle above middle line)
-      @luna_dom.svg_rect(
-        x=(x - 6.0).to_string(),
-        y=(y - 4.0).to_string(),
-        width="12",
-        height="4",
-        fill="#000000",
-      )
-    Eighth => {
-      // Eighth rest (simplified flag)
-      let path_d = "M " + x.to_string() + " " + y.to_string() + " l 3 -8 l 4 4"
-      @luna_dom.svg_path(
-        d=path_d,
-        stroke="#000000",
-        fill="none",
-        stroke_width="1.5",
-      )
-    }
-  }
-}
+  // Chord symbol (dynamic based on current_measure_index)
+  children.push(
+    @luna_dom.svg_text(
+      x=(x + 10.0).to_string(),
+      y="40",
+      text_anchor="start",
+      font_size="24",
+      font_family="serif",
+      dyn_attrs=[
+        (
+          "fill",
+          @luna_dom.AttrValue::Dynamic(fn() {
+            if measure.measure_index == current_measure_index() {
+              "#3b82f6"
+            } else {
+              "#1e293b"
+            }
+          }),
+        ),
+        (
+          "font-weight",
+          @luna_dom.AttrValue::Dynamic(fn() {
+            if measure.measure_index == current_measure_index() {
+              "bold"
+            } else {
+              "normal"
+            }
+          }),
+        ),
+      ],
+      [@luna_dom.text(@music.format_chord(measure.chord))],
+    ),
+  )
 
-///|
-/// Render all notes in a measure
-fn render_notes(
-  measure_x : Double,
-  measure_y : Double,
-  notes : Array[@music.MeasureNote],
-  is_current : Bool,
-) -> Array[@luna_dom.DomNode] {
-  let nodes = []
-  let rest_y = measure_y + staff_line_spacing * 2.0 // Middle of staff
-  for note in notes {
-    let note_x = measure_x +
-      60.0 +
-      note.start_beat * (measure_width - 80.0) / 4.0
+  // Notes (dynamic coloring based on current_measure_index)
+  for note in measure.notes {
+    let note_x = x + 60.0 + note.start_beat * (measure_width - 80.0) / 4.0
     match note.midi {
       Some(midi) => {
         // Render note
-        let note_y = @music.midi_to_staff_y(midi, measure_y)
-        nodes.push(render_note_head(note_x, note_y, note.duration, is_current))
-        let stem_nodes = render_note_stem(
-          note_x,
-          note_y,
-          midi,
-          note.duration,
-          is_current,
+        let note_y = @music.midi_to_staff_y(midi, y)
+
+        // Note head
+        children.push(
+          match note.duration {
+            Eighth | Quarter =>
+              @luna_dom.svg_circle(
+                cx=note_x.to_string(),
+                cy=note_y.to_string(),
+                r="4",
+                stroke="none",
+                dyn_attrs=[
+                  (
+                    "fill",
+                    @luna_dom.AttrValue::Dynamic(fn() {
+                      if measure.measure_index == current_measure_index() {
+                        "#3b82f6"
+                      } else {
+                        "#000000"
+                      }
+                    }),
+                  ),
+                ],
+              )
+            Half =>
+              @luna_dom.svg_circle(
+                cx=note_x.to_string(),
+                cy=note_y.to_string(),
+                r="4",
+                fill="none",
+                stroke_width="1.5",
+                dyn_attrs=[
+                  (
+                    "stroke",
+                    @luna_dom.AttrValue::Dynamic(fn() {
+                      if measure.measure_index == current_measure_index() {
+                        "#3b82f6"
+                      } else {
+                        "#000000"
+                      }
+                    }),
+                  ),
+                ],
+              )
+          },
         )
-        for stem_node in stem_nodes {
-          nodes.push(stem_node)
+
+        // Stem and flag
+        let stem_height = 30.0
+        let stem_up = midi < 71
+        match note.duration {
+          Eighth | Quarter => {
+            let stem_x = if stem_up { note_x + 4.0 } else { note_x - 4.0 }
+            let y1 = note_y
+            let y2 = if stem_up {
+              note_y - stem_height
+            } else {
+              note_y + stem_height
+            }
+            children.push(
+              @luna_dom.svg_line(
+                x1=stem_x.to_string(),
+                y1=y1.to_string(),
+                x2=stem_x.to_string(),
+                y2=y2.to_string(),
+                stroke_width="1.5",
+                dyn_attrs=[
+                  (
+                    "stroke",
+                    @luna_dom.AttrValue::Dynamic(fn() {
+                      if measure.measure_index == current_measure_index() {
+                        "#3b82f6"
+                      } else {
+                        "#000000"
+                      }
+                    }),
+                  ),
+                ],
+              ),
+            )
+
+            // Flag for eighth notes
+            match note.duration {
+              Eighth => {
+                let flag_d = if stem_up {
+                  "M " +
+                  stem_x.to_string() +
+                  " " +
+                  y2.to_string() +
+                  " q 8 3 8 10"
+                } else {
+                  "M " +
+                  stem_x.to_string() +
+                  " " +
+                  y2.to_string() +
+                  " q -8 3 -8 10"
+                }
+                children.push(
+                  @luna_dom.svg_path(
+                    d=flag_d,
+                    fill="none",
+                    stroke_width="1.5",
+                    dyn_attrs=[
+                      (
+                        "stroke",
+                        @luna_dom.AttrValue::Dynamic(fn() {
+                          if measure.measure_index == current_measure_index() {
+                            "#3b82f6"
+                          } else {
+                            "#000000"
+                          }
+                        }),
+                      ),
+                    ],
+                  ),
+                )
+              }
+              _ => ()
+            }
+          }
+          Half => ()
         }
       }
-      None =>
+      None => {
         // Render rest
-        nodes.push(render_rest(note_x, rest_y, note.duration))
+        let rest_y = y + staff_line_spacing * 2.0
+        children.push(
+          match note.duration {
+            Quarter => {
+              let path_d = "M " +
+                note_x.to_string() +
+                " " +
+                rest_y.to_string() +
+                " l 5 -10 l -5 -5 l 5 5 l -5 10 l 3 8"
+              @luna_dom.svg_path(
+                d=path_d,
+                stroke="#000000",
+                fill="#000000",
+                stroke_width="1",
+              )
+            }
+            Half =>
+              @luna_dom.svg_rect(
+                x=(note_x - 6.0).to_string(),
+                y=(rest_y - 4.0).to_string(),
+                width="12",
+                height="4",
+                fill="#000000",
+              )
+            Eighth => {
+              let path_d = "M " +
+                note_x.to_string() +
+                " " +
+                rest_y.to_string() +
+                " l 3 -8 l 4 4"
+              @luna_dom.svg_path(
+                d=path_d,
+                stroke="#000000",
+                fill="none",
+                stroke_width="1.5",
+              )
+            }
+          },
+        )
+      }
     }
   }
-  nodes
+
+  // Bar line
+  children.push(render_bar_line(x + measure_width, y))
+  @luna_dom.svg_g(children)
 }
 
 ///|
@@ -311,56 +377,6 @@ pub fn lead_sheet(
     }
   })
 
-  // Build SVG content
-  let svg_content = @signal.memo(fn() {
-    let measure_list = measures()
-    let current_idx = current_measure_index()
-    let children : Array[@luna_dom.DomNode] = []
-    if measure_list.length() == 0 {
-      // Show placeholder message in SVG
-      children.push(
-        @luna_dom.svg_text(
-          x="600",
-          y="200",
-          text_anchor="middle",
-          font_size="20",
-          fill="#6b7280",
-          [@luna_dom.text("Enter a chord progression to see the lead sheet")],
-        ),
-      )
-    } else {
-      // Render measures
-      for measure in measure_list {
-        let (x, y) = measure_position(measure.measure_index)
-        let is_current = measure.measure_index == current_idx
-
-        // Background highlight
-        children.push(render_measure_background(x, y, is_current))
-
-        // Staff lines
-        children.push(render_staff_lines(x, y))
-
-        // Treble clef (only on first measure of each row)
-        if measure.measure_index % measures_per_row == 0 {
-          children.push(render_treble_clef(x, y))
-        }
-
-        // Chord symbol
-        children.push(render_chord_symbol(x, measure.chord, is_current))
-
-        // Notes
-        let note_nodes = render_notes(x, y, measure.notes, is_current)
-        for node in note_nodes {
-          children.push(node)
-        }
-
-        // Bar line
-        children.push(render_bar_line(x + measure_width, y))
-      }
-    }
-    children
-  })
-
   // Calculate SVG height based on number of rows
   let svg_height = @signal.memo(fn() {
     let measure_count = measures().length()
@@ -374,10 +390,22 @@ pub fn lead_sheet(
 
   // Return container with SVG
   @luna_dom.div(class="w-full h-full overflow-auto bg-white p-4", [
-    @luna_dom.svg(
-      viewBox="0 0 1200 " + svg_height(),
-      width="100%",
-      svg_content(),
-    ),
+    @luna_dom.svg(viewBox="0 0 1200 " + svg_height(), width="100%", [
+      // Empty state message
+      @luna_dom.show(fn() { measures().length() == 0 }, fn() {
+        @luna_dom.svg_text(
+          x="600",
+          y="200",
+          text_anchor="middle",
+          font_size="20",
+          fill="#6b7280",
+          [@luna_dom.text("Enter a chord progression to see the lead sheet")],
+        )
+      }),
+      // Measures using for_each (reactive!)
+      @luna_dom.for_each(fn() { measures() }, fn(measure, _idx) {
+        render_measure(measure, current_measure_index)
+      }),
+    ]),
   ])
 }
