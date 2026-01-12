@@ -52,6 +52,7 @@ pub fn render(
   total_duration : () -> @music.Duration,
   loop_state : LoopState,
   chord_parse_error : @signal.Signal[String?],
+  measures : () -> Array[@music.Measure],
 ) -> Unit {
 
   // Build UI tree
@@ -84,7 +85,7 @@ pub fn render(
         attrs=[("aria-label", @luna_dom.Attr::AttrString("visualization"))],
         [
           @luna_dom.div(class="flex-2 min-h-0", [
-            lead_sheet(sounds, playback_position, raw_chord_progression, bpm),
+            lead_sheet(measures, playback_position, bpm),
           ]),
           @luna_dom.div(
             class="flex flex-col flex-3 min-h-0",

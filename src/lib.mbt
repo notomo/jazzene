@@ -9,6 +9,17 @@ fn main {
   let total_duration = @signal.memo(fn() {
     @music.calculate_total_duration(sounds.get())
   })
+  // Parse chord progression into chords
+  let chords = @signal.memo(fn() {
+    match @music.parse_chord_progression(raw_chord_progression.get()) {
+      Ok(c) => c
+      Err(_) => []
+    }
+  })
+  // Convert to measures for visualization
+  let measures = @signal.memo(fn() {
+    @music.convert_sounds_to_measures(sounds.get(), chords(), bpm.get())
+  })
   let playback_position = @signal.signal(
     @music.Duration::from_milliseconds(0.0),
   )
@@ -27,7 +38,7 @@ fn main {
   @ui.setup_loop(is_playing, tick)
   @ui.render(
     is_playing, playback_position, volume, bpm, raw_chord_progression, seed, sounds,
-    total_duration, loop_state, chord_parse_error,
+    total_duration, loop_state, chord_parse_error, measures,
   )
 }
 
