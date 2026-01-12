@@ -189,7 +189,7 @@ fn render_measure(
               @luna_dom.svg_circle(
                 cx=note_x.to_string(),
                 cy=note_y.to_string(),
-                r="4",
+                r="5",
                 stroke="none",
                 dyn_attrs=[
                   (
@@ -208,7 +208,7 @@ fn render_measure(
               @luna_dom.svg_circle(
                 cx=note_x.to_string(),
                 cy=note_y.to_string(),
-                r="4",
+                r="5",
                 fill="none",
                 stroke_width="1.5",
                 dyn_attrs=[
