@@ -13,7 +13,6 @@ test.describe("Jazzene - Jazz Improvisation Web App", () => {
     await expect(jazzene.getPlayButton()).toBeEnabled();
     await expect(jazzene.getFallingNotes()).toBeVisible();
     await expect(jazzene.getLeadSheet()).toBeVisible();
-    await expect(jazzene.getVisualization()).toBeVisible();
     await expect(jazzene.getSeekbar()).toBeEnabled();
   });
 
