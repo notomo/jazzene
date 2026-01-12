@@ -9,9 +9,6 @@ let color_background = "#111827"
 let color_foreground = "#f1f5f9"
 
 ///|
-let color_highlight = "#3b82f6"
-
-///|
 let color_muted = "#9ca3af"
 
 // Layout constants
@@ -197,19 +194,68 @@ fn render_measure(
   }
 
   // Chord symbol (dynamic based on current_measure_index)
+  // Background rectangle for highlighted chord (white background for better contrast)
+  children.push(
+    @luna_dom.svg_rect(x=(x + 5.0).to_string(), y="14", rx="6", ry="6", dyn_attrs=[
+      (
+        "width",
+        @luna_dom.AttrValue::Dynamic(fn() {
+          if measure.measure_index == current_measure_index() {
+            let chord_text = @music.format_chord(measure.chord)
+            let estimated_width = chord_text.length().to_double() * 18.0 + 20.0
+            estimated_width.to_int().to_string()
+          } else {
+            "0"
+          }
+        }),
+      ),
+      (
+        "height",
+        @luna_dom.AttrValue::Dynamic(fn() {
+          if measure.measure_index == current_measure_index() {
+            "32"
+          } else {
+            "0"
+          }
+        }),
+      ),
+      (
+        "fill",
+        @luna_dom.AttrValue::Dynamic(fn() {
+          if measure.measure_index == current_measure_index() {
+            "#ffffff"
+          } else {
+            "transparent"
+          }
+        }),
+      ),
+      (
+        "opacity",
+        @luna_dom.AttrValue::Dynamic(fn() {
+          if measure.measure_index == current_measure_index() {
+            "0.95"
+          } else {
+            "0"
+          }
+        }),
+      ),
+    ]),
+  )
+
+  // Chord text
   children.push(
     @luna_dom.svg_text(
       x=(x + 10.0).to_string(),
       y="40",
       text_anchor="start",
-      font_size="24",
+      font_size="26",
       font_family="serif",
       dyn_attrs=[
         (
           "fill",
           @luna_dom.AttrValue::Dynamic(fn() {
             if measure.measure_index == current_measure_index() {
-              color_highlight
+              "#1e3a8a" // Dark blue for strong contrast on white background
             } else {
               color_foreground
             }

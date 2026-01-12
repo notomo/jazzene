@@ -61,16 +61,16 @@ pub fn ChordRoot::midi(self : ChordRoot) -> Int {
 pub fn ChordRoot::to_string(self : ChordRoot) -> String {
   match self {
     C => "C"
-    CSharp => "C♯"
+    CSharp => "C#"
     D => "D"
-    DSharp => "E♭" // Prefer flats
+    DSharp => "Eb" // Prefer flats
     E => "E"
     F => "F"
-    FSharp => "F♯"
+    FSharp => "F#"
     G => "G"
-    GSharp => "A♭"
+    GSharp => "Ab"
     A => "A"
-    ASharp => "B♭"
+    ASharp => "Bb"
     B => "B"
   }
 }
