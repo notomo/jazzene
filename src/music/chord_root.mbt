@@ -55,3 +55,22 @@ pub fn ChordRoot::midi(self : ChordRoot) -> Int {
     B => 11
   })
 }
+
+///|
+/// Convert chord root to display string
+pub fn ChordRoot::to_string(self : ChordRoot) -> String {
+  match self {
+    C => "C"
+    CSharp => "C♯"
+    D => "D"
+    DSharp => "E♭" // Prefer flats
+    E => "E"
+    F => "F"
+    FSharp => "F♯"
+    G => "G"
+    GSharp => "A♭"
+    A => "A"
+    ASharp => "B♭"
+    B => "B"
+  }
+}

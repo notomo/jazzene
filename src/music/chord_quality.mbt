@@ -44,3 +44,19 @@ pub fn parse_quality(quality : String) -> Result[ChordQuality, String] {
     _ => Err("Unknown chord quality: " + quality)
   }
 }
+
+///|
+/// Convert chord quality to display string
+pub fn ChordQuality::to_string(self : ChordQuality) -> String {
+  match self {
+    Major7 => "maj7"
+    Minor7 => "m7"
+    Dominant7 => "7"
+    HalfDiminished => "m7♭5"
+    Diminished7 => "°7"
+    Augmented => "aug"
+    Sus4 => "sus4"
+    Major => ""
+    Minor => "m"
+  }
+}

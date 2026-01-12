@@ -60,3 +60,9 @@ pub fn parse_chord_progression(input : String) -> Result[Array[Chord], String] {
     Ok(chords)
   }
 }
+
+///|
+/// Format complete chord symbol
+pub fn format_chord(chord : Chord) -> String {
+  chord.root.to_string() + chord.quality.to_string()
+}

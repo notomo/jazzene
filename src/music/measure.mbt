@@ -61,47 +61,6 @@ pub fn midi_to_staff_y(midi : Int, staff_y : Double) -> Double {
 }
 
 ///|
-/// Convert chord root to display string
-pub fn chord_root_to_string(root : ChordRoot) -> String {
-  match root {
-    C => "C"
-    CSharp => "C♯"
-    D => "D"
-    DSharp => "E♭" // Prefer flats
-    E => "E"
-    F => "F"
-    FSharp => "F♯"
-    G => "G"
-    GSharp => "A♭"
-    A => "A"
-    ASharp => "B♭"
-    B => "B"
-  }
-}
-
-///|
-/// Convert chord quality to display string
-pub fn chord_quality_to_string(quality : ChordQuality) -> String {
-  match quality {
-    Major7 => "maj7"
-    Minor7 => "m7"
-    Dominant7 => "7"
-    HalfDiminished => "m7♭5"
-    Diminished7 => "°7"
-    Augmented => "aug"
-    Sus4 => "sus4"
-    Major => ""
-    Minor => "m"
-  }
-}
-
-///|
-/// Format complete chord symbol
-pub fn format_chord(chord : Chord) -> String {
-  chord_root_to_string(chord.root) + chord_quality_to_string(chord.quality)
-}
-
-///|
 /// Convert sounds array to measures array
 pub fn convert_sounds_to_measures(
   sounds : Array[NoteValueSound],
