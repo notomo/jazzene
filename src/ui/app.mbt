@@ -80,11 +80,20 @@ pub fn render(
         ],
       ),
       @luna_dom.div(
-        class="flex flex-col flex-1 min-h-0",
+        class="flex h-full min-h-0",
         attrs=[("aria-label", @luna_dom.Attr::AttrString("visualization"))],
         [
-          note_display(sounds, playback_position, bpm, total_duration),
-          keyboard(sounds, playback_position),
+          @luna_dom.div(class="flex-2 min-h-0", [
+            lead_sheet(sounds, playback_position, raw_chord_progression, bpm),
+          ]),
+          @luna_dom.div(
+            class="flex flex-col flex-3 min-h-0",
+            attrs=[("aria-label", @luna_dom.Attr::AttrString("visualization"))],
+            [
+              note_display(sounds, playback_position, bpm, total_duration),
+              keyboard(sounds, playback_position),
+            ],
+          ),
         ],
       ),
     ],
