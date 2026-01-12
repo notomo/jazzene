@@ -72,6 +72,30 @@ pub fn convert_sounds_to_measures(
 
   // Account for leading rest (1 measure = 4 beats)
   let leading_rest_duration = measure_duration_ms
+
+  // Create leading rest measure
+  let leading_rest_notes : Array[MeasureNote] = []
+  for sound in sounds {
+    let sound_start = sound.start_time.to_milliseconds()
+    if sound_start < leading_rest_duration {
+      let beat_offset = sound_start / (measure_duration_ms / 4.0)
+      leading_rest_notes.push(MeasureNote::{
+        midi: sound.note_value.midi().map(fn(m) { m.value }),
+        duration: sound.note_value.note_duration(),
+        start_beat: beat_offset,
+      })
+    }
+  }
+
+  // Add leading rest measure with dummy chord (always C major to avoid confusion)
+  let dummy_chord = Chord::{ root: ChordRoot::C, quality: Major }
+  measures.push(Measure::{
+    chord: dummy_chord,
+    notes: leading_rest_notes,
+    start_time: Duration::from_milliseconds(0.0),
+    duration: Duration::from_milliseconds(measure_duration_ms),
+    measure_index: 0, // Leading rest is measure 0
+  })
   for i = 0; i < chords.length(); {
     let chord = chords[i]
     // Offset measure start by leading rest duration
@@ -98,7 +122,7 @@ pub fn convert_sounds_to_measures(
       notes: measure_notes,
       start_time: Duration::from_milliseconds(measure_start),
       duration: Duration::from_milliseconds(measure_duration_ms),
-      measure_index: i,
+      measure_index: i + 1, // Offset by 1 to account for leading rest
     })
     continue i + 1
   }

@@ -189,101 +189,116 @@ fn render_ledger_lines(
 /// Render a single measure with all its elements
 fn render_measure(
   measure : @music.Measure,
+  display_index : Int,
   current_measure_index : () -> Int,
 ) -> @luna_dom.DomNode {
-  let (x, y) = measure_position(measure.measure_index)
+  let (x, y) = measure_position(display_index)
   let children : Array[@luna_dom.DomNode] = []
 
   // Staff lines
   children.push(render_staff_lines(x, y))
 
   // Treble clef (only on first measure of each row)
-  if measure.measure_index % measures_per_row == 0 {
+  if display_index % measures_per_row == 0 {
     children.push(render_treble_clef(x, y))
   }
 
   // Chord symbol (dynamic based on current_measure_index)
-  // Background rectangle for highlighted chord (white background for better contrast)
-  children.push(
-    @luna_dom.svg_rect(x=(x + 5.0).to_string(), y="14", rx="6", ry="6", dyn_attrs=[
-      (
-        "width",
-        @luna_dom.AttrValue::Dynamic(fn() {
-          if measure.measure_index == current_measure_index() {
-            let chord_text = @music.format_chord(measure.chord)
-            let estimated_width = chord_text.length().to_double() * 18.0 + 20.0
-            estimated_width.to_int().to_string()
-          } else {
-            "0"
-          }
-        }),
-      ),
-      (
-        "height",
-        @luna_dom.AttrValue::Dynamic(fn() {
-          if measure.measure_index == current_measure_index() {
-            "32"
-          } else {
-            "0"
-          }
-        }),
-      ),
-      (
-        "fill",
-        @luna_dom.AttrValue::Dynamic(fn() {
-          if measure.measure_index == current_measure_index() {
-            "#ffffff"
-          } else {
-            "transparent"
-          }
-        }),
-      ),
-      (
-        "opacity",
-        @luna_dom.AttrValue::Dynamic(fn() {
-          if measure.measure_index == current_measure_index() {
-            "0.95"
-          } else {
-            "0"
-          }
-        }),
-      ),
-    ]),
-  )
+  // Don't show chord for leading rest measure (measure_index = 0)
+  if measure.measure_index > 0 {
+    // Calculate chord y position relative to staff
+    let chord_y_rect = y - 66.0 // Background rectangle y position
+    let chord_y_text = y - 40.0 // Text y position
 
-  // Chord text
-  children.push(
-    @luna_dom.svg_text(
-      x=(x + 10.0).to_string(),
-      y="40",
-      text_anchor="start",
-      font_size="26",
-      font_family="serif",
-      dyn_attrs=[
-        (
-          "fill",
-          @luna_dom.AttrValue::Dynamic(fn() {
-            if measure.measure_index == current_measure_index() {
-              "#1e3a8a" // Dark blue for strong contrast on white background
-            } else {
-              color_foreground
-            }
-          }),
-        ),
-        (
-          "font-weight",
-          @luna_dom.AttrValue::Dynamic(fn() {
-            if measure.measure_index == current_measure_index() {
-              "bold"
-            } else {
-              "normal"
-            }
-          }),
-        ),
-      ],
-      [@luna_dom.text(@music.format_chord(measure.chord))],
-    ),
-  )
+    // Background rectangle for highlighted chord (white background for better contrast)
+    children.push(
+      @luna_dom.svg_rect(
+        x=(x + 5.0).to_string(),
+        y=chord_y_rect.to_string(),
+        rx="6",
+        ry="6",
+        dyn_attrs=[
+          (
+            "width",
+            @luna_dom.AttrValue::Dynamic(fn() {
+              if measure.measure_index == current_measure_index() {
+                let chord_text = @music.format_chord(measure.chord)
+                let estimated_width = chord_text.length().to_double() * 18.0 +
+                  20.0
+                estimated_width.to_int().to_string()
+              } else {
+                "0"
+              }
+            }),
+          ),
+          (
+            "height",
+            @luna_dom.AttrValue::Dynamic(fn() {
+              if measure.measure_index == current_measure_index() {
+                "32"
+              } else {
+                "0"
+              }
+            }),
+          ),
+          (
+            "fill",
+            @luna_dom.AttrValue::Dynamic(fn() {
+              if measure.measure_index == current_measure_index() {
+                "#ffffff"
+              } else {
+                "transparent"
+              }
+            }),
+          ),
+          (
+            "opacity",
+            @luna_dom.AttrValue::Dynamic(fn() {
+              if measure.measure_index == current_measure_index() {
+                "0.95"
+              } else {
+                "0"
+              }
+            }),
+          ),
+        ],
+      ),
+    )
+
+    // Chord text
+    children.push(
+      @luna_dom.svg_text(
+        x=(x + 10.0).to_string(),
+        y=chord_y_text.to_string(),
+        text_anchor="start",
+        font_size="26",
+        font_family="serif",
+        dyn_attrs=[
+          (
+            "fill",
+            @luna_dom.AttrValue::Dynamic(fn() {
+              if measure.measure_index == current_measure_index() {
+                "#1e3a8a" // Dark blue for strong contrast on white background
+              } else {
+                color_foreground
+              }
+            }),
+          ),
+          (
+            "font-weight",
+            @luna_dom.AttrValue::Dynamic(fn() {
+              if measure.measure_index == current_measure_index() {
+                "bold"
+              } else {
+                "normal"
+              }
+            }),
+          ),
+        ],
+        [@luna_dom.text(@music.format_chord(measure.chord))],
+      ),
+    )
+  }
 
   // Notes (dynamic coloring based on current_measure_index)
   for note in measure.notes {
@@ -492,12 +507,14 @@ pub fn lead_sheet(
     let pos = playback_position.get().to_milliseconds()
     let measure_duration_ms = 60000.0 * 4.0 / bpm.get().to_double()
     if measure_duration_ms > 0.0 {
-      // Account for leading rest (1 measure)
-      let pos_after_rest = pos - measure_duration_ms
-      if pos_after_rest < 0.0 {
+      // Leading rest is measure 0, chord measures start at 1
+      let measure_idx = (pos / measure_duration_ms).to_int()
+      // For measure 0 (leading rest), return -1 to not highlight any chord
+      // For measures >= 1, return the measure index
+      if measure_idx == 0 {
         -1 // Still in leading rest, no chord to highlight
       } else {
-        (pos_after_rest / measure_duration_ms).to_int()
+        measure_idx
       }
     } else {
       0
@@ -538,8 +555,8 @@ pub fn lead_sheet(
         )
       }),
       // Measures using for_each (reactive!)
-      @luna_dom.for_each(fn() { measures() }, fn(measure, _idx) {
-        render_measure(measure, current_measure_index)
+      @luna_dom.for_each(fn() { measures() }, fn(measure, idx) {
+        render_measure(measure, idx, current_measure_index)
       }),
     ]),
   ])

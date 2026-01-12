@@ -31,18 +31,31 @@ test "convert_sounds_to_measures basic case" {
   // Convert to measures
   let measures = convert_sounds_to_measures(sounds, chords, bpm)
 
-  // Verify number of measures
-  inspect(measures.length(), content="2")
+  // Verify number of measures (leading rest + 2 chord measures)
+  inspect(measures.length(), content="3")
 
-  // Verify first measure (C major7)
+  // Verify leading rest measure
   let m0 = measures[0]
   inspect(m0.measure_index, content="0")
-  inspect(m0.chord.root, content="C")
-  inspect(m0.chord.quality, content="Major7")
   inspect(m0.notes.length(), content="4")
+  // All notes should be rests
+  for i = 0; i < m0.notes.length(); {
+    match m0.notes[i].midi {
+      Some(_) => abort("Expected rest in leading measure, got note")
+      None => ()
+    }
+    continue i + 1
+  }
 
-  // Check first note in first measure (C4)
-  let n0 = m0.notes[0]
+  // Verify first chord measure (C major7)
+  let m1 = measures[1]
+  inspect(m1.measure_index, content="1")
+  inspect(m1.chord.root, content="C")
+  inspect(m1.chord.quality, content="Major7")
+  inspect(m1.notes.length(), content="4")
+
+  // Check first note in first chord measure (C4)
+  let n0 = m1.notes[0]
   match n0.midi {
     Some(midi) => inspect(midi, content="60")
     None => abort("Expected note, got rest")
@@ -50,23 +63,23 @@ test "convert_sounds_to_measures basic case" {
   inspect(n0.duration, content="Quarter")
   inspect(n0.start_beat, content="0")
 
-  // Check last note in first measure (B4)
-  let n3 = m0.notes[3]
+  // Check last note in first chord measure (B4)
+  let n3 = m1.notes[3]
   match n3.midi {
     Some(midi) => inspect(midi, content="71")
     None => abort("Expected note, got rest")
   }
   inspect(n3.start_beat, content="3")
 
-  // Verify second measure (F7)
-  let m1 = measures[1]
-  inspect(m1.measure_index, content="1")
-  inspect(m1.chord.root, content="F")
-  inspect(m1.chord.quality, content="Dominant7")
-  inspect(m1.notes.length(), content="4")
+  // Verify second chord measure (F7)
+  let m2 = measures[2]
+  inspect(m2.measure_index, content="2")
+  inspect(m2.chord.root, content="F")
+  inspect(m2.chord.quality, content="Dominant7")
+  inspect(m2.notes.length(), content="4")
 
-  // Check first note in second measure (F4)
-  let n4 = m1.notes[0]
+  // Check first note in second chord measure (F4)
+  let n4 = m2.notes[0]
   match n4.midi {
     Some(midi) => inspect(midi, content="65")
     None => abort("Expected note, got rest")
@@ -91,21 +104,23 @@ test "convert_sounds_to_measures with mixed durations" {
   let sounds = NoteValueSound::from_note_values(note_values, bpm)
   let chords = [Chord::{ root: C, quality: Major }]
   let measures = convert_sounds_to_measures(sounds, chords, bpm)
-  inspect(measures.length(), content="1")
-  let m0 = measures[0]
-  inspect(m0.notes.length(), content="3")
+  // Leading rest + 1 chord measure
+  inspect(measures.length(), content="2")
+  // Check first chord measure (skip leading rest at index 0)
+  let m1 = measures[1]
+  inspect(m1.notes.length(), content="3")
 
   // First note should be at beat 0 with Half duration
-  let n0 = m0.notes[0]
+  let n0 = m1.notes[0]
   inspect(n0.duration, content="Half")
   inspect(n0.start_beat, content="0")
 
   // Second note should be at beat 2
-  let n1 = m0.notes[1]
+  let n1 = m1.notes[1]
   inspect(n1.start_beat, content="2")
 
   // Third note should be at beat 3
-  let n2 = m0.notes[2]
+  let n2 = m1.notes[2]
   inspect(n2.start_beat, content="3")
 }
 
@@ -133,24 +148,29 @@ test "convert_sounds_to_measures with empty measure" {
     Chord::{ root: G, quality: Major },
   ]
   let measures = convert_sounds_to_measures(sounds, chords, bpm)
-  inspect(measures.length(), content="2")
+  // Leading rest + 2 chord measures
+  inspect(measures.length(), content="3")
 
-  // First measure should have 4 rests (rests are included with midi=None)
+  // Leading rest measure (index 0) should have 4 rests
   let m0 = measures[0]
   inspect(m0.notes.length(), content="4")
-  // Verify all notes in measure 1 are rests
-  for i = 0; i < m0.notes.length(); {
-    match m0.notes[i].midi {
+
+  // First chord measure (index 1) should have 4 rests (rests are included with midi=None)
+  let m1 = measures[1]
+  inspect(m1.notes.length(), content="4")
+  // Verify all notes in first chord measure are rests
+  for i = 0; i < m1.notes.length(); {
+    match m1.notes[i].midi {
       Some(_) => abort("Expected rest in measure 1, got note")
       None => ()
     }
     continue i + 1
   }
 
-  // Second measure should have one note
-  let m1 = measures[1]
-  inspect(m1.notes.length(), content="1")
-  match m1.notes[0].midi {
+  // Second chord measure (index 2) should have one note
+  let m2 = measures[2]
+  inspect(m2.notes.length(), content="1")
+  match m2.notes[0].midi {
     Some(midi) => inspect(midi, content="60")
     None => abort("Expected note in measure 2, got rest")
   }
@@ -166,6 +186,10 @@ test "convert_sounds_to_measures with no chords" {
   let chords : Array[Chord] = []
   let measures = convert_sounds_to_measures(sounds, chords, bpm)
 
-  // Should return empty array
-  inspect(measures.length(), content="0")
+  // Should return only leading rest measure with dummy chord
+  inspect(measures.length(), content="1")
+  let m0 = measures[0]
+  inspect(m0.measure_index, content="0")
+  // Leading rest should contain the note since it falls within the first measure
+  inspect(m0.notes.length(), content="1")
 }
