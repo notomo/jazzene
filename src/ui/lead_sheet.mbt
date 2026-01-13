@@ -2,14 +2,8 @@
 /// Lead Sheet Visualization Component
 /// Displays chord symbols, staff notation, and rhythm in SVG format
 
-// Color constants
-let color_background = "#111827"
-
 ///|
 let color_foreground = "#f1f5f9"
-
-///|
-let color_muted = "#9ca3af"
 
 // Layout constants
 
@@ -571,26 +565,6 @@ pub fn lead_sheet(
   // Return container with SVG
   @luna_dom.div(class="w-full h-full overflow-auto bg-gray-900 p-4", [
     @luna_dom.svg(viewBox="0 0 1200 " + svg_height(), width="100%", [
-      // Dark background for the sheet
-      @luna_dom.svg_rect(
-        x="0",
-        y="0",
-        width="1200",
-        height=svg_height(),
-        fill=color_background,
-      ),
-      // Empty state message
-      @luna_dom.show(fn() { measures().length() == 0 }, fn() {
-        @luna_dom.svg_text(
-          x="600",
-          y="200",
-          text_anchor="middle",
-          font_size="20",
-          fill=color_muted,
-          [@luna_dom.text("Enter a chord progression to see the lead sheet")],
-        )
-      }),
-      // Measures using for_each (reactive!)
       @luna_dom.for_each(measures, fn(measure, idx) {
         render_measure(measure, idx, current_measure_index)
       }),
