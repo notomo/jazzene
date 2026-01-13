@@ -35,9 +35,11 @@ pub fn ImprovisationSettings::default() -> ImprovisationSettings {
 /// Returns note values (notes and rests) with varying durations
 /// Notes are generated to fit exactly within measure boundaries
 /// Using the same seed with the same chords produces the same improvisation
+/// measure_count specifies the total number of measures to generate (including leading rest)
 pub fn generate_improvisation(
   chords : Array[Chord],
   settings : ImprovisationSettings,
+  measure_count : Int,
 ) -> Array[NoteValue] {
   // Create a seeded RNG for deterministic generation
   let rand = @random.Rand::chacha8(seed=seed_to_bytes(settings.seed))
@@ -47,7 +49,19 @@ pub fn generate_improvisation(
   // Add ~1 measure of rest at the beginning
   note_values.push(NoteValue::Rest(duration=Half))
   note_values.push(NoteValue::Rest(duration=Half))
-  for chord in chords {
+
+  // Calculate number of chord measures needed (total - 1 for leading rest)
+  let chord_measures_needed = measure_count - 1
+
+  // If no chords or no measures needed, return just the leading rest
+  if chords.length() == 0 || chord_measures_needed <= 0 {
+    return note_values
+  }
+
+  // Generate notes for the required number of measures, cycling through chords
+  for measure_index = 0; measure_index < chord_measures_needed; {
+    let chord = chords[measure_index % chords.length()]
+
     // Track remaining beats in current measure
     let mut remaining_beats = beats_per_measure
     while remaining_beats > 0.0 {
@@ -69,6 +83,7 @@ pub fn generate_improvisation(
         }
       }
     }
+    continue measure_index + 1
   }
   note_values
 }

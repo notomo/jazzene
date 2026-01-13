@@ -2,7 +2,7 @@
 test "generate improvisation from single chord" {
   let chords = [Chord::{ root: C, quality: Major7 }]
   let settings = ImprovisationSettings::default()
-  let note_values = generate_improvisation(chords, settings)
+  let note_values = generate_improvisation(chords, settings, 2)
 
   // Should generate notes that fit within 4 beats + 2 initial rests
   // Note count varies based on random durations
@@ -16,7 +16,7 @@ test "generate improvisation from single chord" {
     }
   }
 
-  // Verify total beats match expected (4 beats per measure + 4 beats of initial rests)
+  // Verify total beats match expected (2 measures: 1 rest + 1 chord = 8 beats)
   let mut total_beats = 0.0
   for note_value in note_values {
     total_beats = total_beats + note_value.note_duration().to_beats()
@@ -32,9 +32,9 @@ test "generate improvisation from chord progression" {
     Chord::{ root: B, quality: Major7 },
   ]
   let settings = ImprovisationSettings::default()
-  let note_values = generate_improvisation(chords, settings)
+  let note_values = generate_improvisation(chords, settings, 4)
 
-  // Verify total beats match expected (3 chords * 4 beats + 4 beats of initial rests = 16 beats)
+  // Verify total beats match expected (4 measures: 1 rest + 3 chords = 16 beats)
   let mut total_beats = 0.0
   for note_value in note_values {
     total_beats = total_beats + note_value.note_duration().to_beats()
