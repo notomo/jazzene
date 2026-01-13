@@ -75,18 +75,27 @@ pub fn generate_improvisation(
 
 ///|
 /// Generate random duration that fits within the remaining beats
-/// Distribution: 20% eighth, 60% quarter, 20% half (adjusted based on remaining beats)
+/// Distribution includes dotted notes for rhythmic variety
 fn random_duration_with_limit(
   remaining_beats : Double,
   rand : @random.Rand,
 ) -> NoteDuration {
   // Filter available durations based on remaining beats
   let available : Array[NoteDuration] = []
+  if remaining_beats >= 3.0 {
+    available.push(DottedHalf)
+  }
   if remaining_beats >= 2.0 {
     available.push(Half)
   }
+  if remaining_beats >= 1.5 {
+    available.push(DottedQuarter)
+  }
   if remaining_beats >= 1.0 {
     available.push(Quarter)
+  }
+  if remaining_beats >= 0.75 {
+    available.push(DottedEighth)
   }
   if remaining_beats >= 0.5 {
     available.push(Eighth)
@@ -102,33 +111,30 @@ fn random_duration_with_limit(
     return available[0]
   }
 
-  // Prefer distribution: 20% eighth, 60% quarter, 20% half (when all available)
+  // Weighted distribution for rhythmic variety
+  // Preferred: 40% Quarter, 20% DottedQuarter, 15% Eighth, 10% DottedEighth, 10% Half, 5% DottedHalf
   let r = rand.int(limit=100)
-  if available.length() == 3 {
-    // All durations available
-    if r < 20 {
+
+  // When all 6 durations are available
+  if available.length() == 6 {
+    if r < 15 {
       Eighth
-    } else if r < 80 {
+    } else if r < 25 {
+      DottedEighth
+    } else if r < 65 {
       Quarter
-    } else {
+    } else if r < 85 {
+      DottedQuarter
+    } else if r < 95 {
       Half
-    }
-  } else if available.length() == 2 {
-    if available.contains(Quarter) && available.contains(Eighth) {
-      // Only Quarter and Eighth available
-      if r < 25 {
-        Eighth
-      } else {
-        Quarter
-      }
-      // Half and something else
-    } else if r < 50 {
-      available[0]
     } else {
-      available[1]
+      DottedHalf
     }
   } else {
-    available[0]
+    // For partial availability, pick uniformly from available options
+    // This keeps the code simple while still introducing variety
+    let index = rand.int(limit=available.length())
+    available[index]
   }
 }
 

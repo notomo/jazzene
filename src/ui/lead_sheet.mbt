@@ -317,7 +317,7 @@ fn render_measure(
         // Note head
         children.push(
           match note.duration {
-            Eighth | Quarter => {
+            Eighth | DottedEighth | Quarter | DottedQuarter => {
               // Filled note head - rotated ellipse for more realistic appearance
               let rx = staff_line_spacing * 0.37894733 * 1.9
               let ry = staff_line_spacing * 0.2542448 * 1.9
@@ -342,7 +342,7 @@ fn render_measure(
                 ],
               )
             }
-            Half => {
+            Half | DottedHalf => {
               // Hollow note head - hollow ellipse path for more realistic appearance
               let scale = staff_line_spacing / 50.0
               let transform_str = "scale(" +
@@ -366,7 +366,7 @@ fn render_measure(
         let stem_height = staff_line_spacing * 3.0 // 3 staff spaces
         let stem_up = midi < 71
         match note.duration {
-          Eighth | Quarter => {
+          Eighth | DottedEighth | Quarter | DottedQuarter => {
             // Calculate stem attachment point on rotated ellipse
             // Ellipse is rotated -25 degrees
             let rx = staff_line_spacing * 0.37894733 * 1.9
@@ -395,7 +395,7 @@ fn render_measure(
 
             // Flag for eighth notes
             match note.duration {
-              Eighth => {
+              Eighth | DottedEighth => {
                 let scale = staff_line_spacing / 32.0
                 let flag_transform = if stem_up {
                   "scale(" +
@@ -430,7 +430,25 @@ fn render_measure(
               _ => ()
             }
           }
-          Half => ()
+          Half | DottedHalf => ()
+        }
+
+        // Dot for dotted notes
+        match note.duration {
+          DottedEighth | DottedQuarter | DottedHalf => {
+            let dot_radius = staff_line_spacing * 0.15
+            let dot_x = note_x + staff_line_spacing * 1.5
+            let dot_y = note_y
+            children.push(
+              @luna_dom.svg_circle(
+                cx=dot_x.to_string(),
+                cy=dot_y.to_string(),
+                r=dot_radius.to_string(),
+                fill=color_foreground,
+              ),
+            )
+          }
+          _ => ()
         }
       }
       None => {
@@ -438,7 +456,7 @@ fn render_measure(
         let rest_y = y + staff_line_spacing * 2.0
         children.push(
           match note.duration {
-            Quarter => {
+            Quarter | DottedQuarter => {
               // Quarter rest with detailed SVG path
               let scale = staff_line_spacing / 40.0
               let transform_str = "scale(" +
@@ -455,7 +473,7 @@ fn render_measure(
                 attrs=[("transform", @luna_dom.Attr::AttrString(transform_str))],
               )
             }
-            Half => {
+            Half | DottedHalf => {
               // Half rest - simple rectangle (same as reference)
               let rest_width = staff_line_spacing * 2.0
               let rest_height = staff_line_spacing / 2.0
@@ -467,7 +485,7 @@ fn render_measure(
                 fill=color_foreground,
               )
             }
-            Eighth => {
+            Eighth | DottedEighth => {
               // Eighth rest with detailed SVG path
               let scale = staff_line_spacing / 40.0
               let transform_str = "scale(" +
@@ -486,6 +504,24 @@ fn render_measure(
             }
           },
         )
+
+        // Dot for dotted rests
+        match note.duration {
+          DottedEighth | DottedQuarter | DottedHalf => {
+            let dot_radius = staff_line_spacing * 0.15
+            let dot_x = note_x + staff_line_spacing * 1.5
+            let dot_y = rest_y
+            children.push(
+              @luna_dom.svg_circle(
+                cx=dot_x.to_string(),
+                cy=dot_y.to_string(),
+                r=dot_radius.to_string(),
+                fill=color_foreground,
+              ),
+            )
+          }
+          _ => ()
+        }
       }
     }
   }

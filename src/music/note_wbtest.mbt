@@ -6,6 +6,13 @@ test "NoteDuration to_beats" {
 }
 
 ///|
+test "NoteDuration to_beats for dotted notes" {
+  inspect(DottedEighth.to_beats(), content="0.75")
+  inspect(DottedQuarter.to_beats(), content="1.5")
+  inspect(DottedHalf.to_beats(), content="3")
+}
+
+///|
 test "NoteValue duration with bpm 120" {
   let bpm = 120
   let midi = MidiNumber::new(60).unwrap()
@@ -22,6 +29,28 @@ test "NoteValue duration with bpm 120" {
     content="1000",
   )
   inspect(Rest(duration=Quarter).duration(bpm).to_milliseconds(), content="500")
+}
+
+///|
+test "Dotted notes duration with bpm 120" {
+  let bpm = 120
+  let midi = MidiNumber::new(60).unwrap()
+  inspect(
+    Note(midi~, duration=DottedEighth).duration(bpm).to_milliseconds(),
+    content="375",
+  )
+  inspect(
+    Note(midi~, duration=DottedQuarter).duration(bpm).to_milliseconds(),
+    content="750",
+  )
+  inspect(
+    Note(midi~, duration=DottedHalf).duration(bpm).to_milliseconds(),
+    content="1500",
+  )
+  inspect(
+    Rest(duration=DottedQuarter).duration(bpm).to_milliseconds(),
+    content="750",
+  )
 }
 
 ///|
@@ -85,6 +114,30 @@ test "calculate_total_duration empty array" {
   let notes : Array[NoteValue] = []
   let sounds = NoteValueSound::from_note_values(notes, 120)
   inspect(calculate_total_duration(sounds).to_milliseconds(), content="0")
+}
+
+///|
+test "calculate_total_duration with mixed dotted and non-dotted notes" {
+  let bpm = 120
+  let midi = MidiNumber::new(60).unwrap()
+
+  // Quarter + DottedEighth + Quarter = 1 + 0.75 + 1 = 2.75 beats = 1375ms
+  let notes1 = [
+    Note(midi~, duration=Quarter),
+    Note(midi~, duration=DottedEighth),
+    Note(midi~, duration=Quarter),
+  ]
+  let sounds1 = NoteValueSound::from_note_values(notes1, bpm)
+  inspect(calculate_total_duration(sounds1).to_milliseconds(), content="1375")
+
+  // DottedQuarter + Rest(Eighth) + DottedHalf = 1.5 + 0.5 + 3.0 = 5.0 beats = 2500ms
+  let notes2 = [
+    Note(midi~, duration=DottedQuarter),
+    Rest(duration=Eighth),
+    Note(midi~, duration=DottedHalf),
+  ]
+  let sounds2 = NoteValueSound::from_note_values(notes2, bpm)
+  inspect(calculate_total_duration(sounds2).to_milliseconds(), content="2500")
 }
 
 ///|

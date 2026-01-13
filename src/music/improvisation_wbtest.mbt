@@ -11,7 +11,7 @@ test "generate improvisation from single chord" {
   // All note values should have valid durations
   for note_value in note_values {
     match note_value.note_duration() {
-      Eighth | Quarter | Half => ()
+      Eighth | Quarter | Half | DottedEighth | DottedQuarter | DottedHalf => ()
       // Compiler ensures exhaustiveness
     }
   }
