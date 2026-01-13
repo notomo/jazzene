@@ -62,10 +62,12 @@ pub fn midi_to_staff_y(midi : Int, staff_y : Double) -> Double {
 
 ///|
 /// Convert sounds array to measures array
+/// measure_count specifies the total number of measures (including leading rest)
 pub fn convert_sounds_to_measures(
   sounds : Array[NoteValueSound],
   chords : Array[Chord],
   bpm : Int,
+  measure_count : Int,
 ) -> Array[Measure] {
   let measure_duration_ms = 60000.0 * 4.0 / bpm.to_double()
   let measures = []
@@ -96,8 +98,18 @@ pub fn convert_sounds_to_measures(
     duration: Duration::from_milliseconds(measure_duration_ms),
     measure_index: 0, // Leading rest is measure 0
   })
-  for i = 0; i < chords.length(); {
-    let chord = chords[i]
+
+  // Calculate number of chord measures needed (total - 1 for leading rest)
+  let chord_measures_needed = measure_count - 1
+
+  // If no chords or no measures needed, return just the leading rest
+  if chords.length() == 0 || chord_measures_needed <= 0 {
+    return measures
+  }
+
+  // Create measures, cycling through chords as needed
+  for i = 0; i < chord_measures_needed; {
+    let chord = chords[i % chords.length()]
     // Offset measure start by leading rest duration
     let measure_start = leading_rest_duration +
       i.to_double() * measure_duration_ms

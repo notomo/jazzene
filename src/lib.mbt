@@ -21,7 +21,12 @@ fn main {
   })
   // Convert to measures for visualization
   let measures = @signal.memo(fn() {
-    @music.convert_sounds_to_measures(sounds.get(), chords(), bpm.get())
+    @music.convert_sounds_to_measures(
+      sounds.get(),
+      chords(),
+      bpm.get(),
+      measure_count.get(),
+    )
   })
   let playback_position = @signal.signal(
     @music.Duration::from_milliseconds(0.0),

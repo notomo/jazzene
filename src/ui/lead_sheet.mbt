@@ -591,7 +591,7 @@ pub fn lead_sheet(
         )
       }),
       // Measures using for_each (reactive!)
-      @luna_dom.for_each(fn() { measures() }, fn(measure, idx) {
+      @luna_dom.for_each(measures, fn(measure, idx) {
         render_measure(measure, idx, current_measure_index)
       }),
     ]),

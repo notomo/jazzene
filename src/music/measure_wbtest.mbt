@@ -28,8 +28,8 @@ test "convert_sounds_to_measures basic case" {
     Chord::{ root: F, quality: Dominant7 },
   ]
 
-  // Convert to measures
-  let measures = convert_sounds_to_measures(sounds, chords, bpm)
+  // Convert to measures (1 leading rest + 2 chord measures = 3 total)
+  let measures = convert_sounds_to_measures(sounds, chords, bpm, 3)
 
   // Verify number of measures (leading rest + 2 chord measures)
   inspect(measures.length(), content="3")
@@ -103,7 +103,7 @@ test "convert_sounds_to_measures with mixed durations" {
   ]
   let sounds = NoteValueSound::from_note_values(note_values, bpm)
   let chords = [Chord::{ root: C, quality: Major }]
-  let measures = convert_sounds_to_measures(sounds, chords, bpm)
+  let measures = convert_sounds_to_measures(sounds, chords, bpm, 2)
   // Leading rest + 1 chord measure
   inspect(measures.length(), content="2")
   // Check first chord measure (skip leading rest at index 0)
@@ -147,7 +147,7 @@ test "convert_sounds_to_measures with empty measure" {
     Chord::{ root: C, quality: Major },
     Chord::{ root: G, quality: Major },
   ]
-  let measures = convert_sounds_to_measures(sounds, chords, bpm)
+  let measures = convert_sounds_to_measures(sounds, chords, bpm, 3)
   // Leading rest + 2 chord measures
   inspect(measures.length(), content="3")
 
@@ -184,7 +184,7 @@ test "convert_sounds_to_measures with no chords" {
   ]
   let sounds = NoteValueSound::from_note_values(note_values, bpm)
   let chords : Array[Chord] = []
-  let measures = convert_sounds_to_measures(sounds, chords, bpm)
+  let measures = convert_sounds_to_measures(sounds, chords, bpm, 1)
 
   // Should return only leading rest measure with dummy chord
   inspect(measures.length(), content="1")
@@ -192,4 +192,75 @@ test "convert_sounds_to_measures with no chords" {
   inspect(m0.measure_index, content="0")
   // Leading rest should contain the note since it falls within the first measure
   inspect(m0.notes.length(), content="1")
+}
+
+///|
+test "convert_sounds_to_measures with chord cycling for more measures than chords" {
+  let bpm = 120
+
+  // Create sounds for 5 measures total (1 leading rest + 4 chord measures)
+  // This represents the output from generate_improvisation with measure_count=5
+  let note_values : Array[NoteValue] = [
+    // Leading rest measure (measure 0)
+    Rest(duration=Quarter),
+    Rest(duration=Quarter),
+    Rest(duration=Quarter),
+    Rest(duration=Quarter),
+    // Measure 1: Cm7
+    Note(midi=MidiNumber::new(60).unwrap(), duration=Quarter),
+    Note(midi=MidiNumber::new(63).unwrap(), duration=Quarter),
+    Note(midi=MidiNumber::new(67).unwrap(), duration=Quarter),
+    Note(midi=MidiNumber::new(70).unwrap(), duration=Quarter),
+    // Measure 2: F7
+    Note(midi=MidiNumber::new(65).unwrap(), duration=Quarter),
+    Note(midi=MidiNumber::new(69).unwrap(), duration=Quarter),
+    Note(midi=MidiNumber::new(72).unwrap(), duration=Quarter),
+    Note(midi=MidiNumber::new(75).unwrap(), duration=Quarter),
+    // Measure 3: Cm7 (cycling)
+    Note(midi=MidiNumber::new(60).unwrap(), duration=Quarter),
+    Note(midi=MidiNumber::new(63).unwrap(), duration=Quarter),
+    Note(midi=MidiNumber::new(67).unwrap(), duration=Quarter),
+    Note(midi=MidiNumber::new(70).unwrap(), duration=Quarter),
+    // Measure 4: F7 (cycling)
+    Note(midi=MidiNumber::new(65).unwrap(), duration=Quarter),
+    Note(midi=MidiNumber::new(69).unwrap(), duration=Quarter),
+    Note(midi=MidiNumber::new(72).unwrap(), duration=Quarter),
+    Note(midi=MidiNumber::new(75).unwrap(), duration=Quarter),
+  ]
+  let sounds = NoteValueSound::from_note_values(note_values, bpm)
+
+  // Only 2 chords in the progression, but we want 5 measures total
+  let chords = [
+    Chord::{ root: C, quality: Minor7 },
+    Chord::{ root: F, quality: Dominant7 },
+  ]
+
+  // Convert to measures with measure_count=5
+  let measures = convert_sounds_to_measures(sounds, chords, bpm, 5)
+
+  // Should create 5 measures (1 leading rest + 4 chord measures)
+  inspect(measures.length(), content="5")
+
+  // Verify measure indices
+  inspect(measures[0].measure_index, content="0")
+  inspect(measures[1].measure_index, content="1")
+  inspect(measures[2].measure_index, content="2")
+  inspect(measures[3].measure_index, content="3")
+  inspect(measures[4].measure_index, content="4")
+
+  // Verify chord cycling: [Cm7, F7, Cm7, F7]
+  inspect(measures[1].chord.root, content="C")
+  inspect(measures[1].chord.quality, content="Minor7")
+  inspect(measures[2].chord.root, content="F")
+  inspect(measures[2].chord.quality, content="Dominant7")
+  inspect(measures[3].chord.root, content="C")
+  inspect(measures[3].chord.quality, content="Minor7")
+  inspect(measures[4].chord.root, content="F")
+  inspect(measures[4].chord.quality, content="Dominant7")
+
+  // Verify each measure has notes
+  inspect(measures[1].notes.length(), content="4")
+  inspect(measures[2].notes.length(), content="4")
+  inspect(measures[3].notes.length(), content="4")
+  inspect(measures[4].notes.length(), content="4")
 }
