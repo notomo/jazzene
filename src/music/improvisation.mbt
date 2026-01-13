@@ -51,14 +51,22 @@ pub fn generate_improvisation(
     // Track remaining beats in current measure
     let mut remaining_beats = beats_per_measure
     while remaining_beats > 0.0 {
-      let midi_number = random_midi_from_chord(chord, rand)
       let duration = random_duration_with_limit(remaining_beats, rand)
-      match MidiNumber::new(midi_number) {
-        Some(x) => {
-          note_values.push(NoteValue::Note(midi=x, duration~))
-          remaining_beats = remaining_beats - duration.to_beats()
+
+      // 25% chance to generate a rest instead of a note
+      let is_rest = rand.int(limit=100) < 25
+      if is_rest {
+        note_values.push(NoteValue::Rest(duration~))
+        remaining_beats = remaining_beats - duration.to_beats()
+      } else {
+        let midi_number = random_midi_from_chord(chord, rand)
+        match MidiNumber::new(midi_number) {
+          Some(x) => {
+            note_values.push(NoteValue::Note(midi=x, duration~))
+            remaining_beats = remaining_beats - duration.to_beats()
+          }
+          None => () // Skip invalid notes
         }
-        None => () // Skip invalid notes
       }
     }
   }
