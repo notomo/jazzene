@@ -551,23 +551,29 @@ pub fn lead_sheet(
     }
   })
 
-  // Calculate SVG height based on number of rows
-  let svg_height = @signal.memo(fn() {
-    let measure_count = measures().length()
-    if measure_count == 0 {
-      return "400"
-    }
-    let rows = (measure_count + measures_per_row - 1) / measures_per_row
-    let height = staff_top + rows.to_double() * row_height + 50.0
-    height.to_int().to_string()
-  })
-
   // Return container with SVG
   @luna_dom.div(class="w-full h-full overflow-auto bg-gray-900 p-4", [
-    @luna_dom.svg(viewBox="0 0 1200 " + svg_height(), width="100%", [
-      @luna_dom.for_each(measures, fn(measure, idx) {
-        render_measure(measure, idx, current_measure_index)
-      }),
-    ]),
+    @luna_dom.svg(
+      attrs=[
+        ("preserveAspectRatio", @luna_dom.Attr::AttrString("xMinYMin meet")),
+      ],
+      width="100%",
+      dyn_attrs=[
+        (
+          "viewBox",
+          @luna_dom.AttrValue::Dynamic(fn() {
+            let measure_count = measures().length()
+            let rows = (measure_count + measures_per_row - 1) / measures_per_row
+            let height = staff_top + rows.to_double() * row_height
+            "0 0 1200 \{height.to_int().to_string()}"
+          }),
+        ),
+      ],
+      [
+        @luna_dom.for_each(measures, fn(measure, idx) {
+          render_measure(measure, idx, current_measure_index)
+        }),
+      ],
+    ),
   ])
 }
