@@ -128,7 +128,7 @@ pub fn render_note(
               ],
             )
           }
-          Half | DottedHalf => {
+          Half | DottedHalf | Whole => {
             // Hollow note head - hollow ellipse path for more realistic appearance
             let scale = staff_line_spacing / 50.0
             let transform_str = "scale(" +
@@ -148,7 +148,7 @@ pub fn render_note(
         },
       )
 
-      // Stem and flag
+      // Stem and flag (whole notes have no stem)
       let stem_height = staff_line_spacing * 3.0 // 3 staff spaces
       let stem_up = midi < 71
       match note.duration {
@@ -216,6 +216,7 @@ pub fn render_note(
             _ => ()
           }
         }
+        Whole => () // Whole notes have no stem
       }
 
       // Dot for dotted notes

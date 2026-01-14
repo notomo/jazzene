@@ -32,12 +32,24 @@ pub fn render_rest(
         )
       }
       Half | DottedHalf => {
-        // Half rest - simple rectangle (same as reference)
+        // Half rest - rectangle with bottom touching center line
         let rest_width = staff_line_spacing * 2.0
         let rest_height = staff_line_spacing / 2.0
         @luna_dom.svg_rect(
           x=(note_x - rest_width / 2.0).to_string(),
-          y=(rest_y - rest_height / 2.0).to_string(),
+          y=(rest_y - rest_height).to_string(),
+          width=rest_width.to_string(),
+          height=rest_height.to_string(),
+          fill=color_foreground,
+        )
+      }
+      Whole => {
+        // Whole rest - rectangle with top touching center line
+        let rest_width = staff_line_spacing * 2.0
+        let rest_height = staff_line_spacing / 2.0
+        @luna_dom.svg_rect(
+          x=(note_x - rest_width / 2.0).to_string(),
+          y=rest_y.to_string(),
           width=rest_width.to_string(),
           height=rest_height.to_string(),
           fill=color_foreground,

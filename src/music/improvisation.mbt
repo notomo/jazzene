@@ -46,9 +46,8 @@ pub fn generate_improvisation(
   let note_values : Array[NoteValue] = []
   let beats_per_measure = settings.notes_per_measure.to_double()
 
-  // Add ~1 measure of rest at the beginning
-  note_values.push(NoteValue::Rest(duration=Half))
-  note_values.push(NoteValue::Rest(duration=Half))
+  // Add 1 measure of rest at the beginning
+  note_values.push(NoteValue::Rest(duration=Whole))
 
   // Calculate number of chord measures needed (total - 1 for leading rest)
   let chord_measures_needed = measure_count - 1
@@ -64,7 +63,8 @@ pub fn generate_improvisation(
 
     // Track remaining beats in current measure
     let mut remaining_beats = beats_per_measure
-    while remaining_beats > 0.0 {
+    while remaining_beats >= 0.5 {
+      // 0.5 is the smallest duration (Eighth)
       let duration = random_duration_with_limit(remaining_beats, rand)
 
       // 25% chance to generate a rest instead of a note
@@ -97,6 +97,9 @@ fn random_duration_with_limit(
 ) -> NoteDuration {
   // Filter available durations based on remaining beats
   let available : Array[NoteDuration] = []
+  if remaining_beats >= 4.0 {
+    available.push(Whole)
+  }
   if remaining_beats >= 3.0 {
     available.push(DottedHalf)
   }
@@ -127,11 +130,11 @@ fn random_duration_with_limit(
   }
 
   // Weighted distribution for rhythmic variety
-  // Preferred: 40% Quarter, 20% DottedQuarter, 15% Eighth, 10% DottedEighth, 10% Half, 5% DottedHalf
+  // Preferred: 40% Quarter, 20% DottedQuarter, 15% Eighth, 10% DottedEighth, 8% Half, 5% DottedHalf, 2% Whole
   let r = rand.int(limit=100)
 
-  // When all 6 durations are available
-  if available.length() == 6 {
+  // When all 7 durations are available
+  if available.length() == 7 {
     if r < 15 {
       Eighth
     } else if r < 25 {
@@ -140,10 +143,12 @@ fn random_duration_with_limit(
       Quarter
     } else if r < 85 {
       DottedQuarter
-    } else if r < 95 {
+    } else if r < 93 {
       Half
-    } else {
+    } else if r < 98 {
       DottedHalf
+    } else {
+      Whole
     }
   } else {
     // For partial availability, pick uniformly from available options
