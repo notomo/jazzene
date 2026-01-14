@@ -152,7 +152,7 @@ pub fn render_note(
       let stem_height = staff_line_spacing * 3.0 // 3 staff spaces
       let stem_up = midi < 71
       match note.duration {
-        Eighth | DottedEighth | Quarter | DottedQuarter => {
+        Eighth | DottedEighth | Quarter | DottedQuarter | Half | DottedHalf => {
           // Calculate stem attachment point on rotated ellipse
           // Ellipse is rotated -25 degrees
           let rx = staff_line_spacing * 0.37894733 * 1.9
@@ -216,7 +216,6 @@ pub fn render_note(
             _ => ()
           }
         }
-        Half | DottedHalf => ()
       }
 
       // Dot for dotted notes
