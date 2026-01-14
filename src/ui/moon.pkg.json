@@ -20,6 +20,10 @@
     {
       "path": "mizchi/js/browser/dom",
       "alias": "js_dom"
+    },
+    {
+      "path": "internal/jazzene/ui/sheet",
+      "alias": "sheet"
     }
   ],
   "supported-targets": [
