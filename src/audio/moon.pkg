@@ -1,0 +1,9 @@
+import {
+  "internal/jazzene/music" as @music,
+  "internal/jazzene/audio/web_audio_api" as @web_audio,
+}
+
+options(
+  "is-main": false,
+  "supported-targets": [ "js" ],
+)

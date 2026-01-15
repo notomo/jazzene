@@ -1,0 +1,13 @@
+import {
+  "mizchi/luna/signal",
+  "mizchi/signals",
+  "internal/jazzene/music" as @music,
+  "internal/jazzene/audio" as @audio,
+  "internal/jazzene/ui" as @ui,
+}
+
+options(
+  "is-main": true,
+  link: { "js": { "format": "esm" } },
+  "supported-targets": [ "js" ],
+)

@@ -1,0 +1,10 @@
+import {
+  "mizchi/luna/signal",
+  "mizchi/signals",
+  "mizchi/luna/dom/element" as @luna_dom,
+  "internal/jazzene/music" as @music,
+}
+
+options(
+  "supported-targets": [ "js" ],
+)
