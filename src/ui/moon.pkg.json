@@ -1,8 +1,9 @@
 {
   "import": [
-    "mizchi/luna/luna/signal",
+    "mizchi/luna/signal",
+    "mizchi/signals",
     {
-      "path": "mizchi/luna/luna/dom/element",
+      "path": "mizchi/luna/dom/element",
       "alias": "luna_dom"
     },
     {

@@ -4,7 +4,8 @@
     "js"
   ],
   "import": [
-    "mizchi/luna/luna/signal",
+    "mizchi/luna/signal",
+    "mizchi/signals",
     {
       "path": "internal/jazzene/music",
       "alias": "music"
