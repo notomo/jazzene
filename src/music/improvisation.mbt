@@ -89,33 +89,50 @@ pub fn generate_improvisation(
 }
 
 ///|
+/// Check if choosing this duration leaves a valid remainder
+/// (either exactly 0 or at least 0.5 for another note)
+fn leaves_valid_remainder(
+  remaining_beats : Double,
+  duration : NoteDuration,
+) -> Bool {
+  let after = remaining_beats - duration.to_beats()
+  // Allow small floating point tolerance
+  after < 0.001 || after >= 0.5 - 0.001
+}
+
+///|
 /// Generate random duration that fits within the remaining beats
 /// Distribution includes dotted notes for rhythmic variety
+/// Ensures that after choosing a duration, the remaining beats is either 0 or >= 0.5
 fn random_duration_with_limit(
   remaining_beats : Double,
   rand : @random.Rand,
 ) -> NoteDuration {
   // Filter available durations based on remaining beats
+  // Also filter out durations that would leave an unfillable gap (0 < remaining < 0.5)
   let available : Array[NoteDuration] = []
-  if remaining_beats >= 4.0 {
+  if remaining_beats >= 4.0 && leaves_valid_remainder(remaining_beats, Whole) {
     available.push(Whole)
   }
-  if remaining_beats >= 3.0 {
+  if remaining_beats >= 3.0 &&
+    leaves_valid_remainder(remaining_beats, DottedHalf) {
     available.push(DottedHalf)
   }
-  if remaining_beats >= 2.0 {
+  if remaining_beats >= 2.0 && leaves_valid_remainder(remaining_beats, Half) {
     available.push(Half)
   }
-  if remaining_beats >= 1.5 {
+  if remaining_beats >= 1.5 &&
+    leaves_valid_remainder(remaining_beats, DottedQuarter) {
     available.push(DottedQuarter)
   }
-  if remaining_beats >= 1.0 {
+  if remaining_beats >= 1.0 && leaves_valid_remainder(remaining_beats, Quarter) {
     available.push(Quarter)
   }
-  if remaining_beats >= 0.75 {
+  if remaining_beats >= 0.75 &&
+    leaves_valid_remainder(remaining_beats, DottedEighth) {
     available.push(DottedEighth)
   }
-  if remaining_beats >= 0.5 {
+  if remaining_beats >= 0.5 && leaves_valid_remainder(remaining_beats, Eighth) {
     available.push(Eighth)
   }
 

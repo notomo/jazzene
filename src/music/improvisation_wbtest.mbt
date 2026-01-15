@@ -48,3 +48,38 @@ test "generate improvisation from chord progression" {
   }
   inspect(total_beats >= 15.5 && total_beats <= 16.0, content="true")
 }
+
+///|
+test "each measure should not exceed 4 beats" {
+  let chords = [Chord::{ root: C, quality: Major7 }]
+  let beats_per_measure = 4.0
+
+  // Test multiple seeds to find patterns that overflow measures
+  for seed = 0; seed < 100; {
+    let settings = ImprovisationSettings::{ notes_per_measure: 4, seed }
+    let note_values = generate_improvisation(chords, settings, 5)
+
+    // Track beats per measure (measure 0 is leading rest)
+    let mut measure_beats = 0.0
+    let mut measure_index = 0
+    for note_value in note_values {
+      let beats = note_value.note_duration().to_beats()
+      measure_beats = measure_beats + beats
+
+      // Check if measure would overflow
+      if measure_beats > beats_per_measure + 0.001 {
+        // This is the bug: a note was added that causes overflow
+        fail(
+          "Measure \{measure_index} overflow at seed \{seed}: \{measure_beats} beats > \{beats_per_measure}",
+        )
+      }
+
+      // Move to next measure when current one is filled (within tolerance)
+      if measure_beats >= beats_per_measure - 0.001 {
+        measure_index = measure_index + 1
+        measure_beats = 0.0
+      }
+    }
+    continue seed + 1
+  }
+}
