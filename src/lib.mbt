@@ -59,14 +59,12 @@ fn make_sounds(
   chord_parse_error : @signal.Signal[String?],
 ) -> @signal.Signal[Array[@music.NoteValueSound]] {
   let note_values = @signal.memo(fn() {
-    let settings = @music.ImprovisationSettings::{
-      notes_per_measure: 4,
-      seed: seed.get(),
-    }
     match @music.parse_chord_progression(raw_chord_progression.get()) {
       Ok(chords) => {
         chord_parse_error.set(None)
-        @music.generate_improvisation(chords, settings, measure_count.get())
+        let gen_settings = @music.GeneratorSettings::default(chords, seed.get())
+        let generator = @music.create_note_value_generator(gen_settings)
+        @music.generate_improvisation(generator, measure_count.get())
       }
       Err(error_msg) => {
         chord_parse_error.set(Some(error_msg))

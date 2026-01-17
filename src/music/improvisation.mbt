@@ -1,202 +1,60 @@
 ///|
-/// Convert an integer seed to a 32-byte seed for ChaCha8 RNG
-/// The seed is distributed across the 32 bytes using little-endian encoding
-fn seed_to_bytes(seed : Int) -> Bytes {
-  let seed_bytes = FixedArray::make(32, b'\x00')
-  let seed_uint = seed.reinterpret_as_uint()
-
-  // Write the seed as 8 consecutive 32-bit integers (little-endian)
-  // This ensures good distribution even for small seed values
-  for i = 0; i < 8; {
-    seed_bytes.unsafe_write_uint32_le(
-      i * 4,
-      seed_uint + i.reinterpret_as_uint(),
-    )
-    continue i + 1
-  }
-  seed_bytes.unsafe_reinterpret_as_bytes()
-}
-
-///|
-/// Settings for improvisation generation
-pub(all) struct ImprovisationSettings {
-  notes_per_measure : Int
-  seed : Int
-} derive(Eq, Show)
-
-///|
-/// Default settings: 4 notes per measure, seed 0
-pub fn ImprovisationSettings::default() -> ImprovisationSettings {
-  ImprovisationSettings::{ notes_per_measure: 4, seed: 0 }
-}
-
-///|
-/// Generate improvisation from a chord progression with a specific seed
-/// Returns note values (notes and rests) with varying durations
-/// Notes are generated to fit exactly within measure boundaries
-/// Using the same seed with the same chords produces the same improvisation
-/// measure_count specifies the total number of measures to generate (including leading rest)
+/// Generate improvisation from a note value generator
+/// Returns note values (notes and rests) that fit within the specified measures
+/// measure_count specifies the total number of measures (including leading rest)
 pub fn generate_improvisation(
-  chords : Array[Chord],
-  settings : ImprovisationSettings,
+  generator : NoteValueGenerator,
   measure_count : Int,
 ) -> Array[NoteValue] {
-  // Create a seeded RNG for deterministic generation
-  let rand = @random.Rand::chacha8(seed=seed_to_bytes(settings.seed))
   let note_values : Array[NoteValue] = []
-  let beats_per_measure = settings.notes_per_measure.to_double()
-
-  // Add 1 measure of rest at the beginning
+  let total_beats = measure_count.to_double() * 4.0
+  // Add 1 measure of rest at the beginning (4 beats)
   note_values.push(NoteValue::Rest(duration=Whole))
-
-  // Calculate number of chord measures needed (total - 1 for leading rest)
-  let chord_measures_needed = measure_count - 1
-
-  // If no chords or no measures needed, return just the leading rest
-  if chords.length() == 0 || chord_measures_needed <= 0 {
-    return note_values
-  }
-
-  // Generate notes for the required number of measures, cycling through chords
-  for measure_index = 0; measure_index < chord_measures_needed; {
-    let chord = chords[measure_index % chords.length()]
-
-    // Track remaining beats in current measure
-    let mut remaining_beats = beats_per_measure
-    while remaining_beats >= 0.5 {
-      // 0.5 is the smallest duration (Eighth)
-      let duration = random_duration_with_limit(remaining_beats, rand)
-
-      // 25% chance to generate a rest instead of a note
-      let is_rest = rand.int(limit=100) < 25
-      if is_rest {
-        note_values.push(NoteValue::Rest(duration~))
-        remaining_beats = remaining_beats - duration.to_beats()
-      } else {
-        let midi_number = random_midi_from_chord(chord, rand)
-        match MidiNumber::new(midi_number) {
-          Some(x) => {
-            note_values.push(NoteValue::Note(midi=x, duration~))
-            remaining_beats = remaining_beats - duration.to_beats()
+  let mut current_beats = 4.0
+  // Generate notes until we exceed total beats
+  while current_beats < total_beats {
+    let note_value = generator()
+    let beats = note_value.note_duration().to_beats()
+    let remaining_beats = total_beats - current_beats
+    match beats <= remaining_beats {
+      true => {
+        note_values.push(note_value)
+        current_beats = current_beats + beats
+      }
+      false => {
+        // Try to trim the note to fit
+        match trim_to_fit(remaining_beats, note_value) {
+          Some(trimmed) => {
+            note_values.push(trimmed)
+            current_beats = current_beats + trimmed.note_duration().to_beats()
           }
-          None => () // Skip invalid notes
+          None => () // Can't fit any more notes
         }
+        break
       }
     }
-    continue measure_index + 1
   }
   note_values
 }
 
 ///|
-/// Check if choosing this duration leaves a valid remainder
-/// (either exactly 0 or at least 0.5 for another note)
-fn leaves_valid_remainder(
-  remaining_beats : Double,
-  duration : NoteDuration,
-) -> Bool {
-  let after = remaining_beats - duration.to_beats()
-  // Allow small floating point tolerance
-  after < 0.001 || after >= 0.5 - 0.001
+/// Find the largest duration that fits within remaining beats
+fn find_fitting_duration(remaining_beats : Double) -> NoteDuration? {
+  // Check durations from largest to smallest
+  [Whole, DottedHalf, Half, DottedQuarter, Quarter, DottedEighth, Eighth]
+  .iter()
+  .find_first(fn(d) { d.to_beats() <= remaining_beats + 0.001 })
 }
 
 ///|
-/// Generate random duration that fits within the remaining beats
-/// Distribution includes dotted notes for rhythmic variety
-/// Ensures that after choosing a duration, the remaining beats is either 0 or >= 0.5
-fn random_duration_with_limit(
-  remaining_beats : Double,
-  rand : @random.Rand,
-) -> NoteDuration {
-  // Filter available durations based on remaining beats
-  // Also filter out durations that would leave an unfillable gap (0 < remaining < 0.5)
-  let available : Array[NoteDuration] = []
-  if remaining_beats >= 4.0 && leaves_valid_remainder(remaining_beats, Whole) {
-    available.push(Whole)
-  }
-  if remaining_beats >= 3.0 &&
-    leaves_valid_remainder(remaining_beats, DottedHalf) {
-    available.push(DottedHalf)
-  }
-  if remaining_beats >= 2.0 && leaves_valid_remainder(remaining_beats, Half) {
-    available.push(Half)
-  }
-  if remaining_beats >= 1.5 &&
-    leaves_valid_remainder(remaining_beats, DottedQuarter) {
-    available.push(DottedQuarter)
-  }
-  if remaining_beats >= 1.0 && leaves_valid_remainder(remaining_beats, Quarter) {
-    available.push(Quarter)
-  }
-  if remaining_beats >= 0.75 &&
-    leaves_valid_remainder(remaining_beats, DottedEighth) {
-    available.push(DottedEighth)
-  }
-  if remaining_beats >= 0.5 && leaves_valid_remainder(remaining_beats, Eighth) {
-    available.push(Eighth)
-  }
-
-  // If no durations fit (shouldn't happen), default to smallest
-  if available.length() == 0 {
-    return Eighth
-  }
-
-  // If only one option, return it
-  if available.length() == 1 {
-    return available[0]
-  }
-
-  // Weighted distribution for rhythmic variety
-  // Preferred: 40% Quarter, 20% DottedQuarter, 15% Eighth, 10% DottedEighth, 8% Half, 5% DottedHalf, 2% Whole
-  let r = rand.int(limit=100)
-
-  // When all 7 durations are available
-  if available.length() == 7 {
-    if r < 15 {
-      Eighth
-    } else if r < 25 {
-      DottedEighth
-    } else if r < 65 {
-      Quarter
-    } else if r < 85 {
-      DottedQuarter
-    } else if r < 93 {
-      Half
-    } else if r < 98 {
-      DottedHalf
-    } else {
-      Whole
-    }
-  } else {
-    // For partial availability, pick uniformly from available options
-    // This keeps the code simple while still introducing variety
-    let index = rand.int(limit=available.length())
-    available[index]
-  }
-}
-
-///|
-/// Generate a random MIDI number from chord tones
-/// Uses chord tones across multiple octaves (C3-C6, MIDI 48-84)
-fn random_midi_from_chord(chord : Chord, rand : @random.Rand) -> Int {
-  let base_tones = chord.tones()
-  if base_tones.length() == 0 {
-    return 60 // Fallback to middle C
-  }
-
-  // Extend to multiple octaves (octaves 3-5)
-  let extended_tones : Array[Int] = []
-  for octave_offset in [-12, 0, 12] {
-    for tone in base_tones {
-      let midi = tone + octave_offset
-      if midi >= 48 && midi <= 84 {
-        // C3 to C6
-        extended_tones.push(midi)
+/// Trim a note value to fit within remaining beats
+fn trim_to_fit(remaining_beats : Double, note_value : NoteValue) -> NoteValue? {
+  match find_fitting_duration(remaining_beats) {
+    Some(duration) =>
+      match note_value {
+        Note(midi~, ..) => Some(NoteValue::Note(midi~, duration~))
+        Rest(..) => Some(NoteValue::Rest(duration~))
       }
-    }
+    None => None
   }
-
-  // Select random note
-  let index = rand.int(limit=extended_tones.length())
-  extended_tones[index]
 }
