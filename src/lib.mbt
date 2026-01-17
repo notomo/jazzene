@@ -118,8 +118,8 @@ fn make_tick(
         new_position
       }
     }
-    @music.slice_notes(sounds.get(), final_position, lookahead)
-    |> @audio.schedule_notes(audio_ctx, final_position, volume.get())
+    @music.AudioSound::from(sounds.get(), final_position, lookahead)
+    |> @audio.schedule_notes(audio_ctx, volume.get())
     playback_position.set(final_position)
     let stop = if loop_state.a_enabled.get() || loop_state.b_enabled.get() {
       false

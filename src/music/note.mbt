@@ -117,18 +117,3 @@ pub fn calculate_playing_notes(
   .filter(fn(sound) { sound.in_range(position) })
   .to_array()
 }
-
-///|
-/// Slice notes within a time window for lookahead scheduling
-/// Returns all sounds (both Note and Rest) within [position, position + lookahead)
-pub fn slice_notes(
-  sounds : Array[NoteValueSound],
-  position : Duration,
-  lookahead : Duration,
-) -> Array[NoteValueSound] {
-  let window_end = position + lookahead
-  @list.from_array(sounds)
-  .take_while(fn(sound) { sound.start_time < window_end })
-  .filter(fn(sound) { sound.start_time >= position })
-  .to_array()
-}

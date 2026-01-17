@@ -46,23 +46,15 @@ fn schedule_note(
 }
 
 ///|
-/// Schedule pre-filtered notes for playback
-/// Calculates audio context timing internally
+/// Schedule audio sounds for playback
 pub fn schedule_notes(
-  sounds : Array[@music.NoteValueSound],
+  sounds : Array[@music.AudioSound],
   ctx : @web_audio.AudioContext,
-  current_pos : @music.Duration,
   volume : Double,
 ) -> Unit {
   let current_time = @music.Duration::from_seconds(ctx.current_time())
   for sound in sounds {
-    match sound.note_value {
-      @music.Note(midi~, ..) => {
-        let offset = sound.start_time - current_pos
-        let start_time = current_time + offset
-        schedule_note(ctx, midi, start_time, sound.duration, volume)
-      }
-      @music.Rest(..) => ()
-    }
+    let start_time = sound.start_time(current_time)
+    schedule_note(ctx, sound.midi, start_time, sound.duration, volume)
   }
 }
