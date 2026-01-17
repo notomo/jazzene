@@ -41,23 +41,27 @@ pub fn parse_chord(input : String) -> Result[Chord, String] {
 /// Example: "Cm7 F7 Bbmaj7 Ebmaj7" -> Ok([Chord, Chord, Chord, Chord])
 /// Returns Err with error message if any chord fails to parse
 pub fn parse_chord_progression(input : String) -> Result[Array[Chord], String] {
-  let tokens = input.trim().split(" ").to_array()
-  let chords : Array[Chord] = []
-  let errors : Array[String] = []
-  for token in tokens {
-    let trimmed = token.to_string().trim().to_string()
-    if trimmed == "" {
-      continue
-    }
-    match parse_chord(trimmed) {
-      Ok(chord) => chords.push(chord)
-      Err(e) => errors.push("Failed to parse '\{trimmed}': \{e}")
-    }
-  }
-  if errors.length() > 0 {
-    Err(errors.join("; "))
-  } else {
-    Ok(chords)
+  let results = input
+    .trim()
+    .split(" ")
+    .map(fn(token) { token.to_string().trim().to_string() })
+    .filter(fn(token) { token != "" })
+    .map(fn(token) {
+      parse_chord(token).map_err(fn(e) { "Failed to parse '\{token}': \{e}" })
+    })
+    .collect()
+  let errors = results
+    .iter()
+    .filter_map(fn(r) {
+      match r {
+        Err(e) => Some(e)
+        Ok(_) => None
+      }
+    })
+    .collect()
+  match errors {
+    [] => Ok(results.iter().filter_map(fn(r) { r.to_option() }).collect())
+    messages => Err(messages.join("; "))
   }
 }
 

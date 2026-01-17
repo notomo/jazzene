@@ -35,8 +35,8 @@ pub enum NoteValue {
 /// Get note duration from either Note or Rest
 pub fn NoteValue::note_duration(self : NoteValue) -> NoteDuration {
   match self {
-    Note(duration=d, ..) => d
-    Rest(duration=d) => d
+    Note(duration~, ..) => duration
+    Rest(duration~) => duration
   }
 }
 
@@ -51,7 +51,7 @@ pub fn NoteValue::duration(self : NoteValue, bpm : Int) -> Duration {
 /// Get MIDI value if this is a Note
 pub fn NoteValue::midi(self : NoteValue) -> MidiNumber? {
   match self {
-    Note(midi=m, ..) => Some(m)
+    Note(midi~, ..) => Some(midi)
     Rest(..) => None
   }
 }
@@ -71,14 +71,14 @@ pub fn NoteValueSound::from_note_values(
   bpm : Int,
 ) -> Array[NoteValueSound] {
   let mut current_time = 0.0
-  note_values.map(fn(nv) {
-    let dur = nv.duration(bpm)
+  note_values.map(fn(note_value) {
+    let duration = note_value.duration(bpm)
     let sound = NoteValueSound::{
-      note_value: nv,
-      duration: dur,
+      note_value,
+      duration,
       start_time: Duration::from_milliseconds(current_time),
     }
-    current_time = current_time + dur.to_milliseconds()
+    current_time = current_time + duration.to_milliseconds()
     sound
   })
 }
@@ -101,9 +101,10 @@ pub fn NoteValueSound::in_range(
 ///|
 /// Calculate total duration of a note sequence
 pub fn calculate_total_duration(sounds : Array[NoteValueSound]) -> Duration {
-  let total = @list.from_array(sounds).fold(init=0.0, (acc, sound) => acc +
-    sound.duration.to_milliseconds())
-  Duration::from_milliseconds(total)
+  sounds
+  .iter()
+  .fold(init=0.0, (acc, sound) => acc + sound.duration.to_milliseconds())
+  |> Duration::from_milliseconds
 }
 
 ///|
@@ -112,8 +113,9 @@ pub fn calculate_playing_notes(
   sounds : Array[NoteValueSound],
   position : Duration,
 ) -> Array[NoteValueSound] {
-  @list.from_array(sounds)
+  sounds
+  .iter()
   .take_while(fn(sound) { sound.start_time <= position })
   .filter(fn(sound) { sound.in_range(position) })
-  .to_array()
+  .collect()
 }
