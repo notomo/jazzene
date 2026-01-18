@@ -13,8 +13,8 @@ test "ChordRoot from_string" {
 
 ///|
 test "ChordRoot midi" {
-  inspect(C.midi(), content="60") // C4
-  inspect(CSharp.midi(), content="61")
-  inspect(A.midi(), content="69") // A4 = 440Hz
-  inspect(B.midi(), content="71")
+  assert_eq(C.midi(), 60) // C4
+  assert_eq(CSharp.midi(), 61)
+  assert_eq(A.midi(), 69) // A4 = 440Hz
+  assert_eq(B.midi(), 71)
 }

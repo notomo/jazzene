@@ -24,7 +24,7 @@ test "parse chord progression" {
   let chords = @helper.unwrap_or_fail(
     parse_chord_progression("Cm7 F7 Bbmaj7 Ebmaj7"),
   )
-  inspect(chords.length(), content="4")
+  assert_eq(chords.length(), 4)
 
   // first
   let c = chords[0]
@@ -40,7 +40,7 @@ test "parse chord progression" {
 ///|
 test "parse empty progression" {
   let chords = @helper.unwrap_or_fail(parse_chord_progression(""))
-  inspect(chords.length(), content="0")
+  assert_eq(chords.length(), 0)
 }
 
 ///|
@@ -48,7 +48,7 @@ test "parse chord progression with invalid chord" {
   guard parse_chord_progression("Cm7 InvalidChord F7") is Err(e) else {
     fail("Expected error for invalid chord")
   }
-  inspect(e.contains("Failed to parse 'InvalidChord'"), content="true")
+  assert_true(e.contains("Failed to parse 'InvalidChord'"))
 }
 
 ///|
@@ -56,8 +56,8 @@ test "parse chord progression with mixed valid and invalid" {
   guard parse_chord_progression("Cm7 XYZ F7 ABC") is Err(e) else {
     fail("Expected error for invalid chords")
   }
-  inspect(e.contains("Failed to parse 'XYZ'"), content="true")
-  inspect(e.contains("Failed to parse 'ABC'"), content="true")
+  assert_true(e.contains("Failed to parse 'XYZ'"))
+  assert_true(e.contains("Failed to parse 'ABC'"))
 }
 
 ///|

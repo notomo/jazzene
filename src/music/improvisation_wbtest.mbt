@@ -23,12 +23,12 @@ test "generate improvisation with fixed sequence" {
   inspect(result[0], content="Rest(duration=Whole)")
   // Then our fixed sequence should fill remaining 4 beats
   // Quarter (1) + Quarter (1) + Half (2) = 4 beats
-  inspect(result.length(), content="4")
+  assert_eq(result.length(), 4)
   let mut total_beats = 0.0
   for i = 0; i < result.length(); i = i + 1 {
     total_beats = total_beats + result[i].note_duration().to_beats()
   }
-  inspect(total_beats, content="8")
+  assert_eq(total_beats, 8.0)
 }
 
 ///|
@@ -45,7 +45,7 @@ test "trimming behavior when note exceeds remaining beats" {
   for i = 0; i < result.length(); i = i + 1 {
     total_beats = total_beats + result[i].note_duration().to_beats()
   }
-  inspect(total_beats, content="12")
+  assert_eq(total_beats, 12.0)
 }
 
 ///|
@@ -63,7 +63,7 @@ test "trimming trims note to fit remaining beats" {
   for i = 0; i < result.length(); i = i + 1 {
     total_beats = total_beats + result[i].note_duration().to_beats()
   }
-  inspect(total_beats, content="8")
+  assert_eq(total_beats, 8.0)
 }
 
 ///|
@@ -73,7 +73,7 @@ test "generate improvisation from real generator" {
   let gen = create_note_value_generator(settings)
   let note_values = generate_improvisation(gen, 2)
   // Should have at least 2 note values (leading rest + at least one more)
-  inspect(note_values.length() >= 2, content="true")
+  assert_true(note_values.length() >= 2)
   // First should be leading rest
   inspect(note_values[0], content="Rest(duration=Whole)")
   // All note values should have valid durations
@@ -105,7 +105,7 @@ test "generate improvisation total beats match expected" {
   for i = 0; i < note_values.length(); i = i + 1 {
     total_beats = total_beats + note_values[i].note_duration().to_beats()
   }
-  inspect(total_beats, content="16")
+  assert_eq(total_beats, 16.0)
 }
 
 ///|
@@ -117,8 +117,8 @@ test "deterministic with same seed" {
   let gen2 = create_note_value_generator(settings2)
   let result1 = generate_improvisation(gen1, 4)
   let result2 = generate_improvisation(gen2, 4)
-  inspect(result1.length() == result2.length(), content="true")
+  assert_eq(result1.length(), result2.length())
   for i = 0; i < result1.length(); i = i + 1 {
-    inspect(result1[i] == result2[i], content="true")
+    assert_eq(result1[i], result2[i])
   }
 }

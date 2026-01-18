@@ -65,5 +65,5 @@ test "AudioSound::start_time adds offset to audio_current_time" {
     offset: Duration::from_milliseconds(100),
   }
   let start_time = audio_sound.start_time(Duration::from_milliseconds(1000))
-  inspect(start_time.to_milliseconds(), content="1100")
+  assert_eq(start_time.to_milliseconds(), 1100.0)
 }

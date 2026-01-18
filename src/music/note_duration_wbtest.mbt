@@ -1,13 +1,13 @@
 ///|
 test "NoteDuration to_beats" {
-  inspect(Eighth.to_beats(), content="0.5")
-  inspect(Quarter.to_beats(), content="1")
-  inspect(Half.to_beats(), content="2")
+  assert_eq(Eighth.to_beats(), 0.5)
+  assert_eq(Quarter.to_beats(), 1.0)
+  assert_eq(Half.to_beats(), 2.0)
 }
 
 ///|
 test "NoteDuration to_beats for dotted notes" {
-  inspect(DottedEighth.to_beats(), content="0.75")
-  inspect(DottedQuarter.to_beats(), content="1.5")
-  inspect(DottedHalf.to_beats(), content="3")
+  assert_eq(DottedEighth.to_beats(), 0.75)
+  assert_eq(DottedQuarter.to_beats(), 1.5)
+  assert_eq(DottedHalf.to_beats(), 3.0)
 }

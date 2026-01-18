@@ -32,12 +32,12 @@ test "convert_sounds_to_measures basic case" {
   let measures = convert_sounds_to_measures(sounds, chords, bpm, 3)
 
   // Verify number of measures (leading rest + 2 chord measures)
-  inspect(measures.length(), content="3")
+  assert_eq(measures.length(), 3)
 
   // Verify leading rest measure
   let m0 = measures[0]
-  inspect(m0.measure_index, content="0")
-  inspect(m0.notes.length(), content="4")
+  assert_eq(m0.measure_index, 0)
+  assert_eq(m0.notes.length(), 4)
   // All notes should be rests
   for i = 0; i < m0.notes.length(); {
     match m0.notes[i].midi {
@@ -49,39 +49,39 @@ test "convert_sounds_to_measures basic case" {
 
   // Verify first chord measure (C major7)
   let m1 = measures[1]
-  inspect(m1.measure_index, content="1")
+  assert_eq(m1.measure_index, 1)
   inspect(m1.chord.root, content="C")
   inspect(m1.chord.quality, content="Major7")
-  inspect(m1.notes.length(), content="4")
+  assert_eq(m1.notes.length(), 4)
 
   // Check first note in first chord measure (C4)
   let n0 = m1.notes[0]
   match n0.midi {
-    Some(midi) => inspect(midi, content="60")
+    Some(midi) => assert_eq(midi, 60)
     None => fail("Expected note, got rest")
   }
   inspect(n0.duration, content="Quarter")
-  inspect(n0.start_beat, content="0")
+  assert_eq(n0.start_beat, 0.0)
 
   // Check last note in first chord measure (B4)
   let n3 = m1.notes[3]
   match n3.midi {
-    Some(midi) => inspect(midi, content="71")
+    Some(midi) => assert_eq(midi, 71)
     None => fail("Expected note, got rest")
   }
-  inspect(n3.start_beat, content="3")
+  assert_eq(n3.start_beat, 3.0)
 
   // Verify second chord measure (F7)
   let m2 = measures[2]
-  inspect(m2.measure_index, content="2")
+  assert_eq(m2.measure_index, 2)
   inspect(m2.chord.root, content="F")
   inspect(m2.chord.quality, content="Dominant7")
-  inspect(m2.notes.length(), content="4")
+  assert_eq(m2.notes.length(), 4)
 
   // Check first note in second chord measure (F4)
   let n4 = m2.notes[0]
   match n4.midi {
-    Some(midi) => inspect(midi, content="65")
+    Some(midi) => assert_eq(midi, 65)
     None => fail("Expected note, got rest")
   }
 }
@@ -105,23 +105,23 @@ test "convert_sounds_to_measures with mixed durations" {
   let chords = [Chord::{ root: C, quality: Major }]
   let measures = convert_sounds_to_measures(sounds, chords, bpm, 2)
   // Leading rest + 1 chord measure
-  inspect(measures.length(), content="2")
+  assert_eq(measures.length(), 2)
   // Check first chord measure (skip leading rest at index 0)
   let m1 = measures[1]
-  inspect(m1.notes.length(), content="3")
+  assert_eq(m1.notes.length(), 3)
 
   // First note should be at beat 0 with Half duration
   let n0 = m1.notes[0]
   inspect(n0.duration, content="Half")
-  inspect(n0.start_beat, content="0")
+  assert_eq(n0.start_beat, 0.0)
 
   // Second note should be at beat 2
   let n1 = m1.notes[1]
-  inspect(n1.start_beat, content="2")
+  assert_eq(n1.start_beat, 2.0)
 
   // Third note should be at beat 3
   let n2 = m1.notes[2]
-  inspect(n2.start_beat, content="3")
+  assert_eq(n2.start_beat, 3.0)
 }
 
 ///|
@@ -149,15 +149,15 @@ test "convert_sounds_to_measures with empty measure" {
   ]
   let measures = convert_sounds_to_measures(sounds, chords, bpm, 3)
   // Leading rest + 2 chord measures
-  inspect(measures.length(), content="3")
+  assert_eq(measures.length(), 3)
 
   // Leading rest measure (index 0) should have 4 rests
   let m0 = measures[0]
-  inspect(m0.notes.length(), content="4")
+  assert_eq(m0.notes.length(), 4)
 
   // First chord measure (index 1) should have 4 rests (rests are included with midi=None)
   let m1 = measures[1]
-  inspect(m1.notes.length(), content="4")
+  assert_eq(m1.notes.length(), 4)
   // Verify all notes in first chord measure are rests
   for i = 0; i < m1.notes.length(); {
     match m1.notes[i].midi {
@@ -169,9 +169,9 @@ test "convert_sounds_to_measures with empty measure" {
 
   // Second chord measure (index 2) should have one note
   let m2 = measures[2]
-  inspect(m2.notes.length(), content="1")
+  assert_eq(m2.notes.length(), 1)
   match m2.notes[0].midi {
-    Some(midi) => inspect(midi, content="60")
+    Some(midi) => assert_eq(midi, 60)
     None => fail("Expected note in measure 2, got rest")
   }
 }
@@ -187,11 +187,11 @@ test "convert_sounds_to_measures with no chords" {
   let measures = convert_sounds_to_measures(sounds, chords, bpm, 1)
 
   // Should return only leading rest measure with dummy chord
-  inspect(measures.length(), content="1")
+  assert_eq(measures.length(), 1)
   let m0 = measures[0]
-  inspect(m0.measure_index, content="0")
+  assert_eq(m0.measure_index, 0)
   // Leading rest should contain the note since it falls within the first measure
-  inspect(m0.notes.length(), content="1")
+  assert_eq(m0.notes.length(), 1)
 }
 
 ///|
@@ -239,14 +239,14 @@ test "convert_sounds_to_measures with chord cycling for more measures than chord
   let measures = convert_sounds_to_measures(sounds, chords, bpm, 5)
 
   // Should create 5 measures (1 leading rest + 4 chord measures)
-  inspect(measures.length(), content="5")
+  assert_eq(measures.length(), 5)
 
   // Verify measure indices
-  inspect(measures[0].measure_index, content="0")
-  inspect(measures[1].measure_index, content="1")
-  inspect(measures[2].measure_index, content="2")
-  inspect(measures[3].measure_index, content="3")
-  inspect(measures[4].measure_index, content="4")
+  assert_eq(measures[0].measure_index, 0)
+  assert_eq(measures[1].measure_index, 1)
+  assert_eq(measures[2].measure_index, 2)
+  assert_eq(measures[3].measure_index, 3)
+  assert_eq(measures[4].measure_index, 4)
 
   // Verify chord cycling: [Cm7, F7, Cm7, F7]
   inspect(measures[1].chord.root, content="C")
@@ -259,8 +259,8 @@ test "convert_sounds_to_measures with chord cycling for more measures than chord
   inspect(measures[4].chord.quality, content="Dominant7")
 
   // Verify each measure has notes
-  inspect(measures[1].notes.length(), content="4")
-  inspect(measures[2].notes.length(), content="4")
-  inspect(measures[3].notes.length(), content="4")
-  inspect(measures[4].notes.length(), content="4")
+  assert_eq(measures[1].notes.length(), 4)
+  assert_eq(measures[2].notes.length(), 4)
+  assert_eq(measures[3].notes.length(), 4)
+  assert_eq(measures[4].notes.length(), 4)
 }
