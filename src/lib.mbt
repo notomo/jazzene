@@ -10,7 +10,10 @@ fn main {
     raw_chord_progression, seed, measure_count, bpm, chord_parse_error,
   )
   let total_duration = @signal.memo(fn() {
-    @music.calculate_total_duration(sounds.get())
+    @music.calculate_total_duration(
+      bpm=bpm.get(),
+      measure_count=measure_count.get(),
+    )
   })
   // Parse chord progression into chords
   let chords = @signal.memo(fn() {

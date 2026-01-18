@@ -41,12 +41,13 @@ pub fn NoteValueSound::in_range(
 }
 
 ///|
-/// Calculate total duration of a note sequence
-pub fn calculate_total_duration(sounds : Array[NoteValueSound]) -> Duration {
-  sounds
-  .iter()
-  .fold(init=0.0, (acc, sound) => acc + sound.duration.to_milliseconds())
-  |> Duration::from_milliseconds
+/// Calculate total duration based on BPM and measure count (4/4 time signature)
+pub fn calculate_total_duration(bpm~ : Int, measure_count~ : Int) -> Duration {
+  // 1 measure = 4 beats, 1 beat = 60s / bpm
+  // total = measure_count * 4 * (60 / bpm) seconds
+  Duration::from_milliseconds(
+    measure_count.to_double() * 240.0 / bpm.to_double() * 1000.0,
+  )
 }
 
 ///|
