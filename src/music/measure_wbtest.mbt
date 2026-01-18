@@ -41,7 +41,7 @@ test "convert_sounds_to_measures basic case" {
   // All notes should be rests
   for i = 0; i < m0.notes.length(); {
     match m0.notes[i].midi {
-      Some(_) => abort("Expected rest in leading measure, got note")
+      Some(_) => fail("Expected rest in leading measure, got note")
       None => ()
     }
     continue i + 1
@@ -58,7 +58,7 @@ test "convert_sounds_to_measures basic case" {
   let n0 = m1.notes[0]
   match n0.midi {
     Some(midi) => inspect(midi, content="60")
-    None => abort("Expected note, got rest")
+    None => fail("Expected note, got rest")
   }
   inspect(n0.duration, content="Quarter")
   inspect(n0.start_beat, content="0")
@@ -67,7 +67,7 @@ test "convert_sounds_to_measures basic case" {
   let n3 = m1.notes[3]
   match n3.midi {
     Some(midi) => inspect(midi, content="71")
-    None => abort("Expected note, got rest")
+    None => fail("Expected note, got rest")
   }
   inspect(n3.start_beat, content="3")
 
@@ -82,7 +82,7 @@ test "convert_sounds_to_measures basic case" {
   let n4 = m2.notes[0]
   match n4.midi {
     Some(midi) => inspect(midi, content="65")
-    None => abort("Expected note, got rest")
+    None => fail("Expected note, got rest")
   }
 }
 
@@ -161,7 +161,7 @@ test "convert_sounds_to_measures with empty measure" {
   // Verify all notes in first chord measure are rests
   for i = 0; i < m1.notes.length(); {
     match m1.notes[i].midi {
-      Some(_) => abort("Expected rest in measure 1, got note")
+      Some(_) => fail("Expected rest in measure 1, got note")
       None => ()
     }
     continue i + 1
@@ -172,7 +172,7 @@ test "convert_sounds_to_measures with empty measure" {
   inspect(m2.notes.length(), content="1")
   match m2.notes[0].midi {
     Some(midi) => inspect(midi, content="60")
-    None => abort("Expected note in measure 2, got rest")
+    None => fail("Expected note in measure 2, got rest")
   }
 }
 

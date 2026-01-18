@@ -6,7 +6,7 @@ test "parse simple chord Cm7" {
       inspect(chord.root, content="C")
       inspect(chord.quality, content="Minor7")
     }
-    Err(e) => abort("Failed to parse Cm7: " + e)
+    Err(e) => fail(e)
   }
 }
 
@@ -18,7 +18,7 @@ test "parse chord with sharp F#maj7" {
       inspect(chord.root, content="FSharp")
       inspect(chord.quality, content="Major7")
     }
-    Err(e) => abort("Failed to parse F#maj7: " + e)
+    Err(e) => fail(e)
   }
 }
 
@@ -30,7 +30,7 @@ test "parse dominant 7th chord" {
       inspect(chord.root, content="G")
       inspect(chord.quality, content="Dominant7")
     }
-    Err(e) => abort("Failed to parse G7: " + e)
+    Err(e) => fail(e)
   }
 }
 
@@ -51,7 +51,7 @@ test "parse chord progression" {
       inspect(eb.root, content="DSharp")
       inspect(eb.quality, content="Major7")
     }
-    Err(e) => abort("Failed to parse progression: " + e)
+    Err(e) => fail(e)
   }
 }
 
@@ -60,30 +60,25 @@ test "parse empty progression" {
   let result = parse_chord_progression("")
   match result {
     Ok(chords) => inspect(chords.length(), content="0")
-    Err(e) => abort("Failed to parse empty progression: " + e)
+    Err(e) => fail(e)
   }
 }
 
 ///|
 test "parse chord progression with invalid chord" {
-  let result = parse_chord_progression("Cm7 InvalidChord F7")
-  match result {
-    Ok(_) => abort("Expected error for invalid chord")
-    Err(e) =>
-      inspect(e.contains("Failed to parse 'InvalidChord'"), content="true")
+  guard parse_chord_progression("Cm7 InvalidChord F7") is Err(e) else {
+    fail("Expected error for invalid chord")
   }
+  inspect(e.contains("Failed to parse 'InvalidChord'"), content="true")
 }
 
 ///|
 test "parse chord progression with mixed valid and invalid" {
-  let result = parse_chord_progression("Cm7 XYZ F7 ABC")
-  match result {
-    Ok(_) => abort("Expected error for invalid chords")
-    Err(e) => {
-      inspect(e.contains("Failed to parse 'XYZ'"), content="true")
-      inspect(e.contains("Failed to parse 'ABC'"), content="true")
-    }
+  guard parse_chord_progression("Cm7 XYZ F7 ABC") is Err(e) else {
+    fail("Expected error for invalid chords")
   }
+  inspect(e.contains("Failed to parse 'XYZ'"), content="true")
+  inspect(e.contains("Failed to parse 'ABC'"), content="true")
 }
 
 ///|
