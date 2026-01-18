@@ -1,0 +1,5 @@
+import { }
+
+options(
+  "is-main": false,
+)

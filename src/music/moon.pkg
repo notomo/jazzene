@@ -1,5 +1,7 @@
 import { }
 
+import "wbtest" { "internal/jazzene/test_helper" as @helper }
+
 options(
   "is-main": false,
 )
