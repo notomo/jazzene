@@ -44,15 +44,7 @@ test "parse empty progression" {
 }
 
 ///|
-test "parse chord progression with invalid chord" {
-  guard parse_chord_progression("Cm7 InvalidChord F7") is Err(e) else {
-    fail("Expected error for invalid chord")
-  }
-  assert_true(e.contains("Failed to parse 'InvalidChord'"))
-}
-
-///|
-test "parse chord progression with mixed valid and invalid" {
+test "parse chord progression including invalid" {
   guard parse_chord_progression("Cm7 XYZ F7 ABC") is Err(e) else {
     fail("Expected error for invalid chords")
   }

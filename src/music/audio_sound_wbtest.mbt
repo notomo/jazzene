@@ -22,6 +22,7 @@ test "AudioSound::from filters out rests" {
     Note(midi~, duration=Quarter), // 0-500ms
     Rest(duration=Quarter), // 500-1000ms
     Note(midi~, duration=Quarter), // 1000-1500ms
+    Note(midi~, duration=Quarter), // 1500-2000ms
   ]
   let sounds = NoteValueSound::from_note_values(notes, bpm)
   let current_pos = Duration::from_milliseconds(0)
