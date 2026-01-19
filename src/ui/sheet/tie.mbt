@@ -11,23 +11,23 @@ pub fn render_tie_start(
   stem_up : Bool,
 ) -> @luna_dom.DomNode {
   // Tie parameters
-  let tie_thickness = 3.0
-  let arc_height = if stem_up { 12.0 } else { -12.0 }
-  let y_offset = if stem_up { 8.0 } else { -8.0 }
+  let tie_thickness = 4.0
+  let arc_height = if stem_up { 18.0 } else { -18.0 }
+  let y_offset = if stem_up { 10.0 } else { -10.0 }
 
   // Start from the right side of the note head
-  let start_x = note_x + 10.0
+  let start_x = note_x + 12.0
   let start_y = note_y + y_offset
 
   // End at the right edge of the measure
-  let end_x = measure_end_x - 5.0
+  let end_x = measure_end_x - 8.0
   let end_y = start_y
 
-  // Control points for cubic Bezier curve
+  // Control points for quadratic Bezier curve
   let mid_x = (start_x + end_x) / 2.0
   let ctrl_y = start_y + arc_height
 
-  // Create path with two curves to give the tie thickness
+  // Create filled path with outer and inner arcs
   let outer_arc = "M " +
     start_x.to_string() +
     " " +
@@ -69,23 +69,23 @@ pub fn render_tie_end(
   stem_up : Bool,
 ) -> @luna_dom.DomNode {
   // Tie parameters
-  let tie_thickness = 3.0
-  let arc_height = if stem_up { 12.0 } else { -12.0 }
-  let y_offset = if stem_up { 8.0 } else { -8.0 }
+  let tie_thickness = 4.0
+  let arc_height = if stem_up { 18.0 } else { -18.0 }
+  let y_offset = if stem_up { 10.0 } else { -10.0 }
 
   // Start from the left edge of the measure
-  let start_x = measure_start_x + 5.0
+  let start_x = measure_start_x + 8.0
   let start_y = note_y + y_offset
 
   // End at the left side of the note head
-  let end_x = note_x - 10.0
+  let end_x = note_x - 12.0
   let end_y = start_y
 
   // Control points for quadratic Bezier curve
   let mid_x = (start_x + end_x) / 2.0
   let ctrl_y = start_y + arc_height
 
-  // Create path with two curves to give the tie thickness
+  // Create filled path with outer and inner arcs
   let outer_arc = "M " +
     start_x.to_string() +
     " " +

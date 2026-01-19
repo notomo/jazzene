@@ -39,7 +39,7 @@ pub fn render_measure(
         // Render tie arcs if needed
         let note_y = @music.midi_to_staff_y(midi, y)
         let stem_up = midi < 71
-        let measure_start_x = x + 60.0 // Account for clef space
+        let measure_start_x = x // Left edge of measure (ties come from previous measure)
         let measure_end_x = x + measure_width
         match note.tie_state {
           @music.TieStart =>
