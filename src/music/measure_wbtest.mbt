@@ -264,3 +264,190 @@ test "convert_sounds_to_measures with chord cycling for more measures than chord
   assert_eq(measures[3].notes.length(), 4)
   assert_eq(measures[4].notes.length(), 4)
 }
+
+///|
+test "convert_sounds_to_measures splits note across measure boundary" {
+  let bpm = 120
+
+  // Create a note that spans across measure boundaries
+  // Leading rest (4 beats) + note starting at beat 3 with Half duration (2 beats)
+  // This should split: beat 3 of measure 1 (1 beat) + beat 0 of measure 2 (1 beat)
+  let note_values : Array[NoteValue] = [
+    Rest(duration=Quarter), // beat 0
+    Rest(duration=Quarter), // beat 1
+    Rest(duration=Quarter), // beat 2
+    Rest(duration=Quarter), // beat 3
+    // Measure 1: note starts at beat 3
+    Rest(duration=Quarter), // beat 0
+    Rest(duration=Quarter), // beat 1
+    Rest(duration=Quarter), // beat 2
+    Note(midi=MidiNumber::new(60).unwrap(), duration=Half), // beat 3, spans to next measure
+  ]
+  let sounds = NoteValueSound::from_note_values(note_values, bpm)
+  let chords = [
+    Chord::{ root: C, quality: Major },
+    Chord::{ root: G, quality: Major },
+  ]
+  let measures = convert_sounds_to_measures(sounds, chords, bpm, 3)
+
+  // Verify we have 3 measures
+  assert_eq(measures.length(), 3)
+
+  // Measure 1 should have 4 notes (3 rests + 1 split note with TieStart)
+  let m1 = measures[1]
+  assert_eq(m1.notes.length(), 4)
+
+  // Last note in measure 1 should be the split note with TieStart
+  let n1_last = m1.notes[3]
+  match n1_last.midi {
+    Some(midi) => assert_eq(midi, 60)
+    None => fail("Expected note, got rest")
+  }
+  assert_eq(n1_last.start_beat, 3.0)
+  assert_eq(n1_last.tie_state, TieStart)
+  // Duration should be 1 beat (Quarter, since it's split at measure boundary)
+  inspect(n1_last.duration, content="Quarter")
+
+  // Measure 2 should have 1 note (the continuation with TieEnd)
+  let m2 = measures[2]
+  assert_eq(m2.notes.length(), 1)
+  let n2_first = m2.notes[0]
+  match n2_first.midi {
+    Some(midi) => assert_eq(midi, 60)
+    None => fail("Expected note, got rest")
+  }
+  assert_eq(n2_first.start_beat, 0.0)
+  assert_eq(n2_first.tie_state, TieEnd)
+  // Duration should be 1 beat (Quarter, the remaining beat)
+  inspect(n2_first.duration, content="Quarter")
+}
+
+///|
+test "convert_sounds_to_measures splits note spanning 3 measures" {
+  let bpm = 120
+
+  // Create a note that spans 3 measures (Whole note starting at beat 2 = 6 beats total needed)
+  // This should split: 2 beats in measure 1 + 4 beats in measure 2 + 0 beats in measure 3
+  // Actually a Whole note is 4 beats. Starting at beat 2 means:
+  // - Measure 1: 2 beats (TieStart)
+  // - Measure 2: 2 beats (TieEnd)
+  // Let's use DottedHalf (3 beats) starting at beat 2:
+  // - Measure 1: 2 beats (TieStart)
+  // - Measure 2: 1 beat (TieEnd)
+  let note_values : Array[NoteValue] = [
+    Rest(duration=Quarter), // beat 0
+    Rest(duration=Quarter), // beat 1
+    Rest(duration=Quarter), // beat 2
+    Rest(duration=Quarter), // beat 3
+    // Measure 1:
+    Rest(duration=Quarter), // beat 0
+    Rest(duration=Quarter), // beat 1
+    Note(midi=MidiNumber::new(64).unwrap(), duration=DottedHalf), // beat 2, 3 beats total
+  ]
+  let sounds = NoteValueSound::from_note_values(note_values, bpm)
+  let chords = [Chord::{ root: C, quality: Major }]
+  let measures = convert_sounds_to_measures(sounds, chords, bpm, 3)
+
+  // Verify we have 3 measures
+  assert_eq(measures.length(), 3)
+
+  // Measure 1 should have 3 notes (2 rests + 1 split note with TieStart)
+  let m1 = measures[1]
+  assert_eq(m1.notes.length(), 3)
+
+  // Last note in measure 1 should be the split note with TieStart
+  let n1_last = m1.notes[2]
+  match n1_last.midi {
+    Some(midi) => assert_eq(midi, 64)
+    None => fail("Expected note, got rest")
+  }
+  assert_eq(n1_last.start_beat, 2.0)
+  assert_eq(n1_last.tie_state, TieStart)
+  // Duration should be 2 beats (Half)
+  inspect(n1_last.duration, content="Half")
+
+  // Measure 2 should have 1 note (the continuation with TieEnd)
+  let m2 = measures[2]
+  assert_eq(m2.notes.length(), 1)
+  let n2_first = m2.notes[0]
+  match n2_first.midi {
+    Some(midi) => assert_eq(midi, 64)
+    None => fail("Expected note, got rest")
+  }
+  assert_eq(n2_first.start_beat, 0.0)
+  assert_eq(n2_first.tie_state, TieEnd)
+  // Duration should be 1 beat (Quarter)
+  inspect(n2_first.duration, content="Quarter")
+}
+
+///|
+test "convert_sounds_to_measures does not split rests" {
+  let bpm = 120
+
+  // Create a rest that would span across measure boundaries if it were a note
+  let note_values : Array[NoteValue] = [
+    Rest(duration=Quarter), // beat 0
+    Rest(duration=Quarter), // beat 1
+    Rest(duration=Quarter), // beat 2
+    Rest(duration=Quarter), // beat 3
+    // Measure 1:
+    Rest(duration=Quarter), // beat 0
+    Rest(duration=Quarter), // beat 1
+    Rest(duration=Quarter), // beat 2
+    Rest(duration=Half), // beat 3, would span if it were a note
+  ]
+  let sounds = NoteValueSound::from_note_values(note_values, bpm)
+  let chords = [Chord::{ root: C, quality: Major }]
+  let measures = convert_sounds_to_measures(sounds, chords, bpm, 3)
+
+  // Verify we have 3 measures
+  assert_eq(measures.length(), 3)
+
+  // Measure 1 should have 4 notes (all rests, no splitting)
+  let m1 = measures[1]
+  assert_eq(m1.notes.length(), 4)
+
+  // Last note in measure 1 should be a rest with TieState::None
+  let n1_last = m1.notes[3]
+  match n1_last.midi {
+    Some(_) => fail("Expected rest, got note")
+    None => ()
+  }
+  assert_eq(n1_last.tie_state, TieState::None)
+
+  // Measure 2 should have no notes (rest wasn't split)
+  let m2 = measures[2]
+  assert_eq(m2.notes.length(), 0)
+}
+
+///|
+test "convert_sounds_to_measures note fitting exactly in measure has no tie" {
+  let bpm = 120
+
+  // Create a note that fits exactly in the measure (no splitting needed)
+  let note_values : Array[NoteValue] = [
+    Rest(duration=Quarter), // beat 0
+    Rest(duration=Quarter), // beat 1
+    Rest(duration=Quarter), // beat 2
+    Rest(duration=Quarter), // beat 3
+    // Measure 1:
+    Note(midi=MidiNumber::new(60).unwrap(), duration=Whole), // beat 0, exactly 4 beats
+  ]
+  let sounds = NoteValueSound::from_note_values(note_values, bpm)
+  let chords = [Chord::{ root: C, quality: Major }]
+  let measures = convert_sounds_to_measures(sounds, chords, bpm, 2)
+
+  // Verify we have 2 measures
+  assert_eq(measures.length(), 2)
+
+  // Measure 1 should have 1 note with TieState::None
+  let m1 = measures[1]
+  assert_eq(m1.notes.length(), 1)
+  let n1 = m1.notes[0]
+  match n1.midi {
+    Some(midi) => assert_eq(midi, 60)
+    None => fail("Expected note, got rest")
+  }
+  assert_eq(n1.tie_state, TieState::None)
+  inspect(n1.duration, content="Whole")
+}

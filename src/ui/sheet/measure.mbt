@@ -29,11 +29,36 @@ pub fn render_measure(
   for note in measure.notes {
     let note_x = x + 60.0 + note.start_beat * (measure_width - 80.0) / 4.0
     match note.midi {
-      Some(_) => {
+      Some(midi) => {
         // Render note
         let note_nodes = render_note(note, note_x, y)
         for node in note_nodes {
           children.push(node)
+        }
+
+        // Render tie arcs if needed
+        let note_y = @music.midi_to_staff_y(midi, y)
+        let stem_up = midi < 71
+        let measure_start_x = x + 60.0 // Account for clef space
+        let measure_end_x = x + measure_width
+        match note.tie_state {
+          @music.TieStart =>
+            children.push(
+              render_tie_start(note_x, note_y, measure_end_x, stem_up),
+            )
+          @music.TieEnd =>
+            children.push(
+              render_tie_end(measure_start_x, note_x, note_y, stem_up),
+            )
+          @music.TieBoth => {
+            children.push(
+              render_tie_end(measure_start_x, note_x, note_y, stem_up),
+            )
+            children.push(
+              render_tie_start(note_x, note_y, measure_end_x, stem_up),
+            )
+          }
+          @music.TieState::None => ()
         }
       }
       None => {

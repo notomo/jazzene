@@ -11,6 +11,15 @@ pub enum Accidental {
 } derive(Eq, Show)
 
 ///|
+/// Tie state for notes that span measure boundaries
+pub enum TieState {
+  None // No tie
+  TieStart // Ties to next measure
+  TieEnd // Tied from previous measure
+  TieBoth // Spans 3+ measures (both in and out)
+} derive(Eq, Show)
+
+///|
 /// Pitch state within a measure for accidental tracking
 enum PitchState {
   Natural
@@ -35,6 +44,7 @@ pub struct MeasureNote {
   duration : NoteDuration
   start_beat : Double // 0.0 to 4.0 for 4/4 time
   accidental : Accidental? // Sharp, Flat, or Natural symbol to display
+  tie_state : TieState // Tie connection state for cross-measure notes
 }
 
 ///|
@@ -117,41 +127,129 @@ pub fn midi_to_staff_y(midi : Int, staff_y : Double) -> Double {
 }
 
 ///|
-/// Helper to create MeasureNotes with accidentals calculated
-fn create_measure_notes_with_accidentals(
-  sounds : Array[NoteValueSound],
-  measure_start_ms : Double,
-  measure_end_ms : Double,
+/// Intermediate representation of a note before accidental calculation
+priv struct RawMeasureNote {
+  midi : Int?
+  duration : NoteDuration
+  start_beat : Double
+  tie_state : TieState
+  measure_index : Int
+}
+
+///|
+/// Split a sound across measure boundaries if needed
+fn split_sound_across_measures(
+  sound : NoteValueSound,
   measure_duration_ms : Double,
-) -> Array[MeasureNote] {
-  // Collect raw note data with timing
-  let raw_notes : Array[(Int?, NoteDuration, Double)] = []
-  for sound in sounds {
-    let sound_start = sound.start_time.to_milliseconds()
-    if sound_start >= measure_start_ms && sound_start < measure_end_ms {
-      let beat_offset = (sound_start - measure_start_ms) /
-        (measure_duration_ms / 4.0)
-      raw_notes.push(
-        (
-          sound.note_value.midi().map(fn(m) { m.value }),
-          sound.note_value.note_duration(),
-          beat_offset,
-        ),
-      )
-    }
+  measure_count : Int,
+) -> Array[RawMeasureNote] {
+  let result : Array[RawMeasureNote] = []
+  let sound_start_ms = sound.start_time.to_milliseconds()
+  let beat_duration_ms = measure_duration_ms / 4.0
+
+  // Calculate which measure this sound starts in
+  let start_measure_index = (sound_start_ms / measure_duration_ms).to_int()
+
+  // If sound starts beyond our measures, skip it
+  if start_measure_index >= measure_count {
+    return result
   }
 
-  // Sort by start_beat to ensure correct accidental calculation order
-  raw_notes.sort_by(fn(a, b) { a.2.compare(b.2) })
+  // Calculate start beat within the measure
+  let measure_start_ms = start_measure_index.to_double() * measure_duration_ms
+  let start_beat = (sound_start_ms - measure_start_ms) / beat_duration_ms
 
-  // Calculate accidentals with pitch state tracking
+  // Get MIDI and duration
+  let midi = sound.note_value.midi().map(fn(m) { m.value })
+  let total_beats = sound.note_value.note_duration().to_beats()
+
+  // Rests cannot be tied - don't split them
+  match midi {
+    None => {
+      result.push(RawMeasureNote::{
+        midi: None,
+        duration: sound.note_value.note_duration(),
+        start_beat,
+        tie_state: TieState::None,
+        measure_index: start_measure_index,
+      })
+      return result
+    }
+    Some(_) => ()
+  }
+
+  // Check if note spans across measure boundaries
+  let beats_until_measure_end = 4.0 - start_beat
+  if total_beats <= beats_until_measure_end {
+    // Note fits in this measure
+    result.push(RawMeasureNote::{
+      midi,
+      duration: sound.note_value.note_duration(),
+      start_beat,
+      tie_state: TieState::None,
+      measure_index: start_measure_index,
+    })
+  } else {
+    // Note spans measures - split it
+    let mut remaining_beats = total_beats
+    let mut current_measure = start_measure_index
+    let mut current_beat = start_beat
+    let mut is_first = true
+    while remaining_beats > 0.0 && current_measure < measure_count {
+      let beats_until_end = 4.0 - current_beat
+      if remaining_beats <= beats_until_end {
+        // Remaining part fits in this measure
+        let tie_state : TieState = if is_first {
+          TieState::None
+        } else {
+          TieEnd
+        }
+        result.push(RawMeasureNote::{
+          midi,
+          duration: NoteDuration::from_beats(remaining_beats),
+          start_beat: current_beat,
+          tie_state,
+          measure_index: current_measure,
+        })
+        remaining_beats = 0.0
+      } else {
+        // Spans to next measure
+        let tie_state : TieState = if is_first { TieStart } else { TieBoth }
+        result.push(RawMeasureNote::{
+          midi,
+          duration: NoteDuration::from_beats(beats_until_end),
+          start_beat: current_beat,
+          tie_state,
+          measure_index: current_measure,
+        })
+        remaining_beats = remaining_beats - beats_until_end
+        current_measure = current_measure + 1
+        current_beat = 0.0
+        is_first = false
+      }
+    }
+  }
+  result
+}
+
+///|
+/// Calculate accidentals for a list of raw notes in a single measure
+/// TieEnd notes don't get accidentals (pitch already established)
+fn apply_accidentals_to_notes(
+  raw_notes : Array[RawMeasureNote],
+) -> Array[MeasureNote] {
+  // Sort by start_beat to ensure correct accidental calculation order
+  raw_notes.sort_by(fn(a, b) { a.start_beat.compare(b.start_beat) })
   let pitch_states : Map[Int, PitchState] = {}
   let measure_notes : Array[MeasureNote] = []
   for note in raw_notes {
-    let (midi_opt, duration, start_beat) = note
-    let accidental = match midi_opt {
+    let accidental : Accidental? = match note.midi {
       Some(midi) => {
-        let acc = calculate_accidental(midi, pitch_states)
+        // TieEnd notes don't show accidentals (pitch established in previous measure)
+        let acc : Accidental? = match note.tie_state {
+          TieEnd | TieBoth => None
+          _ => calculate_accidental(midi, pitch_states)
+        }
         // Update pitch state after calculating accidental
         let pitch_class = midi % 12
         pitch_states[pitch_class] = midi_to_required_state(midi)
@@ -160,10 +258,11 @@ fn create_measure_notes_with_accidentals(
       None => None
     }
     measure_notes.push(MeasureNote::{
-      midi: midi_opt,
-      duration,
-      start_beat,
+      midi: note.midi,
+      duration: note.duration,
+      start_beat: note.start_beat,
       accidental,
+      tie_state: note.tie_state,
     })
   }
   measure_notes
@@ -172,6 +271,7 @@ fn create_measure_notes_with_accidentals(
 ///|
 /// Convert sounds array to measures array
 /// measure_count specifies the total number of measures (including leading rest)
+/// Notes that span across measure boundaries are split with appropriate tie states
 pub fn convert_sounds_to_measures(
   sounds : Array[NoteValueSound],
   chords : Array[Chord],
@@ -179,24 +279,40 @@ pub fn convert_sounds_to_measures(
   measure_count : Int,
 ) -> Array[Measure] {
   let measure_duration_ms = 60000.0 * 4.0 / bpm.to_double()
-  let measures = []
 
-  // Account for leading rest (1 measure = 4 beats)
-  let leading_rest_duration = measure_duration_ms
+  // Step 1: Split all sounds across measure boundaries
+  let all_raw_notes : Array[RawMeasureNote] = []
+  for sound in sounds {
+    let split_notes = split_sound_across_measures(
+      sound, measure_duration_ms, measure_count,
+    )
+    for note in split_notes {
+      all_raw_notes.push(note)
+    }
+  }
 
-  // Create leading rest measure with accidentals
-  let leading_rest_notes = create_measure_notes_with_accidentals(
-    sounds, 0.0, leading_rest_duration, measure_duration_ms,
-  )
+  // Step 2: Group raw notes by measure index
+  let notes_by_measure : Map[Int, Array[RawMeasureNote]] = {}
+  for note in all_raw_notes {
+    match notes_by_measure.get(note.measure_index) {
+      Some(arr) => arr.push(note)
+      None => notes_by_measure[note.measure_index] = [note]
+    }
+  }
+
+  // Step 3: Create measures with accidentals applied
+  let measures : Array[Measure] = []
 
   // Add leading rest measure with dummy chord (always C major to avoid confusion)
   let dummy_chord = Chord::{ root: ChordRoot::C, quality: Major }
+  let leading_rest_raw = notes_by_measure.get(0).unwrap_or([])
+  let leading_rest_notes = apply_accidentals_to_notes(leading_rest_raw)
   measures.push(Measure::{
     chord: dummy_chord,
     notes: leading_rest_notes,
     start_time: Duration::from_milliseconds(0.0),
     duration: Duration::from_milliseconds(measure_duration_ms),
-    measure_index: 0, // Leading rest is measure 0
+    measure_index: 0,
   })
 
   // Calculate number of chord measures needed (total - 1 for leading rest)
@@ -207,26 +323,22 @@ pub fn convert_sounds_to_measures(
     return measures
   }
 
-  // Create measures, cycling through chords as needed
-  for i = 0; i < chord_measures_needed; {
+  // Create chord measures
+  for i = 0; i < chord_measures_needed; i = i + 1 {
     let chord = chords[i % chords.length()]
-    // Offset measure start by leading rest duration
-    let measure_start = leading_rest_duration +
-      i.to_double() * measure_duration_ms
-    let measure_end = measure_start + measure_duration_ms
+    let measure_index = i + 1
+    let measure_start = measure_index.to_double() * measure_duration_ms
 
-    // Create measure notes with accidentals
-    let measure_notes = create_measure_notes_with_accidentals(
-      sounds, measure_start, measure_end, measure_duration_ms,
-    )
+    // Get raw notes for this measure and apply accidentals
+    let raw_notes = notes_by_measure.get(measure_index).unwrap_or([])
+    let measure_notes = apply_accidentals_to_notes(raw_notes)
     measures.push(Measure::{
       chord,
       notes: measure_notes,
       start_time: Duration::from_milliseconds(measure_start),
       duration: Duration::from_milliseconds(measure_duration_ms),
-      measure_index: i + 1, // Offset by 1 to account for leading rest
+      measure_index,
     })
-    continue i + 1
   }
   measures
 }

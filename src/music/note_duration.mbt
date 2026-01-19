@@ -23,3 +23,23 @@ pub fn NoteDuration::to_beats(self : NoteDuration) -> Double {
     DottedHalf => 3.0
   }
 }
+
+///|
+/// Convert beats to the closest note duration
+pub fn NoteDuration::from_beats(beats : Double) -> NoteDuration {
+  if beats <= 0.625 {
+    Eighth
+  } else if beats <= 0.875 {
+    DottedEighth
+  } else if beats <= 1.25 {
+    Quarter
+  } else if beats <= 1.75 {
+    DottedQuarter
+  } else if beats <= 2.5 {
+    Half
+  } else if beats <= 3.5 {
+    DottedHalf
+  } else {
+    Whole
+  }
+}
