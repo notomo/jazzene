@@ -94,32 +94,43 @@ fn decide_midi_number(
 }
 
 ///|
+/// Convert duration weights to an array of (weight, duration) pairs
+fn DurationWeights::to_choices(
+  self : DurationWeights,
+) -> Array[(Int, NoteDuration)] {
+  [
+    (self.eighth, Eighth),
+    (self.dotted_eighth, DottedEighth),
+    (self.quarter, Quarter),
+    (self.dotted_quarter, DottedQuarter),
+    (self.half, Half),
+    (self.dotted_half, DottedHalf),
+    (self.whole, Whole),
+  ]
+}
+
+///|
+/// Select a random item from weighted choices
+fn[T] weighted_choice(choices : Array[(Int, T)], rand : @random.Rand) -> T {
+  let total = choices.iter().fold(init=0, fn(acc, pair) { acc + pair.0 })
+  let r = rand.int(limit=total)
+  let mut cumulative = 0
+  for _, pair in choices {
+    cumulative = cumulative + pair.0
+    if r < cumulative {
+      return pair.1
+    }
+  }
+  choices[choices.length() - 1].1
+}
+
+///|
 /// Generate a random duration based on weights
 fn random_duration(
   weights : DurationWeights,
   rand : @random.Rand,
 ) -> NoteDuration {
-  let total = weights.eighth +
-    weights.dotted_eighth +
-    weights.quarter +
-    weights.dotted_quarter +
-    weights.half +
-    weights.dotted_half +
-    weights.whole
-  let r = rand.int(limit=total)
-  let mut threshold = weights.eighth
-  guard r >= threshold else { return Eighth }
-  threshold = threshold + weights.dotted_eighth
-  guard r >= threshold else { return DottedEighth }
-  threshold = threshold + weights.quarter
-  guard r >= threshold else { return Quarter }
-  threshold = threshold + weights.dotted_quarter
-  guard r >= threshold else { return DottedQuarter }
-  threshold = threshold + weights.half
-  guard r >= threshold else { return Half }
-  threshold = threshold + weights.dotted_half
-  guard r >= threshold else { return DottedHalf }
-  Whole
+  weighted_choice(weights.to_choices(), rand)
 }
 
 ///|
