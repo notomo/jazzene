@@ -55,17 +55,11 @@ pub fn GeneratorSettings::default(
 /// Convert an integer seed to a 32-byte seed for ChaCha8 RNG
 /// The seed is distributed across the 32 bytes using little-endian encoding
 fn seed_to_bytes(seed : Int) -> Bytes {
-  let seed_bytes = FixedArray::make(32, b'\x00')
   let seed_uint = seed.reinterpret_as_uint()
-  // Write the seed as 8 consecutive 32-bit integers (little-endian)
-  // This ensures good distribution even for small seed values
-  for i = 0; i < 8; i = i + 1 {
-    seed_bytes.unsafe_write_uint32_le(
-      i * 4,
-      seed_uint + i.reinterpret_as_uint(),
-    )
-  }
-  seed_bytes.unsafe_reinterpret_as_bytes()
+  Bytes::makei(32, fn(i) {
+    let value = seed_uint + (i / 4).reinterpret_as_uint()
+    (value >> (i % 4 * 8)).to_byte()
+  })
 }
 
 ///|
