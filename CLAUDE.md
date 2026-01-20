@@ -67,7 +67,7 @@ let doubled = @signal.memo(fn() { count.get() * 2 })
 ])
 ```
 
-**Key Luna imports** (from `src/moon.pkg.json`):
+**Key Luna imports** (from `src/moon.pkg`):
 - `mizchi/luna/luna/signal` → Signal primitives (`@signal.*`)
 - `mizchi/luna/platform/dom/element` (alias `@dom`) → DOM node constructors
 - `mizchi/js/browser/dom` (alias `@js_dom`) → Browser APIs (document, getElementById)
@@ -77,7 +77,7 @@ let doubled = @signal.memo(fn() { count.get() * 2 })
 ```
 src/
 ├── lib.mbt          # Main entry point (state management)
-├── moon.pkg.json    # Main package config
+├── moon.pkg    # Main package config
 ├── global.css       # Tailwind imports
 ├── music/           # Music theory package
 ├── audio/           # Audio synthesis package
@@ -92,7 +92,7 @@ target/js/           # MoonBit build output (gitignored)
 
 ### Package Dependency Rules
 
-**CRITICAL**: The main package (`src/moon.pkg.json`) should ONLY depend on:
+**CRITICAL**: The main package (`src/moon.pkg`) should ONLY depend on:
 - `internal/jazzene/music` - Music theory and primitives
 - `internal/jazzene/audio` - Audio synthesis and Web Audio API
 - `internal/jazzene/ui` - UI components and browser APIs
@@ -157,6 +157,6 @@ Apply utility classes directly in MoonBit:
 
 - **Target Platform**: This project only targets JavaScript (`preferred-target: "js"`)
 - **No Hot Reload for MoonBit**: Changes to `.mbt` files require full rebuild (handled by vite-plugin-moonbit)
-- **Package Format**: ESM only (`"type": "module"` in package.json, `"format": "esm"` in moon.pkg.json)
-- **Main Entry**: `src/moon.pkg.json` has `"is-main": true` - this package exports the main function
+- **Package Format**: ESM only (`"type": "module"` in package.json, `"format": "esm"` in moon.pkg)
+- **Main Entry**: `src/moon.pkg` has `"is-main": true` - this package exports the main function
 - **Web Audio API**: All Web Audio API access must go through `src/audio/web_audio_api/`. Other packages should use wrappers in `src/audio/`. Never use raw JavaScript FFI for Web Audio APIs outside this package.
