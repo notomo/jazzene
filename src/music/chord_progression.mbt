@@ -7,10 +7,10 @@ pub struct Chord {
 
 ///|
 /// Get MIDI numbers for chord tones
-pub fn Chord::tones(self : Chord) -> Array[Int] {
+pub fn Chord::tones(self : Chord) -> Array[MidiNumber] {
   let root_midi = self.root.midi()
   let intervals = self.quality.intervals()
-  intervals.map(fn(interval) { root_midi + interval })
+  intervals.filter_map(fn(interval) { MidiNumber::new(root_midi + interval) })
 }
 
 ///|

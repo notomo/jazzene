@@ -1,8 +1,4 @@
 ///|
-/// Type alias for a generator function that produces NoteValues
-pub type NoteValueGenerator = () -> NoteValue
-
-///|
 /// Weights for random duration selection
 pub(all) struct DurationWeights {
   eighth : Int
@@ -128,25 +124,17 @@ fn random_duration(
 
 ///|
 /// Generate a random MIDI number from chord tones
-/// Uses chord tones across multiple octaves (C3-C6, MIDI 48-84)
+/// Uses chord tones across multiple octaves
 fn random_midi_from_chord(chord : Chord, rand : @random.Rand) -> MidiNumber? {
   let base_tones = chord.tones()
-  guard base_tones.length() > 0 else { return MidiNumber::new(60) } // Fallback to middle C
-  // Extend to multiple octaves (octaves 3-5)
-  let extended_tones : Array[Int] = [-12, 0, 12]
+  let extended_tones = [-1, 0, 1]
     .iter()
     .flat_map(fn(octave_offset) {
       base_tones
       .iter()
-      .filter_map(fn(tone) {
-        let midi = tone + octave_offset
-        match midi >= 48 && midi <= 84 {
-          true => Some(midi)
-          false => None
-        }
-      })
+      .filter_map(fn(tone) { tone.shift_octave(octave_offset) })
     })
     .collect()
   let index = rand.int(limit=extended_tones.length())
-  MidiNumber::new(extended_tones[index])
+  Some(extended_tones[index])
 }

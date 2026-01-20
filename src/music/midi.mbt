@@ -15,6 +15,16 @@ pub fn MidiNumber::new(value : Int) -> MidiNumber? {
 }
 
 ///|
+/// Shift by octaves (positive = up, negative = down)
+/// Returns None if result would be outside valid MIDI range (0-127)
+pub fn MidiNumber::shift_octave(
+  self : MidiNumber,
+  octaves : Int,
+) -> MidiNumber? {
+  MidiNumber::new(self.value + octaves * 12)
+}
+
+///|
 /// Convert MIDI number to frequency in Hz
 /// Uses the formula: f = 440 * 2^((n-69)/12)
 /// where MIDI 69 = A4 = 440 Hz

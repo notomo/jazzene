@@ -1,4 +1,8 @@
 ///|
+/// Type alias for a generator function that produces NoteValues
+pub type NoteValueGenerator = () -> NoteValue
+
+///|
 /// Generate improvisation from a note value generator
 /// Returns note values (notes and rests) that fit within the specified measures
 /// measure_count specifies the total number of measures (including leading rest)

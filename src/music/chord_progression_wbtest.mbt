@@ -55,5 +55,9 @@ test "parse chord progression including invalid" {
 ///|
 test "Chord tones" {
   let cmaj7 = Chord::{ root: C, quality: Major7 }
-  inspect(cmaj7.tones(), content="[60, 64, 67, 71]") // C E G B
+  // C E G B
+  inspect(
+    cmaj7.tones(),
+    content="[{value: 60}, {value: 64}, {value: 67}, {value: 71}]",
+  )
 }
