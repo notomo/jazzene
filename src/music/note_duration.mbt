@@ -43,3 +43,11 @@ pub fn NoteDuration::from_beats(beats : Double) -> NoteDuration {
     Whole
   }
 }
+
+///|
+/// Find the largest duration that fits within remaining_beats
+pub fn NoteDuration::fit(remaining_beats : Double) -> NoteDuration? {
+  [Whole, DottedHalf, Half, DottedQuarter, Quarter, DottedEighth, Eighth]
+  .iter()
+  .find_first(fn(d) { d.to_beats() <= remaining_beats + 0.001 })
+}

@@ -21,25 +21,17 @@ pub fn generate_improvisation(
       note_values.push(note_value)
       continue current_beats + beats
     }
-    match trim_to_fit(remaining, note_value) {
-      Some(trimmed) => note_values.push(trimmed)
+    match NoteDuration::fit(remaining) {
+      Some(fitted) => {
+        let trimmed = match note_value {
+          Note(midi~, ..) => NoteValue::Note(midi~, duration=fitted)
+          Rest(..) => NoteValue::Rest(duration=fitted)
+        }
+        note_values.push(trimmed)
+      }
       None => ()
     }
     break
   }
   note_values
-}
-
-///|
-/// Trim a note value to fit within remaining beats
-fn trim_to_fit(remaining_beats : Double, note_value : NoteValue) -> NoteValue? {
-  [Whole, DottedHalf, Half, DottedQuarter, Quarter, DottedEighth, Eighth]
-  .iter()
-  .find_first(fn(d) { d.to_beats() <= remaining_beats + 0.001 })
-  .map(fn(duration) {
-    match note_value {
-      Note(midi~, ..) => NoteValue::Note(midi~, duration~)
-      Rest(..) => NoteValue::Rest(duration~)
-    }
-  })
 }
