@@ -26,7 +26,6 @@ pub fn generate_improvisation(
         current_beats = current_beats + beats
       }
       false => {
-        // Try to trim the note to fit
         match trim_to_fit(remaining_beats, note_value) {
           Some(trimmed) => {
             note_values.push(trimmed)
@@ -42,23 +41,15 @@ pub fn generate_improvisation(
 }
 
 ///|
-/// Find the largest duration that fits within remaining beats
-fn find_fitting_duration(remaining_beats : Double) -> NoteDuration? {
-  // Check durations from largest to smallest
+/// Trim a note value to fit within remaining beats
+fn trim_to_fit(remaining_beats : Double, note_value : NoteValue) -> NoteValue? {
   [Whole, DottedHalf, Half, DottedQuarter, Quarter, DottedEighth, Eighth]
   .iter()
   .find_first(fn(d) { d.to_beats() <= remaining_beats + 0.001 })
-}
-
-///|
-/// Trim a note value to fit within remaining beats
-fn trim_to_fit(remaining_beats : Double, note_value : NoteValue) -> NoteValue? {
-  match find_fitting_duration(remaining_beats) {
-    Some(duration) =>
-      match note_value {
-        Note(midi~, ..) => Some(NoteValue::Note(midi~, duration~))
-        Rest(..) => Some(NoteValue::Rest(duration~))
-      }
-    None => None
-  }
+  .map(fn(duration) {
+    match note_value {
+      Note(midi~, ..) => NoteValue::Note(midi~, duration~)
+      Rest(..) => NoteValue::Rest(duration~)
+    }
+  })
 }
