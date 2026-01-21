@@ -20,13 +20,12 @@ pub fn generate_improvisation(
     if beats <= remaining {
       note_values.push(note_value)
       continue current_beats + beats
-    } else {
-      match trim_to_fit(remaining, note_value) {
-        Some(trimmed) => note_values.push(trimmed)
-        None => ()
-      }
-      break
     }
+    match trim_to_fit(remaining, note_value) {
+      Some(trimmed) => note_values.push(trimmed)
+      None => ()
+    }
+    break
   }
   note_values
 }

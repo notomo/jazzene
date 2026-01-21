@@ -7,10 +7,9 @@ pub struct MidiNumber {
 ///|
 /// Create MidiNumber with validation
 pub fn MidiNumber::new(value : Int) -> MidiNumber? {
-  if value >= 0 && value <= 127 {
-    Some(MidiNumber::{ value, })
-  } else {
-    None
+  match value {
+    0..=127 => Some(MidiNumber::{ value, })
+    _ => None
   }
 }
 
