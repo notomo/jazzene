@@ -17,8 +17,8 @@ pub fn NoteValue::note_duration(self : NoteValue) -> NoteDuration {
 ///|
 /// Get duration from either Note or Rest with BPM conversion
 pub fn NoteValue::duration(self : NoteValue, bpm : Int) -> Duration {
-  let ms_per_beat = 60000.0 / bpm.to_double()
-  (self.note_duration().to_beats() * ms_per_beat) |> Duration::from_milliseconds
+  (self.note_duration().to_beats() * ms_per_beat(bpm))
+  |> Duration::from_milliseconds
 }
 
 ///|

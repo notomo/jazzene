@@ -278,7 +278,7 @@ pub fn convert_sounds_to_measures(
   bpm : Int,
   measure_count : Int,
 ) -> Array[Measure] {
-  let measure_duration_ms = 60000.0 * 4.0 / bpm.to_double()
+  let measure_duration_ms = ms_per_measure(bpm)
 
   // Step 1: Split all sounds across measure boundaries
   let all_raw_notes : Array[RawMeasureNote] = []

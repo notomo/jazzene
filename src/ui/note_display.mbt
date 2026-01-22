@@ -263,7 +263,7 @@ fn draw_notes(
 
   // Draw horizontal lines for each measure
   // In 4/4 time, one measure = 4 quarter notes
-  let measure_ms = (60000 * 4 / bpm).to_double() // (60000ms/BPM) * 4 beats
+  let measure_ms = @music.ms_per_measure(bpm)
 
   // Find the first measure line visible in the window
   let first_measure = (current_pos / measure_ms).to_int()

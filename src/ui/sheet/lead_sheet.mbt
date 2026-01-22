@@ -11,7 +11,7 @@ pub fn lead_sheet(
   // Calculate current measure index
   let current_measure_index = @signal.memo(fn() {
     let pos = playback_position.get().to_milliseconds()
-    let measure_duration_ms = 60000.0 * 4.0 / bpm.get().to_double()
+    let measure_duration_ms = @music.ms_per_measure(bpm.get())
     if measure_duration_ms > 0.0 {
       // Leading rest is measure 0, chord measures start at 1
       let measure_idx = (pos / measure_duration_ms).to_int()
