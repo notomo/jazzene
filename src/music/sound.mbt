@@ -43,8 +43,6 @@ pub fn NoteValueSound::in_range(
 ///|
 /// Calculate total duration based on BPM and measure count (4/4 time signature)
 pub fn calculate_total_duration(bpm~ : Int, measure_count~ : Int) -> Duration {
-  // 1 measure = 4 beats, 1 beat = 60s / bpm
-  // total = measure_count * 4 * (60 / bpm) seconds
   Duration::from_milliseconds(measure_count.to_double() * ms_per_measure(bpm))
 }
 

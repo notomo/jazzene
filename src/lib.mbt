@@ -6,21 +6,24 @@ fn main {
   let seed = @signal.signal(0)
   let measure_count = @signal.signal(8)
   let chord_parse_error : @signal.Signal[String?] = @signal.signal(None)
-  let sounds = make_sounds(
-    raw_chord_progression, seed, measure_count, bpm, chord_parse_error,
-  )
+  let chords = @signal.memo(fn() {
+    match @music.parse_chord_progression(raw_chord_progression.get()) {
+      Ok(c) => {
+        chord_parse_error.set(None)
+        c
+      }
+      Err(error_msg) => {
+        chord_parse_error.set(Some(error_msg))
+        []
+      }
+    }
+  })
+  let sounds = make_sounds(chords, seed, measure_count, bpm)
   let total_duration = @signal.memo(fn() {
     @music.calculate_total_duration(
       bpm=bpm.get(),
       measure_count=measure_count.get(),
     )
-  })
-  // Parse chord progression into chords
-  let chords = @signal.memo(fn() {
-    match @music.parse_chord_progression(raw_chord_progression.get()) {
-      Ok(c) => c
-      Err(_) => []
-    }
   })
   // Convert to measures for visualization
   let measures = @signal.memo(fn() {
@@ -55,23 +58,18 @@ fn main {
 
 ///|
 fn make_sounds(
-  raw_chord_progression : @signal.Signal[String],
+  chords : () -> Array[@music.Chord],
   seed : @signal.Signal[Int],
   measure_count : @signal.Signal[Int],
   bpm : @signal.Signal[Int],
-  chord_parse_error : @signal.Signal[String?],
 ) -> @signal.Signal[Array[@music.NoteValueSound]] {
   let note_values = @signal.memo(fn() {
-    match @music.parse_chord_progression(raw_chord_progression.get()) {
-      Ok(chords) => {
-        chord_parse_error.set(None)
-        let gen_settings = @music.GeneratorSettings::default(chords, seed.get())
+    match chords() {
+      [] => []
+      xs => {
+        let gen_settings = @music.GeneratorSettings::default(xs, seed.get())
         let generator = @music.create_note_value_generator(gen_settings)
         @music.generate_improvisation(generator, measure_count.get())
-      }
-      Err(error_msg) => {
-        chord_parse_error.set(Some(error_msg))
-        []
       }
     }
   })
