@@ -29,3 +29,15 @@ pub fn NoteValue::midi(self : NoteValue) -> MidiNumber? {
     Rest(..) => None
   }
 }
+
+///|
+/// Create a new NoteValue with a different duration
+pub fn NoteValue::with_duration(
+  self : NoteValue,
+  duration : NoteDuration,
+) -> NoteValue {
+  match self {
+    Note(midi~, ..) => Note(midi~, duration~)
+    Rest(..) => Rest(duration~)
+  }
+}

@@ -21,16 +21,9 @@ pub fn generate_improvisation(
       note_values.push(note_value)
       continue current_beats + beats
     }
-    match NoteDuration::fit(remaining) {
-      Some(fitted) => {
-        let trimmed = match note_value {
-          Note(midi~, ..) => NoteValue::Note(midi~, duration=fitted)
-          Rest(..) => NoteValue::Rest(duration=fitted)
-        }
-        note_values.push(trimmed)
-      }
-      None => ()
-    }
+    let _ = NoteDuration::fit(remaining).map(fn(fitted) {
+      note_values.push(note_value.with_duration(fitted))
+    })
     break
   }
   note_values
