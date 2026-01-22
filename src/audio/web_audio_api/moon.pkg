@@ -1,4 +1,6 @@
-import { "mizchi/js/core" as @js }
+import {
+  "mizchi/js/core" as @js,
+}
 
 options(
   "is-main": false,
