@@ -41,12 +41,6 @@ pub fn NoteValueSound::in_range(
 }
 
 ///|
-/// Calculate total duration based on BPM and measure count (4/4 time signature)
-pub fn calculate_total_duration(bpm~ : Int, measure_count~ : Int) -> Duration {
-  Duration::from_milliseconds(measure_count.to_double() * ms_per_measure(bpm))
-}
-
-///|
 /// Calculate which notes are currently playing at a given playback position
 pub fn calculate_playing_notes(
   sounds : Array[NoteValueSound],
