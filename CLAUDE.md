@@ -153,6 +153,37 @@ Apply utility classes directly in MoonBit:
 @dom.div([], class="text-3xl flex flex-col gap-3")
 ```
 
+## Coding Style
+
+### Prefer Iterator Methods Over For Loops
+
+When processing collections, prefer iterator methods (`map`, `fold`, `filter`, etc.) over `for` loops with mutable accumulation:
+
+```moonbit
+// Preferred: Using map + flatten for flat_map pattern
+sounds.map(fn(sound) { process_sound(sound) }).flatten()
+
+// Preferred: Using fold for accumulation
+notes.iter().fold(init=Map::new(), fn(acc, note) {
+  acc[note.key] = note.value
+  acc
+})
+
+// Preferred: Using makei for index-based array creation
+Array::makei(count, fn(i) { create_item(i) })
+
+// Avoid: Mutable accumulation with for loops
+let result = []
+for item in items {
+  result.push(transform(item))
+}
+```
+
+**When to use `for` loops:**
+- Complex control flow with `continue`/`break` that cannot be expressed with iterators
+- While-style loops with mutable state that doesn't fit iterator patterns
+- Performance-critical code where iterator overhead matters
+
 ## Important Notes
 
 - **Target Platform**: This project only targets JavaScript (`preferred-target: "js"`)

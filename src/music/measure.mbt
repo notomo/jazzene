@@ -149,6 +149,111 @@ priv struct TiedNote {
 }
 
 ///|
+/// Split a single sound into positioned notes at measure boundaries
+fn split_sound(
+  sound : NoteValueSound,
+  measure_duration_ms : Double,
+  measure_count : Int,
+) -> Array[PositionedNote] {
+  let beat_duration_ms = measure_duration_ms / 4.0
+  let sound_start_ms = sound.start_time.to_milliseconds()
+
+  // Calculate which measure this sound starts in
+  let start_measure_index = (sound_start_ms / measure_duration_ms).to_int()
+
+  // If sound starts beyond our measures, skip it
+  if start_measure_index >= measure_count {
+    return []
+  }
+
+  // Calculate start beat within the measure
+  let measure_start_ms = start_measure_index.to_double() * measure_duration_ms
+  let start_beat = (sound_start_ms - measure_start_ms) / beat_duration_ms
+
+  // Get MIDI and duration
+  let midi = sound.note_value.midi().map(fn(m) { m.value })
+  let total_beats = sound.note_value.note_duration().to_beats()
+
+  // Rests cannot be tied - don't split them
+  match midi {
+    None =>
+      return [
+        PositionedNote::{
+          midi: None,
+          duration: sound.note_value.note_duration(),
+          start_beat,
+          measure_index: start_measure_index,
+          split_piece: 0,
+          total_pieces: 1,
+        },
+      ]
+    Some(_) => ()
+  }
+
+  // Check if note spans across measure boundaries
+  let beats_until_measure_end = 4.0 - start_beat
+  if total_beats <= beats_until_measure_end {
+    // Note fits in this measure
+    return [
+      PositionedNote::{
+        midi,
+        duration: sound.note_value.note_duration(),
+        start_beat,
+        measure_index: start_measure_index,
+        split_piece: 0,
+        total_pieces: 1,
+      },
+    ]
+  }
+
+  // Note spans measures - collect split pieces
+  let pieces = collect_split_pieces(
+    total_beats, start_measure_index, start_beat, measure_count,
+  )
+
+  // Create positioned notes with split info
+  let total_pieces = pieces.length()
+  pieces.mapi(fn(split_piece, piece) {
+    let (measure_idx, beat, beats) = piece
+    PositionedNote::{
+      midi,
+      duration: NoteDuration::from_beats(beats),
+      start_beat: beat,
+      measure_index: measure_idx,
+      split_piece,
+      total_pieces,
+    }
+  })
+}
+
+///|
+/// Collect split pieces for a note spanning multiple measures
+fn collect_split_pieces(
+  total_beats : Double,
+  start_measure : Int,
+  start_beat : Double,
+  measure_count : Int,
+) -> Array[(Int, Double, Double)] {
+  let pieces : Array[(Int, Double, Double)] = []
+  let mut remaining_beats = total_beats
+  let mut current_measure = start_measure
+  let mut current_beat = start_beat
+  while remaining_beats > 0.0 && current_measure < measure_count {
+    let beats_until_end = 4.0 - current_beat
+    if remaining_beats <= beats_until_end {
+      pieces.push((current_measure, current_beat, remaining_beats))
+      remaining_beats = 0.0
+    } else {
+      pieces.push((current_measure, current_beat, beats_until_end))
+      remaining_beats = remaining_beats - beats_until_end
+      current_measure = current_measure + 1
+      current_beat = 0.0
+    }
+  }
+  pieces
+}
+
+///|
 /// Step 1: Split sounds into positioned notes at measure boundaries
 /// Does not calculate tie states - only records split information
 fn split_to_positioned_notes(
@@ -156,90 +261,9 @@ fn split_to_positioned_notes(
   measure_duration_ms : Double,
   measure_count : Int,
 ) -> Array[PositionedNote] {
-  let result : Array[PositionedNote] = []
-  let beat_duration_ms = measure_duration_ms / 4.0
-  for sound in sounds {
-    let sound_start_ms = sound.start_time.to_milliseconds()
-
-    // Calculate which measure this sound starts in
-    let start_measure_index = (sound_start_ms / measure_duration_ms).to_int()
-
-    // If sound starts beyond our measures, skip it
-    if start_measure_index >= measure_count {
-      continue
-    }
-
-    // Calculate start beat within the measure
-    let measure_start_ms = start_measure_index.to_double() * measure_duration_ms
-    let start_beat = (sound_start_ms - measure_start_ms) / beat_duration_ms
-
-    // Get MIDI and duration
-    let midi = sound.note_value.midi().map(fn(m) { m.value })
-    let total_beats = sound.note_value.note_duration().to_beats()
-
-    // Rests cannot be tied - don't split them
-    match midi {
-      None => {
-        result.push(PositionedNote::{
-          midi: None,
-          duration: sound.note_value.note_duration(),
-          start_beat,
-          measure_index: start_measure_index,
-          split_piece: 0,
-          total_pieces: 1,
-        })
-        continue
-      }
-      Some(_) => ()
-    }
-
-    // Check if note spans across measure boundaries
-    let beats_until_measure_end = 4.0 - start_beat
-    if total_beats <= beats_until_measure_end {
-      // Note fits in this measure
-      result.push(PositionedNote::{
-        midi,
-        duration: sound.note_value.note_duration(),
-        start_beat,
-        measure_index: start_measure_index,
-        split_piece: 0,
-        total_pieces: 1,
-      })
-    } else {
-      // Note spans measures - split it and count pieces first
-      let pieces : Array[(Int, Double, Double)] = [] // (measure_index, start_beat, beats)
-      let mut remaining_beats = total_beats
-      let mut current_measure = start_measure_index
-      let mut current_beat = start_beat
-      while remaining_beats > 0.0 && current_measure < measure_count {
-        let beats_until_end = 4.0 - current_beat
-        if remaining_beats <= beats_until_end {
-          pieces.push((current_measure, current_beat, remaining_beats))
-          remaining_beats = 0.0
-        } else {
-          pieces.push((current_measure, current_beat, beats_until_end))
-          remaining_beats = remaining_beats - beats_until_end
-          current_measure = current_measure + 1
-          current_beat = 0.0
-        }
-      }
-
-      // Create positioned notes with split info
-      let total_pieces = pieces.length()
-      for split_piece, piece in pieces {
-        let (measure_idx, beat, beats) = piece
-        result.push(PositionedNote::{
-          midi,
-          duration: NoteDuration::from_beats(beats),
-          start_beat: beat,
-          measure_index: measure_idx,
-          split_piece,
-          total_pieces,
-        })
-      }
-    }
-  }
-  result
+  sounds
+  .map(fn(sound) { split_sound(sound, measure_duration_ms, measure_count) })
+  .flatten()
 }
 
 ///|
@@ -268,14 +292,15 @@ fn calculate_tie_states(notes : Array[PositionedNote]) -> Array[TiedNote] {
 ///|
 /// Step 3: Group notes by measure index
 fn group_by_measure(notes : Array[TiedNote]) -> Map[Int, Array[TiedNote]] {
-  let grouped : Map[Int, Array[TiedNote]] = {}
-  for note in notes {
+  notes
+  .iter()
+  .fold(init=Map::new(), fn(grouped, note) {
     match grouped.get(note.measure_index) {
       Some(arr) => arr.push(note)
       None => grouped[note.measure_index] = [note]
     }
-  }
-  grouped
+    grouped
+  })
 }
 
 ///|
@@ -283,11 +308,13 @@ fn group_by_measure(notes : Array[TiedNote]) -> Map[Int, Array[TiedNote]] {
 fn apply_accidentals(
   grouped : Map[Int, Array[TiedNote]],
 ) -> Map[Int, Array[MeasureNote]] {
-  let result : Map[Int, Array[MeasureNote]] = {}
-  for measure_index, tied_notes in grouped {
+  grouped
+  .iter()
+  .fold(init=Map::new(), fn(result, entry) {
+    let (measure_index, tied_notes) = entry
     result[measure_index] = apply_accidentals_to_tied_notes(tied_notes)
-  }
-  result
+    result
+  })
 }
 
 ///|
@@ -298,42 +325,40 @@ fn assemble_measures(
   measure_duration_ms : Double,
   measure_count : Int,
 ) -> Array[Measure] {
-  let measures : Array[Measure] = []
-
-  // Add leading rest measure with dummy chord (always C major to avoid confusion)
+  // Leading rest measure with dummy chord (always C major to avoid confusion)
   let dummy_chord = Chord::{ root: ChordRoot::C, quality: Major }
   let leading_rest_notes = notes_by_measure.get(0).unwrap_or([])
-  measures.push(Measure::{
-    chord: dummy_chord,
-    notes: leading_rest_notes,
-    start_time: Duration::from_milliseconds(0.0),
-    duration: Duration::from_milliseconds(measure_duration_ms),
-    measure_index: 0,
-  })
-
-  // Calculate number of chord measures needed (total - 1 for leading rest)
-  let chord_measures_needed = measure_count - 1
+  let leading_measure = [
+    Measure::{
+      chord: dummy_chord,
+      notes: leading_rest_notes,
+      start_time: Duration::from_milliseconds(0.0),
+      duration: Duration::from_milliseconds(measure_duration_ms),
+      measure_index: 0,
+    },
+  ]
 
   // If no chords or no measures needed, return just the leading rest
+  let chord_measures_needed = measure_count - 1
   if chords.length() == 0 || chord_measures_needed <= 0 {
-    return measures
+    return leading_measure
   }
 
-  // Create chord measures
-  for i = 0; i < chord_measures_needed; i = i + 1 {
+  // Create chord measures using makei
+  let chord_measures = Array::makei(chord_measures_needed, fn(i) {
     let chord = chords[i % chords.length()]
     let measure_index = i + 1
     let measure_start = measure_index.to_double() * measure_duration_ms
     let measure_notes = notes_by_measure.get(measure_index).unwrap_or([])
-    measures.push(Measure::{
+    Measure::{
       chord,
       notes: measure_notes,
       start_time: Duration::from_milliseconds(measure_start),
       duration: Duration::from_milliseconds(measure_duration_ms),
       measure_index,
-    })
-  }
-  measures
+    }
+  })
+  leading_measure + chord_measures
 }
 
 ///|
