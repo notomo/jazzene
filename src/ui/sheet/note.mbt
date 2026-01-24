@@ -83,7 +83,7 @@ pub fn render_note(
   match note.midi {
     Some(midi) => {
       // Render note
-      let note_y = @music.midi_to_staff_y(midi, staff_y)
+      let note_y = midi_to_staff_y(midi, staff_y)
 
       // Accidental (rendered to the left of the note)
       match note.accidental {
