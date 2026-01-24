@@ -20,14 +20,6 @@ pub enum TieState {
 } derive(Eq, Show)
 
 ///|
-/// Pitch state within a measure for accidental tracking
-enum PitchState {
-  Natural
-  Sharpened
-  Flattened
-} derive(Eq)
-
-///|
 /// Represents one measure with its chord and notes
 pub struct Measure {
   chord : Chord
@@ -48,17 +40,17 @@ pub struct MeasureNote {
 }
 
 ///|
-/// Determine the required pitch state for a MIDI number
+/// Determine the required accidental state for a MIDI number
 /// Based on C major key (no sharps/flats), so black keys need accidentals
-fn midi_to_required_state(midi : Int) -> PitchState {
+fn midi_to_required_state(midi : Int) -> Accidental {
   let pitch_class = midi % 12
   match pitch_class {
-    1 => Sharpened // C#
-    3 => Flattened // Eb (prefer flat per ChordRoot convention)
-    6 => Sharpened // F#
-    8 => Flattened // Ab (prefer flat per ChordRoot convention)
-    10 => Flattened // Bb (prefer flat per ChordRoot convention)
-    _ => PitchState::Natural // White keys
+    1 => Sharp // C#
+    3 => Flat // Eb (prefer flat per ChordRoot convention)
+    6 => Sharp // F#
+    8 => Flat // Ab (prefer flat per ChordRoot convention)
+    10 => Flat // Bb (prefer flat per ChordRoot convention)
+    _ => Accidental::Natural // White keys
   }
 }
 
@@ -67,22 +59,17 @@ fn midi_to_required_state(midi : Int) -> PitchState {
 /// Returns None if no accidental change is needed
 fn calculate_accidental(
   midi : Int,
-  pitch_states : Map[Int, PitchState],
+  pitch_states : Map[Int, Accidental],
 ) -> Accidental? {
   let pitch_class = midi % 12
   let required_state = midi_to_required_state(midi)
   let current_state = pitch_states
     .get(pitch_class)
-    .unwrap_or(PitchState::Natural)
+    .unwrap_or(Accidental::Natural)
   if required_state == current_state {
     None // No change needed
   } else {
-    // State change needed, return appropriate accidental
-    match required_state {
-      PitchState::Natural => Some(Accidental::Natural)
-      Sharpened => Some(Sharp)
-      Flattened => Some(Flat)
-    }
+    Some(required_state)
   }
 }
 
@@ -326,7 +313,7 @@ fn apply_accidentals_to_tied_notes(
 ) -> Array[MeasureNote] {
   // Sort by start_beat to ensure correct accidental calculation order
   tied_notes.sort_by(fn(a, b) { a.start_beat.compare(b.start_beat) })
-  let pitch_states : Map[Int, PitchState] = {}
+  let pitch_states : Map[Int, Accidental] = {}
   let measure_notes : Array[MeasureNote] = []
   for note in tied_notes {
     let accidental : Accidental? = match note.midi {
