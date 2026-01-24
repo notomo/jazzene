@@ -5,10 +5,7 @@ pub fn seek_bar(
   total_duration : () -> @music.Duration,
 ) -> @luna_dom.DomNode {
   let on_seek : @luna_dom.InputHandler = fn(e) {
-    let target = e.target()
-    let event_target = target.as_event_target()
-    let value = event_target.as_any()._get("value").to_string()
-    match @js_global.parseFloat(value) {
+    match @js_global.parseFloat(get_input_value(e)) {
       Some(position_percent) => {
         let new_position_ms = position_percent /
           100.0 *

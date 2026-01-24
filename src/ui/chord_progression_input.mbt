@@ -5,10 +5,7 @@ pub fn chord_progression_input(
   parse_error : @signal.Signal[String?],
 ) -> @luna_dom.DomNode {
   let on_input : @luna_dom.InputHandler = fn(e) {
-    let target = e.target()
-    let event_target = target.as_event_target()
-    let value = event_target.as_any()._get("value").to_string()
-    raw_chord_progression.set(value)
+    raw_chord_progression.set(get_input_value(e))
   }
   @luna_dom.input(
     type_="text",

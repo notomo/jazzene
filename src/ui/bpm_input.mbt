@@ -2,10 +2,7 @@
 /// Render BPM input control
 pub fn bpm_input(bpm : @signal.Signal[Int]) -> @luna_dom.DomNode {
   let on_input : @luna_dom.InputHandler = fn(e) {
-    let target = e.target()
-    let event_target = target.as_event_target()
-    let value = event_target.as_any()._get("value").to_string()
-    match @js_global.parseInt(value) {
+    match @js_global.parseInt(get_input_value(e)) {
       Some(x) => if x >= 30 && x <= 300 { bpm.set(x) }
       None => ()
     }

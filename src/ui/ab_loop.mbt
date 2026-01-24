@@ -28,26 +28,17 @@ pub fn ab_loop(
 ) -> @luna_dom.DomNode {
   // Checkbox handler for A
   let on_a_checkbox_input : @luna_dom.InputHandler = fn(e) {
-    let target = e.target()
-    let event_target = target.as_event_target()
-    let checked = event_target.as_any()._get("checked").to_string() == "true"
-    loop_state.a_enabled.set(checked)
+    loop_state.a_enabled.set(get_checkbox_checked(e))
   }
 
   // Checkbox handler for B
   let on_b_checkbox_input : @luna_dom.InputHandler = fn(e) {
-    let target = e.target()
-    let event_target = target.as_event_target()
-    let checked = event_target.as_any()._get("checked").to_string() == "true"
-    loop_state.b_enabled.set(checked)
+    loop_state.b_enabled.set(get_checkbox_checked(e))
   }
 
   // Text input handler for A time
   let on_a_time_input : @luna_dom.InputHandler = fn(e) {
-    let target = e.target()
-    let event_target = target.as_event_target()
-    let value = event_target.as_any()._get("value").to_string()
-    match parse_time(value) {
+    match parse_time(get_input_value(e)) {
       Some(new_a) => {
         // Clamp to [0, min(b_time, total_duration)]
         let max_a = @cmp.minimum(loop_state.b_time.get(), total_duration())
@@ -63,10 +54,7 @@ pub fn ab_loop(
 
   // Text input handler for B time
   let on_b_time_input : @luna_dom.InputHandler = fn(e) {
-    let target = e.target()
-    let event_target = target.as_event_target()
-    let value = event_target.as_any()._get("value").to_string()
-    match parse_time(value) {
+    match parse_time(get_input_value(e)) {
       Some(new_b) => {
         // Clamp to [max(a_time, 0), total_duration]
         let min_b = @cmp.maximum(
