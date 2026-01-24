@@ -184,6 +184,36 @@ for item in items {
 - While-style loops with mutable state that doesn't fit iterator patterns
 - Performance-critical code where iterator overhead matters
 
+### Prefer Match Over If-Else Chains
+
+Use `match` expressions instead of `if-else` chains for clearer pattern matching:
+
+```moonbit
+// Preferred: Using match with tuple patterns and guards
+let tie_state = match (total_pieces, split_piece) {
+  (1, _) => None
+  (_, 0) => TieStart
+  (total, piece) if piece == total - 1 => TieEnd
+  _ => TieBoth
+}
+
+// Avoid: If-else chains
+let tie_state = if total_pieces == 1 {
+  None
+} else if split_piece == 0 {
+  TieStart
+} else if split_piece == total_pieces - 1 {
+  TieEnd
+} else {
+  TieBoth
+}
+```
+
+**Benefits of match:**
+- Exhaustiveness checking by the compiler
+- Clearer intent with pattern matching
+- Better support for destructuring and guards
+
 ## Important Notes
 
 - **Target Platform**: This project only targets JavaScript (`preferred-target: "js"`)

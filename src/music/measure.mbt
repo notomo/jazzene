@@ -270,14 +270,11 @@ fn split_to_positioned_notes(
 /// Step 2: Calculate tie states from split information
 fn calculate_tie_states(notes : Array[PositionedNote]) -> Array[TiedNote] {
   notes.map(fn(note) {
-    let tie_state : TieState = if note.total_pieces == 1 {
-      TieState::None
-    } else if note.split_piece == 0 {
-      TieStart
-    } else if note.split_piece == note.total_pieces - 1 {
-      TieEnd
-    } else {
-      TieBoth
+    let tie_state : TieState = match (note.total_pieces, note.split_piece) {
+      (1, _) => TieState::None
+      (_, 0) => TieStart
+      (total, piece) if piece == total - 1 => TieEnd
+      _ => TieBoth
     }
     TiedNote::{
       midi: note.midi,
