@@ -2,10 +2,10 @@
 /// Render seed input control for random number generation
 pub fn seed_input(seed : @signal.Signal[Int]) -> @luna_dom.DomNode {
   let on_input : @luna_dom.InputHandler = fn(e) {
-    match @js_global.parseInt(get_input_value(e)) {
-      Some(x) => seed.set(x)
-      None => ()
-    }
+    get_input_value(e)
+    |> @js_global.parseInt
+    |> Option::map(fn(x) { seed.set(x) })
+    |> ignore
   }
   @luna_dom.div(class="flex items-center gap-2", [
     @luna_dom.label(class="text-sm text-slate-400", [@luna_dom.text("Seed:")]),

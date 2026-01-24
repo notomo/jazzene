@@ -5,17 +5,16 @@ pub fn seek_bar(
   total_duration : () -> @music.Duration,
 ) -> @luna_dom.DomNode {
   let on_seek : @luna_dom.InputHandler = fn(e) {
-    match @js_global.parseFloat(get_input_value(e)) {
-      Some(position_percent) => {
-        let new_position_ms = position_percent /
-          100.0 *
-          total_duration().to_milliseconds()
-        playback_position.set(
-          @music.Duration::from_milliseconds(new_position_ms),
-        )
-      }
-      None => ()
-    }
+    get_input_value(e)
+    |> @js_global.parseFloat
+    |> Option::map(fn(percent) {
+      playback_position.set(
+        @music.Duration::from_milliseconds(
+          percent / 100.0 * total_duration().to_milliseconds(),
+        ),
+      )
+    })
+    |> ignore
   }
   @luna_dom.div(class="w-full flex gap-2 items-baseline bg-slate-800", [
     @luna_dom.div(

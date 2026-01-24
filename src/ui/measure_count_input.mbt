@@ -4,10 +4,10 @@ pub fn measure_count_input(
   measure_count : @signal.Signal[Int],
 ) -> @luna_dom.DomNode {
   let on_input : @luna_dom.InputHandler = fn(e) {
-    match @js_global.parseInt(get_input_value(e)) {
-      Some(x) => if x >= 2 && x <= 32 { measure_count.set(x) }
-      None => ()
-    }
+    get_input_value(e)
+    |> @js_global.parseInt
+    |> Option::map(fn(x) { measure_count.set(x) })
+    |> ignore
   }
   @luna_dom.div(class="flex items-center gap-2", [
     @luna_dom.label(class="text-sm text-slate-400", [

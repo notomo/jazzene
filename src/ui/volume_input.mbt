@@ -3,10 +3,10 @@
 pub fn volume_input(volume : @signal.Signal[Double]) -> @luna_dom.DomNode {
   let show_popup = @signal.signal(false)
   let on_input : @luna_dom.InputHandler = fn(e) {
-    match @js_global.parseFloat(get_input_value(e)) {
-      Some(percent) => volume.set(percent / 100.0)
-      None => ()
-    }
+    get_input_value(e)
+    |> @js_global.parseFloat
+    |> Option::map(fn(percent) { volume.set(percent / 100.0) })
+    |> ignore
   }
   @luna_dom.div(class="relative", [
     @luna_dom.button(
