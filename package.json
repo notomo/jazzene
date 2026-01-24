@@ -18,6 +18,6 @@
     "@tailwindcss/vite": "^4.1.18",
     "tailwindcss": "^4.0.2",
     "vite": "^7.3.1",
-    "vite-plugin-moonbit": "^0.1.2"
+    "vite-plugin-moonbit": "^0.1.3"
   }
 }
