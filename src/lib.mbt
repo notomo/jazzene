@@ -18,19 +18,17 @@ fn main {
       }
     }
   })
-  let sounds = make_sounds(chords, seed, measure_count, bpm)
+  let measures_signal = make_measures(chords, seed, measure_count, bpm)
+  let measures = fn() { measures_signal.get() }
+  let sounds : @signal.Signal[Array[@music.NoteValueSound]] = @signal.signal([])
+  let _ = @signal.effect(fn() {
+    @music.convert_measures_to_sounds(measures_signal.get(), bpm.get())
+    |> sound_list => { sounds.set(sound_list) }
+  })
   let total_duration = @signal.memo(fn() {
     @music.calculate_total_duration(
       bpm=bpm.get(),
       measure_count=measure_count.get(),
-    )
-  })
-  let measures = @signal.memo(fn() {
-    @music.convert_sounds_to_measures(
-      sounds.get(),
-      chords(),
-      bpm.get(),
-      measure_count.get(),
     )
   })
   let playback_position = @signal.signal(
@@ -56,21 +54,20 @@ fn main {
 }
 
 ///|
-fn make_sounds(
+fn make_measures(
   chords : () -> Array[@music.Chord],
   seed : @signal.Signal[Int],
   measure_count : @signal.Signal[Int],
   bpm : @signal.Signal[Int],
-) -> @signal.Signal[Array[@music.NoteValueSound]] {
-  let sounds : @signal.Signal[Array[@music.NoteValueSound]] = @signal.signal([])
+) -> @signal.Signal[Array[@music.Measure]] {
+  let measures : @signal.Signal[Array[@music.Measure]] = @signal.signal([])
   let _ = @signal.effect(fn() {
     @generator.Settings::default(chords(), seed.get())
-    |> @generator.create_note_value_generator
-    |> @generator.improvisation(measure_count.get())
-    |> @music.NoteValueSound::from_note_values(bpm.get())
-    |> sound_list => { sounds.set(sound_list) }
+    |> @generator.create_measure_generator
+    |> @generator.improvisation(chords(), bpm.get(), measure_count.get())
+    |> measure_list => { measures.set(measure_list) }
   })
-  sounds
+  measures
 }
 
 ///|

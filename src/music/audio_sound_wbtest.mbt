@@ -1,9 +1,13 @@
 ///|
 test "AudioSound::from creates audio sounds" {
-  let bpm = 120
   let midi = MidiNumber::{ value: 60 }
-  let notes = [Note(midi~, duration=Quarter)] // 0-500ms
-  let sounds = NoteValueSound::from_note_values(notes, bpm)
+  let sounds = [
+    NoteValueSound::{
+      note_value: Note(midi~, duration=Quarter),
+      duration: Duration::from_milliseconds(500),
+      start_time: Duration::from_milliseconds(0),
+    },
+  ]
   let current_pos = Duration::from_milliseconds(0)
   let lookahead = Duration::from_milliseconds(1000)
   let audio_sounds = AudioSound::from(sounds, current_pos, lookahead)
@@ -16,15 +20,29 @@ test "AudioSound::from creates audio sounds" {
 
 ///|
 test "AudioSound::from filters out rests" {
-  let bpm = 120
   let midi = MidiNumber::{ value: 60 }
-  let notes = [
-    Note(midi~, duration=Quarter), // 0-500ms
-    Rest(duration=Quarter), // 500-1000ms
-    Note(midi~, duration=Quarter), // 1000-1500ms
-    Note(midi~, duration=Quarter), // 1500-2000ms
+  let sounds = [
+    NoteValueSound::{
+      note_value: Note(midi~, duration=Quarter),
+      duration: Duration::from_milliseconds(500),
+      start_time: Duration::from_milliseconds(0),
+    },
+    NoteValueSound::{
+      note_value: Rest(duration=Quarter),
+      duration: Duration::from_milliseconds(500),
+      start_time: Duration::from_milliseconds(500),
+    },
+    NoteValueSound::{
+      note_value: Note(midi~, duration=Quarter),
+      duration: Duration::from_milliseconds(500),
+      start_time: Duration::from_milliseconds(1000),
+    },
+    NoteValueSound::{
+      note_value: Note(midi~, duration=Quarter),
+      duration: Duration::from_milliseconds(500),
+      start_time: Duration::from_milliseconds(1500),
+    },
   ]
-  let sounds = NoteValueSound::from_note_values(notes, bpm)
   let current_pos = Duration::from_milliseconds(0)
   let lookahead = Duration::from_milliseconds(1500)
   let audio_sounds = AudioSound::from(sounds, current_pos, lookahead)
@@ -37,13 +55,23 @@ test "AudioSound::from filters out rests" {
 
 ///|
 test "AudioSound::from extracts notes in lookahead range" {
-  let note_values = [
-    Note(midi=MidiNumber::{ value: 60 }, duration=Quarter), // 0ms - 500ms
-    Note(midi=MidiNumber::{ value: 62 }, duration=Quarter), // 500ms - 1000ms
-    Note(midi=MidiNumber::{ value: 64 }, duration=Quarter), // 1000ms - 1500ms
+  let sounds = [
+    NoteValueSound::{
+      note_value: Note(midi=MidiNumber::{ value: 60 }, duration=Quarter),
+      duration: Duration::from_milliseconds(500),
+      start_time: Duration::from_milliseconds(0),
+    },
+    NoteValueSound::{
+      note_value: Note(midi=MidiNumber::{ value: 62 }, duration=Quarter),
+      duration: Duration::from_milliseconds(500),
+      start_time: Duration::from_milliseconds(500),
+    },
+    NoteValueSound::{
+      note_value: Note(midi=MidiNumber::{ value: 64 }, duration=Quarter),
+      duration: Duration::from_milliseconds(500),
+      start_time: Duration::from_milliseconds(1000),
+    },
   ]
-  let bpm = 120
-  let sounds = NoteValueSound::from_note_values(note_values, bpm)
   let position = Duration::from_milliseconds(500)
   let lookahead = Duration::from_milliseconds(1000)
   let audio_sounds = AudioSound::from(sounds, position, lookahead)
