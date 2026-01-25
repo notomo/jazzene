@@ -136,24 +136,13 @@ fn generate_measure_notes(
 
 ///|
 /// Decide whether to generate a note or rest, and if note, which MIDI number
+/// Uses chord tones across multiple octaves
 fn decide_midi_number(
   chord : @music.Chord,
   rest_probability : Int,
   random_int : (Int) -> Int,
 ) -> @music.MidiNumber? {
-  match random_int(100) < rest_probability {
-    true => None
-    false => random_midi_from_chord(chord, random_int)
-  }
-}
-
-///|
-/// Generate a random MIDI number from chord tones
-/// Uses chord tones across multiple octaves
-fn random_midi_from_chord(
-  chord : @music.Chord,
-  random_int : (Int) -> Int,
-) -> @music.MidiNumber? {
+  guard random_int(100) >= rest_probability else { return None }
   let base_tones = chord.tones()
   let extended_tones = [-1, 0, 1]
     .iter()
