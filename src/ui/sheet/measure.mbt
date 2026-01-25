@@ -6,7 +6,6 @@
 pub fn render_measure(
   measure : @music.Measure,
   display_index : Int,
-  current_measure_index : () -> Int,
 ) -> @luna_dom.DomNode {
   let (x, y) = measure_position(display_index)
   let children : Array[@luna_dom.DomNode] = []
@@ -19,8 +18,8 @@ pub fn render_measure(
     children.push(render_treble_clef(x, y))
   }
 
-  // Chord symbol (dynamic based on current_measure_index)
-  let chord_nodes = render_chord_symbol(measure, x, y, current_measure_index)
+  // Chord symbol (static)
+  let chord_nodes = render_chord_symbol(measure, x, y)
   for node in chord_nodes {
     children.push(node)
   }

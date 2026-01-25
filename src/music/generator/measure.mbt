@@ -2,7 +2,6 @@
 /// Context passed to MeasureGenerator
 pub struct MeasureContext {
   chord : @music.Chord
-  measure_index : Int
   incoming_tie : TieContext? // Tie from previous measure
 }
 

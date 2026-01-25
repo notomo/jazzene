@@ -16,7 +16,6 @@ pub(all) struct Measure {
   notes : Array[MeasureNote]
   start_time : Duration
   duration : Duration
-  measure_index : Int
 }
 
 ///|
