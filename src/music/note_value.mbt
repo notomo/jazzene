@@ -1,6 +1,6 @@
 ///|
 /// Musical event - either a note or a rest
-pub enum NoteValue {
+pub(all) enum NoteValue {
   Note(midi~ : MidiNumber, duration~ : NoteDuration)
   Rest(duration~ : NoteDuration)
 } derive(Eq, Show)

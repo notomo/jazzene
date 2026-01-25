@@ -1,6 +1,6 @@
 ///|
 /// Note duration types for rhythm variation
-pub enum NoteDuration {
+pub(all) enum NoteDuration {
   Eighth // 0.5 beats
   Quarter // 1 beat
   Half // 2 beats

@@ -1,6 +1,6 @@
 ///|
 /// Chord with type-safe root and quality
-pub struct Chord {
+pub(all) struct Chord {
   root : ChordRoot
   quality : ChordQuality
 } derive(Eq, Show)

@@ -1,6 +1,6 @@
 ///|
 /// Note name enum for type-safe chord roots
-pub enum ChordRoot {
+pub(all) enum ChordRoot {
   C
   CSharp // C# / Db
   D

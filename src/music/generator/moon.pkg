@@ -1,0 +1,4 @@
+import {
+  "internal/jazzene/music" as @music,
+  "moonbitlang/core/random",
+}

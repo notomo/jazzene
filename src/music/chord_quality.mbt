@@ -1,6 +1,6 @@
 ///|
 /// Chord quality enum for exhaustive matching
-pub enum ChordQuality {
+pub(all) enum ChordQuality {
   Major7
   Minor7
   Dominant7

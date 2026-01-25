@@ -64,9 +64,9 @@ fn make_sounds(
 ) -> @signal.Signal[Array[@music.NoteValueSound]] {
   let sounds : @signal.Signal[Array[@music.NoteValueSound]] = @signal.signal([])
   let _ = @signal.effect(fn() {
-    @music.GeneratorSettings::default(chords(), seed.get())
-    |> @music.create_note_value_generator
-    |> @music.generate_improvisation(measure_count.get())
+    @generator.Settings::default(chords(), seed.get())
+    |> @generator.create_note_value_generator
+    |> @generator.improvisation(measure_count.get())
     |> @music.NoteValueSound::from_note_values(bpm.get())
     |> sound_list => { sounds.set(sound_list) }
   })

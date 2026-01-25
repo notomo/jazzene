@@ -3,6 +3,7 @@ import {
   "mizchi/luna/signal",
   "mizchi/signals",
   "internal/jazzene/music" as @music,
+  "internal/jazzene/music/generator" as @generator,
   "internal/jazzene/audio" as @audio,
   "internal/jazzene/ui" as @ui,
 }

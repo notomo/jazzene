@@ -1,18 +1,18 @@
 ///|
 /// Type alias for a generator function that produces NoteValues
-pub type NoteValueGenerator = () -> NoteValue
+pub type NoteValueGenerator = () -> @music.NoteValue
 
 ///|
 /// Generate improvisation from a note value generator
 /// Returns note values (notes and rests) that fit within the specified measures
 /// measure_count specifies the total number of measures (including leading rest)
-pub fn generate_improvisation(
+pub fn improvisation(
   generator : NoteValueGenerator,
   measure_count : Int,
-) -> Array[NoteValue] {
+) -> Array[@music.NoteValue] {
   let total_beats = measure_count.to_double() * 4.0
   // Start with 1 measure of rest (4 beats)
-  let note_values = [NoteValue::Rest(duration=Whole)]
+  let note_values = [@music.NoteValue::Rest(duration=@music.Whole)]
   for current_beats = 4.0; current_beats < total_beats; {
     let note_value = generator()
     let beats = note_value.note_duration().to_beats()
@@ -21,7 +21,7 @@ pub fn generate_improvisation(
       note_values.push(note_value)
       continue current_beats + beats
     }
-    let _ = NoteDuration::fit(remaining).map(fn(fitted) {
+    let _ = @music.NoteDuration::fit(remaining).map(fn(fitted) {
       note_values.push(note_value.with_duration(fitted))
     })
     break
