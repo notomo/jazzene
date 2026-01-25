@@ -221,3 +221,4 @@ let tie_state = if total_pieces == 1 {
 - **Package Format**: ESM only (`"type": "module"` in package.json, `"format": "esm"` in moon.pkg)
 - **Main Entry**: `src/moon.pkg` has `"is-main": true` - this package exports the main function
 - **Web Audio API**: All Web Audio API access must go through `src/audio/web_audio_api/`. Other packages should use wrappers in `src/audio/`. Never use raw JavaScript FFI for Web Audio APIs outside this package.
+- **MoonBit Reference**: When you need to reference MoonBit language features, syntax, or conventions, use the `moonbit-agent-guide` skill by invoking `/moonbit-agent-guide`.
