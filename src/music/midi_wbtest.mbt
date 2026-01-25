@@ -12,3 +12,26 @@ test "MidiNumber to_frequency conversion" {
   let a4 = MidiNumber::{ value: 69 }
   assert_eq(a4.to_frequency(), 440.0)
 }
+
+///|
+test "MidiNumber pitch_class" {
+  // C4 (MIDI 60) -> pitch class 0
+  inspect(MidiNumber::{ value: 60 }.pitch_class(), content="0")
+  // C#4 (MIDI 61) -> pitch class 1
+  inspect(MidiNumber::{ value: 61 }.pitch_class(), content="1")
+  // C5 (MIDI 72) -> pitch class 0
+  inspect(MidiNumber::{ value: 72 }.pitch_class(), content="0")
+}
+
+///|
+test "MidiNumber accidental" {
+  // White keys -> Natural
+  inspect(MidiNumber::{ value: 60 }.accidental(), content="Natural") // C
+  inspect(MidiNumber::{ value: 62 }.accidental(), content="Natural") // D
+  // Black keys -> Sharp or Flat
+  inspect(MidiNumber::{ value: 61 }.accidental(), content="Sharp") // C#
+  inspect(MidiNumber::{ value: 63 }.accidental(), content="Flat") // Eb
+  inspect(MidiNumber::{ value: 66 }.accidental(), content="Sharp") // F#
+  inspect(MidiNumber::{ value: 68 }.accidental(), content="Flat") // Ab
+  inspect(MidiNumber::{ value: 70 }.accidental(), content="Flat") // Bb
+}

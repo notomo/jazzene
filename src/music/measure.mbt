@@ -2,14 +2,6 @@
 /// Measure representation for lead sheet visualization
 
 ///|
-/// Accidental types for note display
-pub(all) enum Accidental {
-  Sharp
-  Flat
-  Natural
-} derive(Eq, Show)
-
-///|
 /// Tie state for notes that span measure boundaries
 pub(all) enum TieState {
   None // No tie

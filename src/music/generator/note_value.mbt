@@ -42,7 +42,7 @@ fn generate_measure_notes(
   random_int : (Int) -> Int,
 ) -> MeasureResult {
   let notes : Array[@music.MeasureNote] = []
-  let pitch_states : Map[Int, @music.Accidental] = {}
+  let update_accidental = @music.create_accidental_calculator()
   let mut current_beat = 0.0
   let beats_per_measure = 4.0
 
@@ -64,9 +64,6 @@ fn generate_measure_notes(
         accidental: None,
         tie_state,
       })
-      // Update pitch state for tie note
-      let pc = tie_ctx.midi.value % 12
-      pitch_states[pc] = midi_to_required_state(tie_ctx.midi.value)
       current_beat = remaining
       // If tie extends beyond this measure, return early with outgoing tie
       if tie_ctx.remaining_beats > beats_per_measure {
@@ -91,14 +88,11 @@ fn generate_measure_notes(
       Some(midi) =>
         if beats <= remaining_beats {
           // Note fits in this measure
-          let accidental = calculate_accidental(midi.value, pitch_states)
-          let pc = midi.value % 12
-          pitch_states[pc] = midi_to_required_state(midi.value)
           notes.push(@music.MeasureNote::{
             midi: Some(midi.value),
             duration,
             start_beat: current_beat,
-            accidental,
+            accidental: update_accidental(midi),
             tie_state: @music.None,
           })
           current_beat = current_beat + beats
@@ -107,14 +101,11 @@ fn generate_measure_notes(
           let fitted_duration = @music.NoteDuration::fit(remaining_beats).unwrap_or(
             @music.Eighth,
           )
-          let accidental = calculate_accidental(midi.value, pitch_states)
-          let pc = midi.value % 12
-          pitch_states[pc] = midi_to_required_state(midi.value)
           notes.push(@music.MeasureNote::{
             midi: Some(midi.value),
             duration: fitted_duration,
             start_beat: current_beat,
-            accidental,
+            accidental: update_accidental(midi),
             tie_state: @music.TieStart,
           })
           return MeasureResult::{
