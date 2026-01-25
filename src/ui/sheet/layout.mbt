@@ -7,7 +7,7 @@ pub let color_foreground = "#f1f5f9"
 // Layout constants
 
 ///|
-pub let staff_top = 80.0
+pub let staff_top = 120.0
 
 ///|
 pub let staff_line_spacing = 15.0

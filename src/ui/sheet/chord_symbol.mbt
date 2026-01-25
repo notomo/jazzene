@@ -23,8 +23,9 @@ pub fn render_chord_symbol(
   }
 
   // Calculate chord y position relative to staff
-  let chord_y_rect = y - 66.0 // Background rectangle y position
-  let chord_y_text = y - 40.0 // Text y position
+  // Position high enough to avoid overlap with ledger line notes (E6 at step 14 is at y - 45)
+  let chord_y_rect = y - 100.0 // Background rectangle y position
+  let chord_y_text = y - 85.0 // Text y position
 
   // Background rectangle for highlighted chord (white background for better contrast)
   children.push(
