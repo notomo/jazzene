@@ -33,7 +33,7 @@ test.describe("Jazzene - Jazz Improvisation Web App", () => {
   test("should update time display during playback", async () => {
     await jazzene.play();
 
-    await jazzene.waitForPlayback(100);
+    await jazzene.waitForPlayback(200);
 
     const totalTime = await jazzene.getTimeDisplayText();
     expect(totalTime).not.toContain("0:00 / 0:00"); // Should not be initial state

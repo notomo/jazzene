@@ -55,8 +55,6 @@ pub fn render(
   chord_parse_error : @signal.Signal[String?],
   measures : () -> Array[@music.Measure],
 ) -> Unit {
-
-  // Build UI tree
   let app = @luna_dom.div(
     class="flex flex-col h-dvh overflow-hidden w-dvw bg-gradient-to-br from-slate-950 to-slate-900 text-white",
     [
@@ -101,11 +99,9 @@ pub fn render(
       ),
     ],
   )
-
-  // Mount to DOM
-  let doc = @js_dom.document()
-  match doc.getElementById("app") {
-    Some(el) => el |> @luna_dom.DomElement::from_dom |> @luna_dom.render(app)
-    None => ()
-  }
+  @js_dom.document().getElementById("app")
+  |> Option::map(fn(e) {
+    @luna_dom.DomElement::from_dom(e) |> @luna_dom.render(app)
+  })
+  |> ignore
 }

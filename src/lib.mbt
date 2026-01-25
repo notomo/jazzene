@@ -25,7 +25,6 @@ fn main {
       measure_count=measure_count.get(),
     )
   })
-  // Convert to measures for visualization
   let measures = @signal.memo(fn() {
     @music.convert_sounds_to_measures(
       sounds.get(),
@@ -63,23 +62,13 @@ fn make_sounds(
   measure_count : @signal.Signal[Int],
   bpm : @signal.Signal[Int],
 ) -> @signal.Signal[Array[@music.NoteValueSound]] {
-  let note_values = @signal.memo(fn() {
-    match chords() {
-      [] => []
-      xs => {
-        let gen_settings = @music.GeneratorSettings::default(xs, seed.get())
-        let generator = @music.create_note_value_generator(gen_settings)
-        @music.generate_improvisation(generator, measure_count.get())
-      }
-    }
-  })
   let sounds : @signal.Signal[Array[@music.NoteValueSound]] = @signal.signal([])
   let _ = @signal.effect(fn() {
-    let sound_list = @music.NoteValueSound::from_note_values(
-      note_values(),
-      bpm.get(),
-    )
-    sounds.set(sound_list)
+    @music.GeneratorSettings::default(chords(), seed.get())
+    |> @music.create_note_value_generator
+    |> @music.generate_improvisation(measure_count.get())
+    |> @music.NoteValueSound::from_note_values(bpm.get())
+    |> sound_list => { sounds.set(sound_list) }
   })
   sounds
 }
