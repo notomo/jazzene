@@ -11,9 +11,8 @@ pub fn improvisation(
   let measure_duration_ms = @music.ms_per_measure(bpm)
 
   // Leading rest measure (measure index 0)
-  let dummy_chord = @music.Chord::{ root: @music.C, quality: @music.Major }
   let leading_rest = @music.Measure::{
-    chord: dummy_chord,
+    chords: [],
     notes: [
       @music.MeasureNote::{
         midi: None,
@@ -41,7 +40,7 @@ pub fn improvisation(
     let ctx = MeasureContext::{ chord, measure_index, incoming_tie }
     let result = generator(ctx)
     let measure = @music.Measure::{
-      chord,
+      chords: [chord],
       notes: result.notes,
       start_time: @music.Duration::from_milliseconds(
         measure_index.to_double() * measure_duration_ms,

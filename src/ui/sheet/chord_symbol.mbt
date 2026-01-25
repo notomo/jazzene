@@ -2,6 +2,12 @@
 /// Chord symbol rendering with dynamic highlighting
 
 ///|
+/// Format array of chords for display, joining with " | " separator
+fn format_chords(chords : Array[@music.Chord]) -> String {
+  chords.iter().map(@music.format_chord).collect().join(" ")
+}
+
+///|
 /// Render chord symbol with background highlight based on current measure
 pub fn render_chord_symbol(
   measure : @music.Measure,
@@ -11,8 +17,8 @@ pub fn render_chord_symbol(
 ) -> Array[@luna_dom.DomNode] {
   let children : Array[@luna_dom.DomNode] = []
 
-  // Don't show chord for leading rest measure (measure_index = 0)
-  if measure.measure_index <= 0 {
+  // Don't show chord for measures without chords (e.g., leading rest measure)
+  if measure.chords.is_empty() {
     return children
   }
 
@@ -32,7 +38,7 @@ pub fn render_chord_symbol(
           "width",
           @luna_dom.AttrValue::Dynamic(fn() {
             if measure.measure_index == current_measure_index() {
-              let chord_text = @music.format_chord(measure.chord)
+              let chord_text = format_chords(measure.chords)
               let estimated_width = chord_text.length().to_double() * 18.0 +
                 20.0
               estimated_width.to_int().to_string()
@@ -105,7 +111,7 @@ pub fn render_chord_symbol(
           }),
         ),
       ],
-      [@luna_dom.text(@music.format_chord(measure.chord))],
+      [@luna_dom.text(format_chords(measure.chords))],
     ),
   )
   children

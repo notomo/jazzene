@@ -11,9 +11,9 @@ pub(all) enum TieState {
 } derive(Eq, Show)
 
 ///|
-/// Represents one measure with its chord and notes
+/// Represents one measure with its chords and notes
 pub(all) struct Measure {
-  chord : Chord
+  chords : Array[Chord]
   notes : Array[MeasureNote]
   start_time : Duration
   duration : Duration
