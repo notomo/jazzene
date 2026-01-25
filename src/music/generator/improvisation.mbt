@@ -32,19 +32,13 @@ pub fn improvisation(
   }
   let measures : Array[@music.Measure] = [leading_rest]
   let mut incoming_tie : TieContext? = None
-  let mut pitch_states : Map[Int, @music.Accidental] = {}
 
   // Generate measures for each chord position
   let chord_measures_count = measure_count - 1
   for i = 0; i < chord_measures_count; i = i + 1 {
     let chord = chords[i % chords.length()]
     let measure_index = i + 1
-    let ctx = MeasureContext::{
-      chord,
-      measure_index,
-      incoming_tie,
-      pitch_states,
-    }
+    let ctx = MeasureContext::{ chord, measure_index, incoming_tie }
     let result = generator(ctx)
     let measure = @music.Measure::{
       chord,
@@ -56,10 +50,7 @@ pub fn improvisation(
       measure_index,
     }
     measures.push(measure)
-
-    // Pass context to next measure
     incoming_tie = result.outgoing_tie
-    pitch_states = result.pitch_states
   }
   measures
 }

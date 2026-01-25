@@ -4,7 +4,6 @@ pub struct MeasureContext {
   chord : @music.Chord
   measure_index : Int
   incoming_tie : TieContext? // Tie from previous measure
-  pitch_states : Map[Int, @music.Accidental] // Accidental state from previous measure
 }
 
 ///|
@@ -19,7 +18,6 @@ pub struct TieContext {
 pub struct MeasureResult {
   notes : Array[@music.MeasureNote]
   outgoing_tie : TieContext? // Tie to next measure
-  pitch_states : Map[Int, @music.Accidental] // Updated accidental state
 }
 
 ///|

@@ -42,7 +42,7 @@ fn generate_measure_notes(
   random_int : (Int) -> Int,
 ) -> MeasureResult {
   let notes : Array[@music.MeasureNote] = []
-  let pitch_states = ctx.pitch_states.copy()
+  let pitch_states : Map[Int, @music.Accidental] = {}
   let mut current_beat = 0.0
   let beats_per_measure = 4.0
 
@@ -76,7 +76,6 @@ fn generate_measure_notes(
             midi: tie_ctx.midi,
             remaining_beats: tie_ctx.remaining_beats - beats_per_measure,
           }),
-          pitch_states,
         }
       }
     }
@@ -124,7 +123,6 @@ fn generate_measure_notes(
               midi,
               remaining_beats: beats - remaining_beats,
             }),
-            pitch_states,
           }
         }
       None => {
@@ -144,7 +142,7 @@ fn generate_measure_notes(
       }
     }
   }
-  MeasureResult::{ notes, outgoing_tie: None, pitch_states }
+  MeasureResult::{ notes, outgoing_tie: None }
 }
 
 ///|
