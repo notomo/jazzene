@@ -75,18 +75,17 @@ fn generate_measure_notes(
     Some(tie_ctx) => {
       let remaining = @cmp.minimum(tie_ctx.remaining_beats, beats_per_measure)
       let duration = @music.NoteDuration::from_beats(remaining)
-      let tie_state : @music.TieState = if tie_ctx.remaining_beats >
-        beats_per_measure {
-        @music.TieBoth
+      let tie : @music.Tie? = if tie_ctx.remaining_beats > beats_per_measure {
+        Some(@music.TieBoth)
       } else {
-        @music.TieEnd
+        Some(@music.TieEnd)
       }
       notes.push(@music.MeasureNote::{
         midi: Some(tie_ctx.midi.value),
         duration,
         start_beat: 0.0,
         accidental: None,
-        tie_state,
+        tie,
       })
       current_beat = remaining
       // If tie extends beyond this measure, return early with outgoing tie
@@ -117,7 +116,7 @@ fn generate_measure_notes(
             duration,
             start_beat: current_beat,
             accidental: update_accidental(midi),
-            tie_state: @music.None,
+            tie: None,
           })
           current_beat = current_beat + beats
         } else {
@@ -130,7 +129,7 @@ fn generate_measure_notes(
             duration: fitted_duration,
             start_beat: current_beat,
             accidental: update_accidental(midi),
-            tie_state: @music.TieStart,
+            tie: Some(@music.TieStart),
           })
           return MeasureResult::{
             notes,
@@ -151,7 +150,7 @@ fn generate_measure_notes(
           duration: rest_duration,
           start_beat: current_beat,
           accidental: None,
-          tie_state: @music.None,
+          tie: None,
         })
         current_beat = current_beat + rest_duration.to_beats()
       }

@@ -41,16 +41,16 @@ pub fn render_measure(
         let stem_up = midi < 71
         let measure_start_x = x // Left edge of measure (ties come from previous measure)
         let measure_end_x = x + measure_width
-        match note.tie_state {
-          @music.TieStart =>
+        match note.tie {
+          Some(@music.TieStart) =>
             children.push(
               render_tie_start(note_x, note_y, measure_end_x, stem_up),
             )
-          @music.TieEnd =>
+          Some(@music.TieEnd) =>
             children.push(
               render_tie_end(measure_start_x, note_x, note_y, stem_up),
             )
-          @music.TieBoth => {
+          Some(@music.TieBoth) => {
             children.push(
               render_tie_end(measure_start_x, note_x, note_y, stem_up),
             )
@@ -58,7 +58,7 @@ pub fn render_measure(
               render_tie_start(note_x, note_y, measure_end_x, stem_up),
             )
           }
-          @music.TieState::None => ()
+          None => ()
         }
       }
       None => {

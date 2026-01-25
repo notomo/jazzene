@@ -19,7 +19,7 @@ pub fn improvisation(
         duration: @music.Whole,
         start_beat: 0.0,
         accidental: None,
-        tie_state: @music.None,
+        tie: None,
       },
     ],
     start_time: @music.Duration::from_milliseconds(0.0),

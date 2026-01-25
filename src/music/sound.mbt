@@ -64,15 +64,15 @@ pub fn convert_measures_to_sounds(
     let (start_ms, note) = flat_notes[i]
 
     // Skip TieEnd and TieBoth - they were already counted by TieStart
-    match note.tie_state {
-      TieEnd | TieBoth => continue
+    match note.tie {
+      Some(TieEnd | TieBoth) => continue
       _ => ()
     }
 
     // Calculate total duration (including any tied continuations)
     let base_beats = note.duration.to_beats()
-    let total_beats = match note.tie_state {
-      TieStart => accumulate_tied_beats(flat_notes, i + 1, base_beats)
+    let total_beats = match note.tie {
+      Some(TieStart) => accumulate_tied_beats(flat_notes, i + 1, base_beats)
       _ => base_beats
     }
     let duration_ms = total_beats * beat_duration_ms
@@ -104,9 +104,9 @@ fn accumulate_tied_beats(
   let mut total = initial_beats
   for j = start_index; j < flat_notes.length(); j = j + 1 {
     let (_, next_note) = flat_notes[j]
-    match next_note.tie_state {
-      TieBoth => total = total + next_note.duration.to_beats()
-      TieEnd => {
+    match next_note.tie {
+      Some(TieBoth) => total = total + next_note.duration.to_beats()
+      Some(TieEnd) => {
         total = total + next_note.duration.to_beats()
         break
       }
