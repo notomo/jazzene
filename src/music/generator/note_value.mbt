@@ -1,17 +1,15 @@
 ///|
 /// Settings for the measure generator
 pub(all) struct Settings {
-  chords : Array[@music.Chord]
   seed : Int
   rest_probability : Int // 0-100
   duration_weights : DurationWeights
 } derive(Eq, Show)
 
 ///|
-/// Create default settings with given chords and seed
-pub fn Settings::default(chords : Array[@music.Chord], seed : Int) -> Settings {
+/// Create default settings with given seed
+pub fn Settings::default(seed : Int) -> Settings {
   Settings::{
-    chords,
     seed,
     rest_probability: 25,
     duration_weights: DurationWeights::default(),

@@ -62,7 +62,7 @@ fn make_measures(
 ) -> @signal.Signal[Array[@music.Measure]] {
   let measures : @signal.Signal[Array[@music.Measure]] = @signal.signal([])
   let _ = @signal.effect(fn() {
-    @generator.Settings::default(chords(), seed.get())
+    @generator.Settings::default(seed.get())
     |> @generator.create_measure_generator
     |> @generator.improvisation(chords(), bpm.get(), measure_count.get())
     |> measure_list => { measures.set(measure_list) }
