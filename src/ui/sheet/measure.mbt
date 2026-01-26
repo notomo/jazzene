@@ -6,9 +6,28 @@
 pub fn render_measure(
   measure : @music.Measure,
   display_index : Int,
+  playback_position : @signal.Signal[@music.Duration],
 ) -> @luna_dom.DomNode {
   let (x, y) = measure_position(display_index)
   let children : Array[@luna_dom.DomNode] = []
+
+  // Clickable background for seeking (added last to be on top)
+  let measure_number = display_index + 1
+  let clickable_background = @luna_dom.svg_rect(
+    x=x.to_string(),
+    y=(y - 80.0).to_string(),
+    width=measure_width.to_string(),
+    height=row_height.to_string(),
+    fill="transparent",
+    style="cursor: pointer",
+    attrs=[
+      ("aria-label", @luna_dom.Attr::AttrString("measure \{measure_number}")),
+      ("pointer-events", @luna_dom.Attr::AttrString("all")),
+    ],
+    on=@luna_dom.events().click(fn(_) {
+      playback_position.set(measure.start_time)
+    }),
+  )
 
   // Staff lines
   children.push(render_staff_lines(x, y))
@@ -72,5 +91,8 @@ pub fn render_measure(
 
   // Bar line
   children.push(render_bar_line(x + measure_width, y))
+
+  // Add clickable background on top
+  children.push(clickable_background)
   @luna_dom.svg_g(children)
 }

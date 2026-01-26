@@ -57,4 +57,13 @@ test.describe("Jazzene - Jazz Improvisation Web App", () => {
     await jazzene.waitForPlayback(100);
     await expect(jazzene.getStopButton()).toBeEnabled();
   });
+
+  test("should change playback position when clicking a measure", async () => {
+    const initialValue = parseInt(await jazzene.getSeekbarValue());
+
+    await jazzene.clickMeasure(5);
+
+    const newValue = parseInt(await jazzene.getSeekbarValue());
+    expect(newValue).toBeGreaterThan(initialValue);
+  });
 });

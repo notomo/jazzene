@@ -28,7 +28,9 @@ pub fn lead_sheet(
       ],
       [
         // Static measure elements (no current_measure_index dependency)
-        @luna_dom.for_each(measures, fn(m, idx) { render_measure(m, idx) }),
+        @luna_dom.for_each(measures, fn(m, idx) {
+          render_measure(m, idx, playback_position)
+        }),
         // Playback position indicator overlay
         render_playback_indicator(playback_position, bpm, fn() {
           measures().length()

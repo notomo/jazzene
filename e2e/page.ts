@@ -56,6 +56,14 @@ export async function openJazzenePage({ page }: { page: Page }) {
     waitForPlayback: async (ms: number) => {
       await page.waitForTimeout(ms);
     },
+
+    getMeasure: (measureNumber: number) =>
+      page.getByLabel(`measure ${measureNumber}`),
+
+    clickMeasure: async (measureNumber: number) => {
+      const measure = jazzenePage.getMeasure(measureNumber);
+      await measure.click();
+    },
   };
 
   return jazzenePage;
