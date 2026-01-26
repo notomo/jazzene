@@ -35,5 +35,21 @@ pub fn improvisation(
     measures.push(measure)
     incoming_tie = result.outgoing_tie
   }
+
+  // Remove dangling tie at the end of the last measure
+  match incoming_tie {
+    Some(_) => {
+      guard not(measures.is_empty()) else { () }
+      let last_measure = measures[measures.length() - 1]
+      guard not(last_measure.notes.is_empty()) else { () }
+      let last_idx = last_measure.notes.length() - 1
+      let last_note = last_measure.notes[last_idx]
+      last_measure.notes[last_idx] = @music.MeasureNote::{
+        ..last_note,
+        tie: None,
+      }
+    }
+    None => ()
+  }
   measures
 }
