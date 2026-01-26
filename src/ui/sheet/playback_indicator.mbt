@@ -13,11 +13,14 @@ pub fn render_playback_indicator(
 
   // Vertical line from above chord symbols to below staff
   let line_top_offset = -100.0 // Same as chord_y_rect
-  let line_bottom_offset = staff_height + 10.0
+  let line_bottom_offset = staff_height + 100.0 // Extended to cover low notes
   @luna_dom.svg_line(
-    stroke="#ef4444",
-    stroke_width="3",
-    attrs=[("stroke-linecap", @luna_dom.Attr::AttrString("round"))],
+    stroke="#3b82f6",
+    stroke_width="10",
+    attrs=[
+      ("stroke-linecap", @luna_dom.Attr::AttrString("round")),
+      ("stroke-opacity", @luna_dom.Attr::AttrString("0.5")),
+    ],
     dyn_attrs=[
       (
         "x1",
@@ -61,7 +64,6 @@ pub fn render_playback_indicator(
           (y + line_bottom_offset).to_string()
         }),
       ),
-      ("opacity", @luna_dom.AttrValue::Dynamic(fn() { "0.7" })),
     ],
   )
 }
