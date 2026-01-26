@@ -2,6 +2,7 @@ import {
   "mizchi/luna/signal",
   "mizchi/signals",
   "mizchi/luna/dom/element" as @luna_dom,
+  "mizchi/js/browser/dom" as @js_dom,
   "internal/jazzene/music" as @music,
 }
 
