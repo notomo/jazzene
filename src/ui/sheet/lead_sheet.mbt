@@ -22,7 +22,10 @@ pub fn lead_sheet(
             let measure_count = measures().length()
             let rows = (measure_count + measures_per_row - 1) / measures_per_row
             let height = staff_top + rows.to_double() * row_height
-            "0 0 1200 \{height.to_int().to_string()}"
+            let width = measure_start_x +
+              clef_space_width +
+              measures_per_row.to_double() * measure_width
+            "\{0} \{0} \{width.to_int()} \{height.to_int()}"
           }),
         ),
       ],

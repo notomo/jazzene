@@ -3,7 +3,11 @@
 
 ///|
 /// Render staff lines (5 horizontal lines)
-pub fn render_staff_lines(x : Double, y : Double) -> @luna_dom.DomNode {
+pub fn render_staff_lines(
+  x : Double,
+  y : Double,
+  width? : Double = measure_width,
+) -> @luna_dom.DomNode {
   let lines = []
   for i = 0; i < staff_lines; {
     let line_y = y + i.to_double() * staff_line_spacing
@@ -11,7 +15,7 @@ pub fn render_staff_lines(x : Double, y : Double) -> @luna_dom.DomNode {
       @luna_dom.svg_line(
         x1=x.to_string(),
         y1=line_y.to_string(),
-        x2=(x + measure_width).to_string(),
+        x2=(x + width).to_string(),
         y2=line_y.to_string(),
         stroke=color_foreground,
         stroke_width="1",

@@ -78,7 +78,7 @@ fn calculate_indicator_x(
   let pos_ms = position.to_milliseconds()
   let ms_per_measure = @music.ms_per_measure(bpm)
   if ms_per_measure <= 0.0 || measure_count <= 0 {
-    return measure_start_x
+    return measure_start_x + clef_space_width
   }
 
   // Calculate current measure index and progress within measure
@@ -97,8 +97,10 @@ fn calculate_indicator_x(
   // Calculate column position
   let col = clamped_idx % measures_per_row
 
-  // X position: start of measure + progress within measure
-  let measure_x = measure_start_x + col.to_double() * measure_width
+  // X position: start of measure + progress within measure (with clef space offset)
+  let measure_x = measure_start_x +
+    clef_space_width +
+    col.to_double() * measure_width
   measure_x + progress * measure_width
 }
 

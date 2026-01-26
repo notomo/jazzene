@@ -29,12 +29,23 @@ pub fn render_measure(
     }),
   )
 
-  // Staff lines
-  children.push(render_staff_lines(x, y))
+  // Staff lines (extend to include clef space on first measure of each row)
+  let is_first_in_row = display_index % measures_per_row == 0
+  if is_first_in_row {
+    children.push(
+      render_staff_lines(
+        x - clef_space_width,
+        y,
+        width=measure_width + clef_space_width,
+      ),
+    )
+  } else {
+    children.push(render_staff_lines(x, y))
+  }
 
-  // Treble clef (only on first measure of each row)
-  if display_index % measures_per_row == 0 {
-    children.push(render_treble_clef(x, y))
+  // Treble clef (only on first measure of each row, positioned in clef space)
+  if is_first_in_row {
+    children.push(render_treble_clef(x - clef_space_width, y))
   }
 
   // Chord symbol (static)
