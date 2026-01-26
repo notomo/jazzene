@@ -81,14 +81,15 @@ fn calculate_indicator_x(
 
   // Calculate current measure index and progress within measure
   let measure_idx = (pos_ms / ms_per_measure).to_int()
-  let progress = (pos_ms - measure_idx.to_double() * ms_per_measure) /
+  let raw_progress = (pos_ms - measure_idx.to_double() * ms_per_measure) /
     ms_per_measure
 
   // Clamp to valid measure range
-  let clamped_idx = if measure_idx >= measure_count {
-    measure_count - 1
+  // When at or past the end, set progress to 1.0 to show indicator at end of last measure
+  let (clamped_idx, progress) = if measure_idx >= measure_count {
+    (measure_count - 1, 1.0)
   } else {
-    measure_idx
+    (measure_idx, raw_progress)
   }
 
   // Calculate column position
