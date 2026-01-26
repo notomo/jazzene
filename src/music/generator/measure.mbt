@@ -1,7 +1,7 @@
 ///|
 /// Context passed to MeasureGenerator
 pub struct MeasureContext {
-  chord : @music.Chord
+  chord : @music.Chord? // None means leading rest
   incoming_tie : TieContext? // Tie from previous measure
 }
 
@@ -47,19 +47,42 @@ pub fn Settings::default(seed : Int) -> Settings {
 pub fn create_measure_generator(settings : Settings) -> MeasureGenerator {
   let random_int = create_random_int(settings.seed)
   fn(ctx : MeasureContext) -> MeasureResult {
-    generate_measure_notes(
-      ctx,
-      settings.rest_probability,
-      settings.duration_weights,
-      random_int,
-    )
+    match ctx.chord {
+      None => generate_leading_rest()
+      Some(chord) =>
+        generate_measure_notes(
+          chord,
+          ctx.incoming_tie,
+          settings.rest_probability,
+          settings.duration_weights,
+          random_int,
+        )
+    }
+  }
+}
+
+///|
+/// Generate a leading rest measure (whole rest)
+fn generate_leading_rest() -> MeasureResult {
+  MeasureResult::{
+    notes: [
+      @music.MeasureNote::{
+        midi: None,
+        duration: @music.Whole,
+        start_beat: 0.0,
+        accidental: None,
+        tie: None,
+      },
+    ],
+    outgoing_tie: None,
   }
 }
 
 ///|
 /// Generate notes for one measure
 fn generate_measure_notes(
-  ctx : MeasureContext,
+  chord : @music.Chord,
+  incoming_tie : TieContext?,
   rest_probability : Int,
   duration_weights : DurationWeights,
   random_int : (Int) -> Int,
@@ -70,7 +93,7 @@ fn generate_measure_notes(
   let beats_per_measure = 4.0
 
   // Handle incoming tie first
-  match ctx.incoming_tie {
+  match incoming_tie {
     Some(tie_ctx) => {
       let remaining = @cmp.minimum(tie_ctx.remaining_beats, beats_per_measure)
       let duration = @music.NoteDuration::from_beats(remaining)
@@ -106,7 +129,7 @@ fn generate_measure_notes(
     let remaining_beats = beats_per_measure - current_beat
     let duration = random_duration(duration_weights, random_int)
     let beats = duration.to_beats()
-    match decide_midi_number(ctx.chord, rest_probability, random_int) {
+    match decide_midi_number(chord, rest_probability, random_int) {
       Some(midi) =>
         if beats <= remaining_beats {
           // Note fits in this measure

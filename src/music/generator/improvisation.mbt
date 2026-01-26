@@ -8,40 +8,27 @@ pub fn improvisation(
   bpm : Int,
   measure_count : Int,
 ) -> Array[@music.Measure] {
+  if chords.is_empty() {
+    return []
+  }
   let measure_duration_ms = @music.ms_per_measure(bpm)
-
-  // Leading rest measure
-  let leading_rest = @music.Measure::{
-    chords: [],
-    notes: [
-      @music.MeasureNote::{
-        midi: None,
-        duration: @music.Whole,
-        start_beat: 0.0,
-        accidental: None,
-        tie: None,
-      },
-    ],
-    start_time: @music.Duration::from_milliseconds(0.0),
-    duration: @music.Duration::from_milliseconds(measure_duration_ms),
-  }
-  if chords.is_empty() || measure_count <= 1 {
-    return [leading_rest]
-  }
-  let measures : Array[@music.Measure] = [leading_rest]
+  let measures : Array[@music.Measure] = []
   let mut incoming_tie : TieContext? = None
-
-  // Generate measures for each chord position
-  let chord_measures_count = measure_count - 1
-  for i = 0; i < chord_measures_count; i = i + 1 {
-    let chord = chords[i % chords.length()]
+  for i = 0; i < measure_count; i = i + 1 {
+    let (chord, measure_chords) = match i {
+      0 => (None, [])
+      _ => {
+        let c = chords[(i - 1) % chords.length()]
+        (Some(c), [c])
+      }
+    }
     let ctx = MeasureContext::{ chord, incoming_tie }
     let result = generator(ctx)
     let measure = @music.Measure::{
-      chords: [chord],
+      chords: measure_chords,
       notes: result.notes,
       start_time: @music.Duration::from_milliseconds(
-        (i + 1).to_double() * measure_duration_ms,
+        i.to_double() * measure_duration_ms,
       ),
       duration: @music.Duration::from_milliseconds(measure_duration_ms),
     }
