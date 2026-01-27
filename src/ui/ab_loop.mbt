@@ -1,8 +1,7 @@
 ///|
 /// State management for A-B loop
 pub struct LoopState {
-  a_enabled : @signal.Signal[Bool]
-  b_enabled : @signal.Signal[Bool]
+  enabled : @signal.Signal[Bool]
   a_time : @signal.Signal[@music.Duration]
   b_time : @signal.Signal[@music.Duration]
   b_manually_set : @signal.Signal[Bool]
@@ -12,8 +11,7 @@ pub struct LoopState {
 /// Create loop state with default values
 pub fn create_loop_state(total_duration : () -> @music.Duration) -> LoopState {
   LoopState::{
-    a_enabled: @signal.signal(false),
-    b_enabled: @signal.signal(false),
+    enabled: @signal.signal(false),
     a_time: @signal.signal(@music.Duration::from_milliseconds(0.0)),
     b_time: @signal.signal(total_duration()),
     b_manually_set: @signal.signal(false),
@@ -26,14 +24,8 @@ pub fn ab_loop(
   loop_state : LoopState,
   total_duration : () -> @music.Duration,
 ) -> @luna_dom.DomNode {
-  // Checkbox handler for A
-  let on_a_checkbox_input : @luna_dom.InputHandler = fn(e) {
-    loop_state.a_enabled.set(get_checkbox_checked(e))
-  }
-
-  // Checkbox handler for B
-  let on_b_checkbox_input : @luna_dom.InputHandler = fn(e) {
-    loop_state.b_enabled.set(get_checkbox_checked(e))
+  let on_enabled_checkbox_input : @luna_dom.InputHandler = fn(e) {
+    loop_state.enabled.set(get_checkbox_checked(e))
   }
 
   // Text input handler for A time
@@ -69,15 +61,13 @@ pub fn ab_loop(
     }
   }
   @luna_dom.div(class="flex gap-2 items-center text-sm text-slate-300", [
-    // A checkbox
     @luna_dom.input(
       type_="checkbox",
       class="w-4 h-4 accent-blue-500 cursor-pointer",
-      attrs=[("aria-label", @luna_dom.Attr::AttrString("enable A loop point"))],
-      dyn_checked=fn() { loop_state.a_enabled.get() },
-      on=@luna_dom.events().input(on_a_checkbox_input),
+      attrs=[("aria-label", @luna_dom.Attr::AttrString("enable A-B loop"))],
+      dyn_checked=fn() { loop_state.enabled.get() },
+      on=@luna_dom.events().input(on_enabled_checkbox_input),
     ),
-    // A label and time input
     @luna_dom.label(class="flex gap-1 items-center", [
       @luna_dom.text("A:"),
       @luna_dom.input(
@@ -93,15 +83,6 @@ pub fn ab_loop(
         on=@luna_dom.events().input(on_a_time_input),
       ),
     ]),
-    // B checkbox
-    @luna_dom.input(
-      type_="checkbox",
-      class="w-4 h-4 accent-blue-500 cursor-pointer",
-      attrs=[("aria-label", @luna_dom.Attr::AttrString("enable B loop point"))],
-      dyn_checked=fn() { loop_state.b_enabled.get() },
-      on=@luna_dom.events().input(on_b_checkbox_input),
-    ),
-    // B label and time input
     @luna_dom.label(class="flex gap-1 items-center", [
       @luna_dom.text("B:"),
       @luna_dom.input(

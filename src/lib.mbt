@@ -96,17 +96,9 @@ fn make_tick(
     )
     // Check loop boundaries
     let final_position = {
-      let a_enabled = loop_state.a_enabled.get()
-      let b_enabled = loop_state.b_enabled.get()
-      let loop_end = if b_enabled { loop_state.b_time.get() } else { total }
-      let loop_start = if a_enabled {
+      let enabled = loop_state.enabled.get()
+      if enabled && new_position >= loop_state.b_time.get() {
         loop_state.a_time.get()
-      } else {
-        @music.Duration::from_milliseconds(0.0)
-      }
-      // If exceeded loop end, jump to loop start
-      if new_position >= loop_end && (a_enabled || b_enabled) {
-        loop_start
       } else {
         new_position
       }
@@ -114,7 +106,7 @@ fn make_tick(
     @music.AudioSound::from(sounds.get(), final_position, lookahead)
     |> @audio.schedule_notes(audio_ctx, volume.get())
     playback_position.set(final_position)
-    let stop = if loop_state.a_enabled.get() || loop_state.b_enabled.get() {
+    let stop = if loop_state.enabled.get() {
       false
     } else {
       final_position == total
