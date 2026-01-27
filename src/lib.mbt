@@ -64,8 +64,16 @@ fn make_measures(
   let _ = @signal.effect(fn() {
     @generator.Settings::default(seed.get())
     |> @generator.create_measure_generator
-    |> @generator.improvisation(chords(), bpm.get(), measure_count.get())
-    |> measure_list => { measures.set(measure_list) }
+    |> @generator.improvisation(
+      chords(),
+      bpm.get(),
+      measure_count.get() - 1,
+      start_offset=1,
+    )
+    |> music_measures => {
+      let leading_rest = @generator.leading_rest_measure(bpm.get())
+      measures.set(leading_rest + music_measures)
+    }
   })
   measures
 }

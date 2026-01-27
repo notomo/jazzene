@@ -1,7 +1,7 @@
 ///|
 /// Context passed to MeasureGenerator
 pub struct MeasureContext {
-  chord : @music.Chord? // None means leading rest
+  chord : @music.Chord
   incoming_tie : TieContext? // Tie from previous measure
 }
 
@@ -47,34 +47,13 @@ pub fn Settings::default(seed : Int) -> Settings {
 pub fn create_measure_generator(settings : Settings) -> MeasureGenerator {
   let random_int = create_random_int(settings.seed)
   fn(ctx : MeasureContext) -> MeasureResult {
-    match ctx.chord {
-      None => generate_leading_rest()
-      Some(chord) =>
-        generate_measure_notes(
-          chord,
-          ctx.incoming_tie,
-          settings.rest_probability,
-          settings.duration_weights,
-          random_int,
-        )
-    }
-  }
-}
-
-///|
-/// Generate a leading rest measure (whole rest)
-fn generate_leading_rest() -> MeasureResult {
-  MeasureResult::{
-    notes: [
-      @music.MeasureNote::{
-        midi: None,
-        duration: @music.Whole,
-        start_beat: 0.0,
-        accidental: None,
-        tie: None,
-      },
-    ],
-    outgoing_tie: None,
+    generate_measure_notes(
+      ctx.chord,
+      ctx.incoming_tie,
+      settings.rest_probability,
+      settings.duration_weights,
+      random_int,
+    )
   }
 }
 

@@ -1,12 +1,28 @@
 ///|
+/// Create a leading rest measure (empty measure at the beginning)
+pub fn leading_rest_measure(bpm : Int) -> Array[@music.Measure] {
+  let measure_duration_ms = @music.ms_per_measure(bpm)
+  [
+    @music.Measure::{
+      chords: [],
+      notes: [],
+      start_time: @music.Duration::from_milliseconds(0.0),
+      duration: @music.Duration::from_milliseconds(measure_duration_ms),
+    },
+  ]
+}
+
+///|
 /// Generate improvisation using measure generator
 /// Returns array of Measures
-/// measure_count specifies the total number of measures (including leading rest)
+/// measure_count specifies the number of music measures (excluding leading rest)
+/// start_offset specifies the measure index offset for start_time calculation
 pub fn improvisation(
   generator : MeasureGenerator,
   chords : Array[@music.Chord],
   bpm : Int,
   measure_count : Int,
+  start_offset? : Int = 0,
 ) -> Array[@music.Measure] {
   if chords.is_empty() {
     return []
@@ -15,20 +31,14 @@ pub fn improvisation(
   let measures : Array[@music.Measure] = []
   let mut incoming_tie : TieContext? = None
   for i = 0; i < measure_count; i = i + 1 {
-    let (chord, measure_chords) = match i {
-      0 => (None, [])
-      _ => {
-        let c = chords[(i - 1) % chords.length()]
-        (Some(c), [c])
-      }
-    }
+    let chord = chords[i % chords.length()]
     let ctx = MeasureContext::{ chord, incoming_tie }
     let result = generator(ctx)
     let measure = @music.Measure::{
-      chords: measure_chords,
+      chords: [chord],
       notes: result.notes,
       start_time: @music.Duration::from_milliseconds(
-        i.to_double() * measure_duration_ms,
+        (i + start_offset).to_double() * measure_duration_ms,
       ),
       duration: @music.Duration::from_milliseconds(measure_duration_ms),
     }
