@@ -59,7 +59,9 @@ pub fn lead_sheet(
         let viewbox_height = staff_top + total_rows.to_double() * row_height
         // Scale factor: how many pixels per SVG unit
         let scale = svg_height.to_double() / viewbox_height
-        // Current row's bottom position in pixels
+        // Current row's position in pixels
+        let row_top_svg = staff_top + current_row.to_double() * row_height
+        let row_top_px = (row_top_svg * scale).to_int()
         let row_bottom_svg = staff_top +
           (current_row + 1).to_double() * row_height
         let row_bottom_px = (row_bottom_svg * scale).to_int()
@@ -67,10 +69,14 @@ pub fn lead_sheet(
         let scroll_top = container.scrollTop()
         let visible_height = container.clientHeight()
         let visible_bottom = scroll_top + visible_height
-        // Only scroll if the current row's bottom is below the visible area
-        // Add margin so the next row is fully visible
+        // Margin to show the next/previous row
         let margin = (row_height * scale).to_int()
-        if row_bottom_px + margin > visible_bottom {
+        // Scroll up if the current row's top is above the visible area
+        if row_top_px - margin < scroll_top {
+          let new_scroll = row_top_px - margin
+          scroll_element_to(container, @cmp.maximum(0, new_scroll))
+        } else if row_bottom_px + margin > visible_bottom {
+          // Scroll down if the current row's bottom is below the visible area
           let new_scroll = row_bottom_px + margin - visible_height
           scroll_element_to(container, new_scroll)
         }
