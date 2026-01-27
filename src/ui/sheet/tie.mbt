@@ -2,6 +2,33 @@
 /// Tie arc rendering for notes that span measure boundaries
 
 ///|
+/// Render tie arc nodes for a note based on its tie state
+pub fn render_tie_arcs(
+  tie : @music.Tie?,
+  note_x : Double,
+  midi : Int,
+  staff_y : Double,
+  measure_x : Double,
+) -> Array[@luna_dom.DomNode] {
+  let note_y = midi_to_staff_y(midi, staff_y)
+  let stem_up = midi < 71
+  let measure_start_x = measure_x
+  let measure_end_x = measure_x + measure_width
+  match tie {
+    Some(@music.TieStart) =>
+      [render_tie_start(note_x, note_y, measure_end_x, stem_up)]
+    Some(@music.TieEnd) =>
+      [render_tie_end(measure_start_x, note_x, note_y, stem_up)]
+    Some(@music.TieBoth) =>
+      [
+        render_tie_end(measure_start_x, note_x, note_y, stem_up),
+        render_tie_start(note_x, note_y, measure_end_x, stem_up),
+      ]
+    None => []
+  }
+}
+
+///|
 /// Render a tie arc from a note to the right edge of the measure (TieStart)
 /// The arc curves away from the stem direction (down if stem up, up if stem down)
 pub fn render_tie_start(

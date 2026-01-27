@@ -66,28 +66,8 @@ pub fn render_measure(
         }
 
         // Render tie arcs if needed
-        let note_y = midi_to_staff_y(midi, y)
-        let stem_up = midi < 71
-        let measure_start_x = x // Left edge of measure (ties come from previous measure)
-        let measure_end_x = x + measure_width
-        match note.tie {
-          Some(@music.TieStart) =>
-            children.push(
-              render_tie_start(note_x, note_y, measure_end_x, stem_up),
-            )
-          Some(@music.TieEnd) =>
-            children.push(
-              render_tie_end(measure_start_x, note_x, note_y, stem_up),
-            )
-          Some(@music.TieBoth) => {
-            children.push(
-              render_tie_end(measure_start_x, note_x, note_y, stem_up),
-            )
-            children.push(
-              render_tie_start(note_x, note_y, measure_end_x, stem_up),
-            )
-          }
-          None => ()
+        for node in render_tie_arcs(note.tie, note_x, midi, y, x) {
+          children.push(node)
         }
       }
       None => {
