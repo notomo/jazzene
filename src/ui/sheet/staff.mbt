@@ -66,22 +66,8 @@ pub fn render_bar_line(x : Double, y : Double) -> @luna_dom.DomNode {
 fn midi_to_diatonic_step(midi : Int) -> Int {
   let pitch_class = midi % 12
   let octave = midi / 12 - 1
-
-  // E4 = pitch_class 4, octave 4
   let e4_pitch_class = 4
   let e4_octave = 4
-  let pitch_class_to_diatonic_step = fn(pc : Int) -> Int {
-    match pc {
-      0 | 1 => 0 // C, C#
-      2 | 3 => 1 // D, D#
-      4 => 2 // E
-      5 | 6 => 3 // F, F#
-      7 | 8 => 4 // G, G#
-      9 | 10 => 5 // A, A#
-      11 => 6 // B
-      _ => 0
-    }
-  }
   let note_diatonic_step = pitch_class_to_diatonic_step(pitch_class)
   let e4_diatonic_step = pitch_class_to_diatonic_step(e4_pitch_class)
   (octave - e4_octave) * 7 + (note_diatonic_step - e4_diatonic_step)
