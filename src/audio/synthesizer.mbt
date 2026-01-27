@@ -13,34 +13,29 @@ fn schedule_note(
   duration : @music.Duration,
   volume : Double,
 ) -> Unit {
-  let frequency = midi.to_frequency()
-
-  // Create nodes
-  let osc = ctx.create_oscillator()
-  let gain = ctx.create_gain()
-
-  // Configure oscillator
-  osc.set_type("sine")
-  osc.set_frequency(frequency)
-
-  // Connect nodes
-  osc.connect(gain.as_audio_node())
-  gain.connect(ctx.destination())
-
-  // Envelope
-  let attack_time = 0.01
-  let release_time = 0.1
   let start_time_sec = start_time.to_seconds()
   let duration_sec = duration.to_seconds()
-  let gain_param = gain.gain()
-  gain_param.set_value_at_time(0.0, start_time_sec)
-  gain_param.linear_ramp_to_value_at_time(volume, start_time_sec + attack_time)
-  gain_param.exponential_ramp_to_value_at_time(
-    0.01,
-    start_time_sec + duration_sec - release_time,
-  )
-
-  // Schedule start/stop
+  let gain = {
+    let gain = ctx.create_gain()
+    let attack_time = 0.01
+    let release_time = 0.1
+    let gain_param = gain.gain()
+    gain_param.set_value_at_time(0.0, start_time_sec)
+    gain_param.linear_ramp_to_value_at_time(
+      volume,
+      start_time_sec + attack_time,
+    )
+    gain_param.exponential_ramp_to_value_at_time(
+      0.01,
+      start_time_sec + duration_sec - release_time,
+    )
+    gain.connect(ctx.destination())
+    gain
+  }
+  let osc = ctx.create_oscillator()
+  osc.set_type("sine")
+  osc.set_frequency(midi.to_frequency())
+  osc.connect(gain.as_audio_node())
   osc.start(start_time_sec)
   osc.stop(start_time_sec + duration_sec)
 }
