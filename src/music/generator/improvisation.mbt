@@ -28,38 +28,45 @@ pub fn improvisation(
     return []
   }
   let measure_duration_ms = @music.ms_per_measure(bpm)
-  let measures : Array[@music.Measure] = []
-  let mut incoming_tie : TieContext? = None
-  for i = 0; i < measure_count; i = i + 1 {
-    let chord = chords[i % chords.length()]
-    let ctx = MeasureContext::{ chord, incoming_tie }
-    let result = generator(ctx)
-    let measure = @music.Measure::{
-      chords: [chord],
-      notes: result.notes,
-      start_time: @music.Duration::from_milliseconds(
-        (i + start_offset).to_double() * measure_duration_ms,
-      ),
-      duration: @music.Duration::from_milliseconds(measure_duration_ms),
-    }
-    measures.push(measure)
-    incoming_tie = result.outgoing_tie
-  }
+  let (measures, last_tie) = Array::makei(measure_count, fn(i) { i })
+    .iter()
+    .fold(init=(([] : Array[@music.Measure]), (None : TieContext?)), fn(
+      acc,
+      i,
+    ) {
+      let (measures, incoming_tie) = acc
+      let chord = chords[i % chords.length()]
+      let result = generator(MeasureContext::{ chord, incoming_tie })
+      measures.push(@music.Measure::{
+        chords: [chord],
+        notes: result.notes,
+        start_time: @music.Duration::from_milliseconds(
+          (i + start_offset).to_double() * measure_duration_ms,
+        ),
+        duration: @music.Duration::from_milliseconds(measure_duration_ms),
+      })
+      (measures, result.outgoing_tie)
+    })
+  remove_dangling_tie(measures, last_tie)
+}
 
-  // Remove dangling tie at the end of the last measure
-  match incoming_tie {
-    Some(_) => {
-      guard not(measures.is_empty()) else { () }
-      let last_measure = measures[measures.length() - 1]
-      guard not(last_measure.notes.is_empty()) else { () }
-      let last_idx = last_measure.notes.length() - 1
-      let last_note = last_measure.notes[last_idx]
-      last_measure.notes[last_idx] = @music.MeasureNote::{
-        ..last_note,
-        tie: None,
-      }
-    }
-    None => ()
+///|
+/// Remove dangling tie at the end of the last measure.
+/// Returns a new array without mutating the original.
+fn remove_dangling_tie(
+  measures : Array[@music.Measure],
+  last_tie : TieContext?,
+) -> Array[@music.Measure] {
+  guard last_tie is Some(_) else { return measures }
+  guard measures is [.. rest_measures, last_measure] else { return measures }
+  guard last_measure.notes is [.. rest_notes, last_note] else {
+    return measures
   }
-  measures
+  [
+    ..rest_measures,
+    @music.Measure::{
+      ..last_measure,
+      notes: [..rest_notes, @music.MeasureNote::{ ..last_note, tie: None }],
+    },
+  ]
 }
