@@ -22,11 +22,14 @@ pub fn play_pause_button(
   }
   @luna_dom.button(
     dyn_class=fn() {
-      if is_playing.get() {
-        "px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition-colors shadow-lg"
-      } else {
-        "px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition-colors shadow-lg"
-      }
+      cn([
+        "px-4 py-3 text-white rounded-lg font-semibold transition-colors shadow-lg",
+        if is_playing.get() {
+          "bg-red-600 hover:bg-red-700"
+        } else {
+          "bg-green-600 hover:bg-green-700"
+        },
+      ])
     },
     on=@luna_dom.events().click(on_click),
     [@luna_dom.text_dyn(fn() { if is_playing.get() { "■" } else { "▶" } })],
