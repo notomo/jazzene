@@ -23,19 +23,15 @@ fn render_chord_symbol(
   x : Double,
   y : Double,
 ) -> Array[@luna_dom.DomNode] {
-  let children : Array[@luna_dom.DomNode] = []
-
   // Don't show chord for measures without chords (e.g., leading rest measure)
   if measure.chords.is_empty() {
-    return children
+    return []
   }
 
   // Calculate chord y position relative to staff
   // Position high enough to avoid overlap with ledger line notes (E6 at step 14 is at y - 45)
   let chord_y_text = y + chord_symbol_y_offset
-
-  // Chord text
-  children.push(
+  [
     @luna_dom.svg_text(
       x=(x + chord_symbol_x_offset).to_string(),
       y=chord_y_text.to_string(),
@@ -45,6 +41,5 @@ fn render_chord_symbol(
       fill=color_foreground,
       [@luna_dom.text(format_chords(measure.chords))],
     ),
-  )
-  children
+  ]
 }

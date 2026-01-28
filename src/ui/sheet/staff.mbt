@@ -20,27 +20,34 @@ let upper_ledger_line_threshold = 8
 let first_ledger_line_above_step = 10
 
 ///|
+/// Render a single staff line
+fn render_staff_line(
+  x : Double,
+  y : Double,
+  width : Double,
+  index : Int,
+) -> @luna_dom.DomNode {
+  let line_y = y + index.to_double() * staff_line_spacing
+  @luna_dom.svg_line(
+    x1=x.to_string(),
+    y1=line_y.to_string(),
+    x2=(x + width).to_string(),
+    y2=line_y.to_string(),
+    stroke=color_foreground,
+    stroke_width="1",
+  )
+}
+
+///|
 /// Render staff lines (5 horizontal lines)
 fn render_staff_lines(
   x : Double,
   y : Double,
   width? : Double = measure_width,
 ) -> @luna_dom.DomNode {
-  let lines = []
-  for i = 0; i < staff_lines; {
-    let line_y = y + i.to_double() * staff_line_spacing
-    lines.push(
-      @luna_dom.svg_line(
-        x1=x.to_string(),
-        y1=line_y.to_string(),
-        x2=(x + width).to_string(),
-        y2=line_y.to_string(),
-        stroke=color_foreground,
-        stroke_width="1",
-      ),
-    )
-    continue i + 1
-  }
+  let lines = Array::makei(staff_lines, fn(i) {
+    render_staff_line(x, y, width, i)
+  })
   @luna_dom.svg_g(lines)
 }
 
@@ -92,6 +99,48 @@ fn midi_to_diatonic_step(midi : Int) -> Int {
 }
 
 ///|
+/// Render a single ledger line
+fn render_ledger_line(
+  note_x : Double,
+  staff_y : Double,
+  step : Int,
+) -> @luna_dom.DomNode {
+  let line_y = staff_y +
+    staff_line_spacing * (staff_lines - 1).to_double() -
+    step.to_double() * (staff_line_spacing / 2.0)
+  @luna_dom.svg_line(
+    x1=(note_x - ledger_line_half_width).to_string(),
+    y1=line_y.to_string(),
+    x2=(note_x + ledger_line_half_width).to_string(),
+    y2=line_y.to_string(),
+    stroke=color_foreground,
+    stroke_width="1",
+  )
+}
+
+///|
+/// Generate ledger line steps for notes below the staff
+fn ledger_steps_below(step : Int) -> Array[Int] {
+  if step >= 0 {
+    return []
+  }
+  let end_step = if step % 2 == 0 { step } else { step - 1 }
+  let count = (first_ledger_line_below_step - end_step) / 2 + 1
+  Array::makei(count, fn(i) { first_ledger_line_below_step - i * 2 })
+}
+
+///|
+/// Generate ledger line steps for notes above the staff
+fn ledger_steps_above(step : Int) -> Array[Int] {
+  if step <= upper_ledger_line_threshold {
+    return []
+  }
+  let end_step = if step % 2 == 0 { step } else { step - 1 }
+  let count = (end_step - first_ledger_line_above_step) / 2 + 1
+  Array::makei(count, fn(i) { first_ledger_line_above_step + i * 2 })
+}
+
+///|
 /// Render ledger lines for notes outside the staff
 fn render_ledger_lines(
   midi : Int,
@@ -99,53 +148,11 @@ fn render_ledger_lines(
   staff_y : Double,
 ) -> Array[@luna_dom.DomNode] {
   let step = midi_to_diatonic_step(midi)
-  let lines = []
-
-  // Ledger line length (slightly longer than note head)
-  let line_half_width = ledger_line_half_width
-
-  // Below staff (step < 0, even steps only)
-  if step < 0 {
-    let end_step = if step % 2 == 0 { step } else { step - 1 }
-    let mut current_step = first_ledger_line_below_step
-    while current_step >= end_step {
-      let line_y = staff_y +
-        staff_line_spacing * (staff_lines - 1).to_double() -
-        current_step.to_double() * (staff_line_spacing / 2.0)
-      lines.push(
-        @luna_dom.svg_line(
-          x1=(note_x - line_half_width).to_string(),
-          y1=line_y.to_string(),
-          x2=(note_x + line_half_width).to_string(),
-          y2=line_y.to_string(),
-          stroke=color_foreground,
-          stroke_width="1",
-        ),
-      )
-      current_step = current_step - 2
-    }
-  }
-
-  // Above staff (step > upper_ledger_line_threshold, even steps only)
-  if step > upper_ledger_line_threshold {
-    let end_step = if step % 2 == 0 { step } else { step - 1 }
-    let mut current_step = first_ledger_line_above_step
-    while current_step <= end_step {
-      let line_y = staff_y +
-        staff_line_spacing * (staff_lines - 1).to_double() -
-        current_step.to_double() * (staff_line_spacing / 2.0)
-      lines.push(
-        @luna_dom.svg_line(
-          x1=(note_x - line_half_width).to_string(),
-          y1=line_y.to_string(),
-          x2=(note_x + line_half_width).to_string(),
-          y2=line_y.to_string(),
-          stroke=color_foreground,
-          stroke_width="1",
-        ),
-      )
-      current_step = current_step + 2
-    }
-  }
-  lines
+  let below = ledger_steps_below(step)
+  let above = ledger_steps_above(step)
+  below
+  .iter()
+  .concat(above.iter())
+  .map(fn(s) { render_ledger_line(note_x, staff_y, s) })
+  .collect()
 }
