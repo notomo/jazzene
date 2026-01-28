@@ -51,7 +51,9 @@ pub fn render(
   measure_count : @signal.Signal[Int],
   sounds : @signal.Signal[Array[@music.NoteValueSound]],
   total_duration : () -> @music.Duration,
-  loop_state : LoopState,
+  loop_enabled : @signal.Signal[Bool],
+  loop_a_time : @signal.Signal[@music.Duration],
+  loop_b_time : @signal.Signal[@music.Duration?],
   chord_parse_error : @signal.Signal[String?],
   measures : () -> Array[@music.Measure],
 ) -> Unit {
@@ -74,7 +76,7 @@ pub fn render(
               volume_input(volume),
               @luna_dom.div(class="flex gap-2 w-full items-center", [
                 seek_bar(playback_position, total_duration),
-                ab_loop(loop_state, total_duration),
+                ab_loop(loop_enabled, loop_a_time, loop_b_time, total_duration),
               ]),
             ]),
           ]),

@@ -35,15 +35,19 @@ fn main {
     @music.Duration::from_milliseconds(0.0),
   )
   let volume = @signal.signal(0.3)
-  let loop_state = @ui.create_loop_state()
+  let loop_enabled = @signal.signal(false)
+  let loop_a_time = @signal.signal(@music.Duration::from_milliseconds(0.0))
+  let loop_b_time : @signal.Signal[@music.Duration?] = @signal.signal(None)
   let tick = make_tick(
-    playback_position, volume, sounds, total_duration, loop_state,
+    playback_position, volume, sounds, total_duration, loop_enabled, loop_a_time,
+    loop_b_time,
   )
   let is_playing = @signal.signal(false)
   @ui.setup_loop(is_playing, tick)
   @ui.render(
     is_playing, playback_position, volume, bpm, raw_chord_progression, seed, measure_count,
-    sounds, total_duration, loop_state, chord_parse_error, measures,
+    sounds, total_duration, loop_enabled, loop_a_time, loop_b_time, chord_parse_error,
+    measures,
   )
 }
 
@@ -78,7 +82,9 @@ fn make_tick(
   volume : @signal.Signal[Double],
   sounds : @signal.Signal[Array[@music.NoteValueSound]],
   total_duration : () -> @music.Duration,
-  loop_state : @ui.LoopState,
+  loop_enabled : @signal.Signal[Bool],
+  loop_a_time : @signal.Signal[@music.Duration],
+  loop_b_time : @signal.Signal[@music.Duration?],
 ) -> (Double) -> Bool {
   let audio_ctx = @audio.create_context()
   let lookahead = @music.Duration::from_milliseconds(100)
@@ -90,10 +96,10 @@ fn make_tick(
     )
     // Check loop boundaries
     let final_position = {
-      let enabled = loop_state.enabled.get()
-      let b_time = loop_state.b_time.get().unwrap_or(total)
+      let enabled = loop_enabled.get()
+      let b_time = loop_b_time.get().unwrap_or(total)
       if enabled && new_position >= b_time {
-        loop_state.a_time.get()
+        loop_a_time.get()
       } else {
         new_position
       }
@@ -101,11 +107,7 @@ fn make_tick(
     @music.AudioSound::from(sounds.get(), final_position, lookahead)
     |> @audio.schedule_notes(audio_ctx, volume.get())
     playback_position.set(final_position)
-    let stop = if loop_state.enabled.get() {
-      false
-    } else {
-      final_position == total
-    }
+    let stop = if loop_enabled.get() { false } else { final_position == total }
     stop
   }
 }
