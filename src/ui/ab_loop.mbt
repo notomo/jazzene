@@ -3,18 +3,16 @@
 pub struct LoopState {
   enabled : @signal.Signal[Bool]
   a_time : @signal.Signal[@music.Duration]
-  b_time : @signal.Signal[@music.Duration]
-  b_manually_set : @signal.Signal[Bool]
+  b_time : @signal.Signal[@music.Duration?]
 }
 
 ///|
 /// Create loop state with default values
-pub fn create_loop_state(total_duration : () -> @music.Duration) -> LoopState {
+pub fn create_loop_state() -> LoopState {
   LoopState::{
     enabled: @signal.signal(false),
     a_time: @signal.signal(@music.Duration::from_milliseconds(0.0)),
-    b_time: @signal.signal(total_duration()),
-    b_manually_set: @signal.signal(false),
+    b_time: @signal.signal(None),
   }
 }
 
@@ -33,7 +31,8 @@ fn ab_loop(
     match parse_time(get_input_value(e)) {
       Some(new_a) => {
         // Clamp to [0, min(b_time, total_duration)]
-        let max_a = @cmp.minimum(loop_state.b_time.get(), total_duration())
+        let b = loop_state.b_time.get().unwrap_or(total_duration())
+        let max_a = @cmp.minimum(b, total_duration())
         let clamped = @cmp.minimum(
           @cmp.maximum(new_a, @music.Duration::from_milliseconds(0.0)),
           max_a,
@@ -54,8 +53,7 @@ fn ab_loop(
           @music.Duration::from_milliseconds(0.0),
         )
         let clamped = @cmp.minimum(@cmp.maximum(new_b, min_b), total_duration())
-        loop_state.b_time.set(clamped)
-        loop_state.b_manually_set.set(true)
+        loop_state.b_time.set(Some(clamped))
       }
       None => ()
     }
@@ -93,7 +91,8 @@ fn ab_loop(
           ("placeholder", @luna_dom.Attr::AttrString("0:00")),
         ],
         dyn_value=fn() {
-          format_time(loop_state.b_time.get().to_milliseconds())
+          let b = loop_state.b_time.get().unwrap_or(total_duration())
+          format_time(b.to_milliseconds())
         },
         on=@luna_dom.events().input(on_b_time_input),
       ),

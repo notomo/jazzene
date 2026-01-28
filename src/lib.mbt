@@ -35,17 +35,11 @@ fn main {
     @music.Duration::from_milliseconds(0.0),
   )
   let volume = @signal.signal(0.3)
-  let loop_state = @ui.create_loop_state(total_duration)
+  let loop_state = @ui.create_loop_state()
   let tick = make_tick(
     playback_position, volume, sounds, total_duration, loop_state,
   )
   let is_playing = @signal.signal(false)
-  let _ = @signal.effect(fn() {
-    let total = total_duration()
-    if not(loop_state.b_manually_set.get()) {
-      loop_state.b_time.set(total)
-    }
-  })
   @ui.setup_loop(is_playing, tick)
   @ui.render(
     is_playing, playback_position, volume, bpm, raw_chord_progression, seed, measure_count,
@@ -97,7 +91,8 @@ fn make_tick(
     // Check loop boundaries
     let final_position = {
       let enabled = loop_state.enabled.get()
-      if enabled && new_position >= loop_state.b_time.get() {
+      let b_time = loop_state.b_time.get().unwrap_or(total)
+      if enabled && new_position >= b_time {
         loop_state.a_time.get()
       } else {
         new_position
