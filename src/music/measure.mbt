@@ -15,7 +15,6 @@ pub(all) struct Measure {
   chords : Array[Chord]
   notes : Array[MeasureNote]
   start_time : Duration
-  duration : Duration
 }
 
 ///|

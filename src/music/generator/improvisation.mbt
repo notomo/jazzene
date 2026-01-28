@@ -1,13 +1,11 @@
 ///|
 /// Create a leading rest measure (empty measure at the beginning)
-pub fn leading_rest_measure(bpm : Int) -> Array[@music.Measure] {
-  let measure_duration_ms = @music.ms_per_measure(bpm)
+pub fn leading_rest_measure() -> Array[@music.Measure] {
   [
     @music.Measure::{
       chords: [],
       notes: [],
       start_time: @music.Duration::from_milliseconds(0.0),
-      duration: @music.Duration::from_milliseconds(measure_duration_ms),
     },
   ]
 }
@@ -43,7 +41,6 @@ pub fn improvisation(
         start_time: @music.Duration::from_milliseconds(
           (i + start_offset).to_double() * measure_duration_ms,
         ),
-        duration: @music.Duration::from_milliseconds(measure_duration_ms),
       })
       (measures, result.outgoing_tie)
     })

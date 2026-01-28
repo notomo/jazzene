@@ -69,7 +69,7 @@ fn make_measures(
       start_offset=1,
     )
     |> music_measures => {
-      let leading_rest = @generator.leading_rest_measure(bpm.get())
+      let leading_rest = @generator.leading_rest_measure()
       measures.set(leading_rest + music_measures)
     }
   })
