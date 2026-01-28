@@ -6,6 +6,36 @@ pub let color_foreground = "#f1f5f9"
 
 // Layout constants
 
+// Stem direction: notes below B4 (MIDI 71) have stems up
+
+///|
+pub let stem_direction_midi_threshold = 71
+
+// Augmentation dot rendering (shared by note.mbt and rest.mbt)
+
+///|
+pub let dot_radius_ratio = 0.15
+
+///|
+pub let dot_x_offset_ratio = 1.5
+
+// Filled note head ellipse ratios
+
+///|
+pub let note_head_rx_ratio : Double = 0.37894733 * 1.9
+
+///|
+pub let note_head_ry_ratio : Double = 0.2542448 * 1.9
+
+///|
+pub let note_head_rotation = -25.0
+
+///|
+pub let cos_note_head_rotation = 0.906308 // cos(25deg)
+
+///|
+pub let sin_note_head_rotation = 0.422618 // sin(25deg)
+
 ///|
 pub let staff_top = 120.0
 
@@ -77,5 +107,5 @@ pub fn midi_to_staff_y(midi : Int, staff_y : Double) -> Double {
   // E4 is on the bottom line (staff_y + 4 * staff_line_spacing)
   // Each diatonic step = half a line spacing
   let offset = total_diatonic_steps.to_double() * -(staff_line_spacing / 2.0)
-  staff_y + staff_line_spacing * 4.0 + offset
+  staff_y + staff_line_spacing * (staff_lines - 1).to_double() + offset
 }

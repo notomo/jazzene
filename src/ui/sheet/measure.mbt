@@ -2,6 +2,15 @@
 /// Measure assembly - combines all musical notation elements
 
 ///|
+let measure_clickable_top_offset = -80.0
+
+///|
+let note_area_start_offset = 60.0
+
+///|
+let note_area_padding = 80.0
+
+///|
 /// Render a single measure with all its elements
 pub fn render_measure(
   measure : @music.Measure,
@@ -15,7 +24,7 @@ pub fn render_measure(
   let measure_number = display_index + 1
   let clickable_background = @luna_dom.svg_rect(
     x=x.to_string(),
-    y=(y - 80.0).to_string(),
+    y=(y + measure_clickable_top_offset).to_string(),
     width=measure_width.to_string(),
     height=row_height.to_string(),
     fill="transparent",
@@ -56,7 +65,9 @@ pub fn render_measure(
 
   // Notes and rests
   for note in measure.notes {
-    let note_x = x + 60.0 + note.start_beat * (measure_width - 80.0) / 4.0
+    let note_x = x +
+      note_area_start_offset +
+      note.start_beat * (measure_width - note_area_padding) / 4.0
     match note.midi {
       Some(midi) => {
         // Render note

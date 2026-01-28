@@ -2,6 +2,9 @@
 /// Rest symbol rendering (quarter, half, eighth rests with dots)
 
 ///|
+let rest_scale_divisor = 40.0
+
+///|
 /// Render a single rest symbol
 pub fn render_rest(
   note : @music.MeasureNote,
@@ -16,7 +19,7 @@ pub fn render_rest(
     match note.duration {
       Quarter | DottedQuarter => {
         // Quarter rest with detailed SVG path
-        let scale = staff_line_spacing / 40.0
+        let scale = staff_line_spacing / rest_scale_divisor
         let transform_str = "scale(" +
           scale.to_string() +
           ") translate(" +
@@ -57,7 +60,7 @@ pub fn render_rest(
       }
       Eighth | DottedEighth => {
         // Eighth rest with detailed SVG path
-        let scale = staff_line_spacing / 40.0
+        let scale = staff_line_spacing / rest_scale_divisor
         let transform_str = "scale(" +
           scale.to_string() +
           ") translate(" +
@@ -78,8 +81,8 @@ pub fn render_rest(
   // Dot for dotted rests
   match note.duration {
     DottedEighth | DottedQuarter | DottedHalf => {
-      let dot_radius = staff_line_spacing * 0.15
-      let dot_x = note_x + staff_line_spacing * 1.5
+      let dot_radius = staff_line_spacing * dot_radius_ratio
+      let dot_x = note_x + staff_line_spacing * dot_x_offset_ratio
       let dot_y = rest_y
       children.push(
         @luna_dom.svg_circle(

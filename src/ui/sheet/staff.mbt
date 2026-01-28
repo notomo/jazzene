@@ -2,6 +2,24 @@
 /// Staff notation rendering functions (staff lines, treble clef, bar lines, ledger lines)
 
 ///|
+let treble_clef_scale_divisor = 32.0
+
+///|
+let treble_clef_x_offset = 10.0
+
+///|
+let ledger_line_half_width = 15.0
+
+///|
+let first_ledger_line_below_step = -2
+
+///|
+let upper_ledger_line_threshold = 8
+
+///|
+let first_ledger_line_above_step = 10
+
+///|
 /// Render staff lines (5 horizontal lines)
 pub fn render_staff_lines(
   x : Double,
@@ -29,8 +47,8 @@ pub fn render_staff_lines(
 ///|
 /// Render treble clef symbol with detailed SVG path
 pub fn render_treble_clef(x : Double, y : Double) -> @luna_dom.DomNode {
-  let scale = staff_line_spacing / 32.0
-  let cx = x + 10.0
+  let scale = staff_line_spacing / treble_clef_scale_divisor
+  let cx = x + treble_clef_x_offset
   let cy = y + staff_line_spacing * 2.0 // Middle of staff
   let transform = "scale(" +
     scale.to_string() +
@@ -55,7 +73,7 @@ pub fn render_bar_line(x : Double, y : Double) -> @luna_dom.DomNode {
     x1=x.to_string(),
     y1=y.to_string(),
     x2=x.to_string(),
-    y2=(y + staff_line_spacing * 4.0).to_string(),
+    y2=(y + staff_line_spacing * (staff_lines - 1).to_double()).to_string(),
     stroke=color_foreground,
     stroke_width="2",
   )
@@ -84,15 +102,15 @@ pub fn render_ledger_lines(
   let lines = []
 
   // Ledger line length (slightly longer than note head)
-  let line_half_width = 15.0
+  let line_half_width = ledger_line_half_width
 
   // Below staff (step < 0, even steps only)
   if step < 0 {
     let end_step = if step % 2 == 0 { step } else { step - 1 }
-    let mut current_step = -2 // First ledger line below staff
+    let mut current_step = first_ledger_line_below_step
     while current_step >= end_step {
       let line_y = staff_y +
-        staff_line_spacing * 4.0 -
+        staff_line_spacing * (staff_lines - 1).to_double() -
         current_step.to_double() * (staff_line_spacing / 2.0)
       lines.push(
         @luna_dom.svg_line(
@@ -108,13 +126,13 @@ pub fn render_ledger_lines(
     }
   }
 
-  // Above staff (step > 8, even steps only)
-  if step > 8 {
+  // Above staff (step > upper_ledger_line_threshold, even steps only)
+  if step > upper_ledger_line_threshold {
     let end_step = if step % 2 == 0 { step } else { step - 1 }
-    let mut current_step = 10 // First ledger line above F5
+    let mut current_step = first_ledger_line_above_step
     while current_step <= end_step {
       let line_y = staff_y +
-        staff_line_spacing * 4.0 -
+        staff_line_spacing * (staff_lines - 1).to_double() -
         current_step.to_double() * (staff_line_spacing / 2.0)
       lines.push(
         @luna_dom.svg_line(

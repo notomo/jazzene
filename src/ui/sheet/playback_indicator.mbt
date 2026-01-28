@@ -2,6 +2,18 @@
 /// Playback position indicator - vertical line overlay
 
 ///|
+let playback_indicator_top_offset = -100.0
+
+///|
+let playback_indicator_bottom_offset = 100.0
+
+///|
+let playback_indicator_color = "#3b82f6"
+
+///|
+let playback_indicator_stroke_width = "10"
+
+///|
 /// Render a vertical line indicator showing the current playback position
 pub fn render_playback_indicator(
   playback_position : @signal.Signal[@music.Duration],
@@ -12,11 +24,11 @@ pub fn render_playback_indicator(
   let staff_height = (staff_lines - 1).to_double() * staff_line_spacing
 
   // Vertical line from above chord symbols to below staff
-  let line_top_offset = -100.0 // Same as chord_y_rect
-  let line_bottom_offset = staff_height + 100.0 // Extended to cover low notes
+  let line_top_offset = playback_indicator_top_offset
+  let line_bottom_offset = staff_height + playback_indicator_bottom_offset
   @luna_dom.svg_line(
-    stroke="#3b82f6",
-    stroke_width="10",
+    stroke=playback_indicator_color,
+    stroke_width=playback_indicator_stroke_width,
     attrs=[
       ("stroke-linecap", @luna_dom.Attr::AttrString("round")),
       ("stroke-opacity", @luna_dom.Attr::AttrString("0.5")),

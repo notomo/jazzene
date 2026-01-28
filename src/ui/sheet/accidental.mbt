@@ -2,9 +2,18 @@
 /// Accidental symbol rendering (sharp, flat, natural)
 
 ///|
+let sharp_scale_divisor = 50.0
+
+///|
+let flat_scale_divisor = 90.0
+
+///|
+let natural_scale_divisor = 45.0
+
+///|
 /// Render a sharp accidental symbol
 fn render_sharp(x : Double, y : Double) -> @luna_dom.DomNode {
-  let scale = staff_line_spacing / 50.0
+  let scale = staff_line_spacing / sharp_scale_divisor
   let transform_str = "scale(" +
     scale.to_string() +
     ") translate(" +
@@ -23,7 +32,7 @@ fn render_sharp(x : Double, y : Double) -> @luna_dom.DomNode {
 ///|
 /// Render a flat accidental symbol
 fn render_flat(x : Double, y : Double) -> @luna_dom.DomNode {
-  let scale = staff_line_spacing / 90.0
+  let scale = staff_line_spacing / flat_scale_divisor
   let transform_str = "scale(" +
     scale.to_string() +
     ") translate(" +
@@ -42,7 +51,7 @@ fn render_flat(x : Double, y : Double) -> @luna_dom.DomNode {
 ///|
 /// Render a natural accidental symbol
 fn render_natural(x : Double, y : Double) -> @luna_dom.DomNode {
-  let scale = staff_line_spacing / 45.0
+  let scale = staff_line_spacing / natural_scale_divisor
   let transform_str = "scale(" +
     scale.to_string() +
     ") translate(" +

@@ -1,4 +1,16 @@
 ///|
+let accidental_x_offset_ratio = 1.2
+
+///|
+let hollow_note_scale_divisor = 50.0
+
+///|
+let stem_height_spaces = 3.0
+
+///|
+let flag_scale_divisor = 32.0
+
+///|
 /// Render a single note with all its elements
 pub fn render_note(
   note : @music.MeasureNote,
@@ -14,7 +26,8 @@ pub fn render_note(
       // Accidental (rendered to the left of the note)
       match note.accidental {
         Some(accidental) => {
-          let accidental_x = note_x - staff_line_spacing * 1.2
+          let accidental_x = note_x -
+            staff_line_spacing * accidental_x_offset_ratio
           children.push(render_accidental(accidental, accidental_x, note_y))
         }
         None => ()
@@ -31,8 +44,8 @@ pub fn render_note(
         match note.duration {
           Eighth | DottedEighth | Quarter | DottedQuarter => {
             // Filled note head - rotated ellipse for more realistic appearance
-            let rx = staff_line_spacing * 0.37894733 * 1.9
-            let ry = staff_line_spacing * 0.2542448 * 1.9
+            let rx = staff_line_spacing * note_head_rx_ratio
+            let ry = staff_line_spacing * note_head_ry_ratio
             @luna_dom.svg_ellipse(
               cx=note_x.to_string(),
               cy=note_y.to_string(),
@@ -44,7 +57,9 @@ pub fn render_note(
                 (
                   "transform",
                   @luna_dom.Attr::AttrString(
-                    "rotate(-25, " +
+                    "rotate(" +
+                    note_head_rotation.to_string() +
+                    ", " +
                     note_x.to_string() +
                     ", " +
                     note_y.to_string() +
@@ -56,7 +71,7 @@ pub fn render_note(
           }
           Half | DottedHalf | Whole => {
             // Hollow note head - hollow ellipse path for more realistic appearance
-            let scale = staff_line_spacing / 50.0
+            let scale = staff_line_spacing / hollow_note_scale_divisor
             let transform_str = "scale(" +
               scale.to_string() +
               ") translate(" +
@@ -75,15 +90,15 @@ pub fn render_note(
       )
 
       // Stem and flag (whole notes have no stem)
-      let stem_height = staff_line_spacing * 3.0 // 3 staff spaces
-      let stem_up = midi < 71
+      let stem_height = staff_line_spacing * stem_height_spaces
+      let stem_up = midi < stem_direction_midi_threshold
       match note.duration {
         Eighth | DottedEighth | Quarter | DottedQuarter | Half | DottedHalf => {
           // Calculate stem attachment point on rotated ellipse
           // Ellipse is rotated -25 degrees
-          let rx = staff_line_spacing * 0.37894733 * 1.9
-          let cos_25 = 0.906308
-          let sin_25 = 0.422618
+          let rx = staff_line_spacing * note_head_rx_ratio
+          let cos_25 = cos_note_head_rotation
+          let sin_25 = sin_note_head_rotation
           let (stem_x_offset, stem_y_offset) = if stem_up {
             // Attach to right side of ellipse (0 degrees before rotation)
             (rx * cos_25, -(rx * sin_25))
@@ -108,7 +123,7 @@ pub fn render_note(
           // Flag for eighth notes
           match note.duration {
             Eighth | DottedEighth => {
-              let scale = staff_line_spacing / 32.0
+              let scale = staff_line_spacing / flag_scale_divisor
               let flag_transform = if stem_up {
                 "scale(" +
                 scale.to_string() +
@@ -148,8 +163,8 @@ pub fn render_note(
       // Dot for dotted notes
       match note.duration {
         DottedEighth | DottedQuarter | DottedHalf => {
-          let dot_radius = staff_line_spacing * 0.15
-          let dot_x = note_x + staff_line_spacing * 1.5
+          let dot_radius = staff_line_spacing * dot_radius_ratio
+          let dot_x = note_x + staff_line_spacing * dot_x_offset_ratio
           let dot_y = note_y
           children.push(
             @luna_dom.svg_circle(
