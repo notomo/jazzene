@@ -1,6 +1,6 @@
 ///|
 /// Render BPM input control
-pub fn bpm_input(bpm : @signal.Signal[Int]) -> @luna_dom.DomNode {
+fn bpm_input(bpm : @signal.Signal[Int]) -> @luna_dom.DomNode {
   let on_input : @luna_dom.InputHandler = fn(e) {
     get_input_value(e)
     |> @js_global.parseInt

@@ -1,6 +1,6 @@
 ///|
 /// Render piano keyboard component using Canvas API
-pub fn keyboard(
+fn keyboard(
   sounds : @signal.Signal[Array[@music.NoteValueSound]],
   playback_position : @signal.Signal[@music.Duration],
 ) -> @luna_dom.DomNode {

@@ -1,6 +1,6 @@
 ///|
 /// Rectangle - Basic geometry type for canvas calculations
-pub struct Rectangle {
+priv struct Rectangle {
   left : Double
   top : Double
   width : Double
@@ -9,7 +9,7 @@ pub struct Rectangle {
 
 ///|
 /// KeyArea - Represents a piano key with position and metadata
-pub struct KeyArea {
+priv struct KeyArea {
   rect : Rectangle
   midi : Int
   is_black : Bool
@@ -43,7 +43,7 @@ let key_ratio : Array[(Double, Double)] = [
 ///
 /// # Returns
 /// Array of KeyArea with exact position and size for each key
-pub fn calc_key_areas(
+fn calc_key_areas(
   rect : Rectangle,
   min_key : Int,
   max_key : Int,

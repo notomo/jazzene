@@ -1,6 +1,6 @@
 ///|
 /// Render seek_bar UI component
-pub fn seek_bar(
+fn seek_bar(
   playback_position : @signal.Signal[@music.Duration],
   total_duration : () -> @music.Duration,
 ) -> @luna_dom.DomNode {

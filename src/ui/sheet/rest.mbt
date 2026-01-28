@@ -6,7 +6,7 @@ let rest_scale_divisor = 40.0
 
 ///|
 /// Render a single rest symbol
-pub fn render_rest(
+fn render_rest(
   note : @music.MeasureNote,
   note_x : Double,
   staff_y : Double,

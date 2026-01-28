@@ -20,7 +20,7 @@ pub fn create_loop_state(total_duration : () -> @music.Duration) -> LoopState {
 
 ///|
 /// Render A-B loop control UI
-pub fn ab_loop(
+fn ab_loop(
   loop_state : LoopState,
   total_duration : () -> @music.Duration,
 ) -> @luna_dom.DomNode {

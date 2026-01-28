@@ -12,7 +12,7 @@ let flag_scale_divisor = 32.0
 
 ///|
 /// Render a single note with all its elements
-pub fn render_note(
+fn render_note(
   note : @music.MeasureNote,
   note_x : Double,
   staff_y : Double,

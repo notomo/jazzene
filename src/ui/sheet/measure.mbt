@@ -12,7 +12,7 @@ let note_area_padding = 80.0
 
 ///|
 /// Render a single measure with all its elements
-pub fn render_measure(
+fn render_measure(
   measure : @music.Measure,
   display_index : Int,
   playback_position : @signal.Signal[@music.Duration],

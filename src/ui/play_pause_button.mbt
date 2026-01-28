@@ -1,6 +1,6 @@
 ///|
 /// Render play/pause button
-pub fn play_pause_button(
+fn play_pause_button(
   is_playing : @signal.Signal[Bool],
   playback_position : @signal.Signal[@music.Duration],
   total_duration : () -> @music.Duration,

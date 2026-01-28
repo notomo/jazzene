@@ -1,6 +1,6 @@
 ///|
 /// Format milliseconds as "M:SS"
-pub fn format_time(ms : Double) -> String {
+fn format_time(ms : Double) -> String {
   let total_seconds = (ms / 1000.0).to_int()
   let minutes = total_seconds / 60
   let seconds = total_seconds % 60
@@ -13,7 +13,7 @@ pub fn format_time(ms : Double) -> String {
 ///|
 /// Parse "M:SS" format to Duration
 /// Returns None if format is invalid
-pub fn parse_time(input : String) -> @music.Duration? {
+fn parse_time(input : String) -> @music.Duration? {
   let parts = input.split(":").to_array()
   if parts.length() != 2 {
     return None

@@ -15,7 +15,7 @@ let playback_indicator_stroke_width = "10"
 
 ///|
 /// Render a vertical line indicator showing the current playback position
-pub fn render_playback_indicator(
+fn render_playback_indicator(
   playback_position : @signal.Signal[@music.Duration],
   bpm : @signal.Signal[Int],
   measure_count : () -> Int,

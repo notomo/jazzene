@@ -18,7 +18,7 @@ fn format_chords(chords : Array[@music.Chord]) -> String {
 
 ///|
 /// Render chord symbol as static text
-pub fn render_chord_symbol(
+fn render_chord_symbol(
   measure : @music.Measure,
   x : Double,
   y : Double,

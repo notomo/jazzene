@@ -2,68 +2,68 @@
 /// Layout constants and calculations for lead sheet rendering
 
 ///|
-pub let color_foreground = "#f1f5f9"
+let color_foreground = "#f1f5f9"
 
 // Layout constants
 
 // Stem direction: notes below B4 (MIDI 71) have stems up
 
 ///|
-pub let stem_direction_midi_threshold = 71
+let stem_direction_midi_threshold = 71
 
 // Augmentation dot rendering (shared by note.mbt and rest.mbt)
 
 ///|
-pub let dot_radius_ratio = 0.15
+let dot_radius_ratio = 0.15
 
 ///|
-pub let dot_x_offset_ratio = 1.5
+let dot_x_offset_ratio = 1.5
 
 // Filled note head ellipse ratios
 
 ///|
-pub let note_head_rx_ratio : Double = 0.37894733 * 1.9
+let note_head_rx_ratio : Double = 0.37894733 * 1.9
 
 ///|
-pub let note_head_ry_ratio : Double = 0.2542448 * 1.9
+let note_head_ry_ratio : Double = 0.2542448 * 1.9
 
 ///|
-pub let note_head_rotation = -25.0
+let note_head_rotation = -25.0
 
 ///|
-pub let cos_note_head_rotation = 0.906308 // cos(25deg)
+let cos_note_head_rotation = 0.906308 // cos(25deg)
 
 ///|
-pub let sin_note_head_rotation = 0.422618 // sin(25deg)
+let sin_note_head_rotation = 0.422618 // sin(25deg)
 
 ///|
-pub let staff_top = 120.0
+let staff_top = 120.0
 
 ///|
-pub let staff_line_spacing = 15.0
+let staff_line_spacing = 15.0
 
 ///|
-pub let staff_lines = 5
+let staff_lines = 5
 
 ///|
-pub let measures_per_row = 4
+let measures_per_row = 4
 
 ///|
-pub let measure_width = 280.0
+let measure_width = 280.0
 
 ///|
-pub let clef_space_width = 50.0
+let clef_space_width = 50.0
 
 ///|
-pub let measure_start_x = 40.0
+let measure_start_x = 40.0
 
 ///|
-pub let row_height = 250.0
+let row_height = 250.0
 
 ///|
 /// Calculate measure position in the layout
 /// First measure of each row is offset by clef_space_width for the treble clef
-pub fn measure_position(measure_index : Int) -> (Double, Double) {
+fn measure_position(measure_index : Int) -> (Double, Double) {
   let col = measure_index % measures_per_row
   let row = measure_index / measures_per_row
   let clef_offset = clef_space_width
@@ -90,7 +90,7 @@ fn pitch_class_to_diatonic_step(pitch_class : Int) -> Int {
 ///|
 /// Convert MIDI number to Y position on staff
 /// E4 (MIDI 64) is the bottom line of treble clef
-pub fn midi_to_staff_y(midi : Int, staff_y : Double) -> Double {
+fn midi_to_staff_y(midi : Int, staff_y : Double) -> Double {
   // Calculate pitch class and octave
   let pitch_class = midi % 12
   let octave = midi / 12 - 1

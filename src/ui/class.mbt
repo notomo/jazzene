@@ -4,6 +4,6 @@
 /// ```
 /// cn(["base-class", if condition { "active" } else { "" }])
 /// ```
-pub fn cn(classes : Array[String]) -> String {
+fn cn(classes : Array[String]) -> String {
   classes.iter().filter(fn(s) { not(s.is_empty()) }).join(" ")
 }

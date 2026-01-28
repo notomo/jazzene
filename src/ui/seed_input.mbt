@@ -1,6 +1,6 @@
 ///|
 /// Render seed input control for random number generation
-pub fn seed_input(seed : @signal.Signal[Int]) -> @luna_dom.DomNode {
+fn seed_input(seed : @signal.Signal[Int]) -> @luna_dom.DomNode {
   let on_input : @luna_dom.InputHandler = fn(e) {
     get_input_value(e)
     |> @js_global.parseInt

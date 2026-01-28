@@ -27,7 +27,7 @@ let tie_stroke_width = "0.5"
 
 ///|
 /// Render tie arc nodes for a note based on its tie state
-pub fn render_tie_arcs(
+fn render_tie_arcs(
   tie : @music.Tie?,
   note_x : Double,
   midi : Int,
@@ -55,7 +55,7 @@ pub fn render_tie_arcs(
 ///|
 /// Render a tie arc from a note to the right edge of the measure (TieStart)
 /// The arc curves away from the stem direction (down if stem up, up if stem down)
-pub fn render_tie_start(
+fn render_tie_start(
   note_x : Double,
   note_y : Double,
   measure_end_x : Double,
@@ -122,7 +122,7 @@ pub fn render_tie_start(
 ///|
 /// Render a tie arc from the left edge of the measure to a note (TieEnd)
 /// The arc curves away from the stem direction
-pub fn render_tie_end(
+fn render_tie_end(
   measure_start_x : Double,
   note_x : Double,
   note_y : Double,

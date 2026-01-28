@@ -1,6 +1,6 @@
 ///|
 /// Render chord input textarea
-pub fn chord_progression_input(
+fn chord_progression_input(
   raw_chord_progression : @signal.Signal[String],
   parse_error : @signal.Signal[String?],
 ) -> @luna_dom.DomNode {

@@ -21,7 +21,7 @@ let first_ledger_line_above_step = 10
 
 ///|
 /// Render staff lines (5 horizontal lines)
-pub fn render_staff_lines(
+fn render_staff_lines(
   x : Double,
   y : Double,
   width? : Double = measure_width,
@@ -46,7 +46,7 @@ pub fn render_staff_lines(
 
 ///|
 /// Render treble clef symbol with detailed SVG path
-pub fn render_treble_clef(x : Double, y : Double) -> @luna_dom.DomNode {
+fn render_treble_clef(x : Double, y : Double) -> @luna_dom.DomNode {
   let scale = staff_line_spacing / treble_clef_scale_divisor
   let cx = x + treble_clef_x_offset
   let cy = y + staff_line_spacing * 2.0 // Middle of staff
@@ -68,7 +68,7 @@ pub fn render_treble_clef(x : Double, y : Double) -> @luna_dom.DomNode {
 
 ///|
 /// Render bar line
-pub fn render_bar_line(x : Double, y : Double) -> @luna_dom.DomNode {
+fn render_bar_line(x : Double, y : Double) -> @luna_dom.DomNode {
   @luna_dom.svg_line(
     x1=x.to_string(),
     y1=y.to_string(),
@@ -93,7 +93,7 @@ fn midi_to_diatonic_step(midi : Int) -> Int {
 
 ///|
 /// Render ledger lines for notes outside the staff
-pub fn render_ledger_lines(
+fn render_ledger_lines(
   midi : Int,
   note_x : Double,
   staff_y : Double,

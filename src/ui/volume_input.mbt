@@ -1,6 +1,6 @@
 ///|
 /// Render volume control with popup
-pub fn volume_input(volume : @signal.Signal[Double]) -> @luna_dom.DomNode {
+fn volume_input(volume : @signal.Signal[Double]) -> @luna_dom.DomNode {
   let show_popup = @signal.signal(false)
   let on_input : @luna_dom.InputHandler = fn(e) {
     get_input_value(e)

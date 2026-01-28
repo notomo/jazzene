@@ -1,6 +1,6 @@
 ///|
 /// Render measure count input control
-pub fn measure_count_input(
+fn measure_count_input(
   measure_count : @signal.Signal[Int],
 ) -> @luna_dom.DomNode {
   let on_input : @luna_dom.InputHandler = fn(e) {
