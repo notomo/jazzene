@@ -1,4 +1,13 @@
 ///|
+fn clamp(
+  min : @music.Duration,
+  value : @music.Duration,
+  max : @music.Duration,
+) -> @music.Duration {
+  @cmp.minimum(@cmp.maximum(value, min), max)
+}
+
+///|
 /// Render A-B loop control UI
 fn ab_loop(
   loop_enabled : @signal.Signal[Bool],
@@ -9,35 +18,23 @@ fn ab_loop(
   let on_enabled_checkbox_input : @luna_dom.InputHandler = fn(e) {
     loop_enabled.set(get_checkbox_checked(e))
   }
-
-  // Text input handler for A time
   let on_a_time_input : @luna_dom.InputHandler = fn(e) {
     match parse_time(get_input_value(e)) {
       Some(new_a) => {
-        // Clamp to [0, min(b_time, total_duration)]
         let b = loop_b_time.get().unwrap_or(total_duration())
         let max_a = @cmp.minimum(b, total_duration())
-        let clamped = @cmp.minimum(
-          @cmp.maximum(new_a, @music.Duration::from_milliseconds(0.0)),
-          max_a,
-        )
-        loop_a_time.set(clamped)
+        let zero = @music.Duration::from_milliseconds(0.0)
+        loop_a_time.set(clamp(zero, new_a, max_a))
       }
       None => ()
     }
   }
-
-  // Text input handler for B time
   let on_b_time_input : @luna_dom.InputHandler = fn(e) {
     match parse_time(get_input_value(e)) {
       Some(new_b) => {
-        // Clamp to [max(a_time, 0), total_duration]
-        let min_b = @cmp.maximum(
-          loop_a_time.get(),
-          @music.Duration::from_milliseconds(0.0),
-        )
-        let clamped = @cmp.minimum(@cmp.maximum(new_b, min_b), total_duration())
-        loop_b_time.set(Some(clamped))
+        let zero = @music.Duration::from_milliseconds(0.0)
+        let min_b = @cmp.maximum(loop_a_time.get(), zero)
+        loop_b_time.set(Some(clamp(min_b, new_b, total_duration())))
       }
       None => ()
     }
