@@ -37,40 +37,10 @@ let cos_note_head_rotation = 0.906308 // cos(25deg)
 let sin_note_head_rotation = 0.422618 // sin(25deg)
 
 ///|
-let staff_top = 120.0
-
-///|
 let staff_line_spacing = 15.0
 
 ///|
 let staff_lines = 5
-
-///|
-let measures_per_row = 4
-
-///|
-let measure_width = 280.0
-
-///|
-let clef_space_width = 50.0
-
-///|
-let measure_start_x = 40.0
-
-///|
-let row_height = 250.0
-
-///|
-/// Calculate measure position in the layout
-/// First measure of each row is offset by clef_space_width for the treble clef
-fn measure_position(measure_index : Int) -> (Double, Double) {
-  let col = measure_index % measures_per_row
-  let row = measure_index / measures_per_row
-  let clef_offset = clef_space_width
-  let x = measure_start_x + clef_offset + col.to_double() * measure_width
-  let y = staff_top + row.to_double() * row_height
-  (x, y)
-}
 
 ///|
 /// Convert MIDI pitch class to diatonic steps from C
