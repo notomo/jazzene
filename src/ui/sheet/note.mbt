@@ -26,6 +26,9 @@ const COS_NOTE_HEAD_ROTATION = 0.906308 // cos(25deg)
 const SIN_NOTE_HEAD_ROTATION = 0.422618 // sin(25deg)
 
 ///|
+const STEM_DIRECTION_MIDI_THRESHOLD = 71
+
+///|
 /// Render accidental symbol to the left of the note
 fn render_note_accidental(
   accidental : @music.Accidental?,
