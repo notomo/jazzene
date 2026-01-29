@@ -17,7 +17,7 @@ const CLEF_SPACE_WIDTH = 50.0
 const MEASURE_START_X = 40.0
 
 ///|
-const ROW_HEIGHT = 250.0
+const ROW_HEIGHT = 300.0
 
 ///|
 /// Calculate measure position in the layout
