@@ -169,30 +169,6 @@ fn render_stem_and_flag(
 }
 
 ///|
-/// Render duration dot for dotted notes
-fn render_duration_dot(
-  duration : @music.NoteDuration,
-  note_x : Double,
-  note_y : Double,
-) -> @luna_dom.DomNode? {
-  match duration {
-    DottedEighth | DottedQuarter | DottedHalf => {
-      let dot_radius = STAFF_LINE_SPACING * DOT_RADIUS_RATIO
-      let dot_x = note_x + STAFF_LINE_SPACING * DOT_X_OFFSET_RATIO
-      Some(
-        @luna_dom.svg_circle(
-          cx=dot_x.to_string(),
-          cy=note_y.to_string(),
-          r=dot_radius.to_string(),
-          fill=COLOR_FOREGROUND,
-        ),
-      )
-    }
-    _ => None
-  }
-}
-
-///|
 /// Render a single note with all its elements
 fn render_note(
   note : @music.MeasureNote,

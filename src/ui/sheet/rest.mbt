@@ -72,30 +72,6 @@ fn render_rest_symbol(
 }
 
 ///|
-/// Render duration dot for dotted rests
-fn render_rest_dot(
-  duration : @music.NoteDuration,
-  note_x : Double,
-  rest_y : Double,
-) -> @luna_dom.DomNode? {
-  match duration {
-    DottedEighth | DottedQuarter | DottedHalf => {
-      let dot_radius = STAFF_LINE_SPACING * DOT_RADIUS_RATIO
-      let dot_x = note_x + STAFF_LINE_SPACING * DOT_X_OFFSET_RATIO
-      Some(
-        @luna_dom.svg_circle(
-          cx=dot_x.to_string(),
-          cy=rest_y.to_string(),
-          r=dot_radius.to_string(),
-          fill=COLOR_FOREGROUND,
-        ),
-      )
-    }
-    _ => None
-  }
-}
-
-///|
 /// Render a single rest symbol
 fn render_rest(
   note : @music.MeasureNote,
@@ -105,6 +81,6 @@ fn render_rest(
   let rest_y = staff_y + STAFF_LINE_SPACING * 2.0
   [
     render_rest_symbol(note.duration, note_x, rest_y),
-    ..render_rest_dot(note.duration, note_x, rest_y),
+    ..render_duration_dot(note.duration, note_x, rest_y),
   ]
 }

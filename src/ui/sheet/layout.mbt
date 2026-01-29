@@ -11,14 +11,6 @@ const COLOR_FOREGROUND = "#f1f5f9"
 ///|
 const STEM_DIRECTION_MIDI_THRESHOLD = 71
 
-// Augmentation dot rendering (shared by note.mbt and rest.mbt)
-
-///|
-const DOT_RADIUS_RATIO = 0.15
-
-///|
-const DOT_X_OFFSET_RATIO = 1.5
-
 // Filled note head ellipse ratios
 
 ///|
