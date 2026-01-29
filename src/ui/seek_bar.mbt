@@ -22,9 +22,7 @@ fn seek_bar(
       attrs=[("aria-label", @luna_dom.Attr::AttrString("time display"))],
       [
         @luna_dom.text_dyn(fn() {
-          format_time(playback_position.get().to_milliseconds()) +
-          " / " +
-          format_time(total_duration().to_milliseconds())
+          playback_position.get().format() + " / " + total_duration().format()
         }),
       ],
     ),

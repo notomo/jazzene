@@ -66,3 +66,79 @@ test "Duration equality" {
   assert_eq(d1, d2)
   assert_true(d1 != d3)
 }
+
+///|
+test "Duration::format - zero" {
+  let d = Duration::from_milliseconds(0.0)
+  assert_eq(d.format(), "0:00")
+}
+
+///|
+test "Duration::format - seconds with leading zero" {
+  let d = Duration::from_seconds(5.0)
+  assert_eq(d.format(), "0:05")
+}
+
+///|
+test "Duration::format - minutes and seconds" {
+  let d = Duration::from_seconds(65.0)
+  assert_eq(d.format(), "1:05")
+}
+
+///|
+test "Duration::format - exact minute" {
+  let d = Duration::from_seconds(120.0)
+  assert_eq(d.format(), "2:00")
+}
+
+///|
+test "Duration::format - large value" {
+  let d = Duration::from_seconds(3661.0)
+  assert_eq(d.format(), "61:01")
+}
+
+///|
+test "Duration::parse - valid 0:00" {
+  assert_eq(Duration::parse("0:00"), Some(Duration::from_seconds(0.0)))
+}
+
+///|
+test "Duration::parse - valid 1:30" {
+  assert_eq(Duration::parse("1:30"), Some(Duration::from_seconds(90.0)))
+}
+
+///|
+test "Duration::parse - valid 10:05" {
+  assert_eq(Duration::parse("10:05"), Some(Duration::from_seconds(605.0)))
+}
+
+///|
+test "Duration::parse - invalid no colon" {
+  assert_eq(Duration::parse("100"), None)
+}
+
+///|
+test "Duration::parse - invalid seconds >= 60" {
+  assert_eq(Duration::parse("1:60"), None)
+}
+
+///|
+test "Duration::parse - invalid non-numeric" {
+  assert_eq(Duration::parse("a:bc"), None)
+}
+
+///|
+test "Duration::parse - invalid empty" {
+  assert_eq(Duration::parse(""), None)
+}
+
+///|
+test "Duration::parse - invalid multiple colons" {
+  assert_eq(Duration::parse("1:2:3"), None)
+}
+
+///|
+test "Duration format-parse round trip" {
+  let d = Duration::from_seconds(95.0)
+  assert_eq(Duration::parse(d.format()), Some(Duration::from_seconds(95.0)))
+}

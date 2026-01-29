@@ -1,6 +1,7 @@
 import {
   "moonbitlang/core/math",
   "moonbitlang/core/random",
+  "moonbitlang/core/strconv",
 }
 
 import "wbtest" {

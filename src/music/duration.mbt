@@ -53,3 +53,37 @@ pub impl Add for Duration with add(self, other) {
 pub impl Sub for Duration with sub(self, other) {
   { seconds: self.seconds - other.seconds }
 }
+
+///|
+/// Format Duration as "M:SS"
+pub fn Duration::format(self : Duration) -> String {
+  let total_seconds = self.seconds.to_int()
+  let minutes = total_seconds / 60
+  let secs = total_seconds % 60
+  minutes.to_string() +
+  ":" +
+  (if secs < 10 { "0" } else { "" }) +
+  secs.to_string()
+}
+
+///|
+/// Parse "M:SS" format to Duration
+/// Returns None if format is invalid
+pub fn Duration::parse(input : String) -> Duration? {
+  let parts = input.split(":").to_array()
+  if parts.length() != 2 {
+    return None
+  }
+  try {
+    let minutes = @strconv.parse_int(parts[0])
+    let seconds = @strconv.parse_int(parts[1])
+    if minutes >= 0 && seconds >= 0 && seconds < 60 {
+      let total_ms = (minutes * 60 + seconds).to_double() * 1000.0
+      Some(Duration::from_milliseconds(total_ms))
+    } else {
+      None
+    }
+  } catch {
+    _ => None
+  }
+}
