@@ -2,43 +2,43 @@
 /// Measure assembly - combines all musical notation elements
 
 ///|
-let staff_top = 120.0
+const STAFF_TOP = 120.0
 
 ///|
-let measures_per_row = 4
+const MEASURES_PER_ROW = 4
 
 ///|
-let measure_width = 280.0
+const MEASURE_WIDTH = 280.0
 
 ///|
-let clef_space_width = 50.0
+const CLEF_SPACE_WIDTH = 50.0
 
 ///|
-let measure_start_x = 40.0
+const MEASURE_START_X = 40.0
 
 ///|
-let row_height = 250.0
+const ROW_HEIGHT = 250.0
 
 ///|
 /// Calculate measure position in the layout
 /// First measure of each row is offset by clef_space_width for the treble clef
 fn measure_position(measure_index : Int) -> (Double, Double) {
-  let col = measure_index % measures_per_row
-  let row = measure_index / measures_per_row
-  let clef_offset = clef_space_width
-  let x = measure_start_x + clef_offset + col.to_double() * measure_width
-  let y = staff_top + row.to_double() * row_height
+  let col = measure_index % MEASURES_PER_ROW
+  let row = measure_index / MEASURES_PER_ROW
+  let clef_offset = CLEF_SPACE_WIDTH
+  let x = MEASURE_START_X + clef_offset + col.to_double() * MEASURE_WIDTH
+  let y = STAFF_TOP + row.to_double() * ROW_HEIGHT
   (x, y)
 }
 
 ///|
-let measure_clickable_top_offset = -80.0
+const MEASURE_CLICKABLE_TOP_OFFSET = -80.0
 
 ///|
-let note_area_start_offset = 60.0
+const NOTE_AREA_START_OFFSET = 60.0
 
 ///|
-let note_area_padding = 80.0
+const NOTE_AREA_PADDING = 80.0
 
 ///|
 /// Render clickable background for seeking
@@ -51,9 +51,9 @@ fn render_clickable_background(
 ) -> @luna_dom.DomNode {
   @luna_dom.svg_rect(
     x=x.to_string(),
-    y=(y + measure_clickable_top_offset).to_string(),
-    width=measure_width.to_string(),
-    height=row_height.to_string(),
+    y=(y + MEASURE_CLICKABLE_TOP_OFFSET).to_string(),
+    width=MEASURE_WIDTH.to_string(),
+    height=ROW_HEIGHT.to_string(),
     fill="transparent",
     style="cursor: pointer",
     attrs=[
@@ -75,9 +75,9 @@ fn render_measure_staff_lines(
 ) -> @luna_dom.DomNode {
   if is_first_in_row {
     render_staff_lines(
-      x - clef_space_width,
+      x - CLEF_SPACE_WIDTH,
       y,
-      width=measure_width + clef_space_width,
+      width=MEASURE_WIDTH + CLEF_SPACE_WIDTH,
     )
   } else {
     render_staff_lines(x, y)
@@ -92,7 +92,7 @@ fn render_measure_clef(
   is_first_in_row : Bool,
 ) -> @luna_dom.DomNode? {
   if is_first_in_row {
-    Some(render_treble_clef(x - clef_space_width, y))
+    Some(render_treble_clef(x - CLEF_SPACE_WIDTH, y))
   } else {
     None
   }
@@ -102,8 +102,8 @@ fn render_measure_clef(
 /// Calculate note x position within measure
 fn note_x_position(measure_x : Double, start_beat : Double) -> Double {
   measure_x +
-  note_area_start_offset +
-  start_beat * (measure_width - note_area_padding) / 4.0
+  NOTE_AREA_START_OFFSET +
+  start_beat * (MEASURE_WIDTH - NOTE_AREA_PADDING) / 4.0
 }
 
 ///|
@@ -148,7 +148,7 @@ fn render_measure(
   playback_position : @signal.Signal[@music.Duration],
 ) -> @luna_dom.DomNode {
   let (x, y) = measure_position(display_index)
-  let is_first_in_row = display_index % measures_per_row == 0
+  let is_first_in_row = display_index % MEASURES_PER_ROW == 0
   let measure_number = display_index + 1
   let clef_nodes = match render_measure_clef(x, y, is_first_in_row) {
     Some(n) => [n]
@@ -160,7 +160,7 @@ fn render_measure(
       clef_nodes,
       render_chord_symbol(measure, x, y),
       render_measure_notes(measure, x, y),
-      [render_bar_line(x + measure_width, y)],
+      [render_bar_line(x + MEASURE_WIDTH, y)],
       [
         render_clickable_background(
           x, y, measure_number, measure, playback_position,

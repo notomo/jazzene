@@ -2,16 +2,16 @@
 /// Playback position indicator - vertical line overlay
 
 ///|
-let playback_indicator_top_offset = -100.0
+const PLAYBACK_INDICATOR_TOP_OFFSET = -100.0
 
 ///|
-let playback_indicator_bottom_offset = 100.0
+const PLAYBACK_INDICATOR_BOTTOM_OFFSET = 100.0
 
 ///|
-let playback_indicator_color = "#3b82f6"
+const PLAYBACK_INDICATOR_COLOR = "#3b82f6"
 
 ///|
-let playback_indicator_stroke_width = "10"
+const PLAYBACK_INDICATOR_STROKE_WIDTH = "10"
 
 ///|
 /// Render a vertical line indicator showing the current playback position
@@ -21,14 +21,14 @@ fn render_playback_indicator(
   measure_count : () -> Int,
 ) -> @luna_dom.DomNode {
   // Staff height (5 lines with spacing between them)
-  let staff_height = (staff_lines - 1).to_double() * staff_line_spacing
+  let staff_height = (STAFF_LINES - 1).to_double() * STAFF_LINE_SPACING
 
   // Vertical line from above chord symbols to below staff
-  let line_top_offset = playback_indicator_top_offset
-  let line_bottom_offset = staff_height + playback_indicator_bottom_offset
+  let line_top_offset = PLAYBACK_INDICATOR_TOP_OFFSET
+  let line_bottom_offset = staff_height + PLAYBACK_INDICATOR_BOTTOM_OFFSET
   @luna_dom.svg_line(
-    stroke=playback_indicator_color,
-    stroke_width=playback_indicator_stroke_width,
+    stroke=PLAYBACK_INDICATOR_COLOR,
+    stroke_width=PLAYBACK_INDICATOR_STROKE_WIDTH,
     attrs=[
       ("stroke-linecap", @luna_dom.Attr::AttrString("round")),
       ("stroke-opacity", @luna_dom.Attr::AttrString("0.5")),
@@ -90,7 +90,7 @@ fn calculate_indicator_x(
   let pos_ms = position.to_milliseconds()
   let ms_per_measure = @music.ms_per_measure(bpm)
   if ms_per_measure <= 0.0 || measure_count <= 0 {
-    return measure_start_x + clef_space_width
+    return MEASURE_START_X + CLEF_SPACE_WIDTH
   }
 
   // Calculate current measure index and progress within measure
@@ -107,13 +107,13 @@ fn calculate_indicator_x(
   }
 
   // Calculate column position
-  let col = clamped_idx % measures_per_row
+  let col = clamped_idx % MEASURES_PER_ROW
 
   // X position: start of measure + progress within measure (with clef space offset)
-  let measure_x = measure_start_x +
-    clef_space_width +
-    col.to_double() * measure_width
-  measure_x + progress * measure_width
+  let measure_x = MEASURE_START_X +
+    CLEF_SPACE_WIDTH +
+    col.to_double() * MEASURE_WIDTH
+  measure_x + progress * MEASURE_WIDTH
 }
 
 ///|
@@ -126,7 +126,7 @@ fn calculate_indicator_y(
   let pos_ms = position.to_milliseconds()
   let ms_per_measure = @music.ms_per_measure(bpm)
   if ms_per_measure <= 0.0 || measure_count <= 0 {
-    return staff_top
+    return STAFF_TOP
   }
 
   // Calculate current measure index
@@ -140,8 +140,8 @@ fn calculate_indicator_y(
   }
 
   // Calculate row position
-  let row = clamped_idx / measures_per_row
+  let row = clamped_idx / MEASURES_PER_ROW
 
   // Y position: staff top for this row
-  staff_top + row.to_double() * row_height
+  STAFF_TOP + row.to_double() * ROW_HEIGHT
 }
