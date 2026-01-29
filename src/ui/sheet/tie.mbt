@@ -82,37 +82,9 @@ fn render_tie_start(
   // Inner arc control points
   let inner_ctrl_y = ctrl_y +
     (if stem_up { -TIE_THICKNESS } else { TIE_THICKNESS })
-
-  // Create filled path with outer and inner cubic Bezier arcs
-  let path = "M " +
-    start_x.to_string() +
-    " " +
-    start_y.to_string() +
-    " C " +
-    ctrl1_x.to_string() +
-    " " +
-    ctrl_y.to_string() +
-    " " +
-    ctrl2_x.to_string() +
-    " " +
-    ctrl_y.to_string() +
-    " " +
-    end_x.to_string() +
-    " " +
-    end_y.to_string() +
-    " C " +
-    ctrl2_x.to_string() +
-    " " +
-    inner_ctrl_y.to_string() +
-    " " +
-    ctrl1_x.to_string() +
-    " " +
-    inner_ctrl_y.to_string() +
-    " " +
-    start_x.to_string() +
-    " " +
-    start_y.to_string() +
-    " Z"
+  let path = tie_arc_path(
+    start_x, start_y, end_x, end_y, ctrl1_x, ctrl2_x, ctrl_y, inner_ctrl_y,
+  )
   @luna_dom.svg_path(d=path, attrs=[
     ("stroke-width", @luna_dom.Attr::AttrString(TIE_STROKE_WIDTH)),
     ("stroke-linejoin", @luna_dom.Attr::AttrString("round")),
@@ -149,39 +121,34 @@ fn render_tie_end(
   // Inner arc control points
   let inner_ctrl_y = ctrl_y +
     (if stem_up { -TIE_THICKNESS } else { TIE_THICKNESS })
-
-  // Create filled path with outer and inner cubic Bezier arcs
-  let path = "M " +
-    start_x.to_string() +
-    " " +
-    start_y.to_string() +
-    " C " +
-    ctrl1_x.to_string() +
-    " " +
-    ctrl_y.to_string() +
-    " " +
-    ctrl2_x.to_string() +
-    " " +
-    ctrl_y.to_string() +
-    " " +
-    end_x.to_string() +
-    " " +
-    end_y.to_string() +
-    " C " +
-    ctrl2_x.to_string() +
-    " " +
-    inner_ctrl_y.to_string() +
-    " " +
-    ctrl1_x.to_string() +
-    " " +
-    inner_ctrl_y.to_string() +
-    " " +
-    start_x.to_string() +
-    " " +
-    start_y.to_string() +
-    " Z"
+  let path = tie_arc_path(
+    start_x, start_y, end_x, end_y, ctrl1_x, ctrl2_x, ctrl_y, inner_ctrl_y,
+  )
   @luna_dom.svg_path(d=path, attrs=[
     ("stroke-width", @luna_dom.Attr::AttrString(TIE_STROKE_WIDTH)),
     ("stroke-linejoin", @luna_dom.Attr::AttrString("round")),
   ])
+}
+
+///|
+fn tie_arc_path(
+  start_x : Double,
+  start_y : Double,
+  end_x : Double,
+  end_y : Double,
+  ctrl1_x : Double,
+  ctrl2_x : Double,
+  ctrl_y : Double,
+  inner_ctrl_y : Double,
+) -> String {
+  let coords = fn(values : Array[Double]) -> String {
+    values.map(fn(v) { v.to_string() }).join(" ")
+  }
+  [
+    "M " + coords([start_x, start_y]),
+    "C " + coords([ctrl1_x, ctrl_y, ctrl2_x, ctrl_y, end_x, end_y]),
+    "C " +
+    coords([ctrl2_x, inner_ctrl_y, ctrl1_x, inner_ctrl_y, start_x, start_y]),
+    "Z",
+  ].join(" ")
 }
