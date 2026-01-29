@@ -14,40 +14,113 @@ pub fn Chord::tones(self : Chord) -> Array[MidiNumber] {
 }
 
 ///|
-/// Parse a single chord string into a Chord struct
-pub fn parse_chord(input : String) -> Result[Chord, String] {
-  let (root_str, quality_str) = match input {
-    [c1, c2, .. tail] if ['#', 'b'].contains(c2) =>
-      // e.g., "F#", "Bb"
-      (c1.to_string() + c2.to_string(), tail.to_string())
-    [c1, .. tail] =>
-      // e.g., "C", "F"
-      (c1.to_string(), tail.to_string())
-    [] => return Err("Empty chord string")
+/// Format complete chord symbol
+pub fn format_chord(chord : Chord) -> String {
+  chord.root.to_string() + chord.quality.to_string()
+}
+
+///|
+/// Scale degree in a major scale
+pub(all) enum ScaleDegree {
+  I
+  II
+  III
+  IV
+  V
+  VI
+  VII
+} derive(Eq, Show)
+
+///|
+/// Semitone offset from the root for each scale degree in a major scale
+pub fn ScaleDegree::semitones(self : ScaleDegree) -> Int {
+  match self {
+    I => 0
+    II => 2
+    III => 4
+    IV => 5
+    V => 7
+    VI => 9
+    VII => 11
   }
-  let root = match ChordRoot::from_string(root_str) {
-    Ok(r) => r
+}
+
+///|
+/// A chord expressed as a scale degree with optional accidental
+pub(all) struct DegreeChord {
+  accidental : Int // -1 for flat, 0 for natural, +1 for sharp
+  degree : ScaleDegree
+  quality : ChordQuality
+} derive(Eq, Show)
+
+///|
+/// Parse a Roman numeral from the beginning of a string.
+/// Returns the ScaleDegree and the remaining string.
+fn parse_roman_numeral(input : String) -> Result[(ScaleDegree, String), String] {
+  let upper = input.to_upper()
+  match upper {
+    ['V', 'I', 'I', ..] => Ok((VII, drop_chars(input, 3)))
+    ['V', 'I', ..] => Ok((VI, drop_chars(input, 2)))
+    ['I', 'V', ..] => Ok((IV, drop_chars(input, 2)))
+    ['V', ..] => Ok((V, drop_chars(input, 1)))
+    ['I', 'I', 'I', ..] => Ok((III, drop_chars(input, 3)))
+    ['I', 'I', ..] => Ok((II, drop_chars(input, 2)))
+    ['I', ..] => Ok((I, drop_chars(input, 1)))
+    _ => Err("Invalid Roman numeral in: " + input)
+  }
+}
+
+///|
+/// Drop the first n characters from a string
+fn drop_chars(s : String, n : Int) -> String {
+  let buf = StringBuilder::new()
+  for i, c in s {
+    if i >= n {
+      buf..write_char(c)
+    }
+  }
+  buf.to_string()
+}
+
+///|
+/// Parse a single degree chord string (e.g., "IIm7", "bVIImaj7", "#IVm7b5")
+pub fn parse_degree_chord(input : String) -> Result[DegreeChord, String] {
+  if input == "" {
+    return Err("Empty degree chord string")
+  }
+  // Parse optional accidental prefix
+  let (accidental, rest) = match input {
+    ['b', .. tail] | ['♭', .. tail] => (-1, tail.to_string())
+    ['#', .. tail] | ['♯', .. tail] => (1, tail.to_string())
+    _ => (0, input)
+  }
+  // Parse Roman numeral
+  let (degree, quality_str) = match parse_roman_numeral(rest) {
+    Ok(result) => result
     Err(e) => return Err(e)
   }
+  // Parse quality suffix
   let quality = match parse_quality(quality_str) {
     Ok(q) => q
     Err(e) => return Err(e)
   }
-  Ok(Chord::{ root, quality })
+  Ok(DegreeChord::{ accidental, degree, quality })
 }
 
 ///|
-/// Parse a chord progression string into an array of chords
-/// Example: "Cm7 F7 Bbmaj7 Ebmaj7" -> Ok([Chord, Chord, Chord, Chord])
-/// Returns Err with error message if any chord fails to parse
-pub fn parse_chord_progression(input : String) -> Result[Array[Chord], String] {
+/// Parse a space-separated degree chord progression
+pub fn parse_degree_progression(
+  input : String,
+) -> Result[Array[DegreeChord], String] {
   let results = input
     .trim()
     .split(" ")
     .map(fn(token) { token.to_string().trim().to_string() })
     .filter(fn(token) { token != "" })
     .map(fn(token) {
-      parse_chord(token).map_err(fn(e) { "Failed to parse '\{token}': \{e}" })
+      parse_degree_chord(token).map_err(fn(e) {
+        "Failed to parse '\{token}': \{e}"
+      })
     })
     .collect()
   let errors = results
@@ -66,7 +139,10 @@ pub fn parse_chord_progression(input : String) -> Result[Array[Chord], String] {
 }
 
 ///|
-/// Format complete chord symbol
-pub fn format_chord(chord : Chord) -> String {
-  chord.root.to_string() + chord.quality.to_string()
+/// Resolve a degree chord to an absolute chord given a key root
+pub fn DegreeChord::resolve(self : DegreeChord, key_root : ChordRoot) -> Chord {
+  let root_pc = (key_root.midi() + self.degree.semitones() + self.accidental) %
+    12
+  let root = ChordRoot::from_pitch_class(root_pc)
+  Chord::{ root, quality: self.quality }
 }

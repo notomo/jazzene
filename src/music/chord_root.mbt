@@ -57,6 +57,26 @@ pub fn ChordRoot::midi(self : ChordRoot) -> Int {
 }
 
 ///|
+/// Convert pitch class (0-11) to ChordRoot
+pub fn ChordRoot::from_pitch_class(pc : Int) -> ChordRoot {
+  match pc % 12 {
+    0 => C
+    1 => CSharp
+    2 => D
+    3 => DSharp
+    4 => E
+    5 => F
+    6 => FSharp
+    7 => G
+    8 => GSharp
+    9 => A
+    10 => ASharp
+    11 => B
+    _ => C // unreachable
+  }
+}
+
+///|
 /// Convert chord root to display string
 pub fn ChordRoot::to_string(self : ChordRoot) -> String {
   match self {

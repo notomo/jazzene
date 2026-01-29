@@ -20,6 +20,6 @@ fn chord_progression_input(
     },
     on=@luna_dom.events().input(on_input),
     dyn_value=fn() { raw_chord_progression.get() },
-    placeholder="Enter chord progression (e.g., Cm7 F7 Bbmaj7 Ebmaj7)",
+    placeholder="Enter chord progression (e.g., IIm7 V7 Imaj7 IVmaj7)",
   )
 }
