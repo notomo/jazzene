@@ -73,14 +73,14 @@ fn render_measure_staff_lines(
   y : Double,
   is_first_in_row : Bool,
 ) -> @luna_dom.DomNode {
-  if is_first_in_row {
-    render_staff_lines(
-      x - CLEF_SPACE_WIDTH,
-      y,
-      width=MEASURE_WIDTH + CLEF_SPACE_WIDTH,
-    )
-  } else {
-    render_staff_lines(x, y)
+  match is_first_in_row {
+    true =>
+      render_staff_lines(
+        x - CLEF_SPACE_WIDTH,
+        y,
+        width=MEASURE_WIDTH + CLEF_SPACE_WIDTH,
+      )
+    false => render_staff_lines(x, y)
   }
 }
 
@@ -91,10 +91,9 @@ fn render_measure_clef(
   y : Double,
   is_first_in_row : Bool,
 ) -> @luna_dom.DomNode? {
-  if is_first_in_row {
-    Some(render_treble_clef(x - CLEF_SPACE_WIDTH, y))
-  } else {
-    None
+  match is_first_in_row {
+    true => Some(render_treble_clef(x - CLEF_SPACE_WIDTH, y))
+    false => None
   }
 }
 
@@ -115,11 +114,11 @@ fn render_note_or_rest(
   measure_x : Double,
 ) -> Array[@luna_dom.DomNode] {
   match note.midi {
-    Some(midi) => {
-      let note_nodes = render_note(note, note_x, y)
-      let tie_nodes = render_tie_arcs(note.tie, note_x, midi, y, measure_x)
-      [note_nodes, tie_nodes].flatten()
-    }
+    Some(midi) =>
+      [
+        ..render_note(note, note_x, y),
+        ..render_tie_arcs(note.tie, note_x, midi, y, measure_x),
+      ]
     None => render_rest(note, note_x, y)
   }
 }
@@ -150,22 +149,16 @@ fn render_measure(
   let (x, y) = measure_position(display_index)
   let is_first_in_row = display_index % MEASURES_PER_ROW == 0
   let measure_number = display_index + 1
-  let clef_nodes = match render_measure_clef(x, y, is_first_in_row) {
-    Some(n) => [n]
-    None => []
-  }
   @luna_dom.svg_g(
     [
-      [render_measure_staff_lines(x, y, is_first_in_row)],
-      clef_nodes,
-      render_chord_symbol(measure, x, y),
-      render_measure_notes(measure, x, y),
-      [render_bar_line(x + MEASURE_WIDTH, y)],
-      [
-        render_clickable_background(
-          x, y, measure_number, measure, playback_position,
-        ),
-      ],
-    ].flatten(),
+      render_measure_staff_lines(x, y, is_first_in_row),
+      ..render_measure_clef(x, y, is_first_in_row),
+      ..render_chord_symbol(measure, x, y),
+      ..render_measure_notes(measure, x, y),
+      render_bar_line(x + MEASURE_WIDTH, y),
+      render_clickable_background(
+        x, y, measure_number, measure, playback_position,
+      ),
+    ],
   )
 }

@@ -202,25 +202,13 @@ fn render_note(
   match note.midi {
     Some(midi) => {
       let note_y = midi_to_staff_y(midi, staff_y)
-      let accidental = render_note_accidental(note.accidental, note_x, note_y)
-      let ledger_lines = render_ledger_lines(midi, note_x, staff_y)
-      let note_head = render_note_head(note.duration, note_x, note_y)
-      let stem_and_flag = render_stem_and_flag(
-        note.duration,
-        midi,
-        note_x,
-        note_y,
-      )
-      let duration_dot = render_duration_dot(note.duration, note_x, note_y)
-      let accidental_nodes : Array[_] = match accidental {
-        Some(n) => [n]
-        None => []
-      }
-      let dot_nodes : Array[_] = match duration_dot {
-        Some(n) => [n]
-        None => []
-      }
-      [accidental_nodes, ledger_lines, [note_head], stem_and_flag, dot_nodes].flatten()
+      [
+        ..render_note_accidental(note.accidental, note_x, note_y),
+        ..render_ledger_lines(midi, note_x, staff_y),
+        render_note_head(note.duration, note_x, note_y),
+        ..render_stem_and_flag(note.duration, midi, note_x, note_y),
+        ..render_duration_dot(note.duration, note_x, note_y),
+      ]
     }
     None => []
   }

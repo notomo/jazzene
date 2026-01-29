@@ -45,10 +45,9 @@ fn render_staff_lines(
   y : Double,
   width? : Double = MEASURE_WIDTH,
 ) -> @luna_dom.DomNode {
-  let lines = Array::makei(STAFF_LINES, fn(i) {
-    render_staff_line(x, y, width, i)
-  })
-  @luna_dom.svg_g(lines)
+  @luna_dom.svg_g(
+    Array::makei(STAFF_LINES, fn(i) { render_staff_line(x, y, width, i) }),
+  )
 }
 
 ///|
@@ -141,11 +140,7 @@ fn render_ledger_lines(
   staff_y : Double,
 ) -> Array[@luna_dom.DomNode] {
   let step = midi_to_diatonic_step(midi)
-  let below = ledger_steps_below(step)
-  let above = ledger_steps_above(step)
-  below
-  .iter()
-  .concat(above.iter())
-  .map(fn(s) { render_ledger_line(note_x, staff_y, s) })
-  .collect()
+  [..ledger_steps_above(step), ..ledger_steps_below(step)].map(fn(s) {
+    render_ledger_line(note_x, staff_y, s)
+  })
 }

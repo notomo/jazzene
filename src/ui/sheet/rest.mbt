@@ -103,11 +103,8 @@ fn render_rest(
   staff_y : Double,
 ) -> Array[@luna_dom.DomNode] {
   let rest_y = staff_y + STAFF_LINE_SPACING * 2.0
-  let rest_symbol = render_rest_symbol(note.duration, note_x, rest_y)
-  let dot = render_rest_dot(note.duration, note_x, rest_y)
-  let dot_nodes : Array[_] = match dot {
-    Some(n) => [n]
-    None => []
-  }
-  [[rest_symbol], dot_nodes].flatten()
+  [
+    render_rest_symbol(note.duration, note_x, rest_y),
+    ..render_rest_dot(note.duration, note_x, rest_y),
+  ]
 }
