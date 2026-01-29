@@ -2,7 +2,7 @@
 /// Rest symbol rendering (quarter, half, eighth rests with dots)
 
 ///|
-const REST_SCALE_DIVISOR = 40.0
+const REST_SCALE_DIVISOR = 60.0
 
 ///|
 /// Render quarter rest symbol
