@@ -9,15 +9,20 @@ pub(all) enum Accidental {
 ///|
 /// Create an accidental calculator that tracks pitch states internally
 /// Returns a function that calculates and updates accidentals for each note
-pub fn create_accidental_calculator() -> (MidiNumber) -> Accidental? {
-  let pitch_states : Map[Int, Accidental] = {}
+/// Tracks state by diatonic step (0-6) to correctly handle key signatures
+pub fn create_accidental_calculator(
+  key : KeySignature,
+) -> (MidiNumber) -> Accidental? {
+  let step_states : Map[Int, Accidental] = {}
+  // Initialize from key signature: altered steps start with key's accidental type
+  for step in key.altered_steps {
+    step_states[step] = key.accidental_type
+  }
   fn(midi : MidiNumber) -> Accidental? {
-    let pitch_class = midi.pitch_class()
-    let required_state = midi.accidental()
-    let current_state = pitch_states
-      .get(pitch_class)
-      .unwrap_or(Accidental::Natural)
-    pitch_states[pitch_class] = required_state
+    let step = key.pitch_class_to_diatonic_step(midi.pitch_class())
+    let required_state = key.pitch_class_accidental(midi.pitch_class())
+    let current_state = step_states.get(step).unwrap_or(Accidental::Natural)
+    step_states[step] = required_state
     if required_state == current_state {
       None // No change needed
     } else {

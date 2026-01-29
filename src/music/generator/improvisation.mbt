@@ -20,6 +20,7 @@ pub fn improvisation(
   chords : Array[@music.Chord],
   bpm : Int,
   measure_count : Int,
+  key : @music.KeySignature,
   start_offset? : Int = 0,
 ) -> Array[@music.Measure] {
   if chords.is_empty() {
@@ -34,7 +35,7 @@ pub fn improvisation(
     ) {
       let (measures, incoming_tie) = acc
       let chord = chords[i % chords.length()]
-      let result = generator(MeasureContext::{ chord, incoming_tie })
+      let result = generator(MeasureContext::{ chord, incoming_tie, key })
       measures.push(@music.Measure::{
         chords: [chord],
         notes: result.notes,

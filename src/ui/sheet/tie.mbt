@@ -33,8 +33,9 @@ fn render_tie_arcs(
   midi : Int,
   staff_y : Double,
   measure_x : Double,
+  key : @music.KeySignature,
 ) -> Array[@luna_dom.DomNode] {
-  let note_y = midi_to_staff_y(midi, staff_y)
+  let note_y = midi_to_staff_y(midi, staff_y, key)
   let stem_up = midi < STEM_DIRECTION_MIDI_THRESHOLD
   let measure_start_x = measure_x
   let measure_end_x = measure_x + MEASURE_WIDTH

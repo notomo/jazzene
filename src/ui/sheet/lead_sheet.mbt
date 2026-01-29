@@ -38,6 +38,7 @@ pub fn lead_sheet(
   measures : () -> Array[@music.Measure],
   playback_position : @signal.Signal[@music.Duration],
   bpm : @signal.Signal[Int],
+  key : @signal.Signal[@music.KeySignature],
 ) -> @luna_dom.DomNode {
   // Set up auto-scroll effect
   let _ = @signal.effect(fn() {
@@ -108,8 +109,10 @@ pub fn lead_sheet(
               let rows = (measure_count + MEASURES_PER_ROW - 1) /
                 MEASURES_PER_ROW
               let height = STAFF_TOP + rows.to_double() * ROW_HEIGHT
+              let key_sig_width = key_signature_width(key.get())
               let width = MEASURE_START_X +
                 CLEF_SPACE_WIDTH +
+                key_sig_width +
                 MEASURES_PER_ROW.to_double() * MEASURE_WIDTH
               "\{0} \{0} \{width.to_int()} \{height.to_int()}"
             }),
@@ -118,12 +121,15 @@ pub fn lead_sheet(
         [
           // Static measure elements (no current_measure_index dependency)
           @luna_dom.for_each(measures, fn(m, idx) {
-            render_measure(m, idx, playback_position)
+            render_measure(m, idx, playback_position, key.get())
           }),
           // Playback position indicator overlay
-          render_playback_indicator(playback_position, bpm, fn() {
-            measures().length()
-          }),
+          render_playback_indicator(
+            playback_position,
+            bpm,
+            fn() { measures().length() },
+            key,
+          ),
         ],
       ),
     ],

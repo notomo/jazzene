@@ -5,6 +5,7 @@ fn main {
   let raw_chord_progression = @signal.signal("Cm7 F7 Bbmaj7 Ebmaj7")
   let seed = @signal.signal(0)
   let measure_count = @signal.signal(8)
+  let key = @signal.signal(@music.KeySignature::c_major())
   let chord_parse_error : @signal.Signal[String?] = @signal.signal(None)
   let chords = @signal.memo(fn() {
     match @music.parse_chord_progression(raw_chord_progression.get()) {
@@ -18,7 +19,7 @@ fn main {
       }
     }
   })
-  let measures_signal = make_measures(chords, seed, measure_count, bpm)
+  let measures_signal = make_measures(chords, seed, measure_count, bpm, key)
   let measures = fn() { measures_signal.get() }
   let sounds : @signal.Signal[Array[@music.NoteValueSound]] = @signal.signal([])
   let _ = @signal.effect(fn() {
@@ -47,7 +48,7 @@ fn main {
   @ui.render(
     is_playing, playback_position, volume, bpm, raw_chord_progression, seed, measure_count,
     sounds, total_duration, loop_enabled, loop_a_time, loop_b_time, chord_parse_error,
-    measures,
+    measures, key,
   )
 }
 
@@ -57,6 +58,7 @@ fn make_measures(
   seed : @signal.Signal[Int],
   measure_count : @signal.Signal[Int],
   bpm : @signal.Signal[Int],
+  key : @signal.Signal[@music.KeySignature],
 ) -> @signal.Signal[Array[@music.Measure]] {
   let measures : @signal.Signal[Array[@music.Measure]] = @signal.signal([])
   let _ = @signal.effect(fn() {
@@ -66,6 +68,7 @@ fn make_measures(
       chords(),
       bpm.get(),
       measure_count.get() - 1,
+      key.get(),
       start_offset=1,
     )
     |> music_measures => {

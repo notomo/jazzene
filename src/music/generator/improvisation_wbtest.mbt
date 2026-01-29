@@ -35,7 +35,13 @@ test "improvisation removes dangling tie at last measure" {
     }
   }
   let chords = [@music.Chord::{ root: @music.C, quality: @music.Major7 }]
-  let measures = improvisation(generator, chords, 120, 3) // 1 leading rest + 2 chord measures
+  let measures = improvisation(
+    generator,
+    chords,
+    120,
+    3,
+    @music.KeySignature::c_major(),
+  ) // 1 leading rest + 2 chord measures
 
   // Last measure's last note should have tie removed
   let last_measure = measures[measures.length() - 1]
@@ -107,7 +113,13 @@ test "improvisation preserves tie when not at last measure" {
     }
   }
   let chords = [@music.Chord::{ root: @music.C, quality: @music.Major7 }]
-  let measures = improvisation(generator, chords, 120, 4) // 1 leading rest + 3 chord measures
+  let measures = improvisation(
+    generator,
+    chords,
+    120,
+    4,
+    @music.KeySignature::c_major(),
+  ) // 1 leading rest + 3 chord measures
 
   // Second measure should have TieStart preserved (not last measure)
   let second_measure = measures[1]

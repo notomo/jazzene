@@ -19,6 +19,7 @@ fn render_playback_indicator(
   playback_position : @signal.Signal[@music.Duration],
   bpm : @signal.Signal[Int],
   measure_count : () -> Int,
+  key : @signal.Signal[@music.KeySignature],
 ) -> @luna_dom.DomNode {
   // Staff height (5 lines with spacing between them)
   let staff_height = (STAFF_LINES - 1).to_double() * STAFF_LINE_SPACING
@@ -41,6 +42,7 @@ fn render_playback_indicator(
             playback_position.get(),
             bpm.get(),
             measure_count(),
+            key.get(),
           ).to_string()
         }),
       ),
@@ -51,6 +53,7 @@ fn render_playback_indicator(
             playback_position.get(),
             bpm.get(),
             measure_count(),
+            key.get(),
           ).to_string()
         }),
       ),
@@ -86,11 +89,13 @@ fn calculate_indicator_x(
   position : @music.Duration,
   bpm : Int,
   measure_count : Int,
+  key : @music.KeySignature,
 ) -> Double {
   let pos_ms = position.to_milliseconds()
   let ms_per_measure = @music.ms_per_measure(bpm)
+  let clef_and_key_width = CLEF_SPACE_WIDTH + key_signature_width(key)
   if ms_per_measure <= 0.0 || measure_count <= 0 {
-    return MEASURE_START_X + CLEF_SPACE_WIDTH
+    return MEASURE_START_X + clef_and_key_width
   }
 
   // Calculate current measure index and progress within measure
@@ -111,7 +116,7 @@ fn calculate_indicator_x(
 
   // X position: start of measure + progress within measure (with clef space offset)
   let measure_x = MEASURE_START_X +
-    CLEF_SPACE_WIDTH +
+    clef_and_key_width +
     col.to_double() * MEASURE_WIDTH
   measure_x + progress * MEASURE_WIDTH
 }
