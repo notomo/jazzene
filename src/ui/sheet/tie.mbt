@@ -113,7 +113,7 @@ fn render_tie_start(
     " " +
     start_y.to_string() +
     " Z"
-  @luna_dom.svg_path(d=path, fill=COLOR_FOREGROUND, stroke=COLOR_FOREGROUND, attrs=[
+  @luna_dom.svg_path(d=path, attrs=[
     ("stroke-width", @luna_dom.Attr::AttrString(TIE_STROKE_WIDTH)),
     ("stroke-linejoin", @luna_dom.Attr::AttrString("round")),
   ])
@@ -180,7 +180,7 @@ fn render_tie_end(
     " " +
     start_y.to_string() +
     " Z"
-  @luna_dom.svg_path(d=path, fill=COLOR_FOREGROUND, stroke=COLOR_FOREGROUND, attrs=[
+  @luna_dom.svg_path(d=path, attrs=[
     ("stroke-width", @luna_dom.Attr::AttrString(TIE_STROKE_WIDTH)),
     ("stroke-linejoin", @luna_dom.Attr::AttrString("round")),
   ])

@@ -30,7 +30,7 @@ fn render_chord_symbol(
       text_anchor="start",
       font_size=CHORD_SYMBOL_FONT_SIZE,
       font_family="serif",
-      fill=COLOR_FOREGROUND,
+      attrs=[("stroke", @luna_dom.Attr::AttrString("none"))],
       [@luna_dom.text(format_chords(measure.chords))],
     ),
   ]

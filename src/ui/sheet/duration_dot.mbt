@@ -20,7 +20,7 @@ fn render_duration_dot(
           cx=dot_x.to_string(),
           cy=y.to_string(),
           r=dot_radius.to_string(),
-          fill=COLOR_FOREGROUND,
+          stroke="none",
         ),
       )
     }

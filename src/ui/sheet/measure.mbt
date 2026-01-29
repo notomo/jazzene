@@ -55,6 +55,7 @@ fn render_clickable_background(
     width=MEASURE_WIDTH.to_string(),
     height=ROW_HEIGHT.to_string(),
     fill="transparent",
+    stroke="none",
     style="cursor: pointer",
     attrs=[
       ("aria-label", @luna_dom.Attr::AttrString("measure \{measure_number}")),

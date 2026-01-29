@@ -2,6 +2,9 @@
 /// Main lead sheet component - orchestrates all sheet music rendering
 
 ///|
+const COLOR_FOREGROUND = "#f1f5f9"
+
+///|
 const LEAD_SHEET_CONTAINER_ID = "lead-sheet-container"
 
 ///|
@@ -95,6 +98,8 @@ pub fn lead_sheet(
           ("preserveAspectRatio", @luna_dom.Attr::AttrString("xMinYMin meet")),
         ],
         width="100%",
+        fill=COLOR_FOREGROUND,
+        stroke=COLOR_FOREGROUND,
         dyn_attrs=[
           (
             "viewBox",
