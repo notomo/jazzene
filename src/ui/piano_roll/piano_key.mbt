@@ -1,4 +1,10 @@
 ///|
+const KEYBOARD_MIN_KEY = 36
+
+///|
+const KEYBOARD_MAX_KEY = 96
+
+///|
 /// Rectangle - Basic geometry type for canvas calculations
 priv struct Rectangle {
   left : Double
@@ -35,14 +41,6 @@ let key_ratio : Array[(Double, Double)] = [
 
 ///|
 /// Calculate exact rectangles for each key in MIDI range
-///
-/// # Arguments
-/// * `rect` - The bounding rectangle for all keys
-/// * `min_key` - Minimum MIDI note number (e.g., 36 for C2)
-/// * `max_key` - Maximum MIDI note number (e.g., 96 for C7)
-///
-/// # Returns
-/// Array of KeyArea with exact position and size for each key
 fn calc_key_areas(
   rect : Rectangle,
   min_key : Int,
@@ -66,8 +64,8 @@ fn calc_key_areas(
   let octave_width = rect.width / total_octave_ratio
 
   // Build key areas
-  let areas : Array[KeyArea] = []
-  for key = min_key; key <= max_key; key = key + 1 {
+  Array::makei(max_key - min_key + 1, fn(i) {
+    let key = min_key + i
     let note_index = key % 12
     let octave = (key / 12).to_double()
     let (left_ratio, right_ratio) = key_ratio[note_index]
@@ -75,13 +73,12 @@ fn calc_key_areas(
       (octave + left_ratio - base_offset_ratio) * octave_width
     let right = rect.left +
       (octave + right_ratio - base_offset_ratio) * octave_width
-    areas.push({
+    {
       rect: { left, top: rect.top, width: right - left, height: rect.height },
       midi: key,
       is_black: is_black_key(note_index),
-    })
-  }
-  areas
+    }
+  })
 }
 
 ///|
@@ -92,30 +89,3 @@ fn is_black_key(note_in_octave : Int) -> Bool {
     _ => false
   }
 }
-
-///|
-extern "js" fn get_device_pixel_ratio() -> Double =
-  #|() => window.devicePixelRatio || 1
-
-///|
-extern "js" fn get_context_2d(
-  canvas : @js_dom.HTMLCanvasElement,
-) -> @canvas.CanvasRenderingContext2D =
-  #|(canvas) => canvas.getContext("2d")
-
-///|
-extern "js" fn set_canvas_style_width(
-  canvas : @js_dom.HTMLCanvasElement,
-  width : String,
-) -> Unit =
-  #|(canvas, width) => { canvas.style.width = width; }
-
-///|
-extern "js" fn set_canvas_style_height(
-  canvas : @js_dom.HTMLCanvasElement,
-  height : String,
-) -> Unit =
-  #|(canvas, height) => { canvas.style.height = height; }
-
-///|
-fn cast_to_canvas(elem : @js_dom.Element) -> @js_dom.HTMLCanvasElement = "%identity"

@@ -93,8 +93,10 @@ pub fn render(
             class="flex flex-col flex-3 min-h-0",
             attrs=[("aria-label", @luna_dom.Attr::AttrString("visualization"))],
             [
-              note_display(sounds, playback_position, bpm, total_duration),
-              keyboard(sounds, playback_position),
+              @piano_roll.note_display(
+                sounds, playback_position, bpm, total_duration,
+              ),
+              @piano_roll.keyboard(sounds, playback_position),
             ],
           ),
         ],
