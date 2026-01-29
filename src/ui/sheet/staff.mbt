@@ -20,6 +20,12 @@ const UPPER_LEDGER_LINE_THRESHOLD = 8
 const FIRST_LEDGER_LINE_ABOVE_STEP = 10
 
 ///|
+const STAFF_LINES = 5
+
+///|
+const STAFF_LINE_SPACING = 15.0
+
+///|
 /// Render a single staff line
 fn render_staff_line(
   x : Double,
@@ -79,6 +85,21 @@ fn render_bar_line(x : Double, y : Double) -> @luna_dom.DomNode {
 }
 
 ///|
+/// Convert MIDI pitch class to diatonic steps from C
+fn pitch_class_to_diatonic_step(pitch_class : Int) -> Int {
+  match pitch_class {
+    0 | 1 => 0 // C, C#
+    2 | 3 => 1 // D, D#
+    4 => 2 // E
+    5 | 6 => 3 // F, F#
+    7 | 8 => 4 // G, G#
+    9 | 10 => 5 // A, A#
+    11 => 6 // B
+    _ => 0
+  }
+}
+
+///|
 /// Calculate diatonic steps from E4 (bottom line of treble clef)
 fn midi_to_diatonic_step(midi : Int) -> Int {
   let pitch_class = midi % 12
@@ -88,6 +109,15 @@ fn midi_to_diatonic_step(midi : Int) -> Int {
   let note_diatonic_step = pitch_class_to_diatonic_step(pitch_class)
   let e4_diatonic_step = pitch_class_to_diatonic_step(e4_pitch_class)
   (octave - e4_octave) * 7 + (note_diatonic_step - e4_diatonic_step)
+}
+
+///|
+/// Convert MIDI number to Y position on staff
+fn midi_to_staff_y(midi : Int, staff_y : Double) -> Double {
+  let total_diatonic_steps = midi_to_diatonic_step(midi)
+  // Each diatonic step = half a line spacing
+  let offset = total_diatonic_steps.to_double() * -(STAFF_LINE_SPACING / 2.0)
+  staff_y + STAFF_LINE_SPACING * (STAFF_LINES - 1).to_double() + offset
 }
 
 ///|

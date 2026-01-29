@@ -11,6 +11,21 @@ const STEM_HEIGHT_SPACES = 3.0
 const FLAG_SCALE_DIVISOR = 32.0
 
 ///|
+const NOTE_HEAD_RX_RATIO : Double = 0.37894733 * 1.9
+
+///|
+const NOTE_HEAD_RY_RATIO : Double = 0.2542448 * 1.9
+
+///|
+const NOTE_HEAD_ROTATION = -25.0
+
+///|
+const COS_NOTE_HEAD_ROTATION = 0.906308 // cos(25deg)
+
+///|
+const SIN_NOTE_HEAD_ROTATION = 0.422618 // sin(25deg)
+
+///|
 /// Render accidental symbol to the left of the note
 fn render_note_accidental(
   accidental : @music.Accidental?,
