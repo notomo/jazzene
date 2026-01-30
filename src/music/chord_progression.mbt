@@ -57,29 +57,16 @@ pub(all) struct DegreeChord {
 /// Parse a Roman numeral from the beginning of a string.
 /// Returns the ScaleDegree and the remaining string.
 fn parse_roman_numeral(input : String) -> Result[(ScaleDegree, String), String] {
-  let upper = input.to_upper()
-  match upper {
-    ['V', 'I', 'I', ..] => Ok((VII, drop_chars(input, 3)))
-    ['V', 'I', ..] => Ok((VI, drop_chars(input, 2)))
-    ['I', 'V', ..] => Ok((IV, drop_chars(input, 2)))
-    ['V', ..] => Ok((V, drop_chars(input, 1)))
-    ['I', 'I', 'I', ..] => Ok((III, drop_chars(input, 3)))
-    ['I', 'I', ..] => Ok((II, drop_chars(input, 2)))
-    ['I', ..] => Ok((I, drop_chars(input, 1)))
+  match input {
+    ['V' | 'v', 'I' | 'i', 'I' | 'i', .. rest] => Ok((VII, rest.to_string()))
+    ['V' | 'v', 'I' | 'i', .. rest] => Ok((VI, rest.to_string()))
+    ['I' | 'i', 'V' | 'v', .. rest] => Ok((IV, rest.to_string()))
+    ['V' | 'v', .. rest] => Ok((V, rest.to_string()))
+    ['I' | 'i', 'I' | 'i', 'I' | 'i', .. rest] => Ok((III, rest.to_string()))
+    ['I' | 'i', 'I' | 'i', .. rest] => Ok((II, rest.to_string()))
+    ['I' | 'i', .. rest] => Ok((I, rest.to_string()))
     _ => Err("Invalid Roman numeral in: " + input)
   }
-}
-
-///|
-/// Drop the first n characters from a string
-fn drop_chars(s : String, n : Int) -> String {
-  let buf = StringBuilder::new()
-  for i, c in s {
-    if i >= n {
-      buf..write_char(c)
-    }
-  }
-  buf.to_string()
 }
 
 ///|
