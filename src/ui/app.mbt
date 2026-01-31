@@ -99,7 +99,7 @@ pub fn render(
             attrs=[("aria-label", @luna_dom.Attr::AttrString("visualization"))],
             [
               @piano_roll.note_display(
-                sounds, playback_position, bpm, total_duration,
+                sounds, playback_position, bpm, total_duration, time_signature,
               ),
               @piano_roll.keyboard(sounds, playback_position),
             ],

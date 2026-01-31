@@ -5,6 +5,7 @@ pub fn note_display(
   playback_position : @signal.Signal[@music.Duration],
   bpm : @signal.Signal[Int],
   total_duration : () -> @music.Duration,
+  time_signature : @signal.Signal[@music.TimeSignature],
 ) -> @luna_dom.DomNode {
   let { canvas, ctx } = create_canvas_context()
 
@@ -39,6 +40,7 @@ pub fn note_display(
       note_positions(),
       playback_position.get().to_milliseconds(),
       bpm.get(),
+      time_signature.get().beats_per_measure(),
     )
   })
   @luna_dom.div(

@@ -99,7 +99,7 @@ fn calculate_indicator_x(
   bpm : Int,
   measure_count : Int,
   key : @music.KeySignature,
-  beats_per_measure? : Double = 4.0,
+  beats_per_measure~ : Double,
 ) -> Double {
   let pos_ms = position.to_milliseconds()
   let ms_per_measure = @music.ms_per_measure(bpm, beats_per_measure~)
@@ -137,7 +137,7 @@ fn calculate_indicator_y(
   position : @music.Duration,
   bpm : Int,
   measure_count : Int,
-  beats_per_measure? : Double = 4.0,
+  beats_per_measure~ : Double,
 ) -> Double {
   let pos_ms = position.to_milliseconds()
   let ms_per_measure = @music.ms_per_measure(bpm, beats_per_measure~)

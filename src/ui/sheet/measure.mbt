@@ -158,15 +158,18 @@ fn render_measure(
   playback_position : @signal.Signal[@music.Duration],
   key : @music.KeySignature,
   beats_per_measure : Double,
+  time_signature : @music.TimeSignature,
 ) -> @luna_dom.DomNode {
   let (x, y) = measure_position(display_index, key)
   let is_first_in_row = display_index % MEASURES_PER_ROW == 0
+  let is_first_measure = display_index == 0
   let measure_number = display_index + 1
   @luna_dom.svg_g(
     [
       render_measure_staff_lines(x, y, is_first_in_row, key),
       ..render_measure_clef(x, y, is_first_in_row, key),
       ..render_measure_key_signature(key, x, y, is_first_in_row),
+      ..render_measure_time_signature(time_signature, x, y, is_first_measure),
       ..render_chord_symbol(measure, x, y),
       ..render_measure_notes(measure, x, y, key, beats_per_measure),
       render_bar_line(x + MEASURE_WIDTH, y),

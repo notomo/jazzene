@@ -17,7 +17,7 @@ fn calculate_playback_row(
   position : @music.Duration,
   bpm : Int,
   measure_count : Int,
-  beats_per_measure? : Double = 4.0,
+  beats_per_measure~ : Double,
 ) -> Int {
   let pos_ms = position.to_milliseconds()
   let ms_per_measure = @music.ms_per_measure(bpm, beats_per_measure~)
@@ -125,17 +125,16 @@ pub fn lead_sheet(
         [
           // Static measure elements (no current_measure_index dependency)
           @luna_dom.for_each(measures, fn(m, idx) {
-            let beats_per_measure = time_signature.get().beats_per_measure()
+            let ts = time_signature.get()
             render_measure(
               m,
               idx,
               playback_position,
               key.get(),
-              beats_per_measure,
+              ts.beats_per_measure(),
+              ts,
             )
           }),
-          // Time signature display on first row
-          render_time_signature_display(time_signature, key),
           // Playback position indicator overlay
           render_playback_indicator(
             playback_position,

@@ -126,8 +126,9 @@ fn draw_measure_lines(
   height : Double,
   current_pos : Double,
   bpm : Int,
+  beats_per_measure : Double,
 ) -> Unit {
-  let measure_ms = @music.ms_per_measure(bpm)
+  let measure_ms = @music.ms_per_measure(bpm, beats_per_measure~)
   let first_measure = (current_pos / measure_ms).to_int()
   let last_measure = ((current_pos + NOTE_DISPLAY_WINDOW_MS) / measure_ms).to_int() +
     1
@@ -152,11 +153,12 @@ fn draw_notes(
   note_positions : Array[NotePosition],
   current_pos : Double,
   bpm : Int,
+  beats_per_measure : Double,
 ) -> Unit {
   draw_notes_background(ctx, width, height)
   let rect = { left: 0.0, top: 0.0, width, height }
   let key_areas = calc_key_areas(rect, KEYBOARD_MIN_KEY, KEYBOARD_MAX_KEY)
   draw_falling_notes(ctx, height, note_positions, current_pos, key_areas)
   draw_key_grid_lines(ctx, height, key_areas)
-  draw_measure_lines(ctx, width, height, current_pos, bpm)
+  draw_measure_lines(ctx, width, height, current_pos, bpm, beats_per_measure)
 }

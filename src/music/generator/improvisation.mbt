@@ -21,7 +21,7 @@ pub fn improvisation(
   bpm : Int,
   measure_count : Int,
   key : @music.KeySignature,
-  beats_per_measure? : Double = 4.0,
+  beats_per_measure~ : Double,
   start_offset? : Int = 0,
 ) -> Array[@music.Measure] {
   if chords.is_empty() {

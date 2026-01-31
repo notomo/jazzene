@@ -41,6 +41,7 @@ test "improvisation removes dangling tie at last measure" {
     120,
     3,
     @music.KeySignature::c_major(),
+    beats_per_measure=4.0,
   ) // 1 leading rest + 2 chord measures
 
   // Last measure's last note should have tie removed
@@ -119,6 +120,7 @@ test "improvisation preserves tie when not at last measure" {
     120,
     4,
     @music.KeySignature::c_major(),
+    beats_per_measure=4.0,
   ) // 1 leading rest + 3 chord measures
 
   // Second measure should have TieStart preserved (not last measure)
