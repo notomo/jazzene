@@ -1,10 +1,10 @@
 ///|
 /// Jazzene - Jazz Improvisation Web App (Tick-based Architecture)
 fn main {
-  let bpm = @signal.signal(200)
+  let bpm = @signal.signal(@ui.get_initial_int("bpm", 200))
   let raw_chord_progression = @signal.signal("IIm7 V7 Imaj7 IVmaj7")
-  let seed = @signal.signal(0)
-  let measure_count = @signal.signal(8)
+  let seed = @signal.signal(@ui.get_initial_int("seed", 0))
+  let measure_count = @signal.signal(@ui.get_initial_int("measures", 8))
   let key = @signal.signal(@ui.get_initial_key())
   let time_signature = @signal.signal(@music.TimeSignature::default())
   let chord_parse_error : @signal.Signal[String?] = @signal.signal(None)
