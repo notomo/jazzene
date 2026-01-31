@@ -30,19 +30,25 @@ fn key_select(key : @signal.Signal[@music.KeySignature]) -> @luna_dom.DomNode {
             |> Result::map(fn(root) {
               let k = @music.KeySignature::from_root(root)
               key.set(k)
+              set_query_param("key", root.to_string())
             })
             |> ignore
           }),
         ),
       ],
-      all_roots.map(fn(root) {
-        let name = root.to_string()
-        @luna_dom.create_element(
-          "option",
-          [("value", @luna_dom.AttrValue::Static(name))],
-          [@luna_dom.text(name)],
-        )
-      }),
+      {
+        let initial_key = key.get().root.to_string()
+        all_roots.map(fn(root) {
+          let name = root.to_string()
+          let attrs : Array[(String, @luna_dom.AttrValue)] = [
+            ("value", @luna_dom.AttrValue::Static(name)),
+          ]
+          if name == initial_key {
+            attrs.push(("selected", @luna_dom.AttrValue::Static("selected")))
+          }
+          @luna_dom.create_element("option", attrs, [@luna_dom.text(name)])
+        })
+      },
     ),
   ])
 }
