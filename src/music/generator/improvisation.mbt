@@ -21,12 +21,13 @@ pub fn improvisation(
   bpm : Int,
   measure_count : Int,
   key : @music.KeySignature,
+  beats_per_measure? : Double = 4.0,
   start_offset? : Int = 0,
 ) -> Array[@music.Measure] {
   if chords.is_empty() {
     return []
   }
-  let measure_duration_ms = @music.ms_per_measure(bpm)
+  let measure_duration_ms = @music.ms_per_measure(bpm, beats_per_measure~)
   let (measures, last_tie) = Array::makei(measure_count, fn(i) { i })
     .iter()
     .fold(init=(([] : Array[@music.Measure]), (None : TieContext?)), fn(
@@ -35,7 +36,12 @@ pub fn improvisation(
     ) {
       let (measures, incoming_tie) = acc
       let chord = chords[i % chords.length()]
-      let result = generator(MeasureContext::{ chord, incoming_tie, key })
+      let result = generator(MeasureContext::{
+        chord,
+        incoming_tie,
+        key,
+        beats_per_measure,
+      })
       measures.push(@music.Measure::{
         chords: [chord],
         notes: result.notes,

@@ -6,6 +6,7 @@ fn main {
   let seed = @signal.signal(0)
   let measure_count = @signal.signal(8)
   let key = @signal.signal(@music.KeySignature::from_root(ASharp))
+  let time_signature = @signal.signal(@music.TimeSignature::default())
   let chord_parse_error : @signal.Signal[String?] = @signal.signal(None)
   let chords = @signal.memo(fn() {
     match @music.parse_degree_progression(raw_chord_progression.get()) {
@@ -20,7 +21,9 @@ fn main {
       }
     }
   })
-  let measures_signal = make_measures(chords, seed, measure_count, bpm, key)
+  let measures_signal = make_measures(
+    chords, seed, measure_count, bpm, key, time_signature,
+  )
   let measures = fn() { measures_signal.get() }
   let sounds : @signal.Signal[Array[@music.NoteValueSound]] = @signal.signal([])
   let _ = @signal.effect(fn() {
@@ -31,6 +34,7 @@ fn main {
     @music.calculate_total_duration(
       bpm=bpm.get(),
       measure_count=measure_count.get(),
+      beats_per_measure=time_signature.get().beats_per_measure(),
     )
   })
   let playback_position = @signal.signal(
@@ -49,7 +53,7 @@ fn main {
   @ui.render(
     is_playing, playback_position, volume, bpm, raw_chord_progression, seed, measure_count,
     sounds, total_duration, loop_enabled, loop_a_time, loop_b_time, chord_parse_error,
-    measures, key,
+    measures, key, time_signature,
   )
 }
 
@@ -60,9 +64,11 @@ fn make_measures(
   measure_count : @signal.Signal[Int],
   bpm : @signal.Signal[Int],
   key : @signal.Signal[@music.KeySignature],
+  time_signature : @signal.Signal[@music.TimeSignature],
 ) -> @signal.Signal[Array[@music.Measure]] {
   let measures : @signal.Signal[Array[@music.Measure]] = @signal.signal([])
   let _ = @signal.effect(fn() {
+    let beats_per_measure = time_signature.get().beats_per_measure()
     @generator.Settings::default(seed.get())
     |> @generator.create_measure_generator
     |> @generator.improvisation(
@@ -70,6 +76,7 @@ fn make_measures(
       bpm.get(),
       measure_count.get() - 1,
       key.get(),
+      beats_per_measure~,
       start_offset=1,
     )
     |> music_measures => {

@@ -20,6 +20,7 @@ fn render_playback_indicator(
   bpm : @signal.Signal[Int],
   measure_count : () -> Int,
   key : @signal.Signal[@music.KeySignature],
+  time_signature : @signal.Signal[@music.TimeSignature],
 ) -> @luna_dom.DomNode {
   // Staff height (5 lines with spacing between them)
   let staff_height = (STAFF_LINES - 1).to_double() * STAFF_LINE_SPACING
@@ -38,32 +39,38 @@ fn render_playback_indicator(
       (
         "x1",
         @luna_dom.AttrValue::Dynamic(fn() {
+          let beats_per_measure = time_signature.get().beats_per_measure()
           calculate_indicator_x(
             playback_position.get(),
             bpm.get(),
             measure_count(),
             key.get(),
+            beats_per_measure~,
           ).to_string()
         }),
       ),
       (
         "x2",
         @luna_dom.AttrValue::Dynamic(fn() {
+          let beats_per_measure = time_signature.get().beats_per_measure()
           calculate_indicator_x(
             playback_position.get(),
             bpm.get(),
             measure_count(),
             key.get(),
+            beats_per_measure~,
           ).to_string()
         }),
       ),
       (
         "y1",
         @luna_dom.AttrValue::Dynamic(fn() {
+          let beats_per_measure = time_signature.get().beats_per_measure()
           let y = calculate_indicator_y(
             playback_position.get(),
             bpm.get(),
             measure_count(),
+            beats_per_measure~,
           )
           (y + line_top_offset).to_string()
         }),
@@ -71,10 +78,12 @@ fn render_playback_indicator(
       (
         "y2",
         @luna_dom.AttrValue::Dynamic(fn() {
+          let beats_per_measure = time_signature.get().beats_per_measure()
           let y = calculate_indicator_y(
             playback_position.get(),
             bpm.get(),
             measure_count(),
+            beats_per_measure~,
           )
           (y + line_bottom_offset).to_string()
         }),
@@ -90,9 +99,10 @@ fn calculate_indicator_x(
   bpm : Int,
   measure_count : Int,
   key : @music.KeySignature,
+  beats_per_measure? : Double = 4.0,
 ) -> Double {
   let pos_ms = position.to_milliseconds()
-  let ms_per_measure = @music.ms_per_measure(bpm)
+  let ms_per_measure = @music.ms_per_measure(bpm, beats_per_measure~)
   let clef_and_key_width = CLEF_SPACE_WIDTH + key_signature_width(key)
   if ms_per_measure <= 0.0 || measure_count <= 0 {
     return MEASURE_START_X + clef_and_key_width
@@ -127,9 +137,10 @@ fn calculate_indicator_y(
   position : @music.Duration,
   bpm : Int,
   measure_count : Int,
+  beats_per_measure? : Double = 4.0,
 ) -> Double {
   let pos_ms = position.to_milliseconds()
-  let ms_per_measure = @music.ms_per_measure(bpm)
+  let ms_per_measure = @music.ms_per_measure(bpm, beats_per_measure~)
   if ms_per_measure <= 0.0 || measure_count <= 0 {
     return STAFF_TOP
   }

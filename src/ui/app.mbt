@@ -57,6 +57,7 @@ pub fn render(
   chord_parse_error : @signal.Signal[String?],
   measures : () -> Array[@music.Measure],
   key : @signal.Signal[@music.KeySignature],
+  time_signature : @signal.Signal[@music.TimeSignature],
 ) -> Unit {
   let app = @luna_dom.div(
     class="flex flex-col h-dvh overflow-hidden w-dvw bg-gradient-to-br from-slate-950 to-slate-900 text-white",
@@ -89,7 +90,9 @@ pub fn render(
         attrs=[("aria-label", @luna_dom.Attr::AttrString("visualization"))],
         [
           @luna_dom.div(class="flex-2 min-h-0", [
-            @sheet.lead_sheet(measures, playback_position, bpm, key),
+            @sheet.lead_sheet(
+              measures, playback_position, bpm, key, time_signature,
+            ),
           ]),
           @luna_dom.div(
             class="flex flex-col flex-3 min-h-0",

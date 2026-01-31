@@ -5,13 +5,19 @@ pub fn ms_per_beat(bpm : Int) -> Double {
 }
 
 ///|
-/// Calculate milliseconds per measure for a given BPM (assumes 4/4 time)
-pub fn ms_per_measure(bpm : Int) -> Double {
-  ms_per_beat(bpm) * 4.0
+/// Calculate milliseconds per measure for a given BPM and beats per measure
+pub fn ms_per_measure(bpm : Int, beats_per_measure? : Double = 4.0) -> Double {
+  ms_per_beat(bpm) * beats_per_measure
 }
 
 ///|
-/// Calculate total duration based on BPM and measure count (4/4 time signature)
-pub fn calculate_total_duration(bpm~ : Int, measure_count~ : Int) -> Duration {
-  Duration::from_milliseconds(measure_count.to_double() * ms_per_measure(bpm))
+/// Calculate total duration based on BPM, measure count, and beats per measure
+pub fn calculate_total_duration(
+  bpm~ : Int,
+  measure_count~ : Int,
+  beats_per_measure? : Double = 4.0,
+) -> Duration {
+  Duration::from_milliseconds(
+    measure_count.to_double() * ms_per_measure(bpm, beats_per_measure~),
+  )
 }

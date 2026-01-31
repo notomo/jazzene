@@ -17,9 +17,10 @@ fn calculate_playback_row(
   position : @music.Duration,
   bpm : Int,
   measure_count : Int,
+  beats_per_measure? : Double = 4.0,
 ) -> Int {
   let pos_ms = position.to_milliseconds()
-  let ms_per_measure = @music.ms_per_measure(bpm)
+  let ms_per_measure = @music.ms_per_measure(bpm, beats_per_measure~)
   if ms_per_measure <= 0.0 || measure_count <= 0 {
     return 0
   }
@@ -39,14 +40,17 @@ pub fn lead_sheet(
   playback_position : @signal.Signal[@music.Duration],
   bpm : @signal.Signal[Int],
   key : @signal.Signal[@music.KeySignature],
+  time_signature : @signal.Signal[@music.TimeSignature],
 ) -> @luna_dom.DomNode {
   // Set up auto-scroll effect
   let _ = @signal.effect(fn() {
     let measure_count = measures().length()
+    let beats_per_measure = time_signature.get().beats_per_measure()
     let current_row = calculate_playback_row(
       playback_position.get(),
       bpm.get(),
       measure_count,
+      beats_per_measure~,
     )
     match @js_dom.document().getElementById(LEAD_SHEET_CONTAINER_ID) {
       Some(container) => {
@@ -121,14 +125,24 @@ pub fn lead_sheet(
         [
           // Static measure elements (no current_measure_index dependency)
           @luna_dom.for_each(measures, fn(m, idx) {
-            render_measure(m, idx, playback_position, key.get())
+            let beats_per_measure = time_signature.get().beats_per_measure()
+            render_measure(
+              m,
+              idx,
+              playback_position,
+              key.get(),
+              beats_per_measure,
+            )
           }),
+          // Time signature display on first row
+          render_time_signature_display(time_signature, key),
           // Playback position indicator overlay
           render_playback_indicator(
             playback_position,
             bpm,
             fn() { measures().length() },
             key,
+            time_signature,
           ),
         ],
       ),

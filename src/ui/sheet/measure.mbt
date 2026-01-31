@@ -103,10 +103,14 @@ fn render_measure_clef(
 
 ///|
 /// Calculate note x position within measure
-fn note_x_position(measure_x : Double, start_beat : Double) -> Double {
+fn note_x_position(
+  measure_x : Double,
+  start_beat : Double,
+  beats_per_measure : Double,
+) -> Double {
   measure_x +
   NOTE_AREA_START_OFFSET +
-  start_beat * (MEASURE_WIDTH - NOTE_AREA_PADDING) / 4.0
+  start_beat * (MEASURE_WIDTH - NOTE_AREA_PADDING) / beats_per_measure
 }
 
 ///|
@@ -135,11 +139,12 @@ fn render_measure_notes(
   x : Double,
   y : Double,
   key : @music.KeySignature,
+  beats_per_measure : Double,
 ) -> Array[@luna_dom.DomNode] {
   measure.notes
   .iter()
   .flat_map(fn(note) {
-    let note_x = note_x_position(x, note.start_beat)
+    let note_x = note_x_position(x, note.start_beat, beats_per_measure)
     render_note_or_rest(note, note_x, y, x, key).iter()
   })
   .collect()
@@ -152,6 +157,7 @@ fn render_measure(
   display_index : Int,
   playback_position : @signal.Signal[@music.Duration],
   key : @music.KeySignature,
+  beats_per_measure : Double,
 ) -> @luna_dom.DomNode {
   let (x, y) = measure_position(display_index, key)
   let is_first_in_row = display_index % MEASURES_PER_ROW == 0
@@ -162,7 +168,7 @@ fn render_measure(
       ..render_measure_clef(x, y, is_first_in_row, key),
       ..render_measure_key_signature(key, x, y, is_first_in_row),
       ..render_chord_symbol(measure, x, y),
-      ..render_measure_notes(measure, x, y, key),
+      ..render_measure_notes(measure, x, y, key, beats_per_measure),
       render_bar_line(x + MEASURE_WIDTH, y),
       render_clickable_background(
         x, y, measure_number, measure, playback_position,

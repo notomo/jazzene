@@ -4,6 +4,7 @@ pub struct MeasureContext {
   chord : @music.Chord
   incoming_tie : TieContext? // Tie from previous measure
   key : @music.KeySignature
+  beats_per_measure : Double
 }
 
 ///|
@@ -52,6 +53,7 @@ pub fn create_measure_generator(settings : Settings) -> MeasureGenerator {
       ctx.chord,
       ctx.incoming_tie,
       ctx.key,
+      ctx.beats_per_measure,
       settings.rest_probability,
       settings.duration_weights,
       random_int,
@@ -65,6 +67,7 @@ fn generate_measure_notes(
   chord : @music.Chord,
   incoming_tie : TieContext?,
   key : @music.KeySignature,
+  beats_per_measure : Double,
   rest_probability : Int,
   duration_weights : DurationWeights,
   random_int : (Int) -> Int,
@@ -72,7 +75,6 @@ fn generate_measure_notes(
   let notes : Array[@music.MeasureNote] = []
   let update_accidental = @music.create_accidental_calculator(key)
   let mut current_beat = 0.0
-  let beats_per_measure = 4.0
 
   // Handle incoming tie first
   match incoming_tie {
