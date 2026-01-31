@@ -77,8 +77,8 @@ pub fn parse_degree_chord(input : String) -> Result[DegreeChord, String] {
   }
   // Parse optional accidental prefix
   let (accidental, rest) = match input {
-    ['b', .. tail] | ['♭', .. tail] => (-1, tail.to_string())
-    ['#', .. tail] | ['♯', .. tail] => (1, tail.to_string())
+    ['b', .. tail] => (-1, tail.to_string())
+    ['#', .. tail] => (1, tail.to_string())
     _ => (0, input)
   }
   // Parse Roman numeral
