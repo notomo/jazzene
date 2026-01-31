@@ -5,7 +5,7 @@ fn main {
   let raw_chord_progression = @signal.signal("IIm7 V7 Imaj7 IVmaj7")
   let seed = @signal.signal(0)
   let measure_count = @signal.signal(8)
-  let key = @signal.signal(@music.KeySignature::from_root(ASharp))
+  let key = @signal.signal(@music.KeySignature::c_major())
   let time_signature = @signal.signal(@music.TimeSignature::default())
   let chord_parse_error : @signal.Signal[String?] = @signal.signal(None)
   let chords = @signal.memo(fn() {
