@@ -35,7 +35,7 @@ jobs:
           cache: 'npm'
       - run: npm ci
 
-      - uses: hustcer/setup-moonbit@v1.17
+      - uses: hustcer/setup-moonbit@v1.18
       - run: |
           moon update
           moon install
