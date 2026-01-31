@@ -25,11 +25,13 @@ fn key_select(key : @signal.Signal[@music.KeySignature]) -> @luna_dom.DomNode {
         (
           "change",
           @luna_dom.AttrValue::Handler(fn(e) {
-            let value = get_event_target_value(e)
-            match @music.ChordRoot::from_string(value) {
-              Ok(root) => key.set(@music.KeySignature::from_root(root))
-              Err(_) => ()
-            }
+            get_event_target_value(e)
+            |> @music.ChordRoot::from_string
+            |> Result::map(fn(root) {
+              let k = @music.KeySignature::from_root(root)
+              key.set(k)
+            })
+            |> ignore
           }),
         ),
       ],
