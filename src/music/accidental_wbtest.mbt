@@ -8,14 +8,21 @@ test "create_accidental_calculator shows accidental on first occurrence" {
 }
 
 ///|
-test "create_accidental_calculator no accidental on repeated pitch" {
+test "create_accidental_calculator no accidental on repeated pitch in same octave" {
   let calc = create_accidental_calculator(KeySignature::c_major())
   // First C# shows Sharp
   inspect(calc(MidiNumber::{ value: 61 }), content="Some(Sharp)")
   // Same C# again - no accidental needed
   inspect(calc(MidiNumber::{ value: 61 }), content="None")
-  // C# in different octave - same pitch class, no accidental needed
-  inspect(calc(MidiNumber::{ value: 73 }), content="None")
+}
+
+///|
+test "create_accidental_calculator accidental required in different octave" {
+  let calc = create_accidental_calculator(KeySignature::c_major())
+  // C#4 shows Sharp
+  inspect(calc(MidiNumber::{ value: 61 }), content="Some(Sharp)")
+  // C#5 in different octave - accidental needed (accidentals don't cross octaves)
+  inspect(calc(MidiNumber::{ value: 73 }), content="Some(Sharp)")
 }
 
 ///|
@@ -43,4 +50,24 @@ test "create_accidental_calculator G major F# no accidental" {
   inspect(calc(MidiNumber::{ value: 66 }), content="None")
   // F natural (MIDI 65) needs Natural to cancel the key signature sharp
   inspect(calc(MidiNumber::{ value: 65 }), content="Some(Natural)")
+}
+
+///|
+test "create_accidental_calculator key signature applies across octaves" {
+  let calc = create_accidental_calculator(KeySignature::from_root(G))
+  // F#4 (MIDI 66) - key signature, no accidental
+  inspect(calc(MidiNumber::{ value: 66 }), content="None")
+  // F#5 (MIDI 78) - key signature applies in all octaves
+  inspect(calc(MidiNumber::{ value: 78 }), content="None")
+}
+
+///|
+test "create_accidental_calculator cancellation does not cross octaves" {
+  let calc = create_accidental_calculator(KeySignature::from_root(G))
+  // F natural 4 (MIDI 65) cancels key signature F# in octave 4
+  inspect(calc(MidiNumber::{ value: 65 }), content="Some(Natural)")
+  // F#5 (MIDI 78) - key signature still applies in octave 5 (unaffected by octave 4)
+  inspect(calc(MidiNumber::{ value: 78 }), content="None")
+  // F#4 (MIDI 66) - needs Sharp to restore after the F natural in octave 4
+  inspect(calc(MidiNumber::{ value: 66 }), content="Some(Sharp)")
 }
