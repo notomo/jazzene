@@ -57,7 +57,12 @@ fn render_measure_key_signature(
   is_first_in_row : Bool,
 ) -> Array[@luna_dom.DomNode] {
   match is_first_in_row {
-    true => render_key_signature(key, x - CLEF_SPACE_WIDTH, y)
+    true =>
+      render_key_signature(
+        key,
+        x - CLEF_SPACE_WIDTH - key_signature_width(key),
+        y,
+      )
     false => []
   }
 }

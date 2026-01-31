@@ -2,7 +2,7 @@
 /// Accidental symbol rendering (sharp, flat, natural)
 
 ///|
-const SHARP_SCALE_DIVISOR = 50.0
+const SHARP_SCALE_DIVISOR = 70.0
 
 ///|
 const FLAT_SCALE_DIVISOR = 130.0
