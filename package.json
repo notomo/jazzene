@@ -14,7 +14,7 @@
     "tunnel": "cloudflared tunnel --url localhost:5173"
   },
   "devDependencies": {
-    "@playwright/test": "^1.57.0",
+    "@playwright/test": "^1.58.0",
     "@tailwindcss/vite": "^4.1.18",
     "tailwindcss": "^4.0.2",
     "vite": "^7.3.1",
