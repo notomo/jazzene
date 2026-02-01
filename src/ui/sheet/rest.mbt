@@ -79,6 +79,6 @@ fn render_rest(
   let rest_y = staff_y + STAFF_LINE_SPACING * 2.0
   [
     render_rest_symbol(note.duration, note_x, rest_y),
-    ..render_duration_dot(note.duration, note_x, rest_y),
+    ..render_duration_dot(note.duration, note_x, rest_y, on_line=true),
   ]
 }
