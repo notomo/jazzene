@@ -22,6 +22,7 @@ fn measure_count_input(
       attrs=[
         ("min", @luna_dom.Attr::AttrInt(2)),
         ("max", @luna_dom.Attr::AttrInt(32)),
+        ("aria-label", @luna_dom.Attr::AttrString("measures")),
       ],
       dyn_value=fn() { measure_count.get().to_string() },
       on=@luna_dom.events().input(on_input),

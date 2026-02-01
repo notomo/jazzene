@@ -58,6 +58,16 @@ test.describe("Jazzene - Jazz Improvisation Web App", () => {
     await expect(jazzene.getStopButton()).toBeEnabled();
   });
 
+  test("should reflect query parameters in controls", async ({ page }) => {
+    const params = { key: "D", bpm: "140", seed: "42", measures: "16" };
+    const paramJazzene = await openJazzenePage({ page, queryParams: params });
+
+    await expect(paramJazzene.getKeySelect()).toHaveValue("D");
+    await expect(paramJazzene.getBpmInput()).toHaveValue("140");
+    await expect(paramJazzene.getSeedInput()).toHaveValue("42");
+    await expect(paramJazzene.getMeasuresInput()).toHaveValue("16");
+  });
+
   test("should change playback position when clicking a measure", async () => {
     const initialValue = parseInt(await jazzene.getSeekbarValue());
 

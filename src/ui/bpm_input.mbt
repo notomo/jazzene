@@ -18,6 +18,7 @@ fn bpm_input(bpm : @signal.Signal[Int]) -> @luna_dom.DomNode {
       attrs=[
         ("min", @luna_dom.Attr::AttrInt(30)),
         ("max", @luna_dom.Attr::AttrInt(300)),
+        ("aria-label", @luna_dom.Attr::AttrString("bpm")),
       ],
       dyn_value=fn() { bpm.get().to_string() },
       on=@luna_dom.events().input(on_input),

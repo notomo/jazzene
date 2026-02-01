@@ -1,7 +1,15 @@
 import type { Page } from "@playwright/test";
 
-export async function openJazzenePage({ page }: { page: Page }) {
-  await page.goto("/");
+export async function openJazzenePage({
+  page,
+  queryParams,
+}: {
+  page: Page;
+  queryParams?: Record<string, string>;
+}) {
+  const params = new URLSearchParams(queryParams);
+  const url = params.size > 0 ? `/?${params.toString()}` : "/";
+  await page.goto(url);
 
   const jazzenePage = {
     // Main sections
@@ -64,6 +72,11 @@ export async function openJazzenePage({ page }: { page: Page }) {
       const measure = jazzenePage.getMeasure(measureNumber);
       await measure.click();
     },
+
+    getBpmInput: () => page.getByLabel("bpm"),
+    getSeedInput: () => page.getByLabel("seed"),
+    getMeasuresInput: () => page.getByLabel("measures"),
+    getKeySelect: () => page.getByLabel("key", { exact: true }),
   };
 
   return jazzenePage;

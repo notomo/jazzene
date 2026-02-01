@@ -18,6 +18,7 @@ fn key_select(key : @signal.Signal[@music.KeySignature]) -> @luna_dom.DomNode {
             "px-3 py-2 bg-slate-900 text-white rounded-lg border border-slate-600 focus:border-blue-500 focus:outline-none",
           ),
         ),
+        ("aria-label", @luna_dom.AttrValue::Static("key")),
         (
           "value",
           @luna_dom.AttrValue::Dynamic(fn() { key.get().root.to_string() }),

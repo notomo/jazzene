@@ -18,6 +18,7 @@ fn seed_input(seed : @signal.Signal[Int]) -> @luna_dom.DomNode {
       attrs=[
         ("min", @luna_dom.Attr::AttrInt(0)),
         ("step", @luna_dom.Attr::AttrInt(1)),
+        ("aria-label", @luna_dom.Attr::AttrString("seed")),
       ],
       dyn_value=fn() { seed.get().to_string() },
       on=@luna_dom.events().input(on_input),
