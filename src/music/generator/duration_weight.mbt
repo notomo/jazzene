@@ -11,8 +11,8 @@ pub(all) struct DurationWeights {
 } derive(Eq, Show)
 
 ///|
-/// Default weights favoring quarter notes
-pub fn DurationWeights::default() -> DurationWeights {
+/// Default weights for notes, favoring quarter notes
+pub fn DurationWeights::note_default() -> DurationWeights {
   DurationWeights::{
     eighth: 15,
     dotted_eighth: 10,
@@ -20,6 +20,20 @@ pub fn DurationWeights::default() -> DurationWeights {
     dotted_quarter: 20,
     half: 8,
     dotted_half: 5,
+    whole: 2,
+  }
+}
+
+///|
+/// Default weights for rests (no dotted durations)
+pub fn DurationWeights::rest_default() -> DurationWeights {
+  DurationWeights::{
+    eighth: 15,
+    dotted_eighth: 0,
+    quarter: 40,
+    dotted_quarter: 0,
+    half: 8,
+    dotted_half: 0,
     whole: 2,
   }
 }

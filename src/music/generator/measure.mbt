@@ -30,7 +30,8 @@ pub type MeasureGenerator = (MeasureContext) -> MeasureResult
 pub(all) struct Settings {
   seed : Int
   rest_probability : Int // 0-100
-  duration_weights : DurationWeights
+  note_duration_weights : DurationWeights
+  rest_duration_weights : DurationWeights
 } derive(Eq, Show)
 
 ///|
@@ -39,7 +40,8 @@ pub fn Settings::default(seed : Int) -> Settings {
   Settings::{
     seed,
     rest_probability: 25,
-    duration_weights: DurationWeights::default(),
+    note_duration_weights: DurationWeights::note_default(),
+    rest_duration_weights: DurationWeights::rest_default(),
   }
 }
 
@@ -55,7 +57,8 @@ pub fn create_measure_generator(settings : Settings) -> MeasureGenerator {
       ctx.key,
       ctx.beats_per_measure,
       settings.rest_probability,
-      settings.duration_weights,
+      settings.note_duration_weights,
+      settings.rest_duration_weights,
       random_int,
     )
   }
@@ -69,7 +72,8 @@ fn generate_measure_notes(
   key : @music.KeySignature,
   beats_per_measure : Double,
   rest_probability : Int,
-  duration_weights : DurationWeights,
+  note_duration_weights : DurationWeights,
+  rest_duration_weights : DurationWeights,
   random_int : (Int) -> Int,
 ) -> MeasureResult {
   let notes : Array[@music.MeasureNote] = []
@@ -111,10 +115,10 @@ fn generate_measure_notes(
   // Generate notes to fill the rest of the measure
   while current_beat < beats_per_measure {
     let remaining_beats = beats_per_measure - current_beat
-    let duration = random_duration(duration_weights, random_int)
-    let beats = duration.to_beats()
     match decide_midi_number(chord, rest_probability, random_int) {
-      Some(midi) =>
+      Some(midi) => {
+        let duration = random_duration(note_duration_weights, random_int)
+        let beats = duration.to_beats()
         if beats <= remaining_beats {
           // Note fits in this measure
           notes.push(@music.MeasureNote::{
@@ -145,8 +149,11 @@ fn generate_measure_notes(
             }),
           }
         }
+      }
       None => {
         // Rest - rests cannot be tied
+        let duration = random_duration(rest_duration_weights, random_int)
+        let beats = duration.to_beats()
         let rest_beats = @cmp.minimum(beats, remaining_beats)
         let rest_duration = @music.NoteDuration::fit(rest_beats).unwrap_or(
           @music.Eighth,
