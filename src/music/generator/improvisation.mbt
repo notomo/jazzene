@@ -56,6 +56,8 @@ pub fn improvisation(
 
 ///|
 /// Remove dangling tie at the end of the last measure.
+/// The last note that would overflow into a non-existent next measure
+/// is removed entirely rather than kept with its tie cleared.
 /// Returns a new array without mutating the original.
 fn remove_dangling_tie(
   measures : Array[@music.Measure],
@@ -63,14 +65,8 @@ fn remove_dangling_tie(
 ) -> Array[@music.Measure] {
   guard last_tie is Some(_) else { return measures }
   guard measures is [.. rest_measures, last_measure] else { return measures }
-  guard last_measure.notes is [.. rest_notes, last_note] else {
+  guard last_measure.notes is [.. rest_notes, _last_note] else {
     return measures
   }
-  [
-    ..rest_measures,
-    @music.Measure::{
-      ..last_measure,
-      notes: [..rest_notes, @music.MeasureNote::{ ..last_note, tie: None }],
-    },
-  ]
+  [..rest_measures, @music.Measure::{ ..last_measure, notes: [..rest_notes] }]
 }

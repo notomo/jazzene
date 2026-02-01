@@ -44,10 +44,9 @@ test "improvisation removes dangling tie at last measure" {
     beats_per_measure=4.0,
   ) // 1 leading rest + 2 chord measures
 
-  // Last measure's last note should have tie removed
+  // Last measure's overflowing note should be removed entirely
   let last_measure = measures[measures.length() - 1]
-  let last_note = last_measure.notes[last_measure.notes.length() - 1]
-  inspect(last_note.tie, content="None")
+  inspect(last_measure.notes.is_empty(), content="true")
 }
 
 ///|
