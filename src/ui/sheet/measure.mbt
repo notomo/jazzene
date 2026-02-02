@@ -121,12 +121,23 @@ fn render_note_or_rest(
   y : Double,
   measure_x : Double,
   key : @music.KeySignature,
+  prev_note_x? : Double? = None,
+  next_note_x? : Double? = None,
 ) -> Array[@luna_dom.DomNode] {
   match note.midi {
     Some(midi) =>
       [
         ..render_note(note, note_x, y, key),
-        ..render_tie_arcs(note.tie, note_x, midi, y, measure_x, key),
+        ..render_tie_arcs(
+          note.tie,
+          note_x,
+          midi,
+          y,
+          measure_x,
+          key,
+          prev_note_x~,
+          next_note_x~,
+        ),
       ]
     None => render_rest(note, note_x, y)
   }
@@ -141,12 +152,35 @@ fn render_measure_notes(
   key : @music.KeySignature,
   beats_per_measure : Double,
 ) -> Array[@luna_dom.DomNode] {
-  measure.notes
+  let positioned = measure.positioned_notes()
+  positioned
   .iter()
-  .flat_map(fn(note) {
-    let note_x = note_x_position(x, note.start_beat, beats_per_measure)
-    render_note_or_rest(note, note_x, y, x, key).iter()
+  .mapi(fn(i, pair) {
+    let (start_beat, note) = pair
+    let note_x = note_x_position(x, start_beat, beats_per_measure)
+    let prev_note_x : Double? = match note.tie {
+      Some(@music.TieEnd | @music.TieBoth) =>
+        if i > 0 {
+          let (prev_beat, _) = positioned[i - 1]
+          Some(note_x_position(x, prev_beat, beats_per_measure))
+        } else {
+          None
+        }
+      _ => None
+    }
+    let next_note_x : Double? = match note.tie {
+      Some(@music.TieStart | @music.TieBoth) =>
+        if i + 1 < positioned.length() {
+          let (next_beat, _) = positioned[i + 1]
+          Some(note_x_position(x, next_beat, beats_per_measure))
+        } else {
+          None
+        }
+      _ => None
+    }
+    render_note_or_rest(note, note_x, y, x, key, prev_note_x~, next_note_x~).iter()
   })
+  .flatten()
   .collect()
 }
 

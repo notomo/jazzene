@@ -48,11 +48,12 @@ pub fn convert_measures_to_sounds(
     .iter()
     .flat_map(fn(measure) {
       let measure_start_ms = measure.start_time.to_milliseconds()
-      measure.notes
+      measure
+      .positioned_notes()
       .iter()
-      .map(fn(note) {
-        let note_start_ms = measure_start_ms +
-          note.start_beat * beat_duration_ms
+      .map(fn(pair) {
+        let (start_beat, note) = pair
+        let note_start_ms = measure_start_ms + start_beat * beat_duration_ms
         (note_start_ms, note)
       })
     })

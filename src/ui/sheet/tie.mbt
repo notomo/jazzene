@@ -1,5 +1,5 @@
 ///|
-/// Tie arc rendering for notes that span measure boundaries
+/// Tie arc rendering for notes that span measure or beat boundaries
 
 ///|
 const TIE_THICKNESS = 6.0
@@ -26,7 +26,9 @@ const TIE_CONTROL_POINT_2_RATIO = 0.7
 const TIE_STROKE_WIDTH = "0.5"
 
 ///|
-/// Render tie arc nodes for a note based on its tie state
+/// Render tie arc nodes for a note based on its tie state.
+/// prev_note_x/next_note_x are provided for within-measure ties;
+/// when None, arcs extend to measure edges (cross-measure ties).
 fn render_tie_arcs(
   tie : @music.Tie?,
   note_x : Double,
@@ -34,32 +36,53 @@ fn render_tie_arcs(
   staff_y : Double,
   measure_x : Double,
   key : @music.KeySignature,
+  prev_note_x? : Double? = None,
+  next_note_x? : Double? = None,
 ) -> Array[@luna_dom.DomNode] {
   let note_y = midi_to_staff_y(midi, staff_y, key)
   let stem_up = midi < STEM_DIRECTION_MIDI_THRESHOLD
   let measure_start_x = measure_x
   let measure_end_x = measure_x + MEASURE_WIDTH
   match tie {
-    Some(@music.TieStart) =>
-      [render_tie_start(note_x, note_y, measure_end_x, stem_up)]
-    Some(@music.TieEnd) =>
-      [render_tie_end(measure_start_x, note_x, note_y, stem_up)]
-    Some(@music.TieBoth) =>
+    Some(@music.TieStart) => {
+      let end_x = match next_note_x {
+        Some(nx) => nx
+        None => measure_end_x
+      }
+      [render_tie_start(note_x, note_y, end_x, stem_up)]
+    }
+    Some(@music.TieEnd) => {
+      let start_x = match prev_note_x {
+        Some(px) => px
+        None => measure_start_x
+      }
+      [render_tie_end(start_x, note_x, note_y, stem_up)]
+    }
+    Some(@music.TieBoth) => {
+      let start_x = match prev_note_x {
+        Some(px) => px
+        None => measure_start_x
+      }
+      let end_x = match next_note_x {
+        Some(nx) => nx
+        None => measure_end_x
+      }
       [
-        render_tie_end(measure_start_x, note_x, note_y, stem_up),
-        render_tie_start(note_x, note_y, measure_end_x, stem_up),
+        render_tie_end(start_x, note_x, note_y, stem_up),
+        render_tie_start(note_x, note_y, end_x, stem_up),
       ]
+    }
     None => []
   }
 }
 
 ///|
-/// Render a tie arc from a note to the right edge of the measure (TieStart)
+/// Render a tie arc from a note to the right (TieStart)
 /// The arc curves away from the stem direction (down if stem up, up if stem down)
 fn render_tie_start(
   note_x : Double,
   note_y : Double,
-  measure_end_x : Double,
+  end_target_x : Double,
   stem_up : Bool,
 ) -> @luna_dom.DomNode {
   // Tie parameters
@@ -70,8 +93,8 @@ fn render_tie_start(
   let start_x = note_x + TIE_NOTE_HEAD_X_OFFSET
   let start_y = note_y + y_offset
 
-  // End at the right edge of the measure
-  let end_x = measure_end_x - TIE_EDGE_MARGIN
+  // End at the target x position
+  let end_x = end_target_x - TIE_EDGE_MARGIN
   let end_y = start_y
 
   // Control points for cubic Bezier curve (smoother than quadratic)
@@ -93,10 +116,10 @@ fn render_tie_start(
 }
 
 ///|
-/// Render a tie arc from the left edge of the measure to a note (TieEnd)
+/// Render a tie arc from a start position to a note (TieEnd)
 /// The arc curves away from the stem direction
 fn render_tie_end(
-  measure_start_x : Double,
+  start_origin_x : Double,
   note_x : Double,
   note_y : Double,
   stem_up : Bool,
@@ -105,8 +128,8 @@ fn render_tie_end(
   let arc_height = if stem_up { TIE_ARC_HEIGHT } else { -TIE_ARC_HEIGHT }
   let y_offset = if stem_up { TIE_Y_OFFSET } else { -TIE_Y_OFFSET }
 
-  // Start from the left edge of the measure
-  let start_x = measure_start_x + TIE_EDGE_MARGIN
+  // Start from the origin position
+  let start_x = start_origin_x + TIE_EDGE_MARGIN
   let start_y = note_y + y_offset
 
   // End at the left side of the note head
