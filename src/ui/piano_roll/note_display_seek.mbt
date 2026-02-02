@@ -19,8 +19,8 @@ extern "js" fn add_drag_listeners_notes(
   on_drag_end : (@js_dom.MouseEvent) -> Unit,
 ) -> Unit =
   #|(canvas, onDragStart, onDragMove, onDragEnd) => {
-  #|  // Mouse events
-  #|  canvas.addEventListener('mousedown', onDragStart);
+  #|  // Mouse events (left button only)
+  #|  canvas.addEventListener('mousedown', (e) => { if (e.button === 0) onDragStart(e); });
   #|  canvas.addEventListener('mousemove', onDragMove);
   #|  canvas.addEventListener('mouseup', onDragEnd);
   #|  canvas.addEventListener('mouseleave', onDragEnd);
