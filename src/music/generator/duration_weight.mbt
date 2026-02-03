@@ -15,11 +15,11 @@ pub(all) struct DurationWeights {
 pub fn DurationWeights::note_default() -> DurationWeights {
   DurationWeights::{
     eighth: 15,
-    dotted_eighth: 10,
+    dotted_eighth: 0,
     quarter: 40,
-    dotted_quarter: 20,
+    dotted_quarter: 0,
     half: 8,
-    dotted_half: 5,
+    dotted_half: 0,
     whole: 2,
   }
 }
@@ -79,4 +79,23 @@ pub fn random_duration(
   random_int : (Int) -> Int,
 ) -> @music.NoteDuration {
   weighted_choice(weights.to_choices(), random_int)
+}
+
+///|
+/// Generate a random duration that fits within the given beat capacity
+fn random_duration_within(
+  max_beats : Double,
+  weights : DurationWeights,
+  random_int : (Int) -> Int,
+) -> @music.NoteDuration? {
+  let choices = weights
+    .to_choices()
+    .iter()
+    .filter(fn(pair) { pair.0 > 0 && pair.1.to_beats() <= max_beats + 0.001 })
+    .collect()
+  if choices.is_empty() {
+    None
+  } else {
+    Some(weighted_choice(choices, random_int))
+  }
 }

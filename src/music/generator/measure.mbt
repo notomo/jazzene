@@ -65,14 +65,7 @@ pub fn create_measure_generator(settings : Settings) -> MeasureGenerator {
 }
 
 ///|
-/// Tie carry state between beats within a measure
-priv struct BeatTieCarry {
-  midi : @music.MidiNumber
-  remaining_beats : Double
-}
-
-///|
-/// Generate notes for one measure, beat by beat
+/// Generate notes for one measure
 fn generate_measure_notes(
   chord : @music.Chord,
   incoming_tie : TieContext?,
@@ -88,223 +81,125 @@ fn generate_measure_notes(
   let beats : Array[@music.Beat] = []
 
   // Convert incoming cross-measure tie to beat carry
-  let initial_carry : BeatTieCarry? = match incoming_tie {
-    Some(tie_ctx) =>
-      Some(BeatTieCarry::{
-        midi: tie_ctx.midi,
-        remaining_beats: tie_ctx.remaining_beats,
-      })
-    None => None
-  }
-  let mut carry : BeatTieCarry? = initial_carry
-  for beat_index = 0; beat_index < num_beats; beat_index = beat_index + 1 {
-    let notes : Array[@music.MeasureNote] = []
-    let mut current_pos = 0.0
-    let beat_capacity = 1.0
+  // Track position across the entire measure
+  let mut measure_pos = 0.0
+  // Notes grouped by beat index
+  let beat_notes : Array[Array[@music.MeasureNote]] = Array::makei(num_beats, fn(
+    _i,
+  ) {
+    []
+  })
 
-    // Handle incoming carry (from cross-measure tie or previous beat's within-measure tie)
-    match carry {
-      Some(c) => {
-        let remaining_in_measure = beats_per_measure - beat_index.to_double()
-        if c.remaining_beats > remaining_in_measure {
-          // Tie extends beyond this entire measure
+  // Handle incoming tie first
+  let mut outgoing_tie : TieContext? = None
+  match incoming_tie {
+    Some(tie_ctx) => {
+      let midi = tie_ctx.midi
+      let mut remaining = tie_ctx.remaining_beats
+      // Fill beats with tied notes
+      while remaining > 0.0 && measure_pos < beats_per_measure {
+        let beat_index = measure_pos.to_int()
+        let beat_capacity = (beat_index + 1).to_double() - measure_pos
+        let remaining_in_measure = beats_per_measure - measure_pos
+        if remaining > remaining_in_measure {
+          // Tie extends beyond this measure
           let fitted = @music.NoteDuration::fit(beat_capacity).unwrap_or(
             @music.Eighth,
           )
-          let tie = if beat_index == 0 {
-            match incoming_tie {
-              Some(_) => Some(@music.TieBoth)
-              None => Some(@music.TieStart) // shouldn't happen but be safe
-            }
-          } else {
-            Some(@music.TieBoth)
-          }
-          notes.push(@music.MeasureNote::{
-            midi: Some(c.midi.value),
+          beat_notes[beat_index].push(@music.MeasureNote::{
+            midi: Some(midi.value),
             duration: fitted,
             accidental: None,
-            tie,
+            tie: Some(@music.TieBoth),
           })
-          beats.push(@music.Beat::{ count: beat_index, notes })
-          carry = Some(BeatTieCarry::{
-            midi: c.midi,
-            remaining_beats: c.remaining_beats - beat_capacity,
-          })
-          continue
-        }
-        if c.remaining_beats > beat_capacity {
-          // Carry spans beyond this beat but not beyond the measure
+          measure_pos = measure_pos + fitted.to_beats()
+          remaining = remaining - fitted.to_beats()
+        } else if remaining > beat_capacity {
+          // Tie spans beyond this beat but not beyond measure
           let fitted = @music.NoteDuration::fit(beat_capacity).unwrap_or(
             @music.Eighth,
           )
-          let tie = if beat_index == 0 {
-            match incoming_tie {
-              Some(_) => Some(@music.TieBoth)
-              None => Some(@music.TieStart)
-            }
+          let tie = if measure_pos == 0.0 {
+            @music.TieBoth
           } else {
-            Some(@music.TieBoth)
+            @music.TieBoth
           }
-          notes.push(@music.MeasureNote::{
-            midi: Some(c.midi.value),
+          beat_notes[beat_index].push(@music.MeasureNote::{
+            midi: Some(midi.value),
             duration: fitted,
             accidental: None,
-            tie,
+            tie: Some(tie),
           })
-          beats.push(@music.Beat::{ count: beat_index, notes })
-          carry = Some(BeatTieCarry::{
-            midi: c.midi,
-            remaining_beats: c.remaining_beats - beat_capacity,
-          })
-          continue
-        }
-        // Carry fits within this beat
-        let fitted = @music.NoteDuration::fit(c.remaining_beats).unwrap_or(
-          @music.Eighth,
-        )
-        let tie = if beat_index == 0 {
-          match incoming_tie {
-            Some(_) => Some(@music.TieEnd)
-            None => Some(@music.TieEnd)
-          }
+          measure_pos = measure_pos + fitted.to_beats()
+          remaining = remaining - fitted.to_beats()
         } else {
-          Some(@music.TieEnd)
+          // Tie ends in this beat
+          let fitted = @music.NoteDuration::fit(remaining).unwrap_or(
+            @music.Eighth,
+          )
+          beat_notes[beat_index].push(@music.MeasureNote::{
+            midi: Some(midi.value),
+            duration: fitted,
+            accidental: None,
+            tie: Some(@music.TieEnd),
+          })
+          measure_pos = measure_pos + fitted.to_beats()
+          remaining = 0.0
         }
-        notes.push(@music.MeasureNote::{
-          midi: Some(c.midi.value),
-          duration: fitted,
-          accidental: None,
-          tie,
-        })
-        current_pos = current_pos + fitted.to_beats()
-        carry = None
       }
-      None => ()
+      // If tie still has remaining beats, create outgoing tie
+      if remaining > 0.0 {
+        outgoing_tie = Some(TieContext::{ midi, remaining_beats: remaining })
+      }
     }
+    None => ()
+  }
 
-    // Fill remaining capacity in this beat
-    while current_pos < beat_capacity {
-      let remaining_in_beat = beat_capacity - current_pos
-      match decide_midi_number(chord, rest_probability, random_int) {
-        Some(midi) => {
-          let duration = random_duration(note_duration_weights, random_int)
-          let beats_needed = duration.to_beats()
-          if beats_needed <= remaining_in_beat {
-            // Note fits within this beat
-            notes.push(@music.MeasureNote::{
+  // Fill remaining measure with new notes (no ties created)
+  while measure_pos < beats_per_measure {
+    let remaining_in_measure = beats_per_measure - measure_pos
+    let beat_index = measure_pos.to_int()
+    match decide_midi_number(chord, rest_probability, random_int) {
+      Some(midi) =>
+        match
+          random_duration_within(
+            remaining_in_measure, note_duration_weights, random_int,
+          ) {
+          Some(duration) => {
+            beat_notes[beat_index].push(@music.MeasureNote::{
               midi: Some(midi.value),
               duration,
               accidental: update_accidental(midi),
               tie: None,
             })
-            current_pos = current_pos + beats_needed
-          } else {
-            // Note exceeds beat boundary
-            let remaining_in_measure = beats_per_measure -
-              beat_index.to_double() -
-              current_pos
-            if beats_needed > remaining_in_measure {
-              // Note extends beyond the measure - cross-measure tie
-              let fitted = @music.NoteDuration::fit(remaining_in_beat).unwrap_or(
-                @music.Eighth,
-              )
-              notes.push(@music.MeasureNote::{
-                midi: Some(midi.value),
-                duration: fitted,
-                accidental: update_accidental(midi),
-                tie: Some(@music.TieStart),
-              })
-              // Fill remaining beats in this measure with tied notes
-              let mut cross_remaining = beats_needed - remaining_in_beat
-              for b = beat_index + 1; b < num_beats; b = b + 1 {
-                let beat_notes : Array[@music.MeasureNote] = []
-                if cross_remaining > beat_capacity {
-                  let bf = @music.NoteDuration::fit(beat_capacity).unwrap_or(
-                    @music.Eighth,
-                  )
-                  beat_notes.push(@music.MeasureNote::{
-                    midi: Some(midi.value),
-                    duration: bf,
-                    accidental: None,
-                    tie: Some(@music.TieBoth),
-                  })
-                  cross_remaining = cross_remaining - beat_capacity
-                } else {
-                  let bf = @music.NoteDuration::fit(cross_remaining).unwrap_or(
-                    @music.Eighth,
-                  )
-                  beat_notes.push(@music.MeasureNote::{
-                    midi: Some(midi.value),
-                    duration: bf,
-                    accidental: None,
-                    tie: Some(@music.TieBoth),
-                  })
-                  cross_remaining = cross_remaining - bf.to_beats()
-                }
-                beats.push(@music.Beat::{ count: b, notes: beat_notes })
-              }
-              beats.push(@music.Beat::{ count: beat_index, notes })
-              // Sort beats by count since we added out of order
-              beats.sort_by(fn(a, b) { a.count.compare(b.count) })
-              return MeasureResult::{
-                beats,
-                outgoing_tie: Some(TieContext::{
-                  midi,
-                  remaining_beats: beats_needed - remaining_in_measure,
-                }),
-              }
-            } else {
-              // Note exceeds beat but fits in measure - within-measure tie
-              let fitted = @music.NoteDuration::fit(remaining_in_beat).unwrap_or(
-                @music.Eighth,
-              )
-              notes.push(@music.MeasureNote::{
-                midi: Some(midi.value),
-                duration: fitted,
-                accidental: update_accidental(midi),
-                tie: Some(@music.TieStart),
-              })
-              current_pos = current_pos + fitted.to_beats()
-              carry = Some(BeatTieCarry::{
-                midi,
-                remaining_beats: beats_needed - remaining_in_beat,
-              })
-              break // Move to next beat
-            }
+            measure_pos = measure_pos + duration.to_beats()
           }
+          None => break
         }
-        None => {
-          // Rest - truncate to beat boundary (rests don't tie)
-          let duration = random_duration(rest_duration_weights, random_int)
-          let rest_beats = @cmp.minimum(duration.to_beats(), remaining_in_beat)
-          let rest_duration = @music.NoteDuration::fit(rest_beats).unwrap_or(
-            @music.Eighth,
-          )
-          notes.push(@music.MeasureNote::{
-            midi: None,
-            duration: rest_duration,
-            accidental: None,
-            tie: None,
-          })
-          current_pos = current_pos + rest_duration.to_beats()
+      None =>
+        match
+          random_duration_within(
+            remaining_in_measure, rest_duration_weights, random_int,
+          ) {
+          Some(duration) => {
+            beat_notes[beat_index].push(@music.MeasureNote::{
+              midi: None,
+              duration,
+              accidental: None,
+              tie: None,
+            })
+            measure_pos = measure_pos + duration.to_beats()
+          }
+          None => break
         }
-      }
     }
-    beats.push(@music.Beat::{ count: beat_index, notes })
   }
 
-  // If carry remains after all beats, it means the carried note extends beyond the measure
-  match carry {
-    Some(c) =>
-      MeasureResult::{
-        beats,
-        outgoing_tie: Some(TieContext::{
-          midi: c.midi,
-          remaining_beats: c.remaining_beats,
-        }),
-      }
-    None => MeasureResult::{ beats, outgoing_tie: None }
+  // Convert to Beat array
+  for i, notes in beat_notes {
+    beats.push(@music.Beat::{ count: i, notes })
   }
+  MeasureResult::{ beats, outgoing_tie }
 }
 
 ///|
