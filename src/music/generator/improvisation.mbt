@@ -77,31 +77,22 @@ fn remove_dangling_tie(
 /// from the end of the last beat that has notes.
 fn remove_trailing_tied_notes(beats : Array[@music.Beat]) -> Array[@music.Beat] {
   // Work backwards through beats to find and remove the trailing tied note chain
-  let new_beats = beats.copy()
-  for i = new_beats.length() - 1; i >= 0; i = i - 1 {
-    let beat = new_beats[i]
-    if beat.notes.is_empty() {
-      continue
-    }
-    let last_note = beat.notes[beat.notes.length() - 1]
-    match last_note.tie {
-      Some(@music.TieStart | @music.TieBoth) => {
-        // Remove the last note from this beat
-        let remaining_notes = beat.notes
-          .iter()
-          .take(beat.notes.length() - 1)
-          .collect()
-        new_beats[i] = @music.Beat::{
+  // State: (result_beats, should_continue_removing)
+  let (result, _) = beats[:].rev_fold(init=([], true), fn(acc, beat) {
+    let (result_beats, removing) = acc
+    match (removing, beat.notes) {
+      (true, [.. rest, { tie: Some(@music.TieStart | @music.TieBoth), .. }]) => {
+        // Remove the last note and continue removing backwards
+        let new_beat = @music.Beat::{
           count: beat.count,
-          notes: remaining_notes,
+          notes: rest.to_array(),
         }
-        // If this was TieBoth, the previous beat's last note may also need removal
-        // But for the dangling tie case, TieStart in the last beat with notes is the source
-        // Continue backwards to remove any TieBoth notes that were part of the same chain
-        continue
+        ([new_beat, ..result_beats], true)
       }
-      _ => break
+      _ =>
+        // Stop removing: either not removing or last note doesn't have tie
+        ([beat, ..result_beats], false)
     }
-  }
-  new_beats
+  })
+  result
 }
