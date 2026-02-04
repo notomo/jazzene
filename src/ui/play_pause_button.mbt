@@ -21,16 +21,7 @@ fn play_pause_button(
     playback_position.set(start_position)
   }
   @luna_dom.button(
-    dyn_class=fn() {
-      cn([
-        "px-4 py-3 text-white rounded-lg font-semibold transition-colors shadow-lg",
-        if is_playing.get() {
-          "bg-red-600 hover:bg-red-700"
-        } else {
-          "bg-green-600 hover:bg-green-700"
-        },
-      ])
-    },
+    class="px-4 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-semibold transition-colors shadow-lg",
     on=@luna_dom.events().click(on_click),
     [@luna_dom.text_dyn(fn() { if is_playing.get() { "■" } else { "▶" } })],
   )
