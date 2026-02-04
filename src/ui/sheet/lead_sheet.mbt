@@ -100,7 +100,7 @@ pub fn lead_sheet(
     [
       @luna_dom.svg(
         attrs=[
-          ("preserveAspectRatio", @luna_dom.Attr::AttrString("xMinYMin meet")),
+          ("preserveAspectRatio", @luna_dom.Attr::AttrString("xMidYMin meet")),
         ],
         width="100%",
         fill=COLOR_FOREGROUND,
@@ -114,11 +114,13 @@ pub fn lead_sheet(
                 MEASURES_PER_ROW
               let height = STAFF_TOP + rows.to_double() * ROW_HEIGHT
               let key_sig_width = key_signature_width(key.get())
-              let width = MEASURE_START_X +
+              let viewbox_start_x = MEASURE_START_X - 15.0
+              let width = MEASURE_START_X -
+                viewbox_start_x +
                 CLEF_SPACE_WIDTH +
                 key_sig_width +
                 MEASURES_PER_ROW.to_double() * MEASURE_WIDTH
-              "\{0} \{0} \{width.to_int()} \{height.to_int()}"
+              "\{viewbox_start_x.to_int()} \{0} \{width.to_int()} \{height.to_int()}"
             }),
           ),
         ],
