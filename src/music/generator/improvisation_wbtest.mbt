@@ -23,6 +23,8 @@ test "improvisation removes dangling tie at last measure" {
             },
           ],
           outgoing_tie: None,
+          outgoing_stamina: ctx.incoming_stamina,
+          outgoing_last_midi: Some(tie_ctx.midi),
         }
       None =>
         // Always produce a note that extends beyond the measure (TieStart)
@@ -41,16 +43,20 @@ test "improvisation removes dangling tie at last measure" {
             },
           ],
           outgoing_tie: Some(TieContext::{ midi: midi60, remaining_beats: 2.0 }),
+          outgoing_stamina: ctx.incoming_stamina,
+          outgoing_last_midi: Some(midi60),
         }
     }
   }
   let chords = [@music.Chord::{ root: @music.C, quality: @music.Major7 }]
+  let settings = Settings::default(0)
   let measures = improvisation(
     generator,
     chords,
     120,
     3,
     @music.KeySignature::c_major(),
+    settings,
     beats_per_measure=4.0,
   ) // 1 leading rest + 2 chord measures
 
@@ -65,6 +71,7 @@ test "improvisation preserves tie when not at last measure" {
   let call_count = Ref::new(0)
   let generator : MeasureGenerator = fn(ctx) {
     let midi60 = @music.MidiNumber::new(60).unwrap()
+    let midi62 = @music.MidiNumber::new(62).unwrap()
     call_count.val = call_count.val + 1
     match ctx.incoming_tie {
       Some(tie_ctx) =>
@@ -91,6 +98,8 @@ test "improvisation preserves tie when not at last measure" {
             },
           ],
           outgoing_tie: None,
+          outgoing_stamina: ctx.incoming_stamina,
+          outgoing_last_midi: Some(midi62),
         }
       None =>
         if call_count.val == 2 {
@@ -113,6 +122,8 @@ test "improvisation preserves tie when not at last measure" {
               midi: midi60,
               remaining_beats: 2.0,
             }),
+            outgoing_stamina: ctx.incoming_stamina,
+            outgoing_last_midi: Some(midi60),
           }
         } else {
           // Leading rest measure
@@ -131,17 +142,21 @@ test "improvisation preserves tie when not at last measure" {
               },
             ],
             outgoing_tie: None,
+            outgoing_stamina: ctx.incoming_stamina,
+            outgoing_last_midi: None,
           }
         }
     }
   }
   let chords = [@music.Chord::{ root: @music.C, quality: @music.Major7 }]
+  let settings = Settings::default(0)
   let measures = improvisation(
     generator,
     chords,
     120,
     4,
     @music.KeySignature::c_major(),
+    settings,
     beats_per_measure=4.0,
   ) // 1 leading rest + 3 chord measures
 

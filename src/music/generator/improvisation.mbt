@@ -11,6 +11,15 @@ pub fn leading_rest_measure() -> Array[@music.Measure] {
 }
 
 ///|
+/// State passed between measures during improvisation generation
+priv struct ImprovisationState {
+  measures : Array[@music.Measure]
+  incoming_tie : TieContext?
+  incoming_stamina : Int
+  incoming_last_midi : @music.MidiNumber?
+}
+
+///|
 /// Generate improvisation using measure generator
 /// Returns array of Measures
 /// measure_count specifies the number of music measures (excluding leading rest)
@@ -21,6 +30,7 @@ pub fn improvisation(
   bpm : Int,
   measure_count : Int,
   key : @music.KeySignature,
+  settings : Settings,
   beats_per_measure~ : Double,
   start_offset? : Int = 0,
 ) -> Array[@music.Measure] {
@@ -28,30 +38,39 @@ pub fn improvisation(
     return []
   }
   let measure_duration_ms = @music.ms_per_measure(bpm, beats_per_measure~)
-  let (measures, last_tie) = Array::makei(measure_count, fn(i) { i })
+  let initial_state = ImprovisationState::{
+    measures: [],
+    incoming_tie: None,
+    incoming_stamina: settings.stamina_initial,
+    incoming_last_midi: None,
+  }
+  let final_state = Array::makei(measure_count, fn(i) { i })
     .iter()
-    .fold(init=(([] : Array[@music.Measure]), (None : TieContext?)), fn(
-      acc,
-      i,
-    ) {
-      let (measures, incoming_tie) = acc
+    .fold(init=initial_state, fn(state, i) {
       let chord = chords[i % chords.length()]
       let result = generator(MeasureContext::{
         chord,
-        incoming_tie,
+        incoming_tie: state.incoming_tie,
         key,
         beats_per_measure,
+        incoming_stamina: state.incoming_stamina,
+        incoming_last_midi: state.incoming_last_midi,
       })
-      measures.push(@music.Measure::{
+      state.measures.push(@music.Measure::{
         chords: [chord],
         beats: result.beats,
         start_time: @music.Duration::from_milliseconds(
           (i + start_offset).to_double() * measure_duration_ms,
         ),
       })
-      (measures, result.outgoing_tie)
+      ImprovisationState::{
+        measures: state.measures,
+        incoming_tie: result.outgoing_tie,
+        incoming_stamina: result.outgoing_stamina,
+        incoming_last_midi: result.outgoing_last_midi,
+      }
     })
-  remove_dangling_tie(measures, last_tie)
+  remove_dangling_tie(final_state.measures, final_state.incoming_tie)
 }
 
 ///|

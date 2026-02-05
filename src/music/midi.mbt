@@ -51,3 +51,9 @@ pub fn MidiNumber::accidental(self : MidiNumber) -> Accidental {
     _ => Accidental::Natural // White keys
   }
 }
+
+///|
+/// Calculate the absolute interval distance between two MIDI numbers
+pub fn MidiNumber::distance(self : MidiNumber, other : MidiNumber) -> Int {
+  (self.value - other.value).abs()
+}
