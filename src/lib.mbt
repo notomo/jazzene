@@ -25,9 +25,14 @@ fn main {
     chords, seed, measure_count, bpm, key, time_signature,
   )
   let measures = fn() { measures_signal.get() }
+  let swing = @signal.signal(@music.SwingConfig::triplet())
   let sounds : @signal.Signal[Array[@music.NoteValueSound]] = @signal.signal([])
   let _ = @signal.effect(fn() {
-    @music.convert_measures_to_sounds(measures_signal.get(), bpm.get())
+    @music.convert_measures_to_sounds(
+      measures_signal.get(),
+      bpm.get(),
+      swing=swing.get(),
+    )
     |> sound_list => { sounds.set(sound_list) }
   })
   let total_duration = @signal.memo(fn() {

@@ -37,9 +37,11 @@ pub fn calculate_playing_notes(
 ///|
 /// Convert measures array to sounds array
 /// Combines tied notes into single NoteValueSound entries
+/// Applies swing timing to off-beat eighth notes
 pub fn convert_measures_to_sounds(
   measures : Array[Measure],
   bpm : Int,
+  swing? : SwingConfig = SwingConfig::straight(),
 ) -> Array[NoteValueSound] {
   let beat_duration_ms = ms_per_beat(bpm)
 
@@ -53,7 +55,10 @@ pub fn convert_measures_to_sounds(
       .iter()
       .map(fn(pair) {
         let (start_beat, note) = pair
-        let note_start_ms = measure_start_ms + start_beat * beat_duration_ms
+        let swing_delay = swing_offset(start_beat, beat_duration_ms, swing)
+        let note_start_ms = measure_start_ms +
+          start_beat * beat_duration_ms +
+          swing_delay
         (note_start_ms, note)
       })
     })
