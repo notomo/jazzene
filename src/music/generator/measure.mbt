@@ -52,8 +52,8 @@ pub fn Settings::default(seed : Int) -> Settings {
     rest_duration_weights: DurationWeights::rest_default(),
     stamina_initial: 50,
     stamina_max: 50,
-    stamina_recovery_per_beat: 5,
-    stamina_passive_recovery: 3,
+    stamina_recovery_per_beat: 20,
+    stamina_passive_recovery: 5,
   }
 }
 
@@ -74,6 +74,7 @@ priv struct MeasureState {
   beat_notes : Array[Array[@music.MeasureNote]]
   stamina : Int
   last_midi : @music.MidiNumber?
+  last_was_rest : Bool
 }
 
 ///|
@@ -87,6 +88,7 @@ fn MeasureState::new(
     beat_notes: Array::makei(num_beats, fn(_) { [] }),
     stamina,
     last_midi,
+    last_was_rest: false,
   }
 }
 
@@ -102,6 +104,7 @@ fn MeasureState::add_note(
     beat_notes: self.beat_notes,
     stamina: self.stamina,
     last_midi: self.last_midi,
+    last_was_rest: note.midi is None, // rest if no MIDI
   }
 }
 
@@ -228,6 +231,8 @@ fn fill_remaining_measure(
         chord,
         state.last_midi,
         state.stamina,
+        settings.stamina_max,
+        state.last_was_rest,
         settings.rest_probability,
         random_int,
       ) {
@@ -265,6 +270,7 @@ fn fill_remaining_measure(
           }
         }
         let beat_index = state.measure_pos.to_int()
+        let is_rest = midi_opt is None
         state.beat_notes[beat_index].push(@music.MeasureNote::{
           midi: midi_opt.map(fn(m) { m.value }),
           duration,
@@ -276,6 +282,7 @@ fn fill_remaining_measure(
             beat_notes: state.beat_notes,
             stamina: new_stamina,
             last_midi: new_last_midi,
+            last_was_rest: is_rest,
           }
       }
       None => break state
@@ -298,16 +305,42 @@ fn get_extended_tones(chord : @music.Chord) -> Array[@music.MidiNumber] {
 }
 
 ///|
+/// Calculate effective rest probability based on stamina and previous note
+/// High stamina → low rest probability (want to play)
+/// Low stamina → high rest probability (need to rest)
+/// After rest → lower rest probability (avoid consecutive rests)
+fn effective_rest_probability(
+  base_probability : Int,
+  stamina : Int,
+  stamina_max : Int,
+  last_was_rest : Bool,
+) -> Int {
+  guard stamina_max > 0 else { return base_probability }
+  // When stamina is max, rest probability drops to ~10% of base
+  // When stamina is 0, rest probability is at base value
+  let stamina_ratio = stamina.to_double() / stamina_max.to_double()
+  let stamina_scale = 1.0 - stamina_ratio * 0.9 // 1.0 at stamina=0, 0.1 at stamina=max
+  // After a rest, reduce probability by 70% to avoid consecutive rests
+  let consecutive_scale = if last_was_rest { 0.3 } else { 1.0 }
+  (base_probability.to_double() * stamina_scale * consecutive_scale).to_int()
+}
+
+///|
 /// Decide whether to generate a note or rest, and if note, which MIDI number
 /// Uses stamina-based weighted selection for chord tones
 fn decide_midi_number(
   chord : @music.Chord,
   last_midi : @music.MidiNumber?,
   stamina : Int,
+  stamina_max : Int,
+  last_was_rest : Bool,
   rest_probability : Int,
   random_int : (Int) -> Int,
 ) -> @music.MidiNumber? {
-  guard random_int(100) >= rest_probability else { return None }
+  let actual_rest_prob = effective_rest_probability(
+    rest_probability, stamina, stamina_max, last_was_rest,
+  )
+  guard random_int(100) >= actual_rest_prob else { return None }
   let extended_tones = get_extended_tones(chord)
   match last_midi {
     Some(prev) => {
