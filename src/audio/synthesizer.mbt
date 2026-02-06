@@ -19,7 +19,7 @@ pub fn Synthesizer::new() -> Synthesizer {
 pub fn Synthesizer::mute(self : Synthesizer) -> Unit {
   let gain_param = self.master_gain.gain()
   gain_param.cancel_scheduled_values(0.0)
-  gain_param.set_value(0.0)
+  gain_param.value = 0.0
 }
 
 ///|
@@ -27,7 +27,7 @@ pub fn Synthesizer::mute(self : Synthesizer) -> Unit {
 pub fn Synthesizer::unmute(self : Synthesizer) -> Unit {
   let gain_param = self.master_gain.gain()
   gain_param.cancel_scheduled_values(0.0)
-  gain_param.set_value(1.0)
+  gain_param.value = 1.0
 }
 
 ///|

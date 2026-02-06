@@ -143,8 +143,10 @@ pub fn GainNode::gain(self : Self) -> AudioParam {
 
 ///|
 /// [AudioParam](https://developer.mozilla.org/en-US/docs/Web/API/AudioParam)
-#external
-pub type AudioParam
+pub(all) struct AudioParam {
+  /// [value](https://developer.mozilla.org/en-US/docs/Web/API/AudioParam/value)
+  mut value : Double
+}
 
 ///|
 pub fn AudioParam::as_any(self : AudioParam) -> @js.Any = "%identity"
@@ -198,12 +200,4 @@ pub fn AudioParam::exponential_ramp_to_value_at_time(
 /// Cancel scheduled parameter changes
 pub fn AudioParam::cancel_scheduled_values(self : Self, time : Double) -> Unit {
   self.as_any()._call("cancelScheduledValues", [@js.any(time)]) |> ignore
-}
-
-///|
-/// [value](https://developer.mozilla.org/en-US/docs/Web/API/AudioParam/value)
-///
-/// Set the current value
-pub fn AudioParam::set_value(self : Self, value : Double) -> Unit {
-  self.as_any()._set("value", @js.any(value))
 }
