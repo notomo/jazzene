@@ -49,11 +49,19 @@ fn main {
   let loop_enabled = @signal.signal(false)
   let loop_a_time = @signal.signal(@music.Duration::from_milliseconds(0.0))
   let loop_b_time : @signal.Signal[@music.Duration?] = @signal.signal(None)
+  let synth = @audio.Synthesizer::new()
   let tick = make_tick(
     playback_position, volume, sounds, total_duration, loop_enabled, loop_a_time,
-    loop_b_time,
+    loop_b_time, synth,
   )
   let is_playing = @signal.signal(false)
+  let _ = @signal.effect(fn() {
+    if is_playing.get() {
+      synth.unmute()
+    } else {
+      synth.mute()
+    }
+  })
   @ui.setup_loop(is_playing, tick)
   @ui.render(
     is_playing, playback_position, volume, bpm, raw_chord_progression, seed, measure_count,
@@ -103,8 +111,8 @@ fn make_tick(
   loop_enabled : @signal.Signal[Bool],
   loop_a_time : @signal.Signal[@music.Duration],
   loop_b_time : @signal.Signal[@music.Duration?],
+  synth : @audio.Synthesizer,
 ) -> (Double) -> Bool {
-  let audio_ctx = @audio.create_context()
   let lookahead = @music.Duration::from_milliseconds(100)
   return fn(elapsed_ms : Double) -> Bool {
     let total = total_duration()
@@ -122,8 +130,12 @@ fn make_tick(
         new_position
       }
     }
-    @music.AudioSound::from(sounds.get(), final_position, lookahead)
-    |> @audio.schedule_notes(audio_ctx, volume.get())
+    let audio_sounds = @music.AudioSound::from(
+      sounds.get(),
+      final_position,
+      lookahead,
+    )
+    synth.schedule_notes(audio_sounds, volume.get())
     playback_position.set(final_position)
     let stop = if loop_enabled.get() { false } else { final_position == total }
     stop

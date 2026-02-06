@@ -191,3 +191,19 @@ pub fn AudioParam::exponential_ramp_to_value_at_time(
   ._call("exponentialRampToValueAtTime", [@js.any(value), @js.any(time)])
   |> ignore
 }
+
+///|
+/// [cancelScheduledValues()](https://developer.mozilla.org/en-US/docs/Web/API/AudioParam/cancelScheduledValues)
+///
+/// Cancel scheduled parameter changes
+pub fn AudioParam::cancel_scheduled_values(self : Self, time : Double) -> Unit {
+  self.as_any()._call("cancelScheduledValues", [@js.any(time)]) |> ignore
+}
+
+///|
+/// [value](https://developer.mozilla.org/en-US/docs/Web/API/AudioParam/value)
+///
+/// Set the current value
+pub fn AudioParam::set_value(self : Self, value : Double) -> Unit {
+  self.as_any()._set("value", @js.any(value))
+}
