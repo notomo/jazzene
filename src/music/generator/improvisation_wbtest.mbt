@@ -1,4 +1,49 @@
 ///|
+test "create_chord_segments evenly distributes chords" {
+  let chords = [
+    @music.Chord::{ root: @music.C, quality: @music.Major7 },
+    @music.Chord::{ root: @music.G, quality: @music.Dominant7 },
+  ]
+  let segments = create_chord_segments(chords, 4.0)
+  assert_eq(segments.length(), 2)
+  // First chord: beats 0-2
+  assert_eq(segments[0].start_beat, 0.0)
+  assert_eq(segments[0].end_beat, 2.0)
+  assert_eq(segments[0].chord.root, @music.C)
+  // Second chord: beats 2-4
+  assert_eq(segments[1].start_beat, 2.0)
+  assert_eq(segments[1].end_beat, 4.0)
+  assert_eq(segments[1].chord.root, @music.G)
+}
+
+///|
+test "MeasureContext::chord_at returns correct chord for position" {
+  let chords = [
+    @music.Chord::{ root: @music.C, quality: @music.Major7 },
+    @music.Chord::{ root: @music.G, quality: @music.Dominant7 },
+  ]
+  let segments = create_chord_segments(chords, 4.0)
+  let ctx = MeasureContext::{
+    chords: segments,
+    incoming_tie: None,
+    key: @music.KeySignature::c_major(),
+    beats_per_measure: 4.0,
+    incoming_stamina: 50,
+    incoming_last_midi: None,
+  }
+  // Beat 0 should be first chord
+  assert_eq(ctx.chord_at(0.0).root, @music.C)
+  // Beat 1.5 should be first chord
+  assert_eq(ctx.chord_at(1.5).root, @music.C)
+  // Beat 2 should be second chord
+  assert_eq(ctx.chord_at(2.0).root, @music.G)
+  // Beat 3 should be second chord
+  assert_eq(ctx.chord_at(3.0).root, @music.G)
+  // Beat 4 (at end) should return last chord
+  assert_eq(ctx.chord_at(4.0).root, @music.G)
+}
+
+///|
 test "improvisation removes dangling tie at last measure" {
   // Generator that always produces a note with TieStart at the end
   let generator : MeasureGenerator = fn(ctx) {
@@ -48,11 +93,13 @@ test "improvisation removes dangling tie at last measure" {
         }
     }
   }
-  let chords = [@music.Chord::{ root: @music.C, quality: @music.Major7 }]
+  let measure_defs = [
+    [@music.Chord::{ root: @music.C, quality: @music.Major7 }],
+  ]
   let settings = Settings::default(0)
   let measures = improvisation(
     generator,
-    chords,
+    measure_defs,
     120,
     3,
     @music.KeySignature::c_major(),
@@ -148,11 +195,13 @@ test "improvisation preserves tie when not at last measure" {
         }
     }
   }
-  let chords = [@music.Chord::{ root: @music.C, quality: @music.Major7 }]
+  let measure_defs = [
+    [@music.Chord::{ root: @music.C, quality: @music.Major7 }],
+  ]
   let settings = Settings::default(0)
   let measures = improvisation(
     generator,
-    chords,
+    measure_defs,
     120,
     4,
     @music.KeySignature::c_major(),

@@ -1,12 +1,57 @@
 ///|
+/// A chord with its time range within a measure
+pub(all) struct ChordSegment {
+  chord : @music.Chord
+  start_beat : Double
+  end_beat : Double
+} derive(Eq, Show)
+
+///|
 /// Context passed to MeasureGenerator
 pub struct MeasureContext {
-  chord : @music.Chord
+  chords : Array[ChordSegment] // Chord segments within this measure
   incoming_tie : TieContext? // Tie from previous measure
   key : @music.KeySignature
   beats_per_measure : Double
   incoming_stamina : Int // Stamina from previous measure
   incoming_last_midi : @music.MidiNumber? // Last note from previous measure
+}
+
+///|
+/// Get the chord at a specific beat position within the measure
+pub fn MeasureContext::chord_at(
+  self : MeasureContext,
+  beat : Double,
+) -> @music.Chord {
+  // Find the chord segment that contains this beat
+  for segment in self.chords {
+    if beat >= segment.start_beat && beat < segment.end_beat {
+      return segment.chord
+    }
+  }
+  // If beat is at or beyond end, use the last chord
+  self.chords[self.chords.length() - 1].chord
+}
+
+///|
+/// Create chord segments from an array of chords, evenly distributed across the measure
+pub fn create_chord_segments(
+  chords : Array[@music.Chord],
+  beats_per_measure : Double,
+) -> Array[ChordSegment] {
+  let num_chords = chords.length()
+  guard num_chords > 0 else { return [] }
+  let beats_per_chord = beats_per_measure / num_chords.to_double()
+  chords
+  .iter()
+  .mapi(fn(i, chord) {
+    ChordSegment::{
+      chord,
+      start_beat: i.to_double() * beats_per_chord,
+      end_beat: (i + 1).to_double() * beats_per_chord,
+    }
+  })
+  .collect()
 }
 
 ///|
@@ -160,12 +205,7 @@ fn generate_measure_notes(
   // Fill remaining measure with new notes
   let update_accidental = @music.create_accidental_calculator(ctx.key)
   let final_state = fill_remaining_measure(
-    state_after_tie,
-    ctx.chord,
-    ctx.beats_per_measure,
-    settings,
-    update_accidental,
-    random_int,
+    state_after_tie, ctx, settings, update_accidental, random_int,
   )
   MeasureResult::{
     beats: final_state.to_beats(),
@@ -217,15 +257,16 @@ fn process_incoming_tie(
 /// Fill remaining measure with new notes
 fn fill_remaining_measure(
   state : MeasureState,
-  chord : @music.Chord,
-  beats_per_measure : Double,
+  ctx : MeasureContext,
   settings : Settings,
   update_accidental : (@music.MidiNumber) -> @music.Accidental?,
   random_int : (Int) -> Int,
 ) -> MeasureState {
   for state = state {
-    guard state.measure_pos < beats_per_measure else { break state }
-    let remaining = beats_per_measure - state.measure_pos
+    guard state.measure_pos < ctx.beats_per_measure else { break state }
+    let remaining = ctx.beats_per_measure - state.measure_pos
+    // Get chord at current beat position
+    let chord = ctx.chord_at(state.measure_pos)
     let (midi_opt, weights) = match
       decide_midi_number(
         chord,

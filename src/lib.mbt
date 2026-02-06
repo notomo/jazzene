@@ -2,18 +2,18 @@
 /// Jazzene - Jazz Improvisation Web App (Tick-based Architecture)
 fn main {
   let bpm = @signal.signal(@ui.get_initial_int("bpm", 200))
-  let raw_chord_progression = @signal.signal("IIm7 V7 Imaj7 IVmaj7")
+  let raw_chord_progression = @signal.signal("IIm7 | V7 | Imaj7 | IVmaj7")
   let seed = @signal.signal(@ui.get_initial_int("seed", 0))
   let measure_count = @signal.signal(@ui.get_initial_int("measures", 8))
   let key = @signal.signal(@ui.get_initial_key())
   let time_signature = @signal.signal(@music.TimeSignature::default())
   let chord_parse_error : @signal.Signal[String?] = @signal.signal(None)
-  let chords = @signal.memo(fn() {
-    match @music.parse_degree_progression(raw_chord_progression.get()) {
-      Ok(degree_chords) => {
+  let measure_chords = @signal.memo(fn() {
+    match @music.parse_measure_progression(raw_chord_progression.get()) {
+      Ok(degree_measures) => {
         chord_parse_error.set(None)
         let key_root = key.get().root
-        degree_chords.map(fn(dc) { dc.resolve(key_root) })
+        degree_measures.map(fn(dm) { dm.resolve(key_root) })
       }
       Err(error_msg) => {
         chord_parse_error.set(Some(error_msg))
@@ -22,7 +22,7 @@ fn main {
     }
   })
   let measures_signal = make_measures(
-    chords, seed, measure_count, bpm, key, time_signature,
+    measure_chords, seed, measure_count, bpm, key, time_signature,
   )
   let measures = fn() { measures_signal.get() }
   let swing = @signal.signal(@music.SwingConfig::triplet())
@@ -64,7 +64,7 @@ fn main {
 
 ///|
 fn make_measures(
-  chords : () -> Array[@music.Chord],
+  measure_chords : () -> Array[Array[@music.Chord]],
   seed : @signal.Signal[Int],
   measure_count : @signal.Signal[Int],
   bpm : @signal.Signal[Int],
@@ -78,7 +78,7 @@ fn make_measures(
     settings
     |> @generator.create_measure_generator
     |> @generator.improvisation(
-      chords(),
+      measure_chords(),
       bpm.get(),
       measure_count.get() - 1,
       key.get(),

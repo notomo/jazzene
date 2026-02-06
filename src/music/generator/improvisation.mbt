@@ -24,9 +24,10 @@ priv struct ImprovisationState {
 /// Returns array of Measures
 /// measure_count specifies the number of music measures (excluding leading rest)
 /// start_offset specifies the measure index offset for start_time calculation
+/// measure_defs contains arrays of chords per measure (supports multiple chords per measure)
 pub fn improvisation(
   generator : MeasureGenerator,
-  chords : Array[@music.Chord],
+  measure_defs : Array[Array[@music.Chord]],
   bpm : Int,
   measure_count : Int,
   key : @music.KeySignature,
@@ -34,7 +35,7 @@ pub fn improvisation(
   beats_per_measure~ : Double,
   start_offset? : Int = 0,
 ) -> Array[@music.Measure] {
-  if chords.is_empty() {
+  if measure_defs.is_empty() {
     return []
   }
   let measure_duration_ms = @music.ms_per_measure(bpm, beats_per_measure~)
@@ -47,9 +48,12 @@ pub fn improvisation(
   let final_state = Array::makei(measure_count, fn(i) { i })
     .iter()
     .fold(init=initial_state, fn(state, i) {
-      let chord = chords[i % chords.length()]
+      let measure_chords = measure_defs[i % measure_defs.length()]
+      let chord_segments = create_chord_segments(
+        measure_chords, beats_per_measure,
+      )
       let result = generator(MeasureContext::{
-        chord,
+        chords: chord_segments,
         incoming_tie: state.incoming_tie,
         key,
         beats_per_measure,
@@ -57,7 +61,7 @@ pub fn improvisation(
         incoming_last_midi: state.incoming_last_midi,
       })
       state.measures.push(@music.Measure::{
-        chords: [chord],
+        chords: measure_chords,
         beats: result.beats,
         start_time: @music.Duration::from_milliseconds(
           (i + start_offset).to_double() * measure_duration_ms,

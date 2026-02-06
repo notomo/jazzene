@@ -129,3 +129,76 @@ test "Chord tones" {
     content="[{value: 60}, {value: 64}, {value: 67}, {value: 71}]",
   )
 }
+
+///|
+test "parse measure progression without delimiter treats all as single measure" {
+  let measures = @helper.unwrap_or_fail(
+    parse_measure_progression("IIm7 V7 Imaj7 IVmaj7"),
+  )
+  assert_eq(measures.length(), 1)
+  // All chords in single measure
+  assert_eq(measures[0].chords.length(), 4)
+  assert_eq(measures[0].chords[0].degree, II)
+  assert_eq(measures[0].chords[1].degree, V)
+  assert_eq(measures[0].chords[2].degree, I)
+  assert_eq(measures[0].chords[3].degree, IV)
+}
+
+///|
+test "parse measure progression" {
+  let measures = @helper.unwrap_or_fail(
+    parse_measure_progression("IIm7 V7 | Imaj7 | IVmaj7"),
+  )
+  assert_eq(measures.length(), 3)
+  // First measure has 2 chords
+  assert_eq(measures[0].chords.length(), 2)
+  assert_eq(measures[0].chords[0].degree, II)
+  assert_eq(measures[0].chords[1].degree, V)
+  // Second measure has 1 chord
+  assert_eq(measures[1].chords.length(), 1)
+  assert_eq(measures[1].chords[0].degree, I)
+  // Third measure has 1 chord
+  assert_eq(measures[2].chords.length(), 1)
+  assert_eq(measures[2].chords[0].degree, IV)
+}
+
+///|
+test "parse measure progression with multiple chords per measure" {
+  let measures = @helper.unwrap_or_fail(
+    parse_measure_progression("IIm7 V7 | Imaj7 VIm7 | IVmaj7 IIIm7"),
+  )
+  assert_eq(measures.length(), 3)
+  assert_eq(measures[0].chords.length(), 2)
+  assert_eq(measures[1].chords.length(), 2)
+  assert_eq(measures[2].chords.length(), 2)
+}
+
+///|
+test "parse measure progression empty string" {
+  let measures = @helper.unwrap_or_fail(parse_measure_progression(""))
+  assert_eq(measures.length(), 0)
+}
+
+///|
+test "parse measure progression empty measure error" {
+  guard parse_measure_progression("IIm7 | | V7") is Err(e) else {
+    fail("Expected error for empty measure")
+  }
+  assert_true(e.contains("Empty measure"))
+}
+
+///|
+test "DegreeMeasure resolve" {
+  let dm = DegreeMeasure::{
+    chords: [
+      DegreeChord::{ accidental: 0, degree: II, quality: Minor7 },
+      DegreeChord::{ accidental: 0, degree: V, quality: Dominant7 },
+    ],
+  }
+  let resolved = dm.resolve(C)
+  assert_eq(resolved.length(), 2)
+  assert_eq(resolved[0].root, D) // II of C
+  assert_eq(resolved[0].quality, Minor7)
+  assert_eq(resolved[1].root, G) // V of C
+  assert_eq(resolved[1].quality, Dominant7)
+}

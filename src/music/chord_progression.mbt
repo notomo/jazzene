@@ -133,3 +133,58 @@ pub fn DegreeChord::resolve(self : DegreeChord, key_root : ChordRoot) -> Chord {
   let root = ChordRoot::from_pitch_class(root_pc)
   Chord::{ root, quality: self.quality }
 }
+
+///|
+/// A single measure containing one or more degree chords
+pub(all) struct DegreeMeasure {
+  chords : Array[DegreeChord]
+} derive(Eq, Show)
+
+///|
+/// Resolve all chords in a measure to absolute chords
+pub fn DegreeMeasure::resolve(
+  self : DegreeMeasure,
+  key_root : ChordRoot,
+) -> Array[Chord] {
+  self.chords.map(fn(dc) { dc.resolve(key_root) })
+}
+
+///|
+/// Parse a measure progression with `|` as measure delimiter.
+/// Returns array of DegreeMeasure, each containing one or more chords.
+pub fn parse_measure_progression(
+  input : String,
+) -> Result[Array[DegreeMeasure], String] {
+  let trimmed = input.trim().to_string()
+  if trimmed == "" {
+    return Ok([])
+  }
+  let measure_strs = trimmed
+    .split("|")
+    .map(fn(s) { s.to_string().trim().to_string() })
+    .collect()
+  let results : Array[Result[DegreeMeasure, String]] = measure_strs
+    .iter()
+    .mapi(fn(i, measure_str) {
+      if measure_str == "" {
+        return Err("Empty measure at position \{i + 1}")
+      }
+      parse_degree_progression(measure_str).map(fn(chords) {
+        DegreeMeasure::{ chords, }
+      })
+    })
+    .collect()
+  let errors : Array[String] = results
+    .iter()
+    .filter_map(fn(r) {
+      match r {
+        Err(e) => Some(e)
+        Ok(_) => None
+      }
+    })
+    .collect()
+  match errors {
+    [] => Ok(results.iter().filter_map(fn(r) { r.to_option() }).collect())
+    messages => Err(messages.join("; "))
+  }
+}
