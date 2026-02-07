@@ -157,7 +157,10 @@ fn render_measure_notes(
   .iter()
   .mapi(fn(i, pair) {
     let (start_beat, note) = pair
-    let note_x = note_x_position(x, start_beat, beats_per_measure)
+    let note_x = match (note.midi, note.duration) {
+      (None, Whole) => x + MEASURE_WIDTH / 2.0
+      _ => note_x_position(x, start_beat, beats_per_measure)
+    }
     let prev_note_x : Double? = match note.tie {
       Some(@music.TieEnd | @music.TieBoth) =>
         if i > 0 {

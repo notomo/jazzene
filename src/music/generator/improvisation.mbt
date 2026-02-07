@@ -4,7 +4,19 @@ pub fn leading_rest_measure() -> Array[@music.Measure] {
   [
     @music.Measure::{
       chords: [],
-      beats: [],
+      beats: [
+        @music.Beat::{
+          count: 0,
+          notes: [
+            @music.MeasureNote::{
+              midi: None,
+              duration: Whole,
+              accidental: None,
+              tie: None,
+            },
+          ],
+        },
+      ],
       start_time: @music.Duration::from_milliseconds(0.0),
     },
   ]
