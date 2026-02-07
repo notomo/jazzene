@@ -189,6 +189,7 @@ fn render_note(
   note_x : Double,
   staff_y : Double,
   key : @music.KeySignature,
+  beamed? : Bool = false,
 ) -> Array[@luna_dom.DomNode] {
   match note.midi {
     Some(midi) => {
@@ -198,7 +199,11 @@ fn render_note(
         ..render_note_accidental(note.accidental, note_x, note_y),
         ..render_ledger_lines(midi, note_x, staff_y, key),
         render_note_head(note.duration, note_x, note_y),
-        ..render_stem_and_flag(note.duration, midi, note_x, note_y),
+        ..if beamed {
+          []
+        } else {
+          render_stem_and_flag(note.duration, midi, note_x, note_y)
+        },
         ..render_duration_dot(note.duration, note_x, note_y, on_line~),
       ]
     }

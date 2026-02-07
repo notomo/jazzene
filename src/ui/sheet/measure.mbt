@@ -123,11 +123,12 @@ fn render_note_or_rest(
   key : @music.KeySignature,
   prev_note_x? : Double? = None,
   next_note_x? : Double? = None,
+  beamed? : Bool = false,
 ) -> Array[@luna_dom.DomNode] {
   match note.midi {
     Some(midi) =>
       [
-        ..render_note(note, note_x, y, key),
+        ..render_note(note, note_x, y, key, beamed~),
         ..render_tie_arcs(
           note.tie,
           note_x,
@@ -151,40 +152,66 @@ fn render_measure_notes(
   y : Double,
   key : @music.KeySignature,
   beats_per_measure : Double,
+  time_signature : @music.TimeSignature,
 ) -> Array[@luna_dom.DomNode] {
   let positioned = measure.positioned_notes()
-  positioned
-  .iter()
-  .mapi(fn(i, pair) {
-    let (start_beat, note) = pair
-    let note_x = match (note.midi, note.duration) {
-      (None, Whole) => x + MEASURE_WIDTH / 2.0
-      _ => note_x_position(x, start_beat, beats_per_measure)
-    }
-    let prev_note_x : Double? = match note.tie {
-      Some(@music.TieEnd | @music.TieBoth) =>
-        if i > 0 {
-          let (prev_beat, _) = positioned[i - 1]
-          Some(note_x_position(x, prev_beat, beats_per_measure))
-        } else {
-          None
-        }
-      _ => None
-    }
-    let next_note_x : Double? = match note.tie {
-      Some(@music.TieStart | @music.TieBoth) =>
-        if i + 1 < positioned.length() {
-          let (next_beat, _) = positioned[i + 1]
-          Some(note_x_position(x, next_beat, beats_per_measure))
-        } else {
-          None
-        }
-      _ => None
-    }
-    render_note_or_rest(note, note_x, y, x, key, prev_note_x~, next_note_x~).iter()
+  let beam_groups = @music.find_beam_groups(positioned, time_signature)
+  let beamed_indices : Map[Int, Bool] = {}
+  beam_groups.each(fn(group) {
+    group.each(fn(idx) { beamed_indices[idx] = true })
   })
-  .flatten()
-  .collect()
+  let note_nodes : Array[@luna_dom.DomNode] = positioned
+    .iter()
+    .mapi(fn(i, pair) {
+      let (start_beat, note) = pair
+      let note_x = match (note.midi, note.duration) {
+        (None, Whole) => x + MEASURE_WIDTH / 2.0
+        _ => note_x_position(x, start_beat, beats_per_measure)
+      }
+      let is_beamed = beamed_indices.contains(i)
+      // Skip rests that are in beam groups (they are rendered by beam code)
+      match (is_beamed, note.midi) {
+        (true, None) => Array::new().iter()
+        _ => {
+          let prev_note_x : Double? = match note.tie {
+            Some(@music.TieEnd | @music.TieBoth) =>
+              if i > 0 {
+                let (prev_beat, _) = positioned[i - 1]
+                Some(note_x_position(x, prev_beat, beats_per_measure))
+              } else {
+                None
+              }
+            _ => None
+          }
+          let next_note_x : Double? = match note.tie {
+            Some(@music.TieStart | @music.TieBoth) =>
+              if i + 1 < positioned.length() {
+                let (next_beat, _) = positioned[i + 1]
+                Some(note_x_position(x, next_beat, beats_per_measure))
+              } else {
+                None
+              }
+            _ => None
+          }
+          render_note_or_rest(
+            note,
+            note_x,
+            y,
+            x,
+            key,
+            prev_note_x~,
+            next_note_x~,
+            beamed=is_beamed,
+          ).iter()
+        }
+      }
+    })
+    .flatten()
+    .collect()
+  let beam_nodes = render_beams(
+    beam_groups, positioned, x, y, key, beats_per_measure,
+  )
+  [..note_nodes, ..beam_nodes]
 }
 
 ///|
@@ -208,7 +235,9 @@ fn render_measure(
       ..render_measure_key_signature(key, x, y, is_first_in_row),
       ..render_measure_time_signature(time_signature, x, y, is_first_measure),
       ..render_chord_symbol(measure, x, y),
-      ..render_measure_notes(measure, x, y, key, beats_per_measure),
+      ..render_measure_notes(
+        measure, x, y, key, beats_per_measure, time_signature,
+      ),
       render_bar_line(x + MEASURE_WIDTH, y),
       render_clickable_background(
         x, y, measure_number, measure, playback_position,

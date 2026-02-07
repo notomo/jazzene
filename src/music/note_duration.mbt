@@ -45,6 +45,15 @@ pub fn NoteDuration::from_beats(beats : Double) -> NoteDuration {
 }
 
 ///|
+/// Whether this duration can be connected by a beam
+pub fn NoteDuration::is_beamable(self : NoteDuration) -> Bool {
+  match self {
+    Eighth | DottedEighth => true
+    _ => false
+  }
+}
+
+///|
 /// Find the largest duration that fits within remaining_beats
 pub fn NoteDuration::fit(remaining_beats : Double) -> NoteDuration? {
   [Whole, DottedHalf, Half, DottedQuarter, Quarter, DottedEighth, Eighth]

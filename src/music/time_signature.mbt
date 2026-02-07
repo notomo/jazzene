@@ -17,3 +17,25 @@ pub fn TimeSignature::default() -> TimeSignature {
 pub fn TimeSignature::beats_per_measure(self : TimeSignature) -> Double {
   self.numerator.to_double() * (4.0 / self.denominator.to_double())
 }
+
+///|
+/// Return the beat group index for a given start beat position.
+/// In 4/4: beats 0,1 → group 0, beats 2,3 → group 1
+/// In 3/4: beats 0,1 → group 0, beat 2 → group 1
+/// Default: groups of 2 beats
+pub fn TimeSignature::beat_group_index(
+  self : TimeSignature,
+  start_beat : Double,
+) -> Int {
+  let group_size = match (self.numerator, self.denominator) {
+    (3, 4) =>
+      // 3/4: [0,1], [2]
+      if start_beat < 2.0 {
+        return 0
+      } else {
+        return 1
+      }
+    _ => 2.0
+  }
+  (start_beat / group_size).to_int()
+}
