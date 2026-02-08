@@ -147,10 +147,9 @@ fn beam_y_at(
 fn render_beam_group(
   group : Array[Int],
   positioned : Array[(Double, @music.MeasureNote)],
-  measure_x : Double,
+  note_positions : Array[Double],
   staff_y : Double,
   key : @music.KeySignature,
-  beats_per_measure : Double,
   stem_up : Bool,
   first_beam_y : Double,
   last_beam_y : Double,
@@ -161,8 +160,8 @@ fn render_beam_group(
   let mut found_first = false
   // First pass: find first_x and last_x
   for idx in group {
-    let (start_beat, note) = positioned[idx]
-    let note_x = note_x_position(measure_x, start_beat, beats_per_measure)
+    let (_, note) = positioned[idx]
+    let note_x = note_positions[idx]
     match note.midi {
       Some(_) => {
         let rx = STAFF_LINE_SPACING * NOTE_HEAD_RX_RATIO
@@ -180,8 +179,8 @@ fn render_beam_group(
   }
   // Second pass: render stems using interpolated beam_y
   for idx in group {
-    let (start_beat, note) = positioned[idx]
-    let note_x = note_x_position(measure_x, start_beat, beats_per_measure)
+    let (_, note) = positioned[idx]
+    let note_x = note_positions[idx]
     match note.midi {
       Some(midi) => {
         let note_y = midi_to_staff_y(midi, staff_y, key)
@@ -238,9 +237,8 @@ fn render_beam_group(
 fn render_beam_group_rests(
   group : Array[Int],
   positioned : Array[(Double, @music.MeasureNote)],
-  measure_x : Double,
+  note_positions : Array[Double],
   staff_y : Double,
-  beats_per_measure : Double,
   stem_up : Bool,
   first_x : Double,
   last_x : Double,
@@ -249,10 +247,10 @@ fn render_beam_group_rests(
 ) -> Array[@luna_dom.DomNode] {
   let nodes : Array[@luna_dom.DomNode] = []
   for idx in group {
-    let (start_beat, note) = positioned[idx]
+    let (_, note) = positioned[idx]
     match note.midi {
       None => {
-        let note_x = note_x_position(measure_x, start_beat, beats_per_measure)
+        let note_x = note_positions[idx]
         let beam_y_here = beam_y_at(
           note_x, first_x, last_x, first_beam_y, last_beam_y,
         )
@@ -281,10 +279,9 @@ fn render_beam_group_rests(
 fn render_beams(
   beam_groups : Array[Array[Int]],
   positioned : Array[(Double, @music.MeasureNote)],
-  measure_x : Double,
+  note_positions : Array[Double],
   staff_y : Double,
   key : @music.KeySignature,
-  beats_per_measure : Double,
 ) -> Array[@luna_dom.DomNode] {
   beam_groups
   .iter()
@@ -298,10 +295,10 @@ fn render_beams(
     let mut last_x = 0.0
     let mut found_first = false
     for idx in group {
-      let (start_beat, note) = positioned[idx]
+      let (_, note) = positioned[idx]
       match note.midi {
         Some(_) => {
-          let note_x = note_x_position(measure_x, start_beat, beats_per_measure)
+          let note_x = note_positions[idx]
           let rx = STAFF_LINE_SPACING * NOTE_HEAD_RX_RATIO
           let cos_25 = COS_NOTE_HEAD_ROTATION
           let stem_x_offset = if stem_up { rx * cos_25 } else { -(rx * cos_25) }
@@ -317,12 +314,11 @@ fn render_beams(
     }
     [
       ..render_beam_group(
-        group, positioned, measure_x, staff_y, key, beats_per_measure, stem_up, first_beam_y,
-        last_beam_y,
+        group, positioned, note_positions, staff_y, key, stem_up, first_beam_y, last_beam_y,
       ),
       ..render_beam_group_rests(
-        group, positioned, measure_x, staff_y, beats_per_measure, stem_up, first_x,
-        last_x, first_beam_y, last_beam_y,
+        group, positioned, note_positions, staff_y, stem_up, first_x, last_x, first_beam_y,
+        last_beam_y,
       ),
     ].iter()
   })

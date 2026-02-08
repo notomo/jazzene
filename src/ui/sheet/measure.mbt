@@ -44,6 +44,9 @@ const NOTE_AREA_START_OFFSET = 60.0
 const NOTE_AREA_PADDING = 80.0
 
 ///|
+const MIN_NOTE_SPACING = 32.0
+
+///|
 /// Render clickable background for seeking
 fn render_clickable_background(
   x : Double,
@@ -102,15 +105,50 @@ fn render_measure_clef(
 }
 
 ///|
-/// Calculate note x position within measure
-fn note_x_position(
+/// Compute x positions for all notes in a measure, enforcing minimum spacing
+/// to prevent overlapping note heads for shorter durations.
+fn compute_note_positions(
+  positioned : Array[(Double, @music.MeasureNote)],
   measure_x : Double,
-  start_beat : Double,
   beats_per_measure : Double,
-) -> Double {
-  measure_x +
-  NOTE_AREA_START_OFFSET +
-  start_beat * (MEASURE_WIDTH - NOTE_AREA_PADDING) / beats_per_measure
+) -> Array[Double] {
+  let n = positioned.length()
+  if n == 0 {
+    return []
+  }
+  let note_area_start = measure_x + NOTE_AREA_START_OFFSET
+  let note_area_width = MEASURE_WIDTH - NOTE_AREA_PADDING
+  // Compute beat-proportional positions with minimum spacing enforcement
+  let positions : Array[Double] = []
+  for i, pair in positioned {
+    let (start_beat, note) = pair
+    let proportional_x = match (note.midi, note.duration) {
+      (None, @music.Whole) => measure_x + MEASURE_WIDTH / 2.0
+      _ => note_area_start + start_beat * note_area_width / beats_per_measure
+    }
+    let x = if i == 0 {
+      proportional_x
+    } else {
+      @cmp.maximum(proportional_x, positions[i - 1] + MIN_NOTE_SPACING)
+    }
+    positions.push(x)
+  }
+  // If rightmost position exceeds the available area, scale all positions to fit
+  let right_edge = note_area_start + note_area_width
+  if n > 1 && positions[n - 1] > right_edge {
+    let first_pos = positions[0]
+    let current_span = positions[n - 1] - first_pos
+    if current_span > 0.0 {
+      let available_span = right_edge - first_pos
+      let scale = available_span / current_span
+      for i, _ in positions {
+        if i > 0 {
+          positions[i] = first_pos + (positions[i] - first_pos) * scale
+        }
+      }
+    }
+  }
+  positions
 }
 
 ///|
@@ -155,6 +193,7 @@ fn render_measure_notes(
   time_signature : @music.TimeSignature,
 ) -> Array[@luna_dom.DomNode] {
   let positioned = measure.positioned_notes()
+  let note_positions = compute_note_positions(positioned, x, beats_per_measure)
   let beam_groups = @music.find_beam_groups(positioned, time_signature)
   let beamed_indices : Map[Int, Bool] = {}
   beam_groups.each(fn(group) {
@@ -162,12 +201,9 @@ fn render_measure_notes(
   })
   let note_nodes : Array[@luna_dom.DomNode] = positioned
     .iter()
-    .mapi(fn(i, pair) {
-      let (start_beat, note) = pair
-      let note_x = match (note.midi, note.duration) {
-        (None, Whole) => x + MEASURE_WIDTH / 2.0
-        _ => note_x_position(x, start_beat, beats_per_measure)
-      }
+    .mapi(fn(i, _pair) {
+      let (_, note) = _pair
+      let note_x = note_positions[i]
       let is_beamed = beamed_indices.contains(i)
       // Skip rests that are in beam groups (they are rendered by beam code)
       match (is_beamed, note.midi) {
@@ -176,8 +212,7 @@ fn render_measure_notes(
           let prev_note_x : Double? = match note.tie {
             Some(@music.TieEnd | @music.TieBoth) =>
               if i > 0 {
-                let (prev_beat, _) = positioned[i - 1]
-                Some(note_x_position(x, prev_beat, beats_per_measure))
+                Some(note_positions[i - 1])
               } else {
                 None
               }
@@ -186,8 +221,7 @@ fn render_measure_notes(
           let next_note_x : Double? = match note.tie {
             Some(@music.TieStart | @music.TieBoth) =>
               if i + 1 < positioned.length() {
-                let (next_beat, _) = positioned[i + 1]
-                Some(note_x_position(x, next_beat, beats_per_measure))
+                Some(note_positions[i + 1])
               } else {
                 None
               }
@@ -208,9 +242,7 @@ fn render_measure_notes(
     })
     .flatten()
     .collect()
-  let beam_nodes = render_beams(
-    beam_groups, positioned, x, y, key, beats_per_measure,
-  )
+  let beam_nodes = render_beams(beam_groups, positioned, note_positions, y, key)
   [..note_nodes, ..beam_nodes]
 }
 
