@@ -102,6 +102,7 @@ pub(all) struct Settings {
   phrase_length_max : Int // Maximum notes in a phrase (default: 8)
   phrase_early_end_stamina : Int // Below this stamina, phrase may end early (default: 15)
   max_interval : Int // Maximum interval jump in semitones (default: 7 = perfect fifth)
+  syncopation_probability : Int // 0-100, chance of forcing off-beat phrase start on downbeats (default: 40)
 } derive(Eq, Show)
 
 ///|
@@ -123,6 +124,7 @@ pub fn Settings::default(seed : Int) -> Settings {
     phrase_length_max: 8,
     phrase_early_end_stamina: 15,
     max_interval: 7,
+    syncopation_probability: 40,
   }
 }
 
@@ -327,14 +329,28 @@ fn fill_remaining_measure(
     // Get chord at current beat position
     let chord = ctx.chord_at(state.measure_pos)
     match state.phrase {
-      Resting =>
-        // Emit a rest, then roll a new phrase
-        match
+      Resting => {
+        // Syncopation: on downbeats, sometimes force eighth rest so phrase starts on upbeat
+        let is_on_downbeat = (state.measure_pos -
+          state.measure_pos.to_int().to_double()).abs() <
+          0.01
+        let use_syncopation = is_on_downbeat &&
+          random_int(100) < settings.syncopation_probability
+        let duration = if use_syncopation {
+          if remaining >= @music.Eighth.to_beats() {
+            Some(@music.Eighth)
+          } else {
+            None
+          }
+        } else {
           random_duration_within(
             remaining,
             settings.rest_duration_weights,
             random_int,
-          ) {
+          )
+        }
+        // Emit a rest, then roll a new phrase
+        match duration {
           Some(duration) => {
             let recovery = (duration.to_beats() *
             settings.stamina_recovery_per_beat.to_double()).to_int()
@@ -361,6 +377,7 @@ fn fill_remaining_measure(
           }
           None => break state
         }
+      }
       Playing(notes_left) => {
         // Check for early phrase termination due to low stamina
         let should_end_early = notes_left > 1 &&
