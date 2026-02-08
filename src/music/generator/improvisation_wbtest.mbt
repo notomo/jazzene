@@ -1,6 +1,10 @@
 ///|
 test "Chord::scale_tones returns non-chord diatonic tones for Cmaj7 in C" {
-  let chord = @music.Chord::{ root: @music.C, quality: @music.Major7 }
+  let chord = @music.Chord::{
+    root: @music.C,
+    quality: @music.Major7,
+    bass: None,
+  }
   let key = @music.KeySignature::c_major()
   let scale_tones = chord.scale_tones(key)
   // Cmaj7 chord tones: C(0), E(4), G(7), B(11)
@@ -17,7 +21,11 @@ test "Chord::scale_tones returns non-chord diatonic tones for Cmaj7 in C" {
 
 ///|
 test "Chord::scale_tones returns non-chord diatonic tones for Dm7 in C" {
-  let chord = @music.Chord::{ root: @music.D, quality: @music.Minor7 }
+  let chord = @music.Chord::{
+    root: @music.D,
+    quality: @music.Minor7,
+    bass: None,
+  }
   let key = @music.KeySignature::c_major()
   let scale_tones = chord.scale_tones(key)
   // Dm7 chord tones: D(2), F(5), A(9), C(0)
@@ -29,7 +37,11 @@ test "Chord::scale_tones returns non-chord diatonic tones for Dm7 in C" {
 
 ///|
 test "Chord::approach_tones returns chromatic half-steps around chord tones for Cmaj7" {
-  let chord = @music.Chord::{ root: @music.C, quality: @music.Major7 }
+  let chord = @music.Chord::{
+    root: @music.C,
+    quality: @music.Major7,
+    bass: None,
+  }
   let approach = chord.approach_tones()
   // Cmaj7 chord tones: C(60), E(64), G(67), B(71)
   // Approach tones (half-step below/above, excluding chord tones):
@@ -48,7 +60,11 @@ test "Chord::approach_tones returns chromatic half-steps around chord tones for 
 
 ///|
 test "Chord::approach_tones returns chromatic half-steps around chord tones for Dm7" {
-  let chord = @music.Chord::{ root: @music.D, quality: @music.Minor7 }
+  let chord = @music.Chord::{
+    root: @music.D,
+    quality: @music.Minor7,
+    bass: None,
+  }
   let approach = chord.approach_tones()
   // Dm7 chord tones: D(62), F(65), A(69), C(72)
   // Approach tones:
@@ -63,8 +79,8 @@ test "Chord::approach_tones returns chromatic half-steps around chord tones for 
 ///|
 test "create_chord_segments evenly distributes chords" {
   let chords = [
-    @music.Chord::{ root: @music.C, quality: @music.Major7 },
-    @music.Chord::{ root: @music.G, quality: @music.Dominant7 },
+    @music.Chord::{ root: @music.C, quality: @music.Major7, bass: None },
+    @music.Chord::{ root: @music.G, quality: @music.Dominant7, bass: None },
   ]
   let segments = create_chord_segments(chords, 4.0)
   assert_eq(segments.length(), 2)
@@ -81,8 +97,8 @@ test "create_chord_segments evenly distributes chords" {
 ///|
 test "MeasureContext::chord_at returns correct chord for position" {
   let chords = [
-    @music.Chord::{ root: @music.C, quality: @music.Major7 },
-    @music.Chord::{ root: @music.G, quality: @music.Dominant7 },
+    @music.Chord::{ root: @music.C, quality: @music.Major7, bass: None },
+    @music.Chord::{ root: @music.G, quality: @music.Dominant7, bass: None },
   ]
   let segments = create_chord_segments(chords, 4.0)
   let ctx = MeasureContext::{
@@ -163,7 +179,7 @@ test "improvisation removes dangling tie at last measure" {
     }
   }
   let measure_defs = [
-    [@music.Chord::{ root: @music.C, quality: @music.Major7 }],
+    [@music.Chord::{ root: @music.C, quality: @music.Major7, bass: None }],
   ]
   let settings = Settings::default(0)
   let measures = improvisation(
@@ -272,7 +288,7 @@ test "improvisation preserves tie when not at last measure" {
     }
   }
   let measure_defs = [
-    [@music.Chord::{ root: @music.C, quality: @music.Major7 }],
+    [@music.Chord::{ root: @music.C, quality: @music.Major7, bass: None }],
   ]
   let settings = Settings::default(0)
   let measures = improvisation(

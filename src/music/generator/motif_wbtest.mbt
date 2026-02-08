@@ -76,7 +76,11 @@ test "Motif::invert negates all intervals" {
 
 ///|
 test "select_motif_guided_note finds closest chord tone to target" {
-  let chord = @music.Chord::{ root: @music.C, quality: @music.Major7 }
+  let chord = @music.Chord::{
+    root: @music.C,
+    quality: @music.Major7,
+    bass: None,
+  }
   let key = @music.KeySignature::c_major()
   let last_midi = @music.MidiNumber::new(60).unwrap() // C4
   // Target: 62 (D4) - should snap to closest chord/scale tone
@@ -87,7 +91,11 @@ test "select_motif_guided_note finds closest chord tone to target" {
 
 ///|
 test "select_motif_guided_note returns None for out-of-range target" {
-  let chord = @music.Chord::{ root: @music.C, quality: @music.Major7 }
+  let chord = @music.Chord::{
+    root: @music.C,
+    quality: @music.Major7,
+    bass: None,
+  }
   let key = @music.KeySignature::c_major()
   let last_midi = @music.MidiNumber::new(60).unwrap()
   // Target: 200 (invalid MIDI)

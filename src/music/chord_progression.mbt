@@ -1,8 +1,9 @@
 ///|
-/// Chord with type-safe root and quality
+/// Chord with type-safe root and quality, optional bass for slash chords
 pub(all) struct Chord {
   root : ChordRoot
   quality : ChordQuality
+  bass : ChordRoot?
 } derive(Eq, Show)
 
 ///|
@@ -16,7 +17,11 @@ pub fn Chord::tones(self : Chord) -> Array[MidiNumber] {
 ///|
 /// Format complete chord symbol
 pub fn format_chord(chord : Chord) -> String {
-  chord.root.to_string() + chord.quality.to_string()
+  let base = chord.root.to_string() + chord.quality.to_string()
+  match chord.bass {
+    None => base
+    Some(bass) => base + "/" + bass.to_string()
+  }
 }
 
 ///|
@@ -107,11 +112,19 @@ pub fn ScaleDegree::semitones(self : ScaleDegree) -> Int {
 }
 
 ///|
+/// Bass note expressed as a scale degree with optional accidental
+pub(all) struct DegreeBass {
+  accidental : Int // -1 for flat, 0 for natural, +1 for sharp
+  degree : ScaleDegree
+} derive(Eq, Show)
+
+///|
 /// A chord expressed as a scale degree with optional accidental
 pub(all) struct DegreeChord {
   accidental : Int // -1 for flat, 0 for natural, +1 for sharp
   degree : ScaleDegree
   quality : ChordQuality
+  bass : DegreeBass?
 } derive(Eq, Show)
 
 ///|
@@ -131,16 +144,50 @@ fn parse_roman_numeral(input : String) -> Result[(ScaleDegree, String), String] 
 }
 
 ///|
-/// Parse a single degree chord string (e.g., "IIm7", "bVIImaj7", "#IVm7b5")
-pub fn parse_degree_chord(input : String) -> Result[DegreeChord, String] {
+/// Parse bass part after "/" (e.g., "I", "bVII", "#IV")
+fn parse_degree_bass(input : String) -> Result[DegreeBass, String] {
   if input == "" {
-    return Err("Empty degree chord string")
+    return Err("Empty bass degree string")
   }
-  // Parse optional accidental prefix
   let (accidental, rest) = match input {
     ['b', .. tail] => (-1, tail.to_string())
     ['#', .. tail] => (1, tail.to_string())
     _ => (0, input)
+  }
+  let (degree, remainder) = match parse_roman_numeral(rest) {
+    Ok(result) => result
+    Err(e) => return Err(e)
+  }
+  if remainder != "" {
+    return Err("Unexpected characters after bass degree: " + remainder)
+  }
+  Ok(DegreeBass::{ accidental, degree })
+}
+
+///|
+/// Parse a single degree chord string (e.g., "IIm7", "bVIImaj7", "#IVm7b5", "V7/II")
+pub fn parse_degree_chord(input : String) -> Result[DegreeChord, String] {
+  if input == "" {
+    return Err("Empty degree chord string")
+  }
+  let parts : Array[String] = input
+    .split("/")
+    .map(fn(s) { s.to_string() })
+    .collect()
+  let (chord_part, bass) = match parts {
+    [chord_str] => (chord_str, None)
+    [chord_str, bass_str] =>
+      match parse_degree_bass(bass_str) {
+        Ok(b) => (chord_str, Some(b))
+        Err(e) => return Err(e)
+      }
+    _ => return Err("Multiple '/' in chord: " + input)
+  }
+  // Parse optional accidental prefix
+  let (accidental, rest) = match chord_part {
+    ['b', .. tail] => (-1, tail.to_string())
+    ['#', .. tail] => (1, tail.to_string())
+    _ => (0, chord_part)
   }
   // Parse Roman numeral
   let (degree, quality_str) = match parse_roman_numeral(rest) {
@@ -152,7 +199,7 @@ pub fn parse_degree_chord(input : String) -> Result[DegreeChord, String] {
     Ok(q) => q
     Err(e) => return Err(e)
   }
-  Ok(DegreeChord::{ accidental, degree, quality })
+  Ok(DegreeChord::{ accidental, degree, quality, bass })
 }
 
 ///|
@@ -192,7 +239,11 @@ pub fn DegreeChord::resolve(self : DegreeChord, key_root : ChordRoot) -> Chord {
   let root_pc = (key_root.midi() + self.degree.semitones() + self.accidental) %
     12
   let root = ChordRoot::from_pitch_class(root_pc)
-  Chord::{ root, quality: self.quality }
+  let bass = self.bass.map(fn(b) {
+    let bass_pc = (key_root.midi() + b.degree.semitones() + b.accidental) % 12
+    ChordRoot::from_pitch_class(bass_pc)
+  })
+  Chord::{ root, quality: self.quality, bass }
 }
 
 ///|

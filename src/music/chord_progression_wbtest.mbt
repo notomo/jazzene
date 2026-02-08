@@ -79,7 +79,12 @@ test "parse degree progression with invalid token" {
 ///|
 test "resolve IIm7 in Bb major" {
   // II of Bb = C, so IIm7 -> Cm7
-  let dc = DegreeChord::{ accidental: 0, degree: II, quality: Minor7 }
+  let dc = DegreeChord::{
+    accidental: 0,
+    degree: II,
+    quality: Minor7,
+    bass: None,
+  }
   let chord = dc.resolve(ASharp) // Bb
   assert_eq(chord.root, C)
   assert_eq(chord.quality, Minor7)
@@ -88,7 +93,12 @@ test "resolve IIm7 in Bb major" {
 ///|
 test "resolve V7 in Bb major" {
   // V of Bb = F, so V7 -> F7
-  let dc = DegreeChord::{ accidental: 0, degree: V, quality: Dominant7 }
+  let dc = DegreeChord::{
+    accidental: 0,
+    degree: V,
+    quality: Dominant7,
+    bass: None,
+  }
   let chord = dc.resolve(ASharp)
   assert_eq(chord.root, F)
   assert_eq(chord.quality, Dominant7)
@@ -96,7 +106,12 @@ test "resolve V7 in Bb major" {
 
 ///|
 test "resolve Imaj7 in Bb major" {
-  let dc = DegreeChord::{ accidental: 0, degree: I, quality: Major7 }
+  let dc = DegreeChord::{
+    accidental: 0,
+    degree: I,
+    quality: Major7,
+    bass: None,
+  }
   let chord = dc.resolve(ASharp)
   assert_eq(chord.root, ASharp) // Bb
   assert_eq(chord.quality, Major7)
@@ -105,7 +120,12 @@ test "resolve Imaj7 in Bb major" {
 ///|
 test "resolve IVmaj7 in Bb major" {
   // IV of Bb = Eb
-  let dc = DegreeChord::{ accidental: 0, degree: IV, quality: Major7 }
+  let dc = DegreeChord::{
+    accidental: 0,
+    degree: IV,
+    quality: Major7,
+    bass: None,
+  }
   let chord = dc.resolve(ASharp)
   assert_eq(chord.root, DSharp) // Eb
   assert_eq(chord.quality, Major7)
@@ -114,7 +134,12 @@ test "resolve IVmaj7 in Bb major" {
 ///|
 test "resolve bVII in C major" {
   // bVII of C = Bb
-  let dc = DegreeChord::{ accidental: -1, degree: VII, quality: Major }
+  let dc = DegreeChord::{
+    accidental: -1,
+    degree: VII,
+    quality: Major,
+    bass: None,
+  }
   let chord = dc.resolve(C)
   assert_eq(chord.root, ASharp) // Bb
   assert_eq(chord.quality, Major)
@@ -122,7 +147,7 @@ test "resolve bVII in C major" {
 
 ///|
 test "Chord tones" {
-  let cmaj7 = Chord::{ root: C, quality: Major7 }
+  let cmaj7 = Chord::{ root: C, quality: Major7, bass: None }
   // C E G B
   inspect(
     cmaj7.tones(),
@@ -132,7 +157,7 @@ test "Chord tones" {
 
 ///|
 test "Chord tension tones - Major7" {
-  let cmaj7 = Chord::{ root: C, quality: Major7 }
+  let cmaj7 = Chord::{ root: C, quality: Major7, bass: None }
   // 9th(D=62), #11th(F#=66), 13th(A=69)
   inspect(
     cmaj7.tension_tones(),
@@ -142,7 +167,7 @@ test "Chord tension tones - Major7" {
 
 ///|
 test "Chord tension tones - Minor7" {
-  let dm7 = Chord::{ root: D, quality: Minor7 }
+  let dm7 = Chord::{ root: D, quality: Minor7, bass: None }
   // 9th(E=64), 11th(G=67), 13th(B=71)
   inspect(
     dm7.tension_tones(),
@@ -152,20 +177,20 @@ test "Chord tension tones - Minor7" {
 
 ///|
 test "Chord tension tones - Dominant7" {
-  let g7 = Chord::{ root: G, quality: Dominant7 }
+  let g7 = Chord::{ root: G, quality: Dominant7, bass: None }
   // 9th(A=69), #11th(C#=73), 13th(E=76)
   inspect(g7.tension_tones(), content="[{value: 69}, {value: 73}, {value: 76}]")
 }
 
 ///|
 test "Chord tension tones - Diminished7 has none" {
-  let bdim7 = Chord::{ root: B, quality: Diminished7 }
+  let bdim7 = Chord::{ root: B, quality: Diminished7, bass: None }
   inspect(bdim7.tension_tones(), content="[]")
 }
 
 ///|
 test "Chord tension tones - HalfDiminished" {
-  let bm7b5 = Chord::{ root: B, quality: HalfDiminished }
+  let bm7b5 = Chord::{ root: B, quality: HalfDiminished, bass: None }
   // 9th(C#=73), 11th(E=76), b13th(G=79)
   inspect(
     bm7b5.tension_tones(),
@@ -234,8 +259,8 @@ test "parse measure progression empty measure error" {
 test "DegreeMeasure resolve" {
   let dm = DegreeMeasure::{
     chords: [
-      DegreeChord::{ accidental: 0, degree: II, quality: Minor7 },
-      DegreeChord::{ accidental: 0, degree: V, quality: Dominant7 },
+      DegreeChord::{ accidental: 0, degree: II, quality: Minor7, bass: None },
+      DegreeChord::{ accidental: 0, degree: V, quality: Dominant7, bass: None },
     ],
   }
   let resolved = dm.resolve(C)
@@ -244,4 +269,67 @@ test "DegreeMeasure resolve" {
   assert_eq(resolved[0].quality, Minor7)
   assert_eq(resolved[1].root, G) // V of C
   assert_eq(resolved[1].quality, Dominant7)
+}
+
+///|
+test "parse degree chord with slash bass V7/II" {
+  let dc = @helper.unwrap_or_fail(parse_degree_chord("V7/II"))
+  assert_eq(dc.degree, V)
+  assert_eq(dc.quality, Dominant7)
+  assert_eq(dc.accidental, 0)
+  assert_eq(dc.bass, Some(DegreeBass::{ accidental: 0, degree: II }))
+}
+
+///|
+test "parse degree chord with flat bass IIm7/bVII" {
+  let dc = @helper.unwrap_or_fail(parse_degree_chord("IIm7/bVII"))
+  assert_eq(dc.degree, II)
+  assert_eq(dc.quality, Minor7)
+  assert_eq(dc.bass, Some(DegreeBass::{ accidental: -1, degree: VII }))
+}
+
+///|
+test "parse degree chord without slash has None bass" {
+  let dc = @helper.unwrap_or_fail(parse_degree_chord("IIm7"))
+  assert_eq(dc.bass, None)
+}
+
+///|
+test "resolve slash chord V7/II in C major" {
+  // V7 = G7, bass II = D
+  let dc = DegreeChord::{
+    accidental: 0,
+    degree: V,
+    quality: Dominant7,
+    bass: Some(DegreeBass::{ accidental: 0, degree: II }),
+  }
+  let chord = dc.resolve(C)
+  assert_eq(chord.root, G)
+  assert_eq(chord.quality, Dominant7)
+  assert_eq(chord.bass, Some(D))
+}
+
+///|
+test "format slash chord" {
+  let chord = Chord::{ root: G, quality: Dominant7, bass: Some(D) }
+  assert_eq(format_chord(chord), "G7/D")
+}
+
+///|
+test "format chord without bass" {
+  let chord = Chord::{ root: C, quality: Major7, bass: None }
+  assert_eq(format_chord(chord), "Cmaj7")
+}
+
+///|
+test "parse measure progression with slash chord" {
+  let measures = @helper.unwrap_or_fail(
+    parse_measure_progression("IIm7 V7/II | Imaj7"),
+  )
+  assert_eq(measures.length(), 2)
+  assert_eq(measures[0].chords.length(), 2)
+  assert_eq(
+    measures[0].chords[1].bass,
+    Some(DegreeBass::{ accidental: 0, degree: II }),
+  )
 }
