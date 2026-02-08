@@ -95,7 +95,7 @@ pub fn lead_sheet(
 
   // Return container with SVG
   @luna_dom.div(
-    class="w-full h-full overflow-auto bg-gray-900 p-4",
+    class="w-full h-full overflow-auto p-4",
     attrs=[("id", @luna_dom.Attr::AttrString(LEAD_SHEET_CONTAINER_ID))],
     [
       @luna_dom.svg(

@@ -55,6 +55,7 @@ fn main {
     playback_position, volume, sounds, total_duration, loop_enabled, loop_a_time,
     loop_b_time, synth,
   )
+  let display_mode = @signal.signal(@ui.DisplayMode::Sheet_PianoRoll)
   let is_playing = @signal.signal(false)
   let _ = @signal.effect(fn() {
     if is_playing.get() {
@@ -67,7 +68,7 @@ fn main {
   @ui.render(
     is_playing, playback_position, volume, bpm, raw_chord_progression, seed, measure_count,
     sounds, total_duration, loop_enabled, loop_a_time, loop_b_time, chord_parse_error,
-    measures, key, time_signature,
+    measures, key, time_signature, display_mode,
   )
 }
 

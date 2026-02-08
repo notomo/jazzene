@@ -58,6 +58,7 @@ pub fn render(
   measures : () -> Array[@music.Measure],
   key : @signal.Signal[@music.KeySignature],
   time_signature : @signal.Signal[@music.TimeSignature],
+  display_mode : @signal.Signal[DisplayMode],
 ) -> Unit {
   let app = @luna_dom.div(
     class="flex flex-col h-dvh overflow-hidden w-dvw bg-gradient-to-br from-slate-950 to-slate-900 text-white",
@@ -80,22 +81,45 @@ pub fn render(
               @luna_dom.div(class="flex gap-2 w-full items-center", [
                 seek_bar(playback_position, total_duration),
                 ab_loop(loop_enabled, loop_a_time, loop_b_time, total_duration),
+                display_mode_select(display_mode),
               ]),
             ]),
           ]),
         ],
       ),
       @luna_dom.div(
-        class="flex h-full min-h-0",
+        dyn_class=fn() {
+          let mode = display_mode.get()
+          match (mode.show_sheet(), mode.show_piano_roll()) {
+            (true, false) => "flex justify-center h-full min-h-0"
+            (false, true) => "flex justify-center h-full min-h-0"
+            _ => "flex h-full min-h-0"
+          }
+        },
         attrs=[("aria-label", @luna_dom.Attr::AttrString("visualization"))],
         [
-          @luna_dom.div(class="flex-2 min-h-0", [
-            @sheet.lead_sheet(
-              measures, playback_position, bpm, key, time_signature,
-            ),
-          ]),
           @luna_dom.div(
-            class="flex flex-col flex-3 min-h-0",
+            dyn_class=fn() {
+              match display_mode.get() {
+                Sheet => "w-2/5 min-h-0"
+                Sheet_PianoRoll => "flex-2 min-h-0"
+                PianoRoll => "hidden"
+              }
+            },
+            [
+              @sheet.lead_sheet(
+                measures, playback_position, bpm, key, time_signature,
+              ),
+            ],
+          ),
+          @luna_dom.div(
+            dyn_class=fn() {
+              match display_mode.get() {
+                PianoRoll => "flex flex-col flex-3 min-h-0"
+                Sheet_PianoRoll => "flex flex-col flex-3 min-h-0"
+                Sheet => "hidden"
+              }
+            },
             attrs=[("aria-label", @luna_dom.Attr::AttrString("visualization"))],
             [
               @piano_roll.note_display(
