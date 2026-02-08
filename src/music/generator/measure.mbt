@@ -86,6 +86,7 @@ pub(all) struct Settings {
   stamina_max : Int // Maximum stamina (e.g., 100)
   stamina_recovery_per_beat : Int // Recovery per beat of rest (e.g., 20)
   stamina_passive_recovery : Int // Passive recovery after playing note (e.g., 5)
+  scale_tone_weight_ratio : Int // 0-100, scale tone weight as % of chord tone weight
 } derive(Eq, Show)
 
 ///|
@@ -100,6 +101,7 @@ pub fn Settings::default(seed : Int) -> Settings {
     stamina_max: 50,
     stamina_recovery_per_beat: 20,
     stamina_passive_recovery: 5,
+    scale_tone_weight_ratio: 30,
   }
 }
 
@@ -279,11 +281,13 @@ fn fill_remaining_measure(
     let (midi_opt, weights) = match
       decide_midi_number(
         chord,
+        ctx.key,
         state.last_midi,
         state.stamina,
         settings.stamina_max,
         state.last_was_rest,
         settings.rest_probability,
+        settings.scale_tone_weight_ratio,
         random_int,
       ) {
       Some(midi) => (Some(midi), settings.note_duration_weights)
@@ -355,6 +359,23 @@ fn get_extended_tones(chord : @music.Chord) -> Array[@music.MidiNumber] {
 }
 
 ///|
+/// Get extended scale tones (non-chord diatonic tones) across multiple octaves
+fn get_extended_scale_tones(
+  chord : @music.Chord,
+  key : @music.KeySignature,
+) -> Array[@music.MidiNumber] {
+  [-1, 0, 1]
+  .iter()
+  .flat_map(fn(octave_offset) {
+    chord
+    .scale_tones(key)
+    .iter()
+    .filter_map(fn(tone) { tone.shift_octave(octave_offset) })
+  })
+  .collect()
+}
+
+///|
 /// Calculate effective rest probability based on stamina and previous note
 /// High stamina → low rest probability (want to play)
 /// Low stamina → high rest probability (need to rest)
@@ -380,22 +401,25 @@ fn effective_rest_probability(
 /// Uses stamina-based weighted selection for chord tones
 fn decide_midi_number(
   chord : @music.Chord,
+  key : @music.KeySignature,
   last_midi : @music.MidiNumber?,
   stamina : Int,
   stamina_max : Int,
   last_was_rest : Bool,
   rest_probability : Int,
+  scale_tone_weight_ratio : Int,
   random_int : (Int) -> Int,
 ) -> @music.MidiNumber? {
   let actual_rest_prob = effective_rest_probability(
     rest_probability, stamina, stamina_max, last_was_rest,
   )
   guard random_int(100) >= actual_rest_prob else { return None }
-  let extended_tones = get_extended_tones(chord)
+  let chord_tones = get_extended_tones(chord)
+  let scale_tones = get_extended_scale_tones(chord, key)
   match last_midi {
     Some(prev) => {
-      // Calculate weights based on stamina and interval cost
-      let weighted_tones : Array[(Int, @music.MidiNumber)] = extended_tones
+      // Calculate weights for chord tones
+      let weighted_chord : Array[(Int, @music.MidiNumber)] = chord_tones
         .iter()
         .map(fn(tone) {
           let cost = interval_cost(prev, tone)
@@ -403,6 +427,18 @@ fn decide_midi_number(
           (weight, tone)
         })
         .collect()
+      // Calculate weights for scale tones (reduced by ratio)
+      let weighted_scale : Array[(Int, @music.MidiNumber)] = scale_tones
+        .iter()
+        .map(fn(tone) {
+          let cost = interval_cost(prev, tone)
+          let weight = note_selection_weight(stamina, cost) *
+            scale_tone_weight_ratio /
+            100
+          (@cmp.maximum(1, weight), tone)
+        })
+        .collect()
+      let weighted_tones = weighted_chord + weighted_scale
       let total = weighted_tones
         .iter()
         .fold(init=0, fn(acc, pair) { acc + pair.0 })
@@ -417,9 +453,9 @@ fn decide_midi_number(
       Some(weighted_tones[weighted_tones.length() - 1].1)
     }
     None => {
-      // First note: uniform random selection
-      let index = random_int(extended_tones.length())
-      Some(extended_tones[index])
+      // First note: uniform random from chord tones only
+      let index = random_int(chord_tones.length())
+      Some(chord_tones[index])
     }
   }
 }

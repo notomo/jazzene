@@ -1,4 +1,33 @@
 ///|
+test "Chord::scale_tones returns non-chord diatonic tones for Cmaj7 in C" {
+  let chord = @music.Chord::{ root: @music.C, quality: @music.Major7 }
+  let key = @music.KeySignature::c_major()
+  let scale_tones = chord.scale_tones(key)
+  // Cmaj7 chord tones: C(0), E(4), G(7), B(11)
+  // C major scale: C(0), D(2), E(4), F(5), G(7), A(9), B(11)
+  // Scale tones (non-chord): D(62), F(65), A(69)
+  let pitch_classes = scale_tones.map(fn(m) { m.pitch_class() })
+  inspect(pitch_classes, content="[2, 5, 9]")
+  // Verify none are chord tones
+  let chord_pcs = chord.tones().map(fn(m) { m.pitch_class() })
+  for pc in pitch_classes {
+    assert_false(chord_pcs.contains(pc))
+  }
+}
+
+///|
+test "Chord::scale_tones returns non-chord diatonic tones for Dm7 in C" {
+  let chord = @music.Chord::{ root: @music.D, quality: @music.Minor7 }
+  let key = @music.KeySignature::c_major()
+  let scale_tones = chord.scale_tones(key)
+  // Dm7 chord tones: D(2), F(5), A(9), C(0)
+  // C major scale: C(0), D(2), E(4), F(5), G(7), A(9), B(11)
+  // Scale tones (non-chord): E(64), G(67), B(71)
+  let pitch_classes = scale_tones.map(fn(m) { m.pitch_class() })
+  inspect(pitch_classes, content="[4, 7, 11]")
+}
+
+///|
 test "create_chord_segments evenly distributes chords" {
   let chords = [
     @music.Chord::{ root: @music.C, quality: @music.Major7 },

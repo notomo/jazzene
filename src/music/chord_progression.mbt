@@ -20,6 +20,29 @@ pub fn format_chord(chord : Chord) -> String {
 }
 
 ///|
+/// Get diatonic scale tones that are NOT chord tones for the given key
+/// Returns non-chord scale degrees in octave 4
+pub fn Chord::scale_tones(
+  self : Chord,
+  key : KeySignature,
+) -> Array[MidiNumber] {
+  let major_scale_intervals = [0, 2, 4, 5, 7, 9, 11]
+  let root_midi = key.root.midi()
+  let chord_pitch_classes : Array[Int] = self
+    .tones()
+    .map(fn(tone) { tone.pitch_class() })
+  major_scale_intervals
+  .iter()
+  .filter_map(fn(interval) {
+    let midi_value = root_midi + interval
+    let pitch_class = midi_value % 12
+    guard not(chord_pitch_classes.contains(pitch_class)) else { return None }
+    MidiNumber::new(midi_value)
+  })
+  .collect()
+}
+
+///|
 /// Scale degree in a major scale
 pub(all) enum ScaleDegree {
   I
