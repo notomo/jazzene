@@ -46,6 +46,33 @@ pub fn parse_quality(quality : String) -> Result[ChordQuality, String] {
 }
 
 ///|
+/// Get available tension intervals (9th, 11th, 13th) for a quality.
+/// Returns pitch classes (0-11) representing jazz-appropriate tensions.
+/// These are chord extensions that add color without clashing with chord tones.
+pub fn ChordQuality::tensions(self : ChordQuality) -> Array[Int] {
+  match self {
+    // 9(2), #11(6), 13(9) — avoid natural 11 (clashes with major 3rd)
+    Major7 => [2, 6, 9]
+    // 9(2), 11(5), 13(9) — all natural tensions work
+    Minor7 => [2, 5, 9]
+    // 9(2), #11(6), 13(9) — standard "inside" dominant tensions
+    Dominant7 => [2, 6, 9]
+    // 9(2), 11(5), b13(8)
+    HalfDiminished => [2, 5, 8]
+    // Symmetrical chord — no standard tensions
+    Diminished7 => []
+    // 9(2)
+    Augmented => [2]
+    // 9(2), 13(9) — avoid 3rd-related tensions
+    Sus4 => [2, 9]
+    // 9(2), #11(6), 13(9)
+    Major => [2, 6, 9]
+    // 9(2), 11(5), 13(9)
+    Minor => [2, 5, 9]
+  }
+}
+
+///|
 /// Convert chord quality to display string
 pub fn ChordQuality::to_string(self : ChordQuality) -> String {
   match self {

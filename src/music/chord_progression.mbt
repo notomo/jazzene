@@ -20,6 +20,14 @@ pub fn format_chord(chord : Chord) -> String {
 }
 
 ///|
+/// Get tension tones (9th, 11th, 13th) as MIDI numbers in octave 4
+pub fn Chord::tension_tones(self : Chord) -> Array[MidiNumber] {
+  let root_midi = self.root.midi()
+  let tensions = self.quality.tensions()
+  tensions.filter_map(fn(interval) { MidiNumber::new(root_midi + interval) })
+}
+
+///|
 /// Get diatonic scale tones that are NOT chord tones for the given key
 /// Returns non-chord scale degrees in octave 4
 pub fn Chord::scale_tones(

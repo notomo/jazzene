@@ -131,6 +131,49 @@ test "Chord tones" {
 }
 
 ///|
+test "Chord tension tones - Major7" {
+  let cmaj7 = Chord::{ root: C, quality: Major7 }
+  // 9th(D=62), #11th(F#=66), 13th(A=69)
+  inspect(
+    cmaj7.tension_tones(),
+    content="[{value: 62}, {value: 66}, {value: 69}]",
+  )
+}
+
+///|
+test "Chord tension tones - Minor7" {
+  let dm7 = Chord::{ root: D, quality: Minor7 }
+  // 9th(E=64), 11th(G=67), 13th(B=71)
+  inspect(
+    dm7.tension_tones(),
+    content="[{value: 64}, {value: 67}, {value: 71}]",
+  )
+}
+
+///|
+test "Chord tension tones - Dominant7" {
+  let g7 = Chord::{ root: G, quality: Dominant7 }
+  // 9th(A=69), #11th(C#=73), 13th(E=76)
+  inspect(g7.tension_tones(), content="[{value: 69}, {value: 73}, {value: 76}]")
+}
+
+///|
+test "Chord tension tones - Diminished7 has none" {
+  let bdim7 = Chord::{ root: B, quality: Diminished7 }
+  inspect(bdim7.tension_tones(), content="[]")
+}
+
+///|
+test "Chord tension tones - HalfDiminished" {
+  let bm7b5 = Chord::{ root: B, quality: HalfDiminished }
+  // 9th(C#=73), 11th(E=76), b13th(G=79)
+  inspect(
+    bm7b5.tension_tones(),
+    content="[{value: 73}, {value: 76}, {value: 79}]",
+  )
+}
+
+///|
 test "parse measure progression without delimiter treats all as single measure" {
   let measures = @helper.unwrap_or_fail(
     parse_measure_progression("IIm7 V7 Imaj7 IVmaj7"),
