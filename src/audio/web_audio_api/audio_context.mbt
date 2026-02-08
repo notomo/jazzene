@@ -144,6 +144,64 @@ pub fn AudioParam::cancel_scheduled_values(self : Self, time : Double) -> Unit {
   self.as_any()._call("cancelScheduledValues", [@js.any(time)]) |> ignore
 }
 
+// OscillatorNode wrapper
+
+///|
+/// [OscillatorNode](https://developer.mozilla.org/en-US/docs/Web/API/OscillatorNode)
+#external
+pub type OscillatorNode
+
+///|
+pub fn OscillatorNode::as_any(self : OscillatorNode) -> @js.Any = "%identity"
+
+///|
+/// [createOscillator()](https://developer.mozilla.org/en-US/docs/Web/API/BaseAudioContext/createOscillator)
+///
+/// Create oscillator node
+pub fn AudioContext::create_oscillator(self : Self) -> OscillatorNode {
+  self.as_any()._call("createOscillator", []).cast()
+}
+
+///|
+/// [type](https://developer.mozilla.org/en-US/docs/Web/API/OscillatorNode/type)
+///
+/// Set the oscillator waveform type ("sine", "square", "triangle", "sawtooth")
+pub fn OscillatorNode::set_type(self : Self, type_ : String) -> Unit {
+  self.as_any()._set("type", @js.any(type_))
+}
+
+///|
+/// [frequency](https://developer.mozilla.org/en-US/docs/Web/API/OscillatorNode/frequency)
+///
+/// Get frequency AudioParam
+pub fn OscillatorNode::frequency(self : Self) -> AudioParam {
+  self.as_any()._get("frequency").cast()
+}
+
+///|
+/// [connect()](https://developer.mozilla.org/en-US/docs/Web/API/AudioNode/connect)
+///
+/// Connect oscillator to a target node
+pub fn OscillatorNode::connect(self : Self, target : AudioNode) -> Unit {
+  self.as_any()._call("connect", [@js.any(target)]) |> ignore
+}
+
+///|
+/// [start()](https://developer.mozilla.org/en-US/docs/Web/API/AudioScheduledSourceNode/start)
+///
+/// Start oscillator at specified time
+pub fn OscillatorNode::start(self : Self, time : Double) -> Unit {
+  self.as_any()._call("start", [@js.any(time)]) |> ignore
+}
+
+///|
+/// [stop()](https://developer.mozilla.org/en-US/docs/Web/API/AudioScheduledSourceNode/stop)
+///
+/// Stop oscillator at specified time
+pub fn OscillatorNode::stop(self : Self, time : Double) -> Unit {
+  self.as_any()._call("stop", [@js.any(time)]) |> ignore
+}
+
 // AudioBuffer wrapper
 
 ///|

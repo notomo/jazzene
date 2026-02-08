@@ -35,6 +35,17 @@ fn main {
     )
     |> sound_list => { sounds.set(sound_list) }
   })
+  let drum_sounds : @signal.Signal[Array[@music.NoteValueSound]] = @signal.signal([],
+  )
+  let _ = @signal.effect(fn() {
+    @music.generate_drum_sounds(
+      bpm.get(),
+      measure_count.get(),
+      beats_per_measure=time_signature.get().beats_per_measure(),
+      swing=swing.get(),
+    )
+    |> drum_list => { drum_sounds.set(drum_list) }
+  })
   let total_duration = @signal.memo(fn() {
     @music.calculate_total_duration(
       bpm=bpm.get(),
@@ -51,17 +62,23 @@ fn main {
   let loop_b_time : @signal.Signal[@music.Duration?] = @signal.signal(None)
   let synth = @audio.Synthesizer::new()
   synth.load_samples()
+  let drum_synth = @audio.DrumSynth::new(
+    synth.audio_context(),
+    synth.destination(),
+  )
   let tick = make_tick(
-    playback_position, volume, sounds, total_duration, loop_enabled, loop_a_time,
-    loop_b_time, synth,
+    playback_position, volume, sounds, drum_sounds, total_duration, loop_enabled,
+    loop_a_time, loop_b_time, synth, drum_synth,
   )
   let display_mode = @signal.signal(@ui.get_initial_display_mode())
   let is_playing = @signal.signal(false)
   let _ = @signal.effect(fn() {
     if is_playing.get() {
       synth.unmute()
+      drum_synth.unmute()
     } else {
       synth.mute()
+      drum_synth.mute()
     }
   })
   @ui.setup_loop(is_playing, tick)
@@ -116,11 +133,13 @@ fn make_tick(
   playback_position : @signal.Signal[@music.Duration],
   volume : @signal.Signal[Double],
   sounds : @signal.Signal[Array[@music.NoteValueSound]],
+  drum_sounds : @signal.Signal[Array[@music.NoteValueSound]],
   total_duration : () -> @music.Duration,
   loop_enabled : @signal.Signal[Bool],
   loop_a_time : @signal.Signal[@music.Duration],
   loop_b_time : @signal.Signal[@music.Duration?],
   synth : @audio.Synthesizer,
+  drum_synth : @audio.DrumSynth,
 ) -> (Double) -> Bool {
   let lookahead = @music.Duration::from_milliseconds(100)
   return fn(elapsed_ms : Double) -> Bool {
@@ -145,6 +164,12 @@ fn make_tick(
       lookahead,
     )
     synth.schedule_notes(audio_sounds, volume.get())
+    let drum_audio_sounds = @music.AudioSound::from(
+      drum_sounds.get(),
+      final_position,
+      lookahead,
+    )
+    drum_synth.schedule_notes(drum_audio_sounds, volume.get())
     playback_position.set(final_position)
     let stop = if loop_enabled.get() { false } else { final_position == total }
     stop

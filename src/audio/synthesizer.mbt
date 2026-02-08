@@ -16,6 +16,20 @@ pub fn Synthesizer::new() -> Synthesizer {
 }
 
 ///|
+/// Get the AudioContext for sharing with other audio components
+pub fn Synthesizer::audio_context(
+  self : Synthesizer,
+) -> @web_audio.AudioContext {
+  self.ctx
+}
+
+///|
+/// Get the destination node (speakers) for connecting other audio components
+pub fn Synthesizer::destination(self : Synthesizer) -> @web_audio.AudioNode {
+  self.ctx.destination()
+}
+
+///|
 /// Load Salamander Grand Piano samples asynchronously
 pub fn Synthesizer::load_samples(self : Synthesizer) -> Unit {
   load_sample_bank(self.ctx, fn(bank) { self.sample_bank = Some(bank) })
