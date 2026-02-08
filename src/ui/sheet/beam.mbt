@@ -256,14 +256,24 @@ fn render_beam_group_rests(
         )
         let default_rest_y = staff_y + STAFF_LINE_SPACING * 2.0
         // Adjust rest position to avoid overlapping with beam
+        // Eighth rest extends ~18px above rest_y, so stem_up needs extra clearance
         let rest_y = if stem_up {
-          // Beam is above: ensure rest is below beam
-          @cmp.maximum(default_rest_y, beam_y_here + BEAM_REST_CLEARANCE)
+          // Beam is above: ensure rest is below beam (accounting for rest top extent)
+          @cmp.maximum(
+            default_rest_y,
+            beam_y_here +
+            BEAM_THICKNESS +
+            STAFF_LINE_SPACING +
+            BEAM_REST_CLEARANCE,
+          )
         } else {
-          // Beam is below: ensure rest is above beam
+          // Beam is below: ensure rest is above beam (accounting for rest bottom extent)
           @cmp.minimum(
             default_rest_y,
-            beam_y_here - BEAM_REST_CLEARANCE - STAFF_LINE_SPACING,
+            beam_y_here -
+            BEAM_THICKNESS -
+            STAFF_LINE_SPACING -
+            BEAM_REST_CLEARANCE,
           )
         }
         nodes.push(render_rest_symbol(note.duration, note_x, rest_y))
