@@ -16,7 +16,9 @@ fn ab_loop(
   total_duration : () -> @music.Duration,
 ) -> @luna_dom.DomNode {
   let on_enabled_checkbox_input : @luna_dom.InputHandler = fn(e) {
-    loop_enabled.set(get_checkbox_checked(e))
+    let checked = get_checkbox_checked(e)
+    loop_enabled.set(checked)
+    set_query_param("loop", checked.to_string())
   }
   let on_a_time_input : @luna_dom.InputHandler = fn(e) {
     match @music.Duration::parse(get_input_value(e)) {
@@ -24,7 +26,9 @@ fn ab_loop(
         let b = loop_b_time.get().unwrap_or(total_duration())
         let max_a = @cmp.minimum(b, total_duration())
         let zero = @music.Duration::from_milliseconds(0.0)
-        loop_a_time.set(clamp(zero, new_a, max_a))
+        let clamped = clamp(zero, new_a, max_a)
+        loop_a_time.set(clamped)
+        set_query_param("loop_a", clamped.format())
       }
       None => ()
     }
@@ -34,7 +38,9 @@ fn ab_loop(
       Some(new_b) => {
         let zero = @music.Duration::from_milliseconds(0.0)
         let min_b = @cmp.maximum(loop_a_time.get(), zero)
-        loop_b_time.set(Some(clamp(min_b, new_b, total_duration())))
+        let clamped = clamp(min_b, new_b, total_duration())
+        loop_b_time.set(Some(clamped))
+        set_query_param("loop_b", clamped.format())
       }
       None => ()
     }

@@ -1,7 +1,7 @@
 ///|
 /// Read a query parameter from the URL
 extern "js" fn get_query_param(name : String) -> String? =
-  #|(name) => new URLSearchParams(window.location.search).get(name)
+  #|(name) => new URLSearchParams(window.location.search).get(name) ?? undefined
 
 ///|
 /// Set a query parameter in the URL without reloading
@@ -47,5 +47,35 @@ pub fn get_initial_key() -> @music.KeySignature {
         Err(_) => @music.KeySignature::c_major()
       }
     None => @music.KeySignature::c_major()
+  }
+}
+
+///|
+/// Read the initial loop enabled state from the URL query parameter
+pub fn get_initial_loop_enabled() -> Bool {
+  match get_query_param("loop") {
+    Some("true") => true
+    _ => false
+  }
+}
+
+///|
+/// Read the initial loop A time from the URL query parameter
+pub fn get_initial_loop_a_time() -> @music.Duration {
+  match get_query_param("loop_a") {
+    Some(value) =>
+      @music.Duration::parse(value).unwrap_or(
+        @music.Duration::from_milliseconds(0.0),
+      )
+    None => @music.Duration::from_milliseconds(0.0)
+  }
+}
+
+///|
+/// Read the initial loop B time from the URL query parameter
+pub fn get_initial_loop_b_time() -> @music.Duration? {
+  match get_query_param("loop_b") {
+    Some(value) => @music.Duration::parse(value)
+    None => None
   }
 }

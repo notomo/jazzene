@@ -57,9 +57,11 @@ fn main {
     @music.Duration::from_milliseconds(0.0),
   )
   let volume = @signal.signal(0.3)
-  let loop_enabled = @signal.signal(false)
-  let loop_a_time = @signal.signal(@music.Duration::from_milliseconds(0.0))
-  let loop_b_time : @signal.Signal[@music.Duration?] = @signal.signal(None)
+  let loop_enabled = @signal.signal(@ui.get_initial_loop_enabled())
+  let loop_a_time = @signal.signal(@ui.get_initial_loop_a_time())
+  let loop_b_time : @signal.Signal[@music.Duration?] = @signal.signal(
+    @ui.get_initial_loop_b_time(),
+  )
   let synth = @audio.Synthesizer::new()
   synth.load_samples()
   let drum_synth = @audio.DrumSynth::new(
