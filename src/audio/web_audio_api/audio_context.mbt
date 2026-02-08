@@ -212,6 +212,34 @@ pub type AudioBuffer
 ///|
 pub fn AudioBuffer::as_any(self : AudioBuffer) -> @js.Any = "%identity"
 
+///|
+/// [createBuffer()](https://developer.mozilla.org/en-US/docs/Web/API/BaseAudioContext/createBuffer)
+///
+/// Create an empty AudioBuffer
+pub fn AudioContext::create_buffer(
+  self : Self,
+  channels : Int,
+  length : Int,
+  sample_rate : Double,
+) -> AudioBuffer {
+  self
+  .as_any()
+  ._call("createBuffer", [
+    @js.any(channels),
+    @js.any(length),
+    @js.any(sample_rate),
+  ])
+  .cast()
+}
+
+///|
+/// [sampleRate](https://developer.mozilla.org/en-US/docs/Web/API/BaseAudioContext/sampleRate)
+///
+/// Get the sample rate of the AudioContext
+pub fn AudioContext::sample_rate(self : Self) -> Double {
+  self.as_any()._get("sampleRate").cast()
+}
+
 // AudioBufferSourceNode wrapper
 
 ///|
