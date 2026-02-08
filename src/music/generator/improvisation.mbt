@@ -23,6 +23,32 @@ pub fn leading_rest_measure() -> Array[@music.Measure] {
 }
 
 ///|
+/// Create a trailing rest measure (empty measure at the end)
+pub fn trailing_rest_measure(
+  start_time~ : @music.Duration,
+) -> Array[@music.Measure] {
+  [
+    @music.Measure::{
+      chords: [],
+      beats: [
+        @music.Beat::{
+          count: 0,
+          notes: [
+            @music.MeasureNote::{
+              midi: None,
+              duration: Whole,
+              accidental: None,
+              tie: None,
+            },
+          ],
+        },
+      ],
+      start_time,
+    },
+  ]
+}
+
+///|
 /// State passed between measures during improvisation generation
 priv struct ImprovisationState {
   measures : Array[@music.Measure]
