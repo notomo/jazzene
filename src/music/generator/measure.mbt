@@ -101,6 +101,7 @@ pub(all) struct Settings {
   phrase_length_min : Int // Minimum notes in a phrase (default: 2)
   phrase_length_max : Int // Maximum notes in a phrase (default: 8)
   phrase_early_end_stamina : Int // Below this stamina, phrase may end early (default: 15)
+  max_interval : Int // Maximum interval jump in semitones (default: 7 = perfect fifth)
 } derive(Eq, Show)
 
 ///|
@@ -121,6 +122,7 @@ pub fn Settings::default(seed : Int) -> Settings {
     phrase_length_min: 2,
     phrase_length_max: 8,
     phrase_early_end_stamina: 15,
+    max_interval: 7,
   }
 }
 
@@ -388,6 +390,7 @@ fn fill_remaining_measure(
           settings.scale_tone_weight_ratio,
           settings.tension_weight_ratio,
           settings.approach_weight_ratio,
+          settings.max_interval,
           random_int,
         )
         match midi_opt {
@@ -524,6 +527,32 @@ fn effective_rest_probability(
 }
 
 ///|
+/// Filter tones to only those within max_interval semitones of prev.
+/// If all are filtered out, returns the single closest tone as fallback.
+fn filter_by_interval(
+  tones : Array[@music.MidiNumber],
+  prev : @music.MidiNumber,
+  max_interval : Int,
+) -> Array[@music.MidiNumber] {
+  let filtered : Array[@music.MidiNumber] = tones
+    .iter()
+    .filter(fn(tone) { prev.distance(tone) <= max_interval })
+    .collect()
+  guard filtered.is_empty() else { return filtered }
+  // Fallback: pick the single closest tone
+  let mut closest = tones[0]
+  let mut min_dist = prev.distance(closest)
+  for tone in tones {
+    let d = prev.distance(tone)
+    if d < min_dist {
+      closest = tone
+      min_dist = d
+    }
+  }
+  [closest]
+}
+
+///|
 /// Decide whether to generate a note or rest, and if note, which MIDI number
 /// Uses stamina-based weighted selection for chord tones
 fn decide_midi_number(
@@ -537,6 +566,7 @@ fn decide_midi_number(
   scale_tone_weight_ratio : Int,
   tension_weight_ratio : Int,
   approach_weight_ratio : Int,
+  max_interval : Int,
   random_int : (Int) -> Int,
 ) -> @music.MidiNumber? {
   let actual_rest_prob = effective_rest_probability(
@@ -549,6 +579,13 @@ fn decide_midi_number(
   let approach_tones = get_extended_approach_tones(chord)
   match last_midi {
     Some(prev) => {
+      // Filter candidates by max interval
+      let chord_tones = filter_by_interval(chord_tones, prev, max_interval)
+      let tension_tones = filter_by_interval(tension_tones, prev, max_interval)
+      let scale_tones = filter_by_interval(scale_tones, prev, max_interval)
+      let approach_tones = filter_by_interval(
+        approach_tones, prev, max_interval,
+      )
       // Calculate weights for chord tones
       let weighted_chord : Array[(Int, @music.MidiNumber)] = chord_tones
         .iter()
