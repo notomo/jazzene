@@ -8,6 +8,7 @@ pub(all) struct DurationWeights {
   half : Int
   dotted_half : Int
   whole : Int
+  eighth_triplet : Int
 } derive(Eq, Show)
 
 ///|
@@ -21,6 +22,7 @@ pub fn DurationWeights::note_default() -> DurationWeights {
     half: 2,
     dotted_half: 0,
     whole: 2,
+    eighth_triplet: 0,
   }
 }
 
@@ -35,6 +37,7 @@ pub fn DurationWeights::rest_default() -> DurationWeights {
     half: 5,
     dotted_half: 0,
     whole: 0,
+    eighth_triplet: 0,
   }
 }
 
@@ -51,6 +54,7 @@ fn DurationWeights::to_choices(
     (self.half, @music.Half),
     (self.dotted_half, @music.DottedHalf),
     (self.whole, @music.Whole),
+    (self.eighth_triplet, @music.EighthTriplet),
   ]
 }
 

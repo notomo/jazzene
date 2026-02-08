@@ -8,6 +8,12 @@ const BEAM_THICKNESS = 3.5
 const BEAM_REST_CLEARANCE = 8.0
 
 ///|
+const TRIPLET_LABEL_OFFSET = 10.0
+
+///|
+const TRIPLET_LABEL_FONT_SIZE = "20"
+
+///|
 /// Determine stem direction for a beam group.
 /// Uses the note furthest from MIDI 71 (B4) among non-rest notes.
 fn beam_stem_up(
@@ -228,6 +234,32 @@ fn render_beam_group(
   }
   let points = "\{first_x},\{first_top} \{last_x},\{last_top} \{last_x},\{last_bottom} \{first_x},\{first_bottom}"
   nodes.push(@luna_dom.svg_polygon(points~, stroke="none"))
+  // Render triplet "3" label if all notes in the group are EighthTriplet
+  let is_triplet = group
+    .iter()
+    .all(fn(idx) { positioned[idx].1.duration is EighthTriplet })
+  if is_triplet {
+    let center_x = (first_x + last_x) / 2.0
+    let label_y = if stem_up {
+      (first_beam_y + last_beam_y) / 2.0 - TRIPLET_LABEL_OFFSET
+    } else {
+      (first_beam_y + last_beam_y) / 2.0 + TRIPLET_LABEL_OFFSET
+    }
+    nodes.push(
+      @luna_dom.svg_text(
+        x=center_x.to_string(),
+        y=label_y.to_string(),
+        text_anchor="middle",
+        font_size=TRIPLET_LABEL_FONT_SIZE,
+        font_family="serif",
+        attrs=[
+          ("stroke", @luna_dom.Attr::AttrString("none")),
+          ("font-style", @luna_dom.Attr::AttrString("italic")),
+        ],
+        [@luna_dom.text("3")],
+      ),
+    )
+  }
   nodes
 }
 

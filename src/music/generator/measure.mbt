@@ -106,6 +106,7 @@ pub(all) struct Settings {
   max_interval : Int // Maximum interval jump in semitones (default: 7 = perfect fifth)
   syncopation_probability : Int // 0-100, chance of forcing off-beat phrase start on downbeats (default: 40)
   motif_reuse_probability : Int // 0-100, chance of replaying a stored motif when starting a new phrase (default: 30)
+  triplet_probability : Int // 0-100, chance of generating eighth-note triplet group when playing (default: 15)
 } derive(Eq, Show)
 
 ///|
@@ -129,6 +130,7 @@ pub fn Settings::default(seed : Int) -> Settings {
     max_interval: 7,
     syncopation_probability: 40,
     motif_reuse_probability: 30,
+    triplet_probability: 8,
   }
 }
 
@@ -597,6 +599,15 @@ fn fill_remaining_measure(
           // Transition to resting (will emit rest on next iteration)
           continue MeasureState::{ ..state, phrase: Resting }
         }
+        // Try to generate a triplet group (3 eighth triplets = 1 beat)
+        let use_triplet = notes_left >= 3 &&
+          remaining >= 1.0 - 0.001 &&
+          random_int(100) < settings.triplet_probability
+        guard not(use_triplet) else {
+          continue generate_triplet_group(
+              state, chord, ctx, settings, update_accidental, random_int, notes_left,
+            )
+        }
         // Select note using motif-guided or normal selection
         let (midi_opt, new_motif_memory) = select_note_with_motif(
           state, chord, ctx, settings, random_int,
@@ -868,4 +879,71 @@ fn decide_midi_number(
       Some(chord_tones[index])
     }
   }
+}
+
+///|
+/// Generate a group of 3 eighth-note triplets (totaling 1 beat)
+fn generate_triplet_group(
+  state : MeasureState,
+  _chord : @music.Chord,
+  ctx : MeasureContext,
+  settings : Settings,
+  update_accidental : (@music.MidiNumber) -> @music.Accidental?,
+  random_int : (Int) -> Int,
+  notes_left : Int,
+) -> MeasureState {
+  let triplet_duration = @music.EighthTriplet
+  let mut current_state = state
+  for i = 0; i < 3; i = i + 1 {
+    let current_chord = ctx.chord_at(current_state.measure_pos)
+    let (midi_opt, new_motif_memory) = select_note_with_motif(
+      current_state, current_chord, ctx, settings, random_int,
+    )
+    match midi_opt {
+      Some(midi) => {
+        let cost = match current_state.last_midi {
+          Some(prev) => interval_cost(prev, midi)
+          None => 0
+        }
+        let new_stamina = @cmp.maximum(
+          0,
+          @cmp.minimum(
+            current_state.stamina - cost + settings.stamina_passive_recovery,
+            settings.stamina_max,
+          ),
+        )
+        let new_motif_memory = record_motif_interval(
+          new_motif_memory,
+          current_state.last_midi,
+          midi,
+          current_state.motif_first_note,
+        )
+        let beat_index = current_state.measure_pos.to_int()
+        current_state.beat_notes[beat_index].push(@music.MeasureNote::{
+          midi: Some(midi.value),
+          duration: triplet_duration,
+          accidental: update_accidental(midi),
+          tie: None,
+        })
+        let remaining_after = notes_left - (i + 1)
+        let next_phrase = if remaining_after <= 0 {
+          Resting
+        } else {
+          Playing(remaining_after)
+        }
+        current_state = MeasureState::{
+          measure_pos: current_state.measure_pos + triplet_duration.to_beats(),
+          beat_notes: current_state.beat_notes,
+          stamina: new_stamina,
+          last_midi: Some(midi),
+          last_was_rest: false,
+          phrase: next_phrase,
+          motif_memory: new_motif_memory,
+          motif_first_note: false,
+        }
+      }
+      None => break
+    }
+  }
+  current_state
 }

@@ -81,7 +81,7 @@ fn render_note_head(
   note_y : Double,
 ) -> @luna_dom.DomNode {
   match duration {
-    Eighth | DottedEighth | Quarter | DottedQuarter =>
+    Eighth | DottedEighth | Quarter | DottedQuarter | EighthTriplet =>
       render_filled_note_head(note_x, note_y)
     Half | DottedHalf | Whole => render_hollow_note_head(note_x, note_y)
   }
@@ -171,7 +171,7 @@ fn render_stem_and_flag(
 ) -> Array[@luna_dom.DomNode] {
   match duration {
     Whole => []
-    Eighth | DottedEighth => {
+    Eighth | DottedEighth | EighthTriplet => {
       let stem = calculate_stem_info(midi, note_x, note_y)
       [render_stem(stem), render_flag(stem)]
     }

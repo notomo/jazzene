@@ -65,7 +65,7 @@ fn render_rest_symbol(
     Quarter | DottedQuarter => render_quarter_rest(note_x, rest_y)
     Half | DottedHalf => render_half_rest(note_x, rest_y)
     Whole => render_whole_rest(note_x, rest_y)
-    Eighth | DottedEighth => render_eighth_rest(note_x, rest_y)
+    Eighth | DottedEighth | EighthTriplet => render_eighth_rest(note_x, rest_y)
   }
 }
 

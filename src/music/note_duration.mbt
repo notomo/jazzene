@@ -8,6 +8,7 @@ pub(all) enum NoteDuration {
   DottedEighth // 0.75 beats
   DottedQuarter // 1.5 beats
   DottedHalf // 3.0 beats
+  EighthTriplet // 1/3 beat (three per beat)
 } derive(Eq, Show)
 
 ///|
@@ -21,6 +22,7 @@ pub fn NoteDuration::to_beats(self : NoteDuration) -> Double {
     DottedEighth => 0.75
     DottedQuarter => 1.5
     DottedHalf => 3.0
+    EighthTriplet => 1.0 / 3.0
   }
 }
 
@@ -48,7 +50,7 @@ pub fn NoteDuration::from_beats(beats : Double) -> NoteDuration {
 /// Whether this duration can be connected by a beam
 pub fn NoteDuration::is_beamable(self : NoteDuration) -> Bool {
   match self {
-    Eighth | DottedEighth => true
+    Eighth | DottedEighth | EighthTriplet => true
     _ => false
   }
 }
@@ -56,7 +58,16 @@ pub fn NoteDuration::is_beamable(self : NoteDuration) -> Bool {
 ///|
 /// Find the largest duration that fits within remaining_beats
 pub fn NoteDuration::fit(remaining_beats : Double) -> NoteDuration? {
-  [Whole, DottedHalf, Half, DottedQuarter, Quarter, DottedEighth, Eighth]
+  [
+    Whole,
+    DottedHalf,
+    Half,
+    DottedQuarter,
+    Quarter,
+    DottedEighth,
+    Eighth,
+    EighthTriplet,
+  ]
   .iter()
   .find_first(fn(d) { d.to_beats() <= remaining_beats + 0.001 })
 }

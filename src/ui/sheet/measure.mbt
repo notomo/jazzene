@@ -124,7 +124,7 @@ fn note_min_spacing(
     false
   } else {
     match prev_note.duration {
-      Eighth | DottedEighth => true
+      Eighth | DottedEighth | EighthTriplet => true
       _ => false
     }
   }
