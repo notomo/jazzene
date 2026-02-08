@@ -11,30 +11,30 @@ pub(all) struct DurationWeights {
 } derive(Eq, Show)
 
 ///|
-/// Default weights for notes, favoring quarter notes
+/// Default weights for notes, favoring eighth notes for jazz phrasing
 pub fn DurationWeights::note_default() -> DurationWeights {
   DurationWeights::{
-    eighth: 15,
+    eighth: 45,
     dotted_eighth: 0,
-    quarter: 40,
-    dotted_quarter: 0,
-    half: 8,
+    quarter: 20,
+    dotted_quarter: 3,
+    half: 2,
     dotted_half: 0,
     whole: 2,
   }
 }
 
 ///|
-/// Default weights for rests (no dotted durations)
+/// Default weights for rests, shorter rests for jazz feel
 pub fn DurationWeights::rest_default() -> DurationWeights {
   DurationWeights::{
-    eighth: 15,
+    eighth: 40,
     dotted_eighth: 0,
-    quarter: 40,
+    quarter: 25,
     dotted_quarter: 0,
-    half: 8,
+    half: 5,
     dotted_half: 0,
-    whole: 2,
+    whole: 0,
   }
 }
 
