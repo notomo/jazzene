@@ -24,14 +24,6 @@ pub fn MidiNumber::shift_octave(
 }
 
 ///|
-/// Convert MIDI number to frequency in Hz
-/// Uses the formula: f = 440 * 2^((n-69)/12)
-/// where MIDI 69 = A4 = 440 Hz
-pub fn MidiNumber::to_frequency(self : MidiNumber) -> Double {
-  440.0 * @math.pow(2.0, (self.value.to_double() - 69.0) / 12.0)
-}
-
-///|
 /// Get the pitch class (0-11) of the MIDI number
 /// 0 = C, 1 = C#/Db, 2 = D, ..., 11 = B
 pub fn MidiNumber::pitch_class(self : MidiNumber) -> Int {

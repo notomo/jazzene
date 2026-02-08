@@ -50,6 +50,7 @@ fn main {
   let loop_a_time = @signal.signal(@music.Duration::from_milliseconds(0.0))
   let loop_b_time : @signal.Signal[@music.Duration?] = @signal.signal(None)
   let synth = @audio.Synthesizer::new()
+  synth.load_samples()
   let tick = make_tick(
     playback_position, volume, sounds, total_duration, loop_enabled, loop_a_time,
     loop_b_time, synth,

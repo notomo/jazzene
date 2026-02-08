@@ -8,12 +8,6 @@ test "MidiNumber validation" {
 }
 
 ///|
-test "MidiNumber to_frequency conversion" {
-  let a4 = MidiNumber::{ value: 69 }
-  assert_eq(a4.to_frequency(), 440.0)
-}
-
-///|
 test "MidiNumber pitch_class" {
   // C4 (MIDI 60) -> pitch class 0
   inspect(MidiNumber::{ value: 60 }.pitch_class(), content="0")

@@ -37,64 +37,6 @@ pub fn AudioContext::destination(self : Self) -> AudioNode {
   self.as_any()._get("destination").cast()
 }
 
-// OscillatorNode wrapper
-
-///|
-/// [OscillatorNode](https://developer.mozilla.org/en-US/docs/Web/API/OscillatorNode)
-#external
-pub type OscillatorNode
-
-///|
-pub fn OscillatorNode::as_any(self : OscillatorNode) -> @js.Any = "%identity"
-
-///|
-/// [createOscillator()](https://developer.mozilla.org/en-US/docs/Web/API/BaseAudioContext/createOscillator)
-///
-/// Create oscillator node
-pub fn AudioContext::create_oscillator(self : Self) -> OscillatorNode {
-  self.as_any()._call("createOscillator", []).cast()
-}
-
-///|
-/// [type](https://developer.mozilla.org/en-US/docs/Web/API/OscillatorNode/type)
-///
-/// Set oscillator type (sine, square, sawtriangle, triangle)
-pub fn OscillatorNode::set_type(self : Self, osc_type : String) -> Unit {
-  self.as_any()._set("type", @js.any(osc_type))
-}
-
-///|
-/// [frequency](https://developer.mozilla.org/en-US/docs/Web/API/OscillatorNode/frequency)
-///
-/// Set oscillator frequency
-pub fn OscillatorNode::set_frequency(self : Self, freq : Double) -> Unit {
-  self.as_any()._get("frequency")._set("value", @js.any(freq))
-}
-
-///|
-/// [connect()](https://developer.mozilla.org/en-US/docs/Web/API/AudioNode/connect)
-///
-/// Connect oscillator to a target node
-pub fn OscillatorNode::connect(self : Self, target : AudioNode) -> Unit {
-  self.as_any()._call("connect", [@js.any(target)]) |> ignore
-}
-
-///|
-/// [start()](https://developer.mozilla.org/en-US/docs/Web/API/AudioScheduledSourceNode/start)
-///
-/// Start oscillator at specified time
-pub fn OscillatorNode::start(self : Self, time : Double) -> Unit {
-  self.as_any()._call("start", [@js.any(time)]) |> ignore
-}
-
-///|
-/// [stop()](https://developer.mozilla.org/en-US/docs/Web/API/AudioScheduledSourceNode/stop)
-///
-/// Stop oscillator at specified time
-pub fn OscillatorNode::stop(self : Self, time : Double) -> Unit {
-  self.as_any()._call("stop", [@js.any(time)]) |> ignore
-}
-
 ///|
 #external
 pub type AudioNode
@@ -200,4 +142,75 @@ pub fn AudioParam::exponential_ramp_to_value_at_time(
 /// Cancel scheduled parameter changes
 pub fn AudioParam::cancel_scheduled_values(self : Self, time : Double) -> Unit {
   self.as_any()._call("cancelScheduledValues", [@js.any(time)]) |> ignore
+}
+
+// AudioBuffer wrapper
+
+///|
+/// [AudioBuffer](https://developer.mozilla.org/en-US/docs/Web/API/AudioBuffer)
+#external
+pub type AudioBuffer
+
+///|
+pub fn AudioBuffer::as_any(self : AudioBuffer) -> @js.Any = "%identity"
+
+// AudioBufferSourceNode wrapper
+
+///|
+/// [AudioBufferSourceNode](https://developer.mozilla.org/en-US/docs/Web/API/AudioBufferSourceNode)
+#external
+pub type AudioBufferSourceNode
+
+///|
+pub fn AudioBufferSourceNode::as_any(self : AudioBufferSourceNode) -> @js.Any = "%identity"
+
+///|
+/// [createBufferSource()](https://developer.mozilla.org/en-US/docs/Web/API/BaseAudioContext/createBufferSource)
+///
+/// Create buffer source node
+pub fn AudioContext::create_buffer_source(self : Self) -> AudioBufferSourceNode {
+  self.as_any()._call("createBufferSource", []).cast()
+}
+
+///|
+/// [buffer](https://developer.mozilla.org/en-US/docs/Web/API/AudioBufferSourceNode/buffer)
+///
+/// Set the audio buffer to play
+pub fn AudioBufferSourceNode::set_buffer(
+  self : Self,
+  buffer : AudioBuffer,
+) -> Unit {
+  self.as_any()._set("buffer", @js.any(buffer))
+}
+
+///|
+/// [detune](https://developer.mozilla.org/en-US/docs/Web/API/AudioBufferSourceNode/detune)
+///
+/// Get detune AudioParam for pitch shifting (in cents)
+pub fn AudioBufferSourceNode::detune(self : Self) -> AudioParam {
+  self.as_any()._get("detune").cast()
+}
+
+///|
+/// [connect()](https://developer.mozilla.org/en-US/docs/Web/API/AudioNode/connect)
+///
+/// Connect buffer source to a target node
+pub fn AudioBufferSourceNode::connect(self : Self, target : AudioNode) -> Unit {
+  self.as_any()._call("connect", [@js.any(target)]) |> ignore
+}
+
+///|
+/// [start()](https://developer.mozilla.org/en-US/docs/Web/API/AudioScheduledSourceNode/start)
+///
+/// Start buffer source at specified time
+pub fn AudioBufferSourceNode::start(self : Self, time : Double) -> Unit {
+  self.as_any()._call("start", [@js.any(time)]) |> ignore
+}
+
+///|
+/// [stop()](https://developer.mozilla.org/en-US/docs/Web/API/AudioScheduledSourceNode/stop)
+///
+/// Stop buffer source at specified time
+pub fn AudioBufferSourceNode::stop(self : Self, time : Double) -> Unit {
+  self.as_any()._call("stop", [@js.any(time)]) |> ignore
 }
