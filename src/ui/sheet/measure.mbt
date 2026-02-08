@@ -41,10 +41,13 @@ const MEASURE_CLICKABLE_TOP_OFFSET = -80.0
 const NOTE_AREA_START_OFFSET = 60.0
 
 ///|
-const NOTE_AREA_PADDING = 80.0
+const NOTE_AREA_PADDING = 95.0
 
 ///|
 const MIN_NOTE_SPACING = 32.0
+
+///|
+const ACCIDENTAL_EXTRA_SPACING = 14.0
 
 ///|
 /// Render clickable background for seeking
@@ -126,10 +129,14 @@ fn compute_note_positions(
       (None, @music.Whole) => measure_x + MEASURE_WIDTH / 2.0
       _ => note_area_start + start_beat * note_area_width / beats_per_measure
     }
+    let min_spacing = match note.accidental {
+      Some(_) => MIN_NOTE_SPACING + ACCIDENTAL_EXTRA_SPACING
+      None => MIN_NOTE_SPACING
+    }
     let x = if i == 0 {
       proportional_x
     } else {
-      @cmp.maximum(proportional_x, positions[i - 1] + MIN_NOTE_SPACING)
+      @cmp.maximum(proportional_x, positions[i - 1] + min_spacing)
     }
     positions.push(x)
   }
