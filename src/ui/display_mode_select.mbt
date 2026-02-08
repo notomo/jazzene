@@ -25,6 +25,25 @@ fn DisplayMode::from_string(s : String) -> DisplayMode {
 }
 
 ///|
+fn DisplayMode::to_query_string(self : DisplayMode) -> String {
+  match self {
+    Sheet_PianoRoll => "both"
+    Sheet => "sheet"
+    PianoRoll => "pianoroll"
+  }
+}
+
+///|
+fn DisplayMode::from_query_string(s : String) -> DisplayMode? {
+  match s {
+    "both" => Some(Sheet_PianoRoll)
+    "sheet" => Some(Sheet)
+    "pianoroll" => Some(PianoRoll)
+    _ => None
+  }
+}
+
+///|
 fn DisplayMode::all() -> Array[DisplayMode] {
   [Sheet_PianoRoll, Sheet, PianoRoll]
 }
@@ -66,7 +85,9 @@ fn display_mode_select(mode : @signal.Signal[DisplayMode]) -> @luna_dom.DomNode 
           "change",
           @luna_dom.AttrValue::Handler(fn(e) {
             let value = get_event_target_value(e)
-            mode.set(DisplayMode::from_string(value))
+            let m = DisplayMode::from_string(value)
+            mode.set(m)
+            set_query_param("view", m.to_query_string())
           }),
         ),
       ],

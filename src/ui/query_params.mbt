@@ -26,6 +26,18 @@ pub fn get_initial_int(name : String, default : Int) -> Int {
 }
 
 ///|
+/// Read the initial display mode from the URL query parameter
+pub fn get_initial_display_mode() -> DisplayMode {
+  match get_query_param("view") {
+    Some(value) =>
+      DisplayMode::from_query_string(value).unwrap_or(
+        DisplayMode::Sheet_PianoRoll,
+      )
+    None => DisplayMode::Sheet_PianoRoll
+  }
+}
+
+///|
 /// Read the initial key from the URL query parameter, defaulting to C major
 pub fn get_initial_key() -> @music.KeySignature {
   match get_query_param("key") {

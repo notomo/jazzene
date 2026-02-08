@@ -55,7 +55,7 @@ fn main {
     playback_position, volume, sounds, total_duration, loop_enabled, loop_a_time,
     loop_b_time, synth,
   )
-  let display_mode = @signal.signal(@ui.DisplayMode::Sheet_PianoRoll)
+  let display_mode = @signal.signal(@ui.get_initial_display_mode())
   let is_playing = @signal.signal(false)
   let _ = @signal.effect(fn() {
     if is_playing.get() {
