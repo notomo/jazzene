@@ -1,6 +1,6 @@
 ///|
 /// Salamander Grand Piano sample bank
-/// Loads MP3 samples from https://tonejs.github.io/audio/salamander/
+/// Loads MP3 samples from /samples/salamander/
 /// and provides MIDI-to-sample mapping with pitch shifting
 
 ///|
@@ -126,7 +126,7 @@ extern "js" fn ffi_load_sample_bank(
   callback : (SampleBank) -> Unit,
 ) -> Unit =
   #| (ctx, noteNames, callback) => {
-  #|   const baseUrl = "https://tonejs.github.io/audio/salamander/";
+  #|   const baseUrl = import.meta.env.BASE_URL + "samples/salamander/";
   #|   const bank = new Map();
   #|   let loaded = 0;
   #|   const total = noteNames.length;

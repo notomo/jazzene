@@ -11,6 +11,7 @@
     "dev": "vite",
     "start": "npm run dev -- --open",
     "build": "moon build && vite build",
+    "download:samples": "bash scripts/download-samples.sh",
     "tunnel": "cloudflared tunnel --url localhost:5173"
   },
   "devDependencies": {
