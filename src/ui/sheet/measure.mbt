@@ -8,7 +8,7 @@ const STAFF_TOP = 120.0
 const MEASURES_PER_ROW = 4
 
 ///|
-const MEASURE_WIDTH = 280.0
+const MEASURE_WIDTH = 320.0
 
 ///|
 const CLEF_SPACE_WIDTH = 50.0
@@ -38,13 +38,16 @@ fn measure_position(
 const MEASURE_CLICKABLE_TOP_OFFSET = -80.0
 
 ///|
-const NOTE_AREA_START_OFFSET = 60.0
+const NOTE_AREA_START_OFFSET = 40.0
 
 ///|
-const NOTE_AREA_PADDING = 95.0
+const NOTE_AREA_PADDING = 75.0
 
 ///|
 const MIN_NOTE_SPACING = 32.0
+
+///|
+const FLAGGED_EIGHTH_EXTRA_SPACING = 15.0
 
 ///|
 const ACCIDENTAL_EXTRA_SPACING = 14.0
@@ -108,12 +111,39 @@ fn render_measure_clef(
 }
 
 ///|
+/// Calculate minimum spacing between note at index i and its predecessor.
+fn note_min_spacing(
+  i : Int,
+  positioned : Array[(Double, @music.MeasureNote)],
+  beamed_indices : Map[Int, Bool],
+) -> Double {
+  let (_, note) = positioned[i]
+  let (_, prev_note) = positioned[i - 1]
+  // An eighth note has a flag only when not beamed
+  let prev_has_flag = if beamed_indices.contains(i - 1) {
+    false
+  } else {
+    match prev_note.duration {
+      Eighth | DottedEighth => true
+      _ => false
+    }
+  }
+  // Skip accidental extra spacing for beamed notes (accidental fits within beam spacing)
+  let has_accidental_space = note.accidental is Some(_) &&
+    not(beamed_indices.contains(i))
+  MIN_NOTE_SPACING +
+  (if prev_has_flag { FLAGGED_EIGHTH_EXTRA_SPACING } else { 0.0 }) +
+  (if has_accidental_space { ACCIDENTAL_EXTRA_SPACING } else { 0.0 })
+}
+
+///|
 /// Compute x positions for all notes in a measure, enforcing minimum spacing
 /// to prevent overlapping note heads for shorter durations.
 fn compute_note_positions(
   positioned : Array[(Double, @music.MeasureNote)],
   measure_x : Double,
   beats_per_measure : Double,
+  beamed_indices : Map[Int, Bool],
 ) -> Array[Double] {
   let n = positioned.length()
   if n == 0 {
@@ -129,29 +159,75 @@ fn compute_note_positions(
       (None, @music.Whole) => measure_x + MEASURE_WIDTH / 2.0
       _ => note_area_start + start_beat * note_area_width / beats_per_measure
     }
-    let min_spacing = match note.accidental {
-      Some(_) => MIN_NOTE_SPACING + ACCIDENTAL_EXTRA_SPACING
-      None => MIN_NOTE_SPACING
-    }
     let x = if i == 0 {
       proportional_x
     } else {
+      let min_spacing = note_min_spacing(i, positioned, beamed_indices)
       @cmp.maximum(proportional_x, positions[i - 1] + min_spacing)
     }
     positions.push(x)
   }
-  // If rightmost position exceeds the available area, scale all positions to fit
+  // If rightmost position exceeds the available area, compress only the extra
+  // space beyond minimum spacing so that accidental gaps are preserved.
   let right_edge = note_area_start + note_area_width
   if n > 1 && positions[n - 1] > right_edge {
     let first_pos = positions[0]
-    let current_span = positions[n - 1] - first_pos
-    if current_span > 0.0 {
-      let available_span = right_edge - first_pos
-      let scale = available_span / current_span
-      for i, _ in positions {
-        if i > 0 {
-          positions[i] = first_pos + (positions[i] - first_pos) * scale
+    let available_span = right_edge - first_pos
+    // Collect minimum spacing and extra space for each gap
+    let min_gaps : Array[Double] = []
+    let extras : Array[Double] = []
+    let mut total_min = 0.0
+    let mut total_extra = 0.0
+    for i = 1; i < n; i = i + 1 {
+      let min_sp = note_min_spacing(i, positioned, beamed_indices)
+      let gap = positions[i] - positions[i - 1]
+      let extra = gap - min_sp
+      min_gaps.push(min_sp)
+      extras.push(extra)
+      total_min = total_min + min_sp
+      total_extra = total_extra + extra
+    }
+    if available_span >= total_min {
+      // Compress only the extra space beyond minimums
+      let extra_scale = if total_extra > 0.0 {
+        (available_span - total_min) / total_extra
+      } else {
+        0.0
+      }
+      for i = 1; i < n; i = i + 1 {
+        positions[i] = positions[i - 1] +
+          min_gaps[i - 1] +
+          extras[i - 1] * extra_scale
+      }
+    } else {
+      // Not enough space for all minimums: preserve critical gaps (flagged eighths),
+      // compress flexible gaps proportionally to fill remaining space.
+      let mut critical_total = 0.0
+      let mut flexible_total = 0.0
+      let is_critical : Array[Bool] = []
+      for i = 0; i < min_gaps.length(); i = i + 1 {
+        let critical = min_gaps[i] > MIN_NOTE_SPACING
+        is_critical.push(critical)
+        if critical {
+          critical_total = critical_total + min_gaps[i]
+        } else {
+          flexible_total = flexible_total + (min_gaps[i] + extras[i])
         }
+      }
+      let flexible_available = available_span - critical_total
+      let flexible_scale = if flexible_total > 0.0 {
+        @cmp.maximum(0.0, flexible_available / flexible_total)
+      } else {
+        0.0
+      }
+      for i = 1; i < n; i = i + 1 {
+        let gap_idx = i - 1
+        let new_gap = if is_critical[gap_idx] {
+          min_gaps[gap_idx]
+        } else {
+          (min_gaps[gap_idx] + extras[gap_idx]) * flexible_scale
+        }
+        positions[i] = positions[i - 1] + new_gap
       }
     }
   }
@@ -200,12 +276,14 @@ fn render_measure_notes(
   time_signature : @music.TimeSignature,
 ) -> Array[@luna_dom.DomNode] {
   let positioned = measure.positioned_notes()
-  let note_positions = compute_note_positions(positioned, x, beats_per_measure)
   let beam_groups = @music.find_beam_groups(positioned, time_signature)
   let beamed_indices : Map[Int, Bool] = {}
   beam_groups.each(fn(group) {
     group.each(fn(idx) { beamed_indices[idx] = true })
   })
+  let note_positions = compute_note_positions(
+    positioned, x, beats_per_measure, beamed_indices,
+  )
   let note_nodes : Array[@luna_dom.DomNode] = positioned
     .iter()
     .mapi(fn(i, _pair) {

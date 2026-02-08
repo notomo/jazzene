@@ -8,7 +8,7 @@ const SHARP_SCALE_DIVISOR = 70.0
 const FLAT_SCALE_DIVISOR = 130.0
 
 ///|
-const NATURAL_SCALE_DIVISOR = 45.0
+const NATURAL_SCALE_DIVISOR = 55.0
 
 ///|
 /// Render a sharp accidental symbol
