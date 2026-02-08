@@ -12,6 +12,7 @@ pub struct MeasureContext {
   chords : Array[ChordSegment] // Chord segments within this measure
   incoming_tie : TieContext? // Tie from previous measure
   key : @music.KeySignature
+  time_signature : @music.TimeSignature
   beats_per_measure : Double
   incoming_stamina : Int // Stamina from previous measure
   incoming_last_midi : @music.MidiNumber? // Last note from previous measure
@@ -264,7 +265,15 @@ fn fill_remaining_measure(
 ) -> MeasureState {
   for state = state {
     guard state.measure_pos < ctx.beats_per_measure else { break state }
-    let remaining = ctx.beats_per_measure - state.measure_pos
+    let remaining_in_measure = ctx.beats_per_measure - state.measure_pos
+    let remaining_in_group = ctx.time_signature.beat_group_remaining(
+      state.measure_pos,
+    )
+    let remaining = if remaining_in_measure < remaining_in_group {
+      remaining_in_measure
+    } else {
+      remaining_in_group
+    }
     // Get chord at current beat position
     let chord = ctx.chord_at(state.measure_pos)
     let (midi_opt, weights) = match

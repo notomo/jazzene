@@ -44,6 +44,7 @@ pub fn improvisation(
   measure_count : Int,
   key : @music.KeySignature,
   settings : Settings,
+  time_signature~ : @music.TimeSignature,
   beats_per_measure~ : Double,
   start_offset? : Int = 0,
 ) -> Array[@music.Measure] {
@@ -68,6 +69,7 @@ pub fn improvisation(
         chords: chord_segments,
         incoming_tie: state.incoming_tie,
         key,
+        time_signature,
         beats_per_measure,
         incoming_stamina: state.incoming_stamina,
         incoming_last_midi: state.incoming_last_midi,

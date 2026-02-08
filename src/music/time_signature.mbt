@@ -39,3 +39,30 @@ pub fn TimeSignature::beat_group_index(
   }
   (start_beat / group_size).to_int()
 }
+
+///|
+/// Return the remaining beats until the next beat group boundary.
+/// In 4/4 at position 0.5: 1.5 (boundary at 2.0)
+/// In 4/4 at position 2.0: 2.0 (boundary at 4.0)
+/// In 3/4 at position 0.5: 1.5 (boundary at 2.0)
+/// In 3/4 at position 2.0: 1.0 (boundary at 3.0)
+pub fn TimeSignature::beat_group_remaining(
+  self : TimeSignature,
+  position : Double,
+) -> Double {
+  let beats = self.beats_per_measure()
+  let group_end = match (self.numerator, self.denominator) {
+    (3, 4) => if position < 2.0 { 2.0 } else { 3.0 }
+    _ => {
+      let group_size = 2.0
+      let raw_end = ((position / group_size).to_int() + 1).to_double() *
+        group_size
+      if raw_end < beats {
+        raw_end
+      } else {
+        beats
+      }
+    }
+  }
+  group_end - position
+}

@@ -81,7 +81,8 @@ fn make_measures(
 ) -> @signal.Signal[Array[@music.Measure]] {
   let measures : @signal.Signal[Array[@music.Measure]] = @signal.signal([])
   let _ = @signal.effect(fn() {
-    let beats_per_measure = time_signature.get().beats_per_measure()
+    let ts = time_signature.get()
+    let beats_per_measure = ts.beats_per_measure()
     let settings = @generator.Settings::default(seed.get())
     settings
     |> @generator.create_measure_generator
@@ -91,6 +92,7 @@ fn make_measures(
       measure_count.get() - 1,
       key.get(),
       settings,
+      time_signature=ts,
       beats_per_measure~,
       start_offset=1,
     )

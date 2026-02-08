@@ -27,6 +27,7 @@ test "MeasureContext::chord_at returns correct chord for position" {
     chords: segments,
     incoming_tie: None,
     key: @music.KeySignature::c_major(),
+    time_signature: @music.TimeSignature::default(),
     beats_per_measure: 4.0,
     incoming_stamina: 50,
     incoming_last_midi: None,
@@ -104,6 +105,7 @@ test "improvisation removes dangling tie at last measure" {
     3,
     @music.KeySignature::c_major(),
     settings,
+    time_signature=@music.TimeSignature::default(),
     beats_per_measure=4.0,
   ) // 1 leading rest + 2 chord measures
 
@@ -206,6 +208,7 @@ test "improvisation preserves tie when not at last measure" {
     4,
     @music.KeySignature::c_major(),
     settings,
+    time_signature=@music.TimeSignature::default(),
     beats_per_measure=4.0,
   ) // 1 leading rest + 3 chord measures
 
