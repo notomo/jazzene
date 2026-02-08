@@ -55,6 +55,7 @@ priv struct ImprovisationState {
   incoming_tie : TieContext?
   incoming_stamina : Int
   incoming_last_midi : @music.MidiNumber?
+  incoming_phrase : Int?
 }
 
 ///|
@@ -83,6 +84,7 @@ pub fn improvisation(
     incoming_tie: None,
     incoming_stamina: settings.stamina_initial,
     incoming_last_midi: None,
+    incoming_phrase: None,
   }
   let final_state = Array::makei(measure_count, fn(i) { i })
     .iter()
@@ -99,6 +101,7 @@ pub fn improvisation(
         beats_per_measure,
         incoming_stamina: state.incoming_stamina,
         incoming_last_midi: state.incoming_last_midi,
+        incoming_phrase: state.incoming_phrase,
       })
       state.measures.push(@music.Measure::{
         chords: measure_chords,
@@ -112,6 +115,7 @@ pub fn improvisation(
         incoming_tie: result.outgoing_tie,
         incoming_stamina: result.outgoing_stamina,
         incoming_last_midi: result.outgoing_last_midi,
+        incoming_phrase: result.outgoing_phrase,
       }
     })
   remove_dangling_tie(final_state.measures, final_state.incoming_tie)

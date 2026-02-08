@@ -7,6 +7,13 @@ pub(all) struct ChordSegment {
 } derive(Eq, Show)
 
 ///|
+/// Phrase state for phrase-based note generation
+priv enum PhraseState {
+  Playing(Int) // remaining notes in phrase (including current)
+  Resting // must insert rest, then start new phrase
+}
+
+///|
 /// Context passed to MeasureGenerator
 pub struct MeasureContext {
   chords : Array[ChordSegment] // Chord segments within this measure
@@ -16,6 +23,7 @@ pub struct MeasureContext {
   beats_per_measure : Double
   incoming_stamina : Int // Stamina from previous measure
   incoming_last_midi : @music.MidiNumber? // Last note from previous measure
+  incoming_phrase : Int? // Phrase state from previous measure (Some(n) = playing, None = resting)
 }
 
 ///|
@@ -69,6 +77,7 @@ pub struct MeasureResult {
   outgoing_tie : TieContext? // Tie to next measure
   outgoing_stamina : Int // Stamina to pass to next measure
   outgoing_last_midi : @music.MidiNumber? // Last note to pass to next measure
+  outgoing_phrase : Int? // Phrase state to pass to next measure (Some(n) = playing, None = resting)
 }
 
 ///|
@@ -89,6 +98,9 @@ pub(all) struct Settings {
   scale_tone_weight_ratio : Int // 0-100, scale tone weight as % of chord tone weight
   tension_weight_ratio : Int // 0-100, tension tone weight as % of chord tone weight
   approach_weight_ratio : Int // 0-100, approach tone weight as % of chord tone weight
+  phrase_length_min : Int // Minimum notes in a phrase (default: 2)
+  phrase_length_max : Int // Maximum notes in a phrase (default: 8)
+  phrase_early_end_stamina : Int // Below this stamina, phrase may end early (default: 15)
 } derive(Eq, Show)
 
 ///|
@@ -106,6 +118,9 @@ pub fn Settings::default(seed : Int) -> Settings {
     scale_tone_weight_ratio: 30,
     tension_weight_ratio: 50,
     approach_weight_ratio: 20,
+    phrase_length_min: 2,
+    phrase_length_max: 8,
+    phrase_early_end_stamina: 15,
   }
 }
 
@@ -127,6 +142,7 @@ priv struct MeasureState {
   stamina : Int
   last_midi : @music.MidiNumber?
   last_was_rest : Bool
+  phrase : PhraseState
 }
 
 ///|
@@ -134,6 +150,7 @@ fn MeasureState::new(
   num_beats : Int,
   stamina : Int,
   last_midi : @music.MidiNumber?,
+  phrase : PhraseState,
 ) -> MeasureState {
   MeasureState::{
     measure_pos: 0.0,
@@ -141,6 +158,7 @@ fn MeasureState::new(
     stamina,
     last_midi,
     last_was_rest: false,
+    phrase,
   }
 }
 
@@ -148,6 +166,7 @@ fn MeasureState::new(
 fn MeasureState::add_note(
   self : MeasureState,
   note : @music.MeasureNote,
+  phrase : PhraseState,
 ) -> MeasureState {
   let beat_index = self.measure_pos.to_int()
   self.beat_notes[beat_index].push(note)
@@ -157,6 +176,7 @@ fn MeasureState::add_note(
     stamina: self.stamina,
     last_midi: self.last_midi,
     last_was_rest: note.midi is None, // rest if no MIDI
+    phrase,
   }
 }
 
@@ -196,10 +216,16 @@ fn generate_measure_notes(
   settings : Settings,
   random_int : (Int) -> Int,
 ) -> MeasureResult {
+  // Convert Int? to PhraseState
+  let incoming_phrase = match ctx.incoming_phrase {
+    Some(n) => Playing(n)
+    None => Resting
+  }
   let initial_state = MeasureState::new(
     ctx.beats_per_measure.to_int(),
     ctx.incoming_stamina,
     ctx.incoming_last_midi,
+    incoming_phrase,
   )
 
   // Handle incoming tie first
@@ -214,11 +240,17 @@ fn generate_measure_notes(
   let final_state = fill_remaining_measure(
     state_after_tie, ctx, settings, update_accidental, random_int,
   )
+  // Convert PhraseState back to Int?
+  let outgoing_phrase = match final_state.phrase {
+    Playing(n) => Some(n)
+    Resting => None
+  }
   MeasureResult::{
     beats: final_state.to_beats(),
     outgoing_tie,
     outgoing_stamina: final_state.stamina,
     outgoing_last_midi: final_state.last_midi,
+    outgoing_phrase,
   }
 }
 
@@ -250,18 +282,28 @@ fn process_incoming_tie(
       (false, false) => (@music.TieEnd, remaining) // Ends in this beat
     }
     let fitted = @music.NoteDuration::fit(consume).unwrap_or(@music.Eighth)
-    let new_state = state.add_note(@music.MeasureNote::{
-      midi: Some(midi.value),
-      duration: fitted,
-      accidental: None,
-      tie: Some(tie),
-    })
+    let new_state = state.add_note(
+      @music.MeasureNote::{
+        midi: Some(midi.value),
+        duration: fitted,
+        accidental: None,
+        tie: Some(tie),
+      },
+      state.phrase,
+    )
     continue remaining - fitted.to_beats(), new_state
   }
 }
 
 ///|
-/// Fill remaining measure with new notes
+/// Roll a new phrase length from settings
+fn roll_phrase_length(settings : Settings, random_int : (Int) -> Int) -> Int {
+  let range = settings.phrase_length_max - settings.phrase_length_min + 1
+  settings.phrase_length_min + random_int(range)
+}
+
+///|
+/// Fill remaining measure with new notes using phrase-based generation
 fn fill_remaining_measure(
   state : MeasureState,
   ctx : MeasureContext,
@@ -282,70 +324,119 @@ fn fill_remaining_measure(
     }
     // Get chord at current beat position
     let chord = ctx.chord_at(state.measure_pos)
-    let (midi_opt, weights) = match
-      decide_midi_number(
-        chord,
-        ctx.key,
-        state.last_midi,
-        state.stamina,
-        settings.stamina_max,
-        state.last_was_rest,
-        settings.rest_probability,
-        settings.scale_tone_weight_ratio,
-        settings.tension_weight_ratio,
-        settings.approach_weight_ratio,
-        random_int,
-      ) {
-      Some(midi) => (Some(midi), settings.note_duration_weights)
-      None => (None, settings.rest_duration_weights)
-    }
-    match random_duration_within(remaining, weights, random_int) {
-      Some(duration) => {
-        // Update stamina based on note or rest
-        let (new_stamina, new_last_midi) = match midi_opt {
-          Some(midi) => {
-            // Playing a note: consume cost + passive recovery
-            let cost = match state.last_midi {
-              Some(prev) => interval_cost(prev, midi)
-              None => 0 // First note has no cost
-            }
-            let stamina = @cmp.maximum(
-              0,
-              @cmp.minimum(
-                state.stamina - cost + settings.stamina_passive_recovery,
-                settings.stamina_max,
-              ),
-            )
-            (stamina, Some(midi))
-          }
-          None => {
-            // Rest: recover stamina based on duration
+    match state.phrase {
+      Resting =>
+        // Emit a rest, then roll a new phrase
+        match
+          random_duration_within(
+            remaining,
+            settings.rest_duration_weights,
+            random_int,
+          ) {
+          Some(duration) => {
             let recovery = (duration.to_beats() *
             settings.stamina_recovery_per_beat.to_double()).to_int()
-            let stamina = @cmp.minimum(
+            let new_stamina = @cmp.minimum(
               state.stamina + recovery,
               settings.stamina_max,
             )
-            (stamina, state.last_midi)
+            let beat_index = state.measure_pos.to_int()
+            state.beat_notes[beat_index].push(@music.MeasureNote::{
+              midi: None,
+              duration,
+              accidental: None,
+              tie: None,
+            })
+            let new_phrase_len = roll_phrase_length(settings, random_int)
+            continue MeasureState::{
+                measure_pos: state.measure_pos + duration.to_beats(),
+                beat_notes: state.beat_notes,
+                stamina: new_stamina,
+                last_midi: state.last_midi,
+                last_was_rest: true,
+                phrase: Playing(new_phrase_len),
+              }
           }
+          None => break state
         }
-        let beat_index = state.measure_pos.to_int()
-        let is_rest = midi_opt is None
-        state.beat_notes[beat_index].push(@music.MeasureNote::{
-          midi: midi_opt.map(fn(m) { m.value }),
-          duration,
-          accidental: midi_opt.bind(update_accidental),
-          tie: None,
-        })
-        continue MeasureState::{
-            measure_pos: state.measure_pos + duration.to_beats(),
-            beat_notes: state.beat_notes,
-            stamina: new_stamina,
-            last_midi: new_last_midi,
-            last_was_rest: is_rest,
+      Playing(notes_left) => {
+        // Check for early phrase termination due to low stamina
+        let should_end_early = notes_left > 1 &&
+          state.stamina < settings.phrase_early_end_stamina &&
+          {
+            let prob = effective_rest_probability(
+              settings.rest_probability,
+              state.stamina,
+              settings.stamina_max,
+              state.last_was_rest,
+            )
+            random_int(100) < prob
           }
+        guard not(should_end_early) else {
+          // Transition to resting (will emit rest on next iteration)
+          continue MeasureState::{ ..state, phrase: Resting }
+        }
+        // Force a note (no random rests within a phrase)
+        let midi_opt = decide_midi_number(
+          chord,
+          ctx.key,
+          state.last_midi,
+          state.stamina,
+          settings.stamina_max,
+          state.last_was_rest,
+          0, // rest_probability = 0 to force note
+          settings.scale_tone_weight_ratio,
+          settings.tension_weight_ratio,
+          settings.approach_weight_ratio,
+          random_int,
+        )
+        match midi_opt {
+          Some(midi) =>
+            match
+              random_duration_within(
+                remaining,
+                settings.note_duration_weights,
+                random_int,
+              ) {
+              Some(duration) => {
+                let cost = match state.last_midi {
+                  Some(prev) => interval_cost(prev, midi)
+                  None => 0
+                }
+                let new_stamina = @cmp.maximum(
+                  0,
+                  @cmp.minimum(
+                    state.stamina - cost + settings.stamina_passive_recovery,
+                    settings.stamina_max,
+                  ),
+                )
+                let beat_index = state.measure_pos.to_int()
+                state.beat_notes[beat_index].push(@music.MeasureNote::{
+                  midi: Some(midi.value),
+                  duration,
+                  accidental: update_accidental(midi),
+                  tie: None,
+                })
+                let next_phrase = match notes_left {
+                  1 => Resting
+                  n => Playing(n - 1)
+                }
+                continue MeasureState::{
+                    measure_pos: state.measure_pos + duration.to_beats(),
+                    beat_notes: state.beat_notes,
+                    stamina: new_stamina,
+                    last_midi: Some(midi),
+                    last_was_rest: false,
+                    phrase: next_phrase,
+                  }
+              }
+              None => break state
+            }
+          None =>
+            // Shouldn't happen with rest_probability=0, but handle gracefully
+            break state
+        }
       }
-      None => break state
     }
   }
 }

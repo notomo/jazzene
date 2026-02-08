@@ -93,6 +93,7 @@ test "MeasureContext::chord_at returns correct chord for position" {
     beats_per_measure: 4.0,
     incoming_stamina: 50,
     incoming_last_midi: None,
+    incoming_phrase: None,
   }
   // Beat 0 should be first chord
   assert_eq(ctx.chord_at(0.0).root, @music.C)
@@ -133,6 +134,7 @@ test "improvisation removes dangling tie at last measure" {
           outgoing_tie: None,
           outgoing_stamina: ctx.incoming_stamina,
           outgoing_last_midi: Some(tie_ctx.midi),
+          outgoing_phrase: None,
         }
       None =>
         // Always produce a note that extends beyond the measure (TieStart)
@@ -153,6 +155,7 @@ test "improvisation removes dangling tie at last measure" {
           outgoing_tie: Some(TieContext::{ midi: midi60, remaining_beats: 2.0 }),
           outgoing_stamina: ctx.incoming_stamina,
           outgoing_last_midi: Some(midi60),
+          outgoing_phrase: None,
         }
     }
   }
@@ -211,6 +214,7 @@ test "improvisation preserves tie when not at last measure" {
           outgoing_tie: None,
           outgoing_stamina: ctx.incoming_stamina,
           outgoing_last_midi: Some(midi62),
+          outgoing_phrase: None,
         }
       None =>
         if call_count.val == 2 {
@@ -235,6 +239,7 @@ test "improvisation preserves tie when not at last measure" {
             }),
             outgoing_stamina: ctx.incoming_stamina,
             outgoing_last_midi: Some(midi60),
+            outgoing_phrase: None,
           }
         } else {
           // Leading rest measure
@@ -255,6 +260,7 @@ test "improvisation preserves tie when not at last measure" {
             outgoing_tie: None,
             outgoing_stamina: ctx.incoming_stamina,
             outgoing_last_midi: None,
+            outgoing_phrase: None,
           }
         }
     }
