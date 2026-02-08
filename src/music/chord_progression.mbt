@@ -28,6 +28,36 @@ pub fn Chord::tension_tones(self : Chord) -> Array[MidiNumber] {
 }
 
 ///|
+/// Get chromatic approach tones (half-step above and below each chord tone)
+/// Returns MIDI numbers that are NOT already chord tones
+pub fn Chord::approach_tones(self : Chord) -> Array[MidiNumber] {
+  let chord_pitch_classes : Array[Int] = self
+    .tones()
+    .map(fn(tone) { tone.pitch_class() })
+  self
+  .tones()
+  .iter()
+  .flat_map(fn(tone) {
+    // Half-step below and above each chord tone
+    [tone.value - 1, tone.value + 1]
+    .iter()
+    .filter_map(fn(v) {
+      match MidiNumber::new(v) {
+        None => None
+        Some(midi) =>
+          // Exclude if it's already a chord tone
+          if chord_pitch_classes.contains(midi.pitch_class()) {
+            None
+          } else {
+            Some(midi)
+          }
+      }
+    })
+  })
+  .collect()
+}
+
+///|
 /// Get diatonic scale tones that are NOT chord tones for the given key
 /// Returns non-chord scale degrees in octave 4
 pub fn Chord::scale_tones(

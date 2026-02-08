@@ -28,6 +28,39 @@ test "Chord::scale_tones returns non-chord diatonic tones for Dm7 in C" {
 }
 
 ///|
+test "Chord::approach_tones returns chromatic half-steps around chord tones for Cmaj7" {
+  let chord = @music.Chord::{ root: @music.C, quality: @music.Major7 }
+  let approach = chord.approach_tones()
+  // Cmaj7 chord tones: C(60), E(64), G(67), B(71)
+  // Approach tones (half-step below/above, excluding chord tones):
+  //   C: B(59) is chord tone → excluded, Db(61) ✓
+  //   E: Eb(63) ✓, F(65) ✓
+  //   G: Gb(66) ✓, Ab(68) ✓
+  //   B: Bb(70) ✓, C(72) is chord tone → excluded
+  let pitch_classes = approach.map(fn(m) { m.pitch_class() })
+  inspect(pitch_classes, content="[1, 3, 5, 6, 8, 10]")
+  // Verify none are chord tones
+  let chord_pcs = chord.tones().map(fn(m) { m.pitch_class() })
+  for pc in pitch_classes {
+    assert_false(chord_pcs.contains(pc))
+  }
+}
+
+///|
+test "Chord::approach_tones returns chromatic half-steps around chord tones for Dm7" {
+  let chord = @music.Chord::{ root: @music.D, quality: @music.Minor7 }
+  let approach = chord.approach_tones()
+  // Dm7 chord tones: D(62), F(65), A(69), C(72)
+  // Approach tones:
+  //   D: Db(61) ✓, Eb(63) ✓
+  //   F: E(64) ✓, Gb(66) ✓
+  //   A: Ab(68) ✓, Bb(70) ✓
+  //   C: B(71) ✓, Db(73) ✓ (but same pc as 61)
+  let pitch_classes = approach.map(fn(m) { m.pitch_class() })
+  inspect(pitch_classes, content="[1, 3, 4, 6, 8, 10, 11, 1]")
+}
+
+///|
 test "create_chord_segments evenly distributes chords" {
   let chords = [
     @music.Chord::{ root: @music.C, quality: @music.Major7 },

@@ -88,6 +88,7 @@ pub(all) struct Settings {
   stamina_passive_recovery : Int // Passive recovery after playing note (e.g., 5)
   scale_tone_weight_ratio : Int // 0-100, scale tone weight as % of chord tone weight
   tension_weight_ratio : Int // 0-100, tension tone weight as % of chord tone weight
+  approach_weight_ratio : Int // 0-100, approach tone weight as % of chord tone weight
 } derive(Eq, Show)
 
 ///|
@@ -104,6 +105,7 @@ pub fn Settings::default(seed : Int) -> Settings {
     stamina_passive_recovery: 5,
     scale_tone_weight_ratio: 30,
     tension_weight_ratio: 50,
+    approach_weight_ratio: 20,
   }
 }
 
@@ -291,6 +293,7 @@ fn fill_remaining_measure(
         settings.rest_probability,
         settings.scale_tone_weight_ratio,
         settings.tension_weight_ratio,
+        settings.approach_weight_ratio,
         random_int,
       ) {
       Some(midi) => (Some(midi), settings.note_duration_weights)
@@ -393,6 +396,22 @@ fn get_extended_tension_tones(chord : @music.Chord) -> Array[@music.MidiNumber] 
 }
 
 ///|
+/// Get extended approach tones (chromatic half-step above/below chord tones) across multiple octaves
+fn get_extended_approach_tones(
+  chord : @music.Chord,
+) -> Array[@music.MidiNumber] {
+  [-1, 0, 1]
+  .iter()
+  .flat_map(fn(octave_offset) {
+    chord
+    .approach_tones()
+    .iter()
+    .filter_map(fn(tone) { tone.shift_octave(octave_offset) })
+  })
+  .collect()
+}
+
+///|
 /// Calculate effective rest probability based on stamina and previous note
 /// High stamina → low rest probability (want to play)
 /// Low stamina → high rest probability (need to rest)
@@ -426,6 +445,7 @@ fn decide_midi_number(
   rest_probability : Int,
   scale_tone_weight_ratio : Int,
   tension_weight_ratio : Int,
+  approach_weight_ratio : Int,
   random_int : (Int) -> Int,
 ) -> @music.MidiNumber? {
   let actual_rest_prob = effective_rest_probability(
@@ -435,6 +455,7 @@ fn decide_midi_number(
   let chord_tones = get_extended_tones(chord)
   let tension_tones = get_extended_tension_tones(chord)
   let scale_tones = get_extended_scale_tones(chord, key)
+  let approach_tones = get_extended_approach_tones(chord)
   match last_midi {
     Some(prev) => {
       // Calculate weights for chord tones
@@ -468,7 +489,21 @@ fn decide_midi_number(
           (@cmp.maximum(1, weight), tone)
         })
         .collect()
-      let weighted_tones = weighted_chord + weighted_tension + weighted_scale
+      // Calculate weights for approach tones (chromatic half-steps to chord tones)
+      let weighted_approach : Array[(Int, @music.MidiNumber)] = approach_tones
+        .iter()
+        .map(fn(tone) {
+          let cost = interval_cost(prev, tone)
+          let weight = note_selection_weight(stamina, cost) *
+            approach_weight_ratio /
+            100
+          (@cmp.maximum(1, weight), tone)
+        })
+        .collect()
+      let weighted_tones = weighted_chord +
+        weighted_tension +
+        weighted_scale +
+        weighted_approach
       let total = weighted_tones
         .iter()
         .fold(init=0, fn(acc, pair) { acc + pair.0 })
