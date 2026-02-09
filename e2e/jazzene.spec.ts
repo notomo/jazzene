@@ -63,9 +63,9 @@ test.describe("Jazzene - Jazz Improvisation Web App", () => {
     const paramJazzene = await openJazzenePage({ page, queryParams: params });
 
     await expect(paramJazzene.getKeySelect()).toHaveValue("D");
-    await expect(paramJazzene.getBpmInput()).toHaveValue("140");
-    await expect(paramJazzene.getSeedInput()).toHaveValue("42");
-    await expect(paramJazzene.getMeasuresInput()).toHaveValue("16");
+    await expect(paramJazzene.getBpmInput()).toHaveText("140");
+    await expect(paramJazzene.getSeedInput()).toHaveText("42");
+    await expect(paramJazzene.getMeasuresInput()).toHaveText("16");
   });
 
   test("should change playback position when clicking a measure", async () => {
