@@ -898,6 +898,9 @@ fn generate_triplet_group(
   notes_left : Int,
 ) -> MeasureState {
   let triplet_duration = @music.EighthTriplet
+  // Remember the start position so we can snap to exact integer after 3 triplets
+  // (avoids floating-point drift from 1/3 + 1/3 + 1/3 != 1.0)
+  let start_pos = state.measure_pos
   let mut current_state = state
   for i = 0; i < 3; i = i + 1 {
     let current_chord = ctx.chord_at(current_state.measure_pos)
@@ -936,8 +939,14 @@ fn generate_triplet_group(
         } else {
           Playing(remaining_after)
         }
+        // After the last triplet, snap to exact integer to avoid floating-point drift
+        let new_pos = if i == 2 {
+          start_pos + 1.0
+        } else {
+          current_state.measure_pos + triplet_duration.to_beats()
+        }
         current_state = MeasureState::{
-          measure_pos: current_state.measure_pos + triplet_duration.to_beats(),
+          measure_pos: new_pos,
           beat_notes: current_state.beat_notes,
           stamina: new_stamina,
           last_midi: Some(midi),
