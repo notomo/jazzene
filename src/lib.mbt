@@ -118,11 +118,12 @@ fn make_measures(
       start_offset=1,
     )
     |> music_measures => {
-      let leading_rest = @generator.leading_rest_measure()
+      let leading_rest = @generator.leading_rest_measure(beats_per_measure~)
       let trailing_rest_start = (measure_count.get() - 1).to_double() *
         @music.ms_per_measure(bpm.get(), beats_per_measure~)
       let trailing_rest = @generator.trailing_rest_measure(
         start_time=@music.Duration::from_milliseconds(trailing_rest_start),
+        beats_per_measure~,
       )
       measures.set(leading_rest + music_measures + trailing_rest)
     }

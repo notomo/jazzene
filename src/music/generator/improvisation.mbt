@@ -1,20 +1,15 @@
 ///|
 /// Create a leading rest measure (empty measure at the beginning)
-pub fn leading_rest_measure() -> Array[@music.Measure] {
+pub fn leading_rest_measure(
+  beats_per_measure~ : Double,
+) -> Array[@music.Measure] {
   [
     @music.Measure::{
       chords: [],
       beats: [
         @music.Beat::{
           count: 0,
-          notes: [
-            @music.MeasureNote::{
-              midi: None,
-              duration: Whole,
-              accidental: None,
-              tie: None,
-            },
-          ],
+          notes: rest_notes_for_beats(beats_per_measure),
         },
       ],
       start_time: @music.Duration::from_milliseconds(0.0),
@@ -26,6 +21,7 @@ pub fn leading_rest_measure() -> Array[@music.Measure] {
 /// Create a trailing rest measure (empty measure at the end)
 pub fn trailing_rest_measure(
   start_time~ : @music.Duration,
+  beats_per_measure~ : Double,
 ) -> Array[@music.Measure] {
   [
     @music.Measure::{
@@ -33,19 +29,34 @@ pub fn trailing_rest_measure(
       beats: [
         @music.Beat::{
           count: 0,
-          notes: [
-            @music.MeasureNote::{
-              midi: None,
-              duration: Whole,
-              accidental: None,
-              tie: None,
-            },
-          ],
+          notes: rest_notes_for_beats(beats_per_measure),
         },
       ],
       start_time,
     },
   ]
+}
+
+///|
+/// Create rest notes that fill the given number of beats.
+/// Uses the largest fitting duration repeatedly to fill the measure.
+fn rest_notes_for_beats(beats : Double) -> Array[@music.MeasureNote] {
+  let notes : Array[@music.MeasureNote] = []
+  for remaining = beats {
+    guard remaining > 0.001 else { break notes }
+    match @music.NoteDuration::fit(remaining) {
+      Some(duration) => {
+        notes.push(@music.MeasureNote::{
+          midi: None,
+          duration,
+          accidental: None,
+          tie: None,
+        })
+        continue remaining - duration.to_beats()
+      }
+      None => break notes
+    }
+  }
 }
 
 ///|
