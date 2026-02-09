@@ -235,9 +235,9 @@ fn render_beam_group(
   let points = "\{first_x},\{first_top} \{last_x},\{last_top} \{last_x},\{last_bottom} \{first_x},\{first_bottom}"
   nodes.push(@luna_dom.svg_polygon(points~, stroke="none"))
   // Render triplet "3" label if all notes in the group are EighthTriplet
-  let is_triplet = group
-    .iter()
-    .all(fn(idx) { positioned[idx].1.duration is EighthTriplet })
+  // and the group has exactly 3 notes
+  let is_triplet = group.length() == 3 &&
+    group.iter().all(fn(idx) { positioned[idx].1.duration is EighthTriplet })
   if is_triplet {
     let center_x = (first_x + last_x) / 2.0
     let label_y = if stem_up {

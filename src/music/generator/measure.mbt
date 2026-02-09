@@ -600,7 +600,12 @@ fn fill_remaining_measure(
           continue MeasureState::{ ..state, phrase: Resting }
         }
         // Try to generate a triplet group (3 eighth triplets = 1 beat)
-        let use_triplet = notes_left >= 3 &&
+        // Only start triplets on integer beat positions
+        let on_beat = (state.measure_pos -
+          state.measure_pos.to_int().to_double()).abs() <
+          0.01
+        let use_triplet = on_beat &&
+          notes_left >= 3 &&
           remaining >= 1.0 - 0.001 &&
           random_int(100) < settings.triplet_probability
         guard not(use_triplet) else {
