@@ -54,8 +54,8 @@ pub fn get_initial_key() -> @music.KeySignature {
 /// Read the initial loop enabled state from the URL query parameter
 pub fn get_initial_loop_enabled() -> Bool {
   match get_query_param("loop") {
-    Some("true") => true
-    _ => false
+    Some("false") => false
+    _ => true
   }
 }
 
