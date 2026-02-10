@@ -42,7 +42,16 @@ extern "js" fn ffi_create_noise_buffer(
   #|   const len = Math.ceil(sr * dur);
   #|   const buf = ctx.createBuffer(1, len, sr);
   #|   const data = buf.getChannelData(0);
-  #|   for (let i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
+  #|   let seed = 0x12345678;
+  #|   for (let i = 0; i < len; i++) {
+  #|     seed ^= seed << 13;
+  #|     seed ^= seed >> 17;
+  #|     seed ^= seed << 5;
+  #|     data[i] = Math.max(-0.8, Math.min(0.8, seed / 0x7fffffff));
+  #|   }
+  #|   const fade = 64;
+  #|   for (let i = 0; i < fade && i < len; i++) data[i] *= i / fade;
+  #|   for (let i = 0; i < fade && i < len; i++) data[len - 1 - i] *= i / fade;
   #|   return buf;
   #| }
 
