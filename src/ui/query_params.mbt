@@ -51,6 +51,15 @@ pub fn get_initial_key() -> @music.KeySignature {
 }
 
 ///|
+/// Read the initial chord progression from the URL query parameter
+pub fn get_initial_chords() -> String {
+  match get_query_param("chords") {
+    Some(value) => value
+    None => "IIm7 | V7 | Imaj7 | IVmaj7"
+  }
+}
+
+///|
 /// Read the initial loop enabled state from the URL query parameter
 pub fn get_initial_loop_enabled() -> Bool {
   match get_query_param("loop") {

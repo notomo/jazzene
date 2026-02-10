@@ -77,6 +77,10 @@ export async function openJazzenePage({
     getSeedInput: () => page.getByLabel("seed"),
     getMeasuresInput: () => page.getByLabel("measures"),
     getKeySelect: () => page.getByLabel("key", { exact: true }),
+    getDisplayModeSelect: () => page.getByLabel("display mode"),
+    getLoopCheckbox: () => page.getByLabel("enable A-B loop"),
+    getLoopAInput: () => page.getByLabel("A loop time"),
+    getLoopBInput: () => page.getByLabel("B loop time"),
   };
 
   return jazzenePage;

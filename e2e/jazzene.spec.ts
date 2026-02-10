@@ -59,13 +59,28 @@ test.describe("Jazzene - Jazz Improvisation Web App", () => {
   });
 
   test("should reflect query parameters in controls", async ({ page }) => {
-    const params = { key: "D", bpm: "140", seed: "42", measures: "16" };
+    const params = {
+      key: "D",
+      bpm: "140",
+      seed: "42",
+      measures: "16",
+      chords: "IIIm7 | VIm7",
+      view: "sheet",
+      loop: "false",
+      loop_a: "0:05",
+      loop_b: "0:10",
+    };
     const paramJazzene = await openJazzenePage({ page, queryParams: params });
 
     await expect(paramJazzene.getKeySelect()).toHaveValue("D");
     await expect(paramJazzene.getBpmInput()).toHaveText("140");
     await expect(paramJazzene.getSeedInput()).toHaveText("42");
     await expect(paramJazzene.getMeasuresInput()).toHaveText("16");
+    await expect(paramJazzene.getChordInput()).toHaveValue("IIIm7 | VIm7");
+    await expect(paramJazzene.getDisplayModeSelect()).toHaveValue("Sheet");
+    await expect(paramJazzene.getLoopCheckbox()).not.toBeChecked();
+    await expect(paramJazzene.getLoopAInput()).toHaveValue("0:05");
+    await expect(paramJazzene.getLoopBInput()).toHaveValue("0:10");
   });
 
   test("should change playback position when clicking a measure", async () => {
