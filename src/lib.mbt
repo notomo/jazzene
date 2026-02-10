@@ -41,7 +41,7 @@ fn main {
     @music.generate_drum_sounds(
       bpm.get(),
       measure_count.get(),
-      beats_per_measure=time_signature.get().beats_per_measure(),
+      time_signature=time_signature.get(),
       swing=swing.get(),
     )
     |> drum_list => { drum_sounds.set(drum_list) }

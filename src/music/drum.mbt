@@ -44,27 +44,47 @@ priv struct DrumPattern {
 }
 
 ///|
-/// Basic jazz drum pattern for one measure
-/// - Ride cymbal (HiHat): every beat (quarter notes)
-/// - Hi-hat foot (Snare): beats 2 and 4
-/// - Kick: beats 1 and 3 (soft)
-fn DrumPattern::jazz_basic(beats_per_measure : Double) -> DrumPattern {
-  let hits : Array[DrumHit] = []
-  let beat_count = beats_per_measure.to_int()
-  for i = 0; i < beat_count; i = i + 1 {
-    let beat = i.to_double()
-    // Ride on every beat
-    hits.push(DrumHit::{ voice: HiHat, beat })
-    // Kick on odd beats (1, 3)
-    if i % 2 == 0 {
-      hits.push(DrumHit::{ voice: Kick, beat })
-    }
-    // Snare on even beats (2, 4)
-    if i % 2 == 1 {
-      hits.push(DrumHit::{ voice: Snare, beat })
-    }
+/// Basic jazz 4/4 drum pattern
+/// - HiHat: every beat
+/// - Kick: beats 1, 3
+/// - Snare: beats 2, 4
+fn DrumPattern::jazz_4_4() -> DrumPattern {
+  DrumPattern::{
+    hits: [
+      DrumHit::{ voice: HiHat, beat: 0.0 },
+      DrumHit::{ voice: Kick, beat: 0.0 },
+      DrumHit::{ voice: HiHat, beat: 1.0 },
+      DrumHit::{ voice: Snare, beat: 1.0 },
+      DrumHit::{ voice: HiHat, beat: 2.0 },
+      DrumHit::{ voice: Kick, beat: 2.0 },
+      DrumHit::{ voice: HiHat, beat: 3.0 },
+      DrumHit::{ voice: Snare, beat: 3.0 },
+    ],
   }
-  DrumPattern::{ hits, }
+}
+
+///|
+/// Jazz waltz 3/4 drum pattern
+/// - Kick: beat 1
+/// - HiHat: beats 2, 3
+fn DrumPattern::jazz_waltz() -> DrumPattern {
+  DrumPattern::{
+    hits: [
+      DrumHit::{ voice: Kick, beat: 0.0 },
+      DrumHit::{ voice: HiHat, beat: 1.0 },
+      DrumHit::{ voice: HiHat, beat: 2.0 },
+    ],
+  }
+}
+
+///|
+fn DrumPattern::for_time_signature(
+  time_signature : TimeSignature,
+) -> DrumPattern {
+  match (time_signature.numerator, time_signature.denominator) {
+    (3, 4) => DrumPattern::jazz_waltz()
+    _ => DrumPattern::jazz_4_4()
+  }
 }
 
 ///|
@@ -73,12 +93,13 @@ fn DrumPattern::jazz_basic(beats_per_measure : Double) -> DrumPattern {
 pub fn generate_drum_sounds(
   bpm : Int,
   measure_count : Int,
-  beats_per_measure~ : Double,
+  time_signature~ : TimeSignature,
   swing? : SwingConfig = SwingConfig::straight(),
 ) -> Array[NoteValueSound] {
+  let beats_per_measure = time_signature.beats_per_measure()
   let beat_duration_ms = ms_per_beat(bpm)
   let measure_duration_ms = ms_per_measure(bpm, beats_per_measure~)
-  let pattern = DrumPattern::jazz_basic(beats_per_measure)
+  let pattern = DrumPattern::for_time_signature(time_signature)
   let drum_note_duration = Duration::from_milliseconds(50.0)
   Array::makei(measure_count, fn(measure_index) {
     let measure_start_ms = measure_index.to_double() * measure_duration_ms
