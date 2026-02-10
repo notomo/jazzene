@@ -69,6 +69,7 @@ pub fn render(
         [
           @luna_dom.div([
             @luna_dom.div(class="flex gap-4 items-center p-1", [
+              time_signature_select(time_signature),
               key_select(key),
               chord_progression_input(raw_chord_progression, chord_parse_error),
               seed_input(seed),

@@ -66,3 +66,26 @@ pub fn TimeSignature::beat_group_remaining(
   }
   group_end - position
 }
+
+///|
+/// Returns all supported time signatures
+pub fn TimeSignature::all() -> Array[TimeSignature] {
+  [
+    TimeSignature::{ numerator: 4, denominator: 4 },
+    TimeSignature::{ numerator: 3, denominator: 4 },
+  ]
+}
+
+///|
+pub fn TimeSignature::to_string(self : TimeSignature) -> String {
+  self.numerator.to_string() + "/" + self.denominator.to_string()
+}
+
+///|
+pub fn TimeSignature::from_string(s : String) -> Result[TimeSignature, String] {
+  match s {
+    "4/4" => Ok(TimeSignature::{ numerator: 4, denominator: 4 })
+    "3/4" => Ok(TimeSignature::{ numerator: 3, denominator: 4 })
+    _ => Err("Unknown time signature: " + s)
+  }
+}

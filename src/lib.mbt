@@ -6,7 +6,7 @@ fn main {
   let seed = @signal.signal(@ui.get_initial_int("seed", 0))
   let measure_count = @signal.signal(@ui.get_initial_int("measures", 8))
   let key = @signal.signal(@ui.get_initial_key())
-  let time_signature = @signal.signal(@music.TimeSignature::default())
+  let time_signature = @signal.signal(@ui.get_initial_time_signature())
   let chord_parse_error : @signal.Signal[String?] = @signal.signal(None)
   let measure_chords = @signal.memo(fn() {
     match @music.parse_measure_progression(raw_chord_progression.get()) {

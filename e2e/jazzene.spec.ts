@@ -61,6 +61,7 @@ test.describe("Jazzene - Jazz Improvisation Web App", () => {
   test("should reflect query parameters in controls", async ({ page }) => {
     const params = {
       key: "D",
+      time: "3/4",
       bpm: "140",
       seed: "42",
       measures: "16",
@@ -72,6 +73,7 @@ test.describe("Jazzene - Jazz Improvisation Web App", () => {
     };
     const paramJazzene = await openJazzenePage({ page, queryParams: params });
 
+    await expect(paramJazzene.getTimeSignatureSelect()).toHaveValue("3/4");
     await expect(paramJazzene.getKeySelect()).toHaveValue("D");
     await expect(paramJazzene.getBpmInput()).toHaveText("140");
     await expect(paramJazzene.getSeedInput()).toHaveText("42");

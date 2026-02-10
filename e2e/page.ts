@@ -81,6 +81,7 @@ export async function openJazzenePage({
     getLoopCheckbox: () => page.getByLabel("enable A-B loop"),
     getLoopAInput: () => page.getByLabel("A loop time"),
     getLoopBInput: () => page.getByLabel("B loop time"),
+    getTimeSignatureSelect: () => page.getByLabel("time signature"),
   };
 
   return jazzenePage;

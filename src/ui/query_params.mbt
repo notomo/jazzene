@@ -69,6 +69,19 @@ pub fn get_initial_loop_enabled() -> Bool {
 }
 
 ///|
+/// Read the initial time signature from the URL query parameter, defaulting to 4/4
+pub fn get_initial_time_signature() -> @music.TimeSignature {
+  match get_query_param("time") {
+    Some(value) =>
+      match @music.TimeSignature::from_string(value) {
+        Ok(ts) => ts
+        Err(_) => @music.TimeSignature::default()
+      }
+    None => @music.TimeSignature::default()
+  }
+}
+
+///|
 /// Read the initial loop A time from the URL query parameter
 pub fn get_initial_loop_a_time() -> @music.Duration {
   match get_query_param("loop_a") {
