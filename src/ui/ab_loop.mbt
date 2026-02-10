@@ -45,7 +45,7 @@ fn ab_loop(
       None => ()
     }
   }
-  @luna_dom.div(class="flex gap-2 items-center text-sm text-slate-300", [
+  @luna_dom.div(class="flex gap-2 items-center text-sm text-slate-400", [
     @luna_dom.input(
       type_="checkbox",
       class="w-4 h-4 accent-blue-500 cursor-pointer",
@@ -57,7 +57,7 @@ fn ab_loop(
       @luna_dom.text("A:"),
       @luna_dom.input(
         type_="text",
-        class="w-16 px-1 py-0.5 bg-slate-700 text-slate-100 rounded border border-slate-600 focus:border-blue-500 focus:outline-none text-sm",
+        class="w-16 px-1 py-0.5 bg-slate-900 text-slate-100 rounded border border-slate-600 focus:border-blue-500 focus:outline-none text-sm",
         attrs=[
           ("aria-label", @luna_dom.Attr::AttrString("A loop time")),
           ("placeholder", @luna_dom.Attr::AttrString("0:00")),
@@ -70,7 +70,7 @@ fn ab_loop(
       @luna_dom.text("B:"),
       @luna_dom.input(
         type_="text",
-        class="w-16 px-1 py-0.5 bg-slate-700 text-slate-100 rounded border border-slate-600 focus:border-blue-500 focus:outline-none text-sm",
+        class="w-16 px-1 py-0.5 bg-slate-900 text-slate-100 rounded border border-slate-600 focus:border-blue-500 focus:outline-none text-sm",
         attrs=[
           ("aria-label", @luna_dom.Attr::AttrString("B loop time")),
           ("placeholder", @luna_dom.Attr::AttrString("0:00")),
