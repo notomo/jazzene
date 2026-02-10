@@ -2,10 +2,10 @@ import {
   "moonbitlang/core/cmp",
   "mizchi/luna/signal",
   "mizchi/signals",
-  "internal/jazzene/music" as @music,
-  "internal/jazzene/music/generator" as @generator,
-  "internal/jazzene/audio" as @audio,
-  "internal/jazzene/ui" as @ui,
+  "internal/jazzene/music" @music,
+  "internal/jazzene/music/generator" @generator,
+  "internal/jazzene/audio" @audio,
+  "internal/jazzene/ui" @ui,
 }
 
 options(

@@ -1,5 +1,5 @@
 import {
-  "internal/jazzene/music" as @music,
+  "internal/jazzene/music" @music,
   "moonbitlang/core/cmp",
   "moonbitlang/core/random",
 }

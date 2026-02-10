@@ -1,6 +1,6 @@
 import {
-  "internal/jazzene/music" as @music,
-  "internal/jazzene/audio/web_audio_api" as @web_audio,
+  "internal/jazzene/music" @music,
+  "internal/jazzene/audio/web_audio_api" @web_audio,
 }
 
 options(

@@ -2,13 +2,13 @@ import {
   "moonbitlang/core/cmp",
   "mizchi/luna/signal",
   "mizchi/signals",
-  "mizchi/luna/dom/element" as @luna_dom,
-  "mizchi/js/core" as @js,
-  "mizchi/js/builtins/global" as @js_global,
-  "internal/jazzene/music" as @music,
-  "mizchi/js/browser/dom" as @js_dom,
-  "internal/jazzene/ui/sheet" as @sheet,
-  "internal/jazzene/ui/piano_roll" as @piano_roll,
+  "mizchi/luna/dom/element" @luna_dom,
+  "mizchi/js/core" @js,
+  "mizchi/js/builtins/global" @js_global,
+  "internal/jazzene/music" @music,
+  "mizchi/js/browser/dom" @js_dom,
+  "internal/jazzene/ui/sheet" @sheet,
+  "internal/jazzene/ui/piano_roll" @piano_roll,
 }
 
 options(

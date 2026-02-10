@@ -8,6 +8,7 @@ export default defineConfig({
     moonbit({
       watch: true,
       showLogs: true,
+      mode: "debug",
     }),
     tailwindcss({}),
   ],

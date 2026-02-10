@@ -50,7 +50,7 @@ pub fn find_beam_groups(
       current_beat_index = -1
     }
     //
-  } else {
+  } nobreak {
     flush_beam_group(groups, current_group, positioned)
   }
   groups

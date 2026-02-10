@@ -586,7 +586,7 @@ fn fill_remaining_measure(
         // Check for early phrase termination due to low stamina
         let should_end_early = notes_left > 1 &&
           state.stamina < settings.phrase_early_end_stamina &&
-          {
+          ({
             let prob = effective_rest_probability(
               settings.rest_probability,
               state.stamina,
@@ -594,7 +594,7 @@ fn fill_remaining_measure(
               state.last_was_rest,
             )
             random_int(100) < prob
-          }
+          })
         guard not(should_end_early) else {
           // Transition to resting (will emit rest on next iteration)
           continue MeasureState::{ ..state, phrase: Resting }

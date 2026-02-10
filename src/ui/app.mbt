@@ -36,7 +36,6 @@ pub fn setup_loop(
 
     request_id.val = Some(@js_dom.window().requestAnimationFrame(loop_fn))
   })
-
 }
 
 ///|

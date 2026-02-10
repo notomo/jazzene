@@ -3,9 +3,9 @@ import {
   "moonbitlang/core/strconv",
 }
 
-import "wbtest" {
-  "internal/jazzene/test_helper" as @helper,
-}
+import {
+  "internal/jazzene/test_helper" @helper,
+} for "wbtest"
 
 options(
   "is-main": false,
