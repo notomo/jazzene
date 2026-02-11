@@ -8,6 +8,7 @@ pub fn note_display(
   time_signature : @signal.Signal[@music.TimeSignature],
 ) -> @luna_dom.DomNode {
   let { canvas, ctx } = create_canvas_context()
+  let resize_trigger = create_resize_trigger(canvas)
 
   // Pre-calculate note positions
   let note_positions = @signal.memo(fn() {
@@ -30,8 +31,9 @@ pub fn note_display(
   setup_wheel_seek(canvas, playback_position, total_duration)
   setup_drag_seek(canvas, playback_position, total_duration)
 
-  // Redraw when position or notes change
+  // Redraw when position, notes, or canvas size change
   let _ = @signal.effect(fn() {
+    let _ = resize_trigger.get()
     let (width, height) = update_canvas_dpi(canvas, ctx)
     draw_notes(
       ctx,
