@@ -1,17 +1,32 @@
 ///|
 extern "js" fn add_document_drag_listeners(
-  on_move : (@js_dom.MouseEvent) -> Unit,
-  on_up : (@js_dom.MouseEvent) -> Unit,
+  on_move : (Double) -> Unit,
+  on_up : () -> Unit,
 ) -> Unit =
   #|(onMove, onUp) => {
-  #|  const moveHandler = (e) => onMove(e);
-  #|  const upHandler = (e) => {
-  #|    onUp(e);
+  #|  const moveHandler = (e) => onMove(e.clientX);
+  #|  const upHandler = () => {
+  #|    onUp();
   #|    document.removeEventListener('mousemove', moveHandler);
   #|    document.removeEventListener('mouseup', upHandler);
   #|  };
   #|  document.addEventListener('mousemove', moveHandler);
   #|  document.addEventListener('mouseup', upHandler);
+  #|  const touchMoveHandler = (e) => {
+  #|    if (e.touches.length > 0) {
+  #|      e.preventDefault();
+  #|      onMove(e.touches[0].clientX);
+  #|    }
+  #|  };
+  #|  const touchEndHandler = () => {
+  #|    onUp();
+  #|    document.removeEventListener('touchmove', touchMoveHandler);
+  #|    document.removeEventListener('touchend', touchEndHandler);
+  #|    document.removeEventListener('touchcancel', touchEndHandler);
+  #|  };
+  #|  document.addEventListener('touchmove', touchMoveHandler, { passive: false });
+  #|  document.addEventListener('touchend', touchEndHandler);
+  #|  document.addEventListener('touchcancel', touchEndHandler);
   #|}
 
 ///|
@@ -54,10 +69,10 @@ fn spinbox(
       update_value(signal.get() - step)
     }
   }
-  let on_mousemove : (@js_dom.MouseEvent) -> Unit = fn(e) {
+  let on_drag_move : (Double) -> Unit = fn(client_x) {
     match drag_start_x.val {
       Some(start_x) => {
-        let delta = e.clientX - start_x
+        let delta = client_x - start_x
         let steps = (delta / 20.0).to_int()
         let new_value = drag_start_value.val + steps * step
         update_value(new_value)
@@ -65,21 +80,30 @@ fn spinbox(
       None => ()
     }
   }
-  let on_mouseup : (@js_dom.MouseEvent) -> Unit = fn(_) {
-    drag_start_x.val = None
+  let on_drag_end : () -> Unit = fn() { drag_start_x.val = None }
+
+  fn start_drag(client_x : Double) -> Unit {
+    drag_start_x.val = Some(client_x)
+    drag_start_value.val = signal.get()
+    add_document_drag_listeners(on_drag_move, on_drag_end)
   }
 
-  let on_mousedown : @luna_dom.MouseHandler = fn(e) {
-    drag_start_x.val = Some(e.clientX)
-    drag_start_value.val = signal.get()
-    add_document_drag_listeners(on_mousemove, on_mouseup)
+  let on_mousedown : @luna_dom.MouseHandler = fn(e) { start_drag(e.clientX) }
+  let on_touchstart : @luna_dom.TouchHandler = fn(e) {
+    if e.touches.length() > 0 {
+      e.preventDefault()
+      start_drag(e.touches[0].clientX)
+    }
   }
 
   let btn_class = "bg-blue-900/60 hover:bg-blue-800/70 border border-blue-700/50 rounded-lg w-9 py-1 text-lg text-blue-200 text-center cursor-pointer select-none"
 
   @luna_dom.div(
     class="flex items-center gap-2",
-    on=@luna_dom.events().wheel(on_wheel).mousedown(on_mousedown),
+    on=@luna_dom.events()
+      .wheel(on_wheel)
+      .mousedown(on_mousedown)
+      .touchstart(on_touchstart),
     [
       @luna_dom.span(
         class="text-base text-slate-400 mr-1 select-none cursor-ew-resize",
