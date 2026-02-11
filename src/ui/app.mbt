@@ -130,9 +130,11 @@ pub fn render(
         ],
       ),
       @luna_dom.div(
-        class="grid grid-cols-[1fr_auto_1fr] items-center px-3 py-1.5 bg-slate-800 border-t-2 border-slate-700",
+        class="grid grid-cols-[1fr_auto_1fr] items-stretch px-3 py-1.5 bg-slate-800 border-t-2 border-slate-700",
         [
-          @luna_dom.div(class="justify-self-start", [volume_input(volume)]),
+          @luna_dom.div(class="justify-self-start flex items-center", [
+            volume_input(volume),
+          ]),
           play_pause_button(is_playing),
           @luna_dom.div(class="flex items-center justify-between pl-4", [
             ab_loop(loop_a_measure, loop_b_measure, fn() { measure_count.get() }),
