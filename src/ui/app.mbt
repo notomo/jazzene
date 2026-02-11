@@ -79,7 +79,6 @@ pub fn render(
               play_pause_button(is_playing, playback_position, total_duration),
               volume_input(volume),
               @luna_dom.div(class="flex gap-2 w-full items-center", [
-                seek_bar(playback_position, total_duration),
                 ab_loop(loop_enabled, loop_a_time, loop_b_time, total_duration),
                 display_mode_select(display_mode),
               ]),

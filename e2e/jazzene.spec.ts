@@ -13,7 +13,6 @@ test.describe("Jazzene - Jazz Improvisation Web App", () => {
     await expect(jazzene.getPlayButton()).toBeEnabled();
     await expect(jazzene.getFallingNotes()).toBeVisible();
     await expect(jazzene.getLeadSheet()).toBeVisible();
-    await expect(jazzene.getSeekbar()).toBeEnabled();
   });
 
   test("should allow editing chord progression", async () => {
@@ -28,34 +27,6 @@ test.describe("Jazzene - Jazz Improvisation Web App", () => {
 
     await jazzene.stop();
     await expect(jazzene.getPlayButton()).toBeEnabled();
-  });
-
-  test("should update time display during playback", async () => {
-    await jazzene.play();
-
-    await jazzene.waitForPlayback(200);
-
-    const totalTime = await jazzene.getTimeDisplayText();
-    expect(totalTime).not.toContain("0:00 / 0:00"); // Should not be initial state
-  });
-
-  test("should update seekbar value during playback", async () => {
-    const initialValue = await jazzene.getSeekbarValue();
-
-    await jazzene.play();
-    await jazzene.waitForPlayback(100);
-
-    expect(parseInt(await jazzene.getSeekbarValue())).toBeGreaterThan(
-      parseInt(initialValue),
-    );
-  });
-
-  test("should restart from beginning when play is pressed after playback finishes", async () => {
-    await jazzene.setSeekbarValue("100");
-
-    await jazzene.play();
-    await jazzene.waitForPlayback(100);
-    await expect(jazzene.getStopButton()).toBeEnabled();
   });
 
   test("should reflect query parameters in controls", async ({ page }) => {
@@ -86,11 +57,9 @@ test.describe("Jazzene - Jazz Improvisation Web App", () => {
   });
 
   test("should change playback position when clicking a measure", async () => {
-    const initialValue = parseInt(await jazzene.getSeekbarValue());
-
+    await jazzene.play();
     await jazzene.clickMeasure(5);
 
-    const newValue = parseInt(await jazzene.getSeekbarValue());
-    expect(newValue).toBeGreaterThan(initialValue);
+    await expect(jazzene.getStopButton()).toBeEnabled();
   });
 });
