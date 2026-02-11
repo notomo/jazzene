@@ -101,7 +101,7 @@ pub fn render(
           @luna_dom.div(
             dyn_class=fn() {
               match display_mode.get() {
-                Sheet => "w-2/5 min-h-0"
+                Sheet => "w-4/5 min-h-0"
                 Sheet_PianoRoll => "flex-2 min-h-0"
                 PianoRoll => "hidden"
               }
