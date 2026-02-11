@@ -144,6 +144,7 @@ pub fn render(
   )
 
   disable_pinch_zoom()
+  request_wake_lock()
 
   @js_dom.document().getElementById("app")
   |> Option::map(fn(e) {
@@ -158,4 +159,15 @@ extern "js" fn disable_pinch_zoom() -> Unit =
   #|  document.addEventListener('touchmove', (e) => {
   #|    if (e.touches.length > 1) { e.preventDefault(); }
   #|  }, { passive: false });
+  #|}
+
+///|
+extern "js" fn request_wake_lock() -> Unit =
+  #|() => {
+  #|  if (!('wakeLock' in navigator)) return;
+  #|  const request = () => navigator.wakeLock.request('screen').catch(() => {});
+  #|  request();
+  #|  document.addEventListener('visibilitychange', () => {
+  #|    if (document.visibilityState === 'visible') request();
+  #|  });
   #|}
