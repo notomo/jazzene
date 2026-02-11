@@ -91,7 +91,6 @@ fn spinbox(
   let on_mousedown : @luna_dom.MouseHandler = fn(e) { start_drag(e.clientX) }
   let on_touchstart : @luna_dom.TouchHandler = fn(e) {
     if e.touches.length() > 0 {
-      e.preventDefault()
       start_drag(e.touches[0].clientX)
     }
   }
