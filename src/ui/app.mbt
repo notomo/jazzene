@@ -143,9 +143,19 @@ pub fn render(
     ],
   )
 
+  disable_pinch_zoom()
+
   @js_dom.document().getElementById("app")
   |> Option::map(fn(e) {
     @luna_dom.DomElement::from_dom(e) |> @luna_dom.render(app)
   })
   |> ignore
 }
+
+///|
+extern "js" fn disable_pinch_zoom() -> Unit =
+  #|() => {
+  #|  document.addEventListener('touchmove', (e) => {
+  #|    if (e.touches.length > 1) { e.preventDefault(); }
+  #|  }, { passive: false });
+  #|}
