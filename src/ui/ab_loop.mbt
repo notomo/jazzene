@@ -1,9 +1,5 @@
 ///|
-fn clamp(
-  min : @music.Duration,
-  value : @music.Duration,
-  max : @music.Duration,
-) -> @music.Duration {
+fn clamp_int(min : Int, value : Int, max : Int) -> Int {
   @cmp.minimum(@cmp.maximum(value, min), max)
 }
 
@@ -11,9 +7,9 @@ fn clamp(
 /// Render A-B loop control UI
 fn ab_loop(
   loop_enabled : @signal.Signal[Bool],
-  loop_a_time : @signal.Signal[@music.Duration],
-  loop_b_time : @signal.Signal[@music.Duration?],
-  total_duration : () -> @music.Duration,
+  loop_a_measure : @signal.Signal[Int],
+  loop_b_measure : @signal.Signal[Int?],
+  measure_count : () -> Int,
 ) -> @luna_dom.DomNode {
   let on_enabled_checkbox_input : @luna_dom.InputHandler = fn(e) {
     let checked = get_checkbox_checked(e)
@@ -21,28 +17,24 @@ fn ab_loop(
     set_query_param("loop", checked.to_string())
   }
 
-  let on_a_time_input : @luna_dom.InputHandler = fn(e) {
-    match @music.Duration::parse(get_input_value(e)) {
+  let on_a_input : @luna_dom.InputHandler = fn(e) {
+    match @js_global.parseInt(get_input_value(e)) {
       Some(new_a) => {
-        let b = loop_b_time.get().unwrap_or(total_duration())
-        let max_a = @cmp.minimum(b, total_duration())
-        let zero = @music.Duration::from_milliseconds(0.0)
-        let clamped = clamp(zero, new_a, max_a)
-        loop_a_time.set(clamped)
-        set_query_param("loop_a", clamped.format())
+        let max_a = loop_b_measure.get().unwrap_or(measure_count())
+        let clamped = clamp_int(1, new_a, max_a)
+        loop_a_measure.set(clamped)
+        set_query_param("loop_a", clamped.to_string())
       }
       None => ()
     }
   }
 
-  let on_b_time_input : @luna_dom.InputHandler = fn(e) {
-    match @music.Duration::parse(get_input_value(e)) {
+  let on_b_input : @luna_dom.InputHandler = fn(e) {
+    match @js_global.parseInt(get_input_value(e)) {
       Some(new_b) => {
-        let zero = @music.Duration::from_milliseconds(0.0)
-        let min_b = @cmp.maximum(loop_a_time.get(), zero)
-        let clamped = clamp(min_b, new_b, total_duration())
-        loop_b_time.set(Some(clamped))
-        set_query_param("loop_b", clamped.format())
+        let clamped = clamp_int(loop_a_measure.get(), new_b, measure_count())
+        loop_b_measure.set(Some(clamped))
+        set_query_param("loop_b", clamped.to_string())
       }
       None => ()
     }
@@ -59,30 +51,29 @@ fn ab_loop(
     @luna_dom.label(class="flex gap-1 items-center", [
       @luna_dom.text("A:"),
       @luna_dom.input(
-        type_="text",
+        type_="number",
         class="w-16 px-1 py-0.5 bg-slate-900 text-slate-100 rounded border border-slate-600 focus:border-blue-500 focus:outline-none text-sm",
         attrs=[
-          ("aria-label", @luna_dom.Attr::AttrString("A loop time")),
-          ("placeholder", @luna_dom.Attr::AttrString("0:00")),
+          ("aria-label", @luna_dom.Attr::AttrString("A loop measure")),
+          ("min", @luna_dom.Attr::AttrString("1")),
         ],
-        dyn_value=fn() { loop_a_time.get().format() },
-        on=@luna_dom.events().input(on_a_time_input),
+        dyn_value=fn() { loop_a_measure.get().to_string() },
+        on=@luna_dom.events().input(on_a_input),
       ),
     ]),
     @luna_dom.label(class="flex gap-1 items-center", [
       @luna_dom.text("B:"),
       @luna_dom.input(
-        type_="text",
+        type_="number",
         class="w-16 px-1 py-0.5 bg-slate-900 text-slate-100 rounded border border-slate-600 focus:border-blue-500 focus:outline-none text-sm",
         attrs=[
-          ("aria-label", @luna_dom.Attr::AttrString("B loop time")),
-          ("placeholder", @luna_dom.Attr::AttrString("0:00")),
+          ("aria-label", @luna_dom.Attr::AttrString("B loop measure")),
+          ("min", @luna_dom.Attr::AttrString("1")),
         ],
         dyn_value=fn() {
-          let b = loop_b_time.get().unwrap_or(total_duration())
-          b.format()
+          loop_b_measure.get().unwrap_or(measure_count()).to_string()
         },
-        on=@luna_dom.events().input(on_b_time_input),
+        on=@luna_dom.events().input(on_b_input),
       ),
     ]),
   ])

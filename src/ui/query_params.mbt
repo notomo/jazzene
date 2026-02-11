@@ -82,22 +82,16 @@ pub fn get_initial_time_signature() -> @music.TimeSignature {
 }
 
 ///|
-/// Read the initial loop A time from the URL query parameter
-pub fn get_initial_loop_a_time() -> @music.Duration {
-  match get_query_param("loop_a") {
-    Some(value) =>
-      @music.Duration::parse(value).unwrap_or(
-        @music.Duration::from_milliseconds(0.0),
-      )
-    None => @music.Duration::from_milliseconds(0.0)
-  }
+/// Read the initial loop A measure from the URL query parameter (1-based)
+pub fn get_initial_loop_a_measure() -> Int {
+  get_initial_int("loop_a", 1)
 }
 
 ///|
-/// Read the initial loop B time from the URL query parameter
-pub fn get_initial_loop_b_time() -> @music.Duration? {
+/// Read the initial loop B measure from the URL query parameter (1-based)
+pub fn get_initial_loop_b_measure() -> Int? {
   match get_query_param("loop_b") {
-    Some(value) => @music.Duration::parse(value)
+    Some(value) => @js_global.parseInt(value)
     None => None
   }
 }

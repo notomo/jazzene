@@ -39,8 +39,8 @@ test.describe("Jazzene - Jazz Improvisation Web App", () => {
       chords: "IIIm7 | VIm7",
       view: "sheet",
       loop: "false",
-      loop_a: "0:05",
-      loop_b: "0:10",
+      loop_a: "3",
+      loop_b: "6",
     };
     const paramJazzene = await openJazzenePage({ page, queryParams: params });
 
@@ -52,8 +52,8 @@ test.describe("Jazzene - Jazz Improvisation Web App", () => {
     await expect(paramJazzene.getChordInput()).toHaveValue("IIIm7 | VIm7");
     await expect(paramJazzene.getDisplayModeSelect()).toHaveValue("Sheet");
     await expect(paramJazzene.getLoopCheckbox()).not.toBeChecked();
-    await expect(paramJazzene.getLoopAInput()).toHaveValue("0:05");
-    await expect(paramJazzene.getLoopBInput()).toHaveValue("0:10");
+    await expect(paramJazzene.getLoopAInput()).toHaveValue("3");
+    await expect(paramJazzene.getLoopBInput()).toHaveValue("6");
   });
 
   test("should change playback position when clicking a measure", async () => {

@@ -65,9 +65,9 @@ fn main {
   let volume = @signal.signal(0.3)
 
   let loop_enabled = @signal.signal(@ui.get_initial_loop_enabled())
-  let loop_a_time = @signal.signal(@ui.get_initial_loop_a_time())
-  let loop_b_time : @signal.Signal[@music.Duration?] = @signal.signal(
-    @ui.get_initial_loop_b_time(),
+  let loop_a_measure = @signal.signal(@ui.get_initial_loop_a_measure())
+  let loop_b_measure : @signal.Signal[Int?] = @signal.signal(
+    @ui.get_initial_loop_b_measure(),
   )
 
   let synth = @audio.Synthesizer::new()
@@ -79,7 +79,7 @@ fn main {
 
   let tick = make_tick(
     playback_position, volume, sounds, drum_sounds, total_duration, loop_enabled,
-    loop_a_time, loop_b_time, synth, drum_synth,
+    loop_a_measure, loop_b_measure, bpm, time_signature, synth, drum_synth,
   )
 
   let display_mode = @signal.signal(@ui.get_initial_display_mode())
@@ -97,7 +97,7 @@ fn main {
   @ui.setup_loop(is_playing, tick)
   @ui.render(
     is_playing, playback_position, volume, bpm, raw_chord_progression, seed, measure_count,
-    sounds, total_duration, loop_enabled, loop_a_time, loop_b_time, chord_parse_error,
+    sounds, total_duration, loop_enabled, loop_a_measure, loop_b_measure, chord_parse_error,
     measures, key, time_signature, display_mode,
   )
 }
@@ -143,6 +143,17 @@ fn make_measures(
 }
 
 ///|
+fn measure_to_duration(
+  measure_number : Int,
+  bpm : Int,
+  beats_per_measure : Double,
+) -> @music.Duration {
+  let ms = (measure_number - 1).to_double() *
+    @music.ms_per_measure(bpm, beats_per_measure~)
+  @music.Duration::from_milliseconds(ms)
+}
+
+///|
 fn make_tick(
   playback_position : @signal.Signal[@music.Duration],
   volume : @signal.Signal[Double],
@@ -150,8 +161,10 @@ fn make_tick(
   drum_sounds : @signal.Signal[Array[@music.NoteValueSound]],
   total_duration : () -> @music.Duration,
   loop_enabled : @signal.Signal[Bool],
-  loop_a_time : @signal.Signal[@music.Duration],
-  loop_b_time : @signal.Signal[@music.Duration?],
+  loop_a_measure : @signal.Signal[Int],
+  loop_b_measure : @signal.Signal[Int?],
+  bpm : @signal.Signal[Int],
+  time_signature : @signal.Signal[@music.TimeSignature],
   synth : @audio.Synthesizer,
   drum_synth : @audio.DrumSynth,
 ) -> (Double) -> Bool {
@@ -167,9 +180,21 @@ fn make_tick(
     // Check loop boundaries
     let final_position = {
       let enabled = loop_enabled.get()
-      let b_time = loop_b_time.get().unwrap_or(total)
-      if enabled && new_position >= b_time {
-        loop_a_time.get()
+      if enabled {
+        let beats = time_signature.get().beats_per_measure()
+        let current_bpm = bpm.get()
+        let b_measure = loop_b_measure.get()
+        // B: end of the B measure (so B+1 start)
+        let b_time = match b_measure {
+          Some(b) => measure_to_duration(b + 1, current_bpm, beats)
+          None => total
+        }
+        if new_position >= b_time {
+          // A: start of the A measure
+          measure_to_duration(loop_a_measure.get(), current_bpm, beats)
+        } else {
+          new_position
+        }
       } else {
         new_position
       }
