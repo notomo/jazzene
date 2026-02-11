@@ -10,7 +10,8 @@
     "skipLibCheck": true,
     "paths": {
       "mbt:internal/jazzene": [
-        "./target/js/release/build/app/app.js"
+        "./_build/js/debug/build/app/app.js",
+        "./_build/js/release/build/app/app.js"
       ]
     }
   },

@@ -10,7 +10,7 @@
     "test:e2e": "playwright test",
     "dev": "vite",
     "start": "npm run dev -- --open",
-    "build": "moon build && vite build",
+    "build": "moon build --release && vite build",
     "download:samples": "bash scripts/download-samples.sh",
     "tunnel": "cloudflared tunnel --url localhost:5173"
   },
