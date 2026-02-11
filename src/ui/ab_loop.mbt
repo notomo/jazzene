@@ -76,24 +76,32 @@ fn ab_loop_spinbox(
 /// Render A-B loop control UI
 fn ab_loop(
   loop_a_measure : @signal.Signal[Int],
-  loop_b_measure : @signal.Signal[Int?],
+  loop_b_measure : @signal.Signal[Int],
   measure_count : () -> Int,
 ) -> @luna_dom.DomNode {
   let on_a_change = fn(delta : Int) {
-    let max_a = loop_b_measure.get().unwrap_or(measure_count())
+    let max_a = loop_b_measure.get()
     let clamped = clamp_int(1, loop_a_measure.get() + delta, max_a)
     loop_a_measure.set(clamped)
-    set_query_param("loop_a", clamped.to_string())
+    set_query_param(
+      "loop_a",
+      clamped.to_string(),
+      default=default_loop_a.to_string(),
+    )
   }
 
   let on_b_change = fn(delta : Int) {
     let clamped = clamp_int(
       loop_a_measure.get(),
-      loop_b_measure.get().unwrap_or(measure_count()) + delta,
+      loop_b_measure.get() + delta,
       measure_count(),
     )
-    loop_b_measure.set(Some(clamped))
-    set_query_param("loop_b", clamped.to_string())
+    loop_b_measure.set(clamped)
+    set_query_param(
+      "loop_b",
+      clamped.to_string(),
+      default=measure_count().to_string(),
+    )
   }
 
   @luna_dom.div(class="flex items-center gap-3 text-base text-slate-400", [
@@ -102,10 +110,6 @@ fn ab_loop(
     ]),
     ab_loop_spinbox(on_a_change, fn() { loop_a_measure.get() }, "loop_a"),
     @luna_dom.span(class="text-xl text-slate-200", [@luna_dom.text("~")]),
-    ab_loop_spinbox(
-      on_b_change,
-      fn() { loop_b_measure.get().unwrap_or(measure_count()) },
-      "loop_b",
-    ),
+    ab_loop_spinbox(on_b_change, fn() { loop_b_measure.get() }, "loop_b"),
   ])
 }

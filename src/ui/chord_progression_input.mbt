@@ -7,7 +7,7 @@ fn chord_progression_input(
   let on_input : @luna_dom.InputHandler = fn(e) {
     let value = get_input_value(e)
     raw_chord_progression.set(value)
-    set_query_param("chords", value)
+    set_query_param("chords", value, default=default_chords)
   }
 
   @luna_dom.input(

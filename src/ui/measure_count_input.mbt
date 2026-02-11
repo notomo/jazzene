@@ -7,6 +7,7 @@ fn measure_count_input(
     label="Measures",
     measure_count,
     query_param="measures",
+    default=default_measures,
     min=2,
     max=32,
     step=1,

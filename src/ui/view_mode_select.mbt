@@ -80,7 +80,7 @@ fn view_mode_select(mode : @signal.Signal[ViewMode]) -> @luna_dom.DomNode {
     on=@luna_dom.events().click(fn(_) {
       let next = toggle_sheet(mode.get())
       mode.set(next)
-      set_query_param("view", next.to_query_string())
+      set_query_param("view", next.to_query_string(), default="both")
     }),
     [@luna_dom.text("Sheet")],
   )
@@ -99,7 +99,7 @@ fn view_mode_select(mode : @signal.Signal[ViewMode]) -> @luna_dom.DomNode {
     on=@luna_dom.events().click(fn(_) {
       let next = toggle_piano(mode.get())
       mode.set(next)
-      set_query_param("view", next.to_query_string())
+      set_query_param("view", next.to_query_string(), default="both")
     }),
     [@luna_dom.text("Piano")],
   )

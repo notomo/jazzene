@@ -13,7 +13,8 @@ fn time_signature_select(
       @music.TimeSignature::from_string(value)
       |> Result::map(fn(ts) {
         time_signature.set(ts)
-        set_query_param("time", ts.to_string())
+        let default_ts = @music.TimeSignature::default().to_string()
+        set_query_param("time", ts.to_string(), default=default_ts)
       })
       |> ignore
     },

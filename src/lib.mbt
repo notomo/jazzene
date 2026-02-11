@@ -1,10 +1,10 @@
 ///|
 /// Jazzene - Jazz Improvisation Web App (Tick-based Architecture)
 fn main {
-  let bpm = @signal.signal(@ui.get_initial_int("bpm", 200))
+  let bpm = @signal.signal(@ui.get_initial_bpm())
   let raw_chord_progression = @signal.signal(@ui.get_initial_chords())
-  let seed = @signal.signal(@ui.get_initial_int("seed", 0))
-  let measure_count = @signal.signal(@ui.get_initial_int("measures", 8))
+  let seed = @signal.signal(@ui.get_initial_seed())
+  let measure_count = @signal.signal(@ui.get_initial_measures())
   let key = @signal.signal(@ui.get_initial_key())
   let time_signature = @signal.signal(@ui.get_initial_time_signature())
 
@@ -62,11 +62,11 @@ fn main {
   let playback_position = @signal.signal(
     @music.Duration::from_milliseconds(0.0),
   )
-  let volume = @signal.signal(@ui.get_initial_int("volume", 50))
+  let volume = @signal.signal(@ui.get_initial_volume())
 
   let loop_a_measure = @signal.signal(@ui.get_initial_loop_a_measure())
-  let loop_b_measure : @signal.Signal[Int?] = @signal.signal(
-    @ui.get_initial_loop_b_measure(),
+  let loop_b_measure = @signal.signal(
+    @ui.get_initial_loop_b_measure(measure_count.get()),
   )
 
   let synth = @audio.Synthesizer::new()
@@ -160,7 +160,7 @@ fn make_tick(
   drum_sounds : @signal.Signal[Array[@music.NoteValueSound]],
   total_duration : () -> @music.Duration,
   loop_a_measure : @signal.Signal[Int],
-  loop_b_measure : @signal.Signal[Int?],
+  loop_b_measure : @signal.Signal[Int],
   bpm : @signal.Signal[Int],
   time_signature : @signal.Signal[@music.TimeSignature],
   synth : @audio.Synthesizer,
@@ -179,12 +179,12 @@ fn make_tick(
     let final_position = {
       let beats = time_signature.get().beats_per_measure()
       let current_bpm = bpm.get()
-      let b_measure = loop_b_measure.get()
       // B: end of the B measure (so B+1 start)
-      let b_time = match b_measure {
-        Some(b) => measure_to_duration(b + 1, current_bpm, beats)
-        None => total
-      }
+      let b_time = measure_to_duration(
+        loop_b_measure.get() + 1,
+        current_bpm,
+        beats,
+      )
       if new_position >= b_time {
         // A: start of the A measure
         measure_to_duration(loop_a_measure.get(), current_bpm, beats)

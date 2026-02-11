@@ -5,7 +5,7 @@ extern "js" fn get_query_param(name : String) -> String? =
 
 ///|
 /// Set a query parameter in the URL without reloading
-extern "js" fn set_query_param(name : String, value : String) -> Unit =
+extern "js" fn raw_set_query_param(name : String, value : String) -> Unit =
   #|(name, value) => {
   #|  const params = new URLSearchParams(window.location.search)
   #|  params.set(name, value)
@@ -13,8 +13,27 @@ extern "js" fn set_query_param(name : String, value : String) -> Unit =
   #|}
 
 ///|
-/// Read an integer query parameter, returning default if absent or invalid
-pub fn get_initial_int(name : String, default : Int) -> Int {
+/// Delete a query parameter from the URL without reloading
+extern "js" fn delete_query_param(name : String) -> Unit =
+  #|(name) => {
+  #|  const params = new URLSearchParams(window.location.search)
+  #|  params.delete(name)
+  #|  const qs = params.toString()
+  #|  history.replaceState(null, "", qs ? "?" + qs : window.location.pathname)
+  #|}
+
+///|
+/// Set a query parameter, or delete it if the value matches the default
+fn set_query_param(name : String, value : String, default~ : String) -> Unit {
+  if value == default {
+    delete_query_param(name)
+  } else {
+    raw_set_query_param(name, value)
+  }
+}
+
+///|
+fn get_initial_int(name : String, default : Int) -> Int {
   match get_query_param(name) {
     Some(value) =>
       match @js_global.parseInt(value) {
@@ -25,8 +44,47 @@ pub fn get_initial_int(name : String, default : Int) -> Int {
   }
 }
 
+// Default values for query parameters
+
 ///|
-/// Read the initial view mode from the URL query parameter
+pub let default_bpm : Int = 200
+
+///|
+pub let default_seed : Int = 0
+
+///|
+pub let default_measures : Int = 8
+
+///|
+pub let default_volume : Int = 50
+
+///|
+pub let default_loop_a : Int = 1
+
+///|
+pub let default_chords : String = "IIm7 | V7 | Imaj7 | IVmaj7"
+
+///|
+pub fn get_initial_bpm() -> Int {
+  get_initial_int("bpm", default_bpm)
+}
+
+///|
+pub fn get_initial_seed() -> Int {
+  get_initial_int("seed", default_seed)
+}
+
+///|
+pub fn get_initial_measures() -> Int {
+  get_initial_int("measures", default_measures)
+}
+
+///|
+pub fn get_initial_volume() -> Int {
+  get_initial_int("volume", default_volume)
+}
+
+///|
 pub fn get_initial_view_mode() -> ViewMode {
   match get_query_param("view") {
     Some(value) =>
@@ -36,7 +94,6 @@ pub fn get_initial_view_mode() -> ViewMode {
 }
 
 ///|
-/// Read the initial key from the URL query parameter, defaulting to C major
 pub fn get_initial_key() -> @music.KeySignature {
   match get_query_param("key") {
     Some(value) =>
@@ -49,16 +106,14 @@ pub fn get_initial_key() -> @music.KeySignature {
 }
 
 ///|
-/// Read the initial chord progression from the URL query parameter
 pub fn get_initial_chords() -> String {
   match get_query_param("chords") {
     Some(value) => value
-    None => "IIm7 | V7 | Imaj7 | IVmaj7"
+    None => default_chords
   }
 }
 
 ///|
-/// Read the initial time signature from the URL query parameter, defaulting to 4/4
 pub fn get_initial_time_signature() -> @music.TimeSignature {
   match get_query_param("time") {
     Some(value) =>
@@ -71,16 +126,14 @@ pub fn get_initial_time_signature() -> @music.TimeSignature {
 }
 
 ///|
-/// Read the initial loop A measure from the URL query parameter (1-based)
 pub fn get_initial_loop_a_measure() -> Int {
-  get_initial_int("loop_a", 1)
+  get_initial_int("loop_a", default_loop_a)
 }
 
 ///|
-/// Read the initial loop B measure from the URL query parameter (1-based)
-pub fn get_initial_loop_b_measure() -> Int? {
+pub fn get_initial_loop_b_measure(measure_count : Int) -> Int {
   match get_query_param("loop_b") {
-    Some(value) => @js_global.parseInt(value)
-    None => None
+    Some(value) => @js_global.parseInt(value).unwrap_or(measure_count)
+    None => measure_count
   }
 }

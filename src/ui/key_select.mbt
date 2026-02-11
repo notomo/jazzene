@@ -12,7 +12,8 @@ fn key_select(key : @signal.Signal[@music.KeySignature]) -> @luna_dom.DomNode {
       |> Result::map(fn(root) {
         let k = @music.KeySignature::from_root(root)
         key.set(k)
-        set_query_param("key", root.to_string())
+        let default_key = @music.KeySignature::c_major().root.to_string()
+        set_query_param("key", root.to_string(), default=default_key)
       })
       |> ignore
     },

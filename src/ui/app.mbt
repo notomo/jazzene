@@ -51,7 +51,7 @@ pub fn render(
   sounds : @signal.Signal[Array[@music.NoteValueSound]],
   total_duration : () -> @music.Duration,
   loop_a_measure : @signal.Signal[Int],
-  loop_b_measure : @signal.Signal[Int?],
+  loop_b_measure : @signal.Signal[Int],
   chord_parse_error : @signal.Signal[String?],
   measures : () -> Array[@music.Measure],
   key : @signal.Signal[@music.KeySignature],

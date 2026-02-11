@@ -36,6 +36,7 @@ fn spinbox(
   label~ : String,
   signal : @signal.Signal[Int],
   query_param~ : String,
+  default~ : Int,
   min~ : Int,
   max~ : Int,
   step~ : Int,
@@ -50,7 +51,11 @@ fn spinbox(
   fn update_value(new_value : Int) -> Unit {
     let clamped = clamp(new_value)
     signal.set(clamped)
-    set_query_param(query_param, clamped.to_string())
+    set_query_param(
+      query_param,
+      clamped.to_string(),
+      default=default.to_string(),
+    )
   }
 
   let on_decrement : @luna_dom.MouseHandler = fn(_) {
