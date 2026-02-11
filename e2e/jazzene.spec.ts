@@ -49,7 +49,7 @@ test.describe("Jazzene - Jazz Improvisation Web App", () => {
     await expect(paramJazzene.getSeedInput()).toHaveText("42");
     await expect(paramJazzene.getMeasuresInput()).toHaveText("16");
     await expect(paramJazzene.getChordInput()).toHaveValue("IIIm7 | VIm7");
-    await expect(paramJazzene.getDisplayModeSelect()).toHaveValue("Sheet");
+    await expect(paramJazzene.getActiveDisplayModeButton()).toHaveText("Sheet");
     await expect(paramJazzene.getLoopAInput()).toHaveText("3");
     await expect(paramJazzene.getLoopBInput()).toHaveText("6");
   });
