@@ -230,50 +230,140 @@ fn note_selection_weight(stamina : Int, cost : Int) -> Int {
 }
 
 ///|
+/// Transpose a MidiNumber by a semitone offset, clamping to valid range
+fn transpose_midi(midi : @music.MidiNumber, offset : Int) -> @music.MidiNumber {
+  @music.MidiNumber::new(midi.value + offset).unwrap_or(midi)
+}
+
+///|
+/// Transpose a chord's root by a semitone offset
+fn transpose_chord(chord : @music.Chord, offset : Int) -> @music.Chord {
+  let new_pc = (chord.root.midi() - 60 + offset + 120) % 12
+  let new_root = @music.ChordRoot::from_pitch_class(new_pc)
+  let new_bass = chord.bass.map(fn(b) {
+    let bp = (b.midi() - 60 + offset + 120) % 12
+    @music.ChordRoot::from_pitch_class(bp)
+  })
+  @music.Chord::{ root: new_root, quality: chord.quality, bass: new_bass }
+}
+
+///|
 /// Generate notes for one measure
 fn generate_measure_notes(
   ctx : MeasureContext,
   settings : Settings,
   random_int : (Int) -> Int,
 ) -> MeasureResult {
+  // Transpose everything to key of C so the RNG sequence is key-independent.
+  // Only pitch values change with key; rhythm/structure remain identical.
+  let offset = ctx.key.root.midi() - 60 // semitones from C
+  let neg_offset = -offset
+
+  // Transpose input to C
+  let c_chords = ctx.chords.map(fn(seg) {
+    ChordSegment::{
+      chord: transpose_chord(seg.chord, neg_offset),
+      start_beat: seg.start_beat,
+      end_beat: seg.end_beat,
+    }
+  })
+  let c_incoming_tie = ctx.incoming_tie.map(fn(tie) {
+    TieContext::{
+      midi: transpose_midi(tie.midi, neg_offset),
+      remaining_beats: tie.remaining_beats,
+    }
+  })
+  let c_incoming_last_midi = ctx.incoming_last_midi.map(fn(m) {
+    transpose_midi(m, neg_offset)
+  })
+  let c_ctx = MeasureContext::{
+    chords: c_chords,
+    incoming_tie: c_incoming_tie,
+    key: @music.KeySignature::c_major(),
+    time_signature: ctx.time_signature,
+    beats_per_measure: ctx.beats_per_measure,
+    incoming_stamina: ctx.incoming_stamina,
+    incoming_last_midi: c_incoming_last_midi,
+    incoming_phrase: ctx.incoming_phrase,
+    incoming_motif_memory: ctx.incoming_motif_memory,
+  }
+
   // Convert Int? to PhraseState
-  let incoming_phrase = match ctx.incoming_phrase {
+  let incoming_phrase = match c_ctx.incoming_phrase {
     Some(n) => Playing(n)
     None => Resting
   }
 
   let initial_state = MeasureState::new(
-    ctx.beats_per_measure.to_int(),
-    ctx.incoming_stamina,
-    ctx.incoming_last_midi,
+    c_ctx.beats_per_measure.to_int(),
+    c_ctx.incoming_stamina,
+    c_ctx.incoming_last_midi,
     incoming_phrase,
-    ctx.incoming_motif_memory,
+    c_ctx.incoming_motif_memory,
   )
 
   // Handle incoming tie first
-  let (state_after_tie, outgoing_tie) = match ctx.incoming_tie {
+  let (state_after_tie, outgoing_tie) = match c_ctx.incoming_tie {
     Some(tie_ctx) =>
-      process_incoming_tie(initial_state, tie_ctx, ctx.beats_per_measure)
+      process_incoming_tie(initial_state, tie_ctx, c_ctx.beats_per_measure)
     None => (initial_state, None)
   }
 
-  // Fill remaining measure with new notes
-
-  let update_accidental = @music.create_accidental_calculator(ctx.key)
-  let final_state = fill_remaining_measure(
-    state_after_tie, ctx, settings, update_accidental, random_int,
+  // Fill remaining measure with new notes (all in key of C)
+  // Use a temporary accidental calculator for C major during generation
+  let c_update_accidental = @music.create_accidental_calculator(
+    @music.KeySignature::c_major(),
   )
+  let final_state = fill_remaining_measure(
+    state_after_tie, c_ctx, settings, c_update_accidental, random_int,
+  )
+
+  // Transpose output back to the real key
+  let real_update_accidental = @music.create_accidental_calculator(ctx.key)
+  let beats = final_state
+    .to_beats()
+    .map(fn(beat) {
+      @music.Beat::{
+        count: beat.count,
+        notes: beat.notes.map(fn(note) {
+          match note.midi {
+            Some(midi_val) => {
+              let real_midi = transpose_midi(
+                @music.MidiNumber::new(midi_val).unwrap(),
+                offset,
+              )
+              @music.MeasureNote::{
+                midi: Some(real_midi.value),
+                duration: note.duration,
+                accidental: real_update_accidental(real_midi),
+                tie: note.tie,
+              }
+            }
+            None => note
+          }
+        }),
+      }
+    })
 
   // Convert PhraseState back to Int?
   let outgoing_phrase = match final_state.phrase {
     Playing(n) => Some(n)
     Resting => None
   }
+  let real_outgoing_tie = outgoing_tie.map(fn(tie) {
+    TieContext::{
+      midi: transpose_midi(tie.midi, offset),
+      remaining_beats: tie.remaining_beats,
+    }
+  })
+  let real_outgoing_last_midi = final_state.last_midi.map(fn(m) {
+    transpose_midi(m, offset)
+  })
   MeasureResult::{
-    beats: final_state.to_beats(),
-    outgoing_tie,
+    beats,
+    outgoing_tie: real_outgoing_tie,
     outgoing_stamina: final_state.stamina,
-    outgoing_last_midi: final_state.last_midi,
+    outgoing_last_midi: real_outgoing_last_midi,
     outgoing_phrase,
     outgoing_motif_memory: final_state.motif_memory,
   }
