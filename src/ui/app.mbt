@@ -62,10 +62,10 @@ pub fn render(
     class="flex flex-col h-dvh overflow-hidden w-dvw bg-gradient-to-br from-slate-950 to-slate-900 text-white touch-manipulation",
     [
       @luna_dom.div(
-        class="p-2 bg-slate-800 border-2 border-slate-700",
+        class="px-3 py-1.5 bg-slate-800 border-b-2 border-slate-700",
         attrs=[("aria-label", @luna_dom.Attr::AttrString("lead sheet"))],
         [
-          @luna_dom.div(class="flex gap-4 items-center p-1", [
+          @luna_dom.div(class="flex gap-4 items-center", [
             time_signature_select(time_signature),
             key_select(key),
             chord_progression_input(raw_chord_progression, chord_parse_error),
