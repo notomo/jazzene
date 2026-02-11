@@ -85,30 +85,26 @@ fn render_tie_start(
   end_target_x : Double,
   stem_up : Bool,
 ) -> @luna_dom.DomNode {
-  // Tie parameters
   let arc_height = if stem_up { TIE_ARC_HEIGHT } else { -TIE_ARC_HEIGHT }
   let y_offset = if stem_up { TIE_Y_OFFSET } else { -TIE_Y_OFFSET }
 
-  // Start from the right side of the note head
   let start_x = note_x + TIE_NOTE_HEAD_X_OFFSET
   let start_y = note_y + y_offset
 
-  // End at the target x position
   let end_x = end_target_x - TIE_EDGE_MARGIN
   let end_y = start_y
 
-  // Control points for cubic Bezier curve (smoother than quadratic)
   let width = end_x - start_x
   let ctrl1_x = start_x + width * TIE_CONTROL_POINT_1_RATIO
   let ctrl2_x = start_x + width * TIE_CONTROL_POINT_2_RATIO
   let ctrl_y = start_y + arc_height
 
-  // Inner arc control points
   let inner_ctrl_y = ctrl_y +
     (if stem_up { -TIE_THICKNESS } else { TIE_THICKNESS })
   let path = tie_arc_path(
     start_x, start_y, end_x, end_y, ctrl1_x, ctrl2_x, ctrl_y, inner_ctrl_y,
   )
+
   @luna_dom.svg_path(d=path, attrs=[
     ("stroke-width", @luna_dom.Attr::AttrString(TIE_STROKE_WIDTH)),
     ("stroke-linejoin", @luna_dom.Attr::AttrString("round")),
@@ -124,30 +120,26 @@ fn render_tie_end(
   note_y : Double,
   stem_up : Bool,
 ) -> @luna_dom.DomNode {
-  // Tie parameters
   let arc_height = if stem_up { TIE_ARC_HEIGHT } else { -TIE_ARC_HEIGHT }
   let y_offset = if stem_up { TIE_Y_OFFSET } else { -TIE_Y_OFFSET }
 
-  // Start from the origin position
   let start_x = start_origin_x + TIE_EDGE_MARGIN
   let start_y = note_y + y_offset
 
-  // End at the left side of the note head
   let end_x = note_x - TIE_NOTE_HEAD_X_OFFSET
   let end_y = start_y
 
-  // Control points for cubic Bezier curve (smoother than quadratic)
   let width = end_x - start_x
   let ctrl1_x = start_x + width * TIE_CONTROL_POINT_1_RATIO
   let ctrl2_x = start_x + width * TIE_CONTROL_POINT_2_RATIO
   let ctrl_y = start_y + arc_height
 
-  // Inner arc control points
   let inner_ctrl_y = ctrl_y +
     (if stem_up { -TIE_THICKNESS } else { TIE_THICKNESS })
   let path = tie_arc_path(
     start_x, start_y, end_x, end_y, ctrl1_x, ctrl2_x, ctrl_y, inner_ctrl_y,
   )
+
   @luna_dom.svg_path(d=path, attrs=[
     ("stroke-width", @luna_dom.Attr::AttrString(TIE_STROKE_WIDTH)),
     ("stroke-linejoin", @luna_dom.Attr::AttrString("round")),

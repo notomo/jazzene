@@ -51,6 +51,7 @@ pub fn TimeSignature::beat_group_remaining(
   position : Double,
 ) -> Double {
   let beats = self.beats_per_measure()
+
   let group_end = match (self.numerator, self.denominator) {
     (3, 4) => if position < 2.0 { 2.0 } else { 3.0 }
     _ => {

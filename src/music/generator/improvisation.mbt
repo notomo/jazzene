@@ -90,6 +90,7 @@ pub fn improvisation(
   if measure_defs.is_empty() {
     return []
   }
+
   let measure_duration_ms = @music.ms_per_measure(bpm, beats_per_measure~)
   let initial_state = ImprovisationState::{
     measures: [],
@@ -99,6 +100,7 @@ pub fn improvisation(
     incoming_phrase: None,
     incoming_motif_memory: MotifMemory::empty(),
   }
+
   let final_state = Array::makei(measure_count, fn(i) { i })
     .iter()
     .fold(init=initial_state, fn(state, i) {
@@ -148,6 +150,7 @@ fn remove_dangling_tie(
   guard last_tie is Some(_) else { return measures }
   guard measures is [.. rest_measures, last_measure] else { return measures }
   guard last_measure.beats is [.. _rest_beats] else { return measures }
+
   // Remove trailing tied notes from the last measure's beats
   let new_beats = remove_trailing_tied_notes(last_measure.beats)
   [..rest_measures, @music.Measure::{ ..last_measure, beats: new_beats }]

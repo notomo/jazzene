@@ -97,6 +97,7 @@ fn midi_to_sample_info(midi_value : Int) -> SampleInfo {
       }
     }
   }
+
   // Find the MIDI number of the best match to calculate detune
   let mut best_midi = 60
   for pair in sampled_midis {
@@ -105,6 +106,7 @@ fn midi_to_sample_info(midi_value : Int) -> SampleInfo {
       break
     }
   }
+
   let detune_cents = (midi_value - best_midi).to_double() * 100.0
   { note_name: best_name, detune_cents }
 }

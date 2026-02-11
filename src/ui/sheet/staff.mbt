@@ -87,6 +87,7 @@ fn midi_to_diatonic_step(midi : Int, key : @music.KeySignature) -> Int {
   let octave = midi / 12 - 1
   let e4_pitch_class = 4
   let e4_octave = 4
+
   let note_diatonic_step = key.pitch_class_to_diatonic_step(pitch_class)
   let e4_diatonic_step = key.pitch_class_to_diatonic_step(e4_pitch_class)
   (octave - e4_octave) * 7 + (note_diatonic_step - e4_diatonic_step)

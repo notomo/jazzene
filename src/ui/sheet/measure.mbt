@@ -149,6 +149,7 @@ fn compute_note_positions(
   if n == 0 {
     return []
   }
+
   let note_area_start = measure_x + NOTE_AREA_START_OFFSET
   let note_area_width = MEASURE_WIDTH - NOTE_AREA_PADDING
   // Compute beat-proportional positions with minimum spacing enforcement
@@ -167,6 +168,7 @@ fn compute_note_positions(
     }
     positions.push(x)
   }
+
   // If rightmost position exceeds the available area, compress only the extra
   // space beyond minimum spacing so that accidental gaps are preserved.
   let right_edge = note_area_start + note_area_width
@@ -281,6 +283,7 @@ fn render_measure_notes(
   beam_groups.each(fn(group) {
     group.each(fn(idx) { beamed_indices[idx] = true })
   })
+
   let note_positions = compute_note_positions(
     positioned, x, beats_per_measure, beamed_indices,
   )
@@ -327,6 +330,7 @@ fn render_measure_notes(
     })
     .flatten()
     .collect()
+
   let beam_nodes = render_beams(beam_groups, positioned, note_positions, y, key)
   [..note_nodes, ..beam_nodes]
 }
@@ -345,6 +349,7 @@ fn render_measure(
   let is_first_in_row = display_index % MEASURES_PER_ROW == 0
   let is_first_measure = display_index == 0
   let measure_number = display_index + 1
+
   @luna_dom.svg_g(
     [
       render_measure_staff_lines(x, y, is_first_in_row, key),

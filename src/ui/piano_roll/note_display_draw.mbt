@@ -66,7 +66,7 @@ fn draw_falling_notes(
     let end_offset = note.start_ms + note.duration_ms - current_pos
     let key_area = key_areas[note.midi - KEYBOARD_MIN_KEY]
 
-    // Calculate vertical position (inverted: future at top, now at bottom)
+    // Calculate vertical position (inverted: future at top, now at bottom) (inverted: future at top, now at bottom)
     let bottom_percent = 100.0 - start_offset / NOTE_DISPLAY_WINDOW_MS * 100.0
     let top_percent = 100.0 - end_offset / NOTE_DISPLAY_WINDOW_MS * 100.0
     let bottom_y = height * bottom_percent / 100.0
@@ -132,6 +132,7 @@ fn draw_measure_lines(
   let first_measure = (current_pos / measure_ms).to_int()
   let last_measure = ((current_pos + NOTE_DISPLAY_WINDOW_MS) / measure_ms).to_int() +
     1
+
   for i = first_measure; i <= last_measure; i = i + 1 {
     let measure_pos_ms = i.to_double() * measure_ms
     let offset = measure_pos_ms - current_pos

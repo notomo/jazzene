@@ -65,6 +65,7 @@ pub fn convert_measures_to_sounds(
     .collect()
 
   // Convert to sounds, combining tied notes
+
   let sounds : Array[NoteValueSound] = []
   for i = 0; i < flat_notes.length(); i = i + 1 {
     let (start_ms, note) = flat_notes[i]
@@ -76,12 +77,14 @@ pub fn convert_measures_to_sounds(
     }
 
     // Calculate total duration (including any tied continuations)
+
     let base_beats = note.duration.to_beats()
     let total_beats = match note.tie {
       Some(TieStart) => accumulate_tied_beats(flat_notes, i + 1, base_beats)
       _ => base_beats
     }
     let duration_ms = total_beats * beat_duration_ms
+
     let note_value : NoteValue = match note.midi {
       Some(midi) =>
         match MidiNumber::new(midi) {
@@ -91,6 +94,7 @@ pub fn convert_measures_to_sounds(
         }
       None => Rest(duration=NoteDuration::from_beats(total_beats))
     }
+
     sounds.push(NoteValueSound::{
       note_value,
       duration: Duration::from_milliseconds(duration_ms),
@@ -108,6 +112,7 @@ fn accumulate_tied_beats(
   initial_beats : Double,
 ) -> Double {
   let mut total = initial_beats
+
   for j = start_index; j < flat_notes.length(); j = j + 1 {
     let (_, next_note) = flat_notes[j]
     match next_note.tie {

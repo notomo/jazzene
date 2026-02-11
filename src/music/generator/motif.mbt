@@ -43,6 +43,7 @@ fn MotifMemory::finish_recording(self : MotifMemory) -> MotifMemory {
   guard self.recording.length() >= min_motif_intervals else {
     return MotifMemory::{ ..self, recording: [], replaying: None }
   }
+
   let motif = Motif::{ intervals: self.recording }
   let stored = if self.stored.length() >= max_stored_motifs {
     self.stored[1:].to_array() + [motif]

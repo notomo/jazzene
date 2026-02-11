@@ -4,6 +4,7 @@ fn time_signature_select(
   time_signature : @signal.Signal[@music.TimeSignature],
 ) -> @luna_dom.DomNode {
   let all_time_signatures = @music.TimeSignature::all()
+
   @luna_dom.div(class="flex items-center gap-2", [
     @luna_dom.label(class="text-sm text-slate-400", [@luna_dom.text("Time:")]),
     @luna_dom.create_element(

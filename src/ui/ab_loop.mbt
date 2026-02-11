@@ -20,6 +20,7 @@ fn ab_loop(
     loop_enabled.set(checked)
     set_query_param("loop", checked.to_string())
   }
+
   let on_a_time_input : @luna_dom.InputHandler = fn(e) {
     match @music.Duration::parse(get_input_value(e)) {
       Some(new_a) => {
@@ -33,6 +34,7 @@ fn ab_loop(
       None => ()
     }
   }
+
   let on_b_time_input : @luna_dom.InputHandler = fn(e) {
     match @music.Duration::parse(get_input_value(e)) {
       Some(new_b) => {
@@ -45,6 +47,7 @@ fn ab_loop(
       None => ()
     }
   }
+
   @luna_dom.div(class="flex gap-2 items-center text-sm text-slate-400", [
     @luna_dom.input(
       type_="checkbox",

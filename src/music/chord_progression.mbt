@@ -183,17 +183,20 @@ pub fn parse_degree_chord(input : String) -> Result[DegreeChord, String] {
       }
     _ => return Err("Multiple '/' in chord: " + input)
   }
+
   // Parse optional accidental prefix
   let (accidental, rest) = match chord_part {
     ['b', .. tail] => (-1, tail.to_string())
     ['#', .. tail] => (1, tail.to_string())
     _ => (0, chord_part)
   }
+
   // Parse Roman numeral
   let (degree, quality_str) = match parse_roman_numeral(rest) {
     Ok(result) => result
     Err(e) => return Err(e)
   }
+
   // Parse quality suffix
   let quality = match parse_quality(quality_str) {
     Ok(q) => q
@@ -218,6 +221,7 @@ pub fn parse_degree_progression(
       })
     })
     .collect()
+
   let errors = results
     .iter()
     .filter_map(fn(r) {
@@ -239,6 +243,7 @@ pub fn DegreeChord::resolve(self : DegreeChord, key_root : ChordRoot) -> Chord {
   let root_pc = (key_root.midi() + self.degree.semitones() + self.accidental) %
     12
   let root = ChordRoot::from_pitch_class(root_pc)
+
   let bass = self.bass.map(fn(b) {
     let bass_pc = (key_root.midi() + b.degree.semitones() + b.accidental) % 12
     ChordRoot::from_pitch_class(bass_pc)
@@ -275,6 +280,7 @@ pub fn parse_measure_progression(
     .split("|")
     .map(fn(s) { s.to_string().trim().to_string() })
     .collect()
+
   let results : Array[Result[DegreeMeasure, String]] = measure_strs
     .iter()
     .mapi(fn(i, measure_str) {
@@ -286,6 +292,7 @@ pub fn parse_measure_progression(
       })
     })
     .collect()
+
   let errors : Array[String] = results
     .iter()
     .filter_map(fn(r) {

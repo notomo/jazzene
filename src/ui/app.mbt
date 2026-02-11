@@ -132,6 +132,7 @@ pub fn render(
       ),
     ],
   )
+
   @js_dom.document().getElementById("app")
   |> Option::map(fn(e) {
     @luna_dom.DomElement::from_dom(e) |> @luna_dom.render(app)

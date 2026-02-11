@@ -24,12 +24,14 @@ fn calculate_playback_row(
   if ms_per_measure <= 0.0 || measure_count <= 0 {
     return 0
   }
+
   let measure_idx = (pos_ms / ms_per_measure).to_int()
   let clamped_idx = if measure_idx >= measure_count {
     measure_count - 1
   } else {
     measure_idx
   }
+
   clamped_idx / MEASURES_PER_ROW
 }
 

@@ -54,6 +54,7 @@ fn draw_keyboard(
   ctx.clearRect(0.0, 0.0, width, height)
   ctx.fillStyle = NOTE_DISPLAY_BG_COLOR
   ctx.fillRect(0.0, 0.0, width, height)
+
   let rect = { left: 0.0, top: 0.0, width, height }
   let key_areas = calc_key_areas(rect, KEYBOARD_MIN_KEY, KEYBOARD_MAX_KEY)
 

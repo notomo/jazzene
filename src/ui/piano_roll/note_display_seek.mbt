@@ -74,6 +74,7 @@ fn setup_wheel_seek(
     )
     playback_position.set(@music.Duration::from_milliseconds(clamped_position))
   }
+
   add_wheel_listener_notes(canvas, on_wheel)
 }
 
@@ -86,6 +87,7 @@ fn setup_drag_seek(
 ) -> Unit {
   let drag_start_y : Ref[Double?] = { val: None }
   let drag_start_position_ms : Ref[Double?] = { val: None }
+
   let on_drag_start : (@js_dom.MouseEvent) -> Unit = fn(e) {
     drag_start_y.val = Some(e.clientY)
     drag_start_position_ms.val = Some(playback_position.get().to_milliseconds())
@@ -110,5 +112,6 @@ fn setup_drag_seek(
     drag_start_y.val = None
     drag_start_position_ms.val = None
   }
+
   add_drag_listeners_notes(canvas, on_drag_start, on_drag_move, on_drag_end)
 }

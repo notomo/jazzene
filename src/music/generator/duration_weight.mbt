@@ -66,6 +66,7 @@ fn[T] weighted_choice(
 ) -> T {
   let total = choices.iter().fold(init=0, fn(acc, pair) { acc + pair.0 })
   let r = random_int(total)
+
   let mut cumulative = 0
   for _, pair in choices {
     cumulative = cumulative + pair.0
@@ -97,6 +98,7 @@ fn random_duration_within(
     .iter()
     .filter(fn(pair) { pair.0 > 0 && pair.1.to_beats() <= max_beats + 0.001 })
     .collect()
+
   if choices.is_empty() {
     None
   } else {

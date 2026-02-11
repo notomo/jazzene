@@ -9,6 +9,7 @@ fn chord_progression_input(
     raw_chord_progression.set(value)
     set_query_param("chords", value)
   }
+
   @luna_dom.input(
     type_="text",
     dyn_class=fn() {

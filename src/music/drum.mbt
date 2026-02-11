@@ -101,6 +101,7 @@ pub fn generate_drum_sounds(
   let measure_duration_ms = ms_per_measure(bpm, beats_per_measure~)
   let pattern = DrumPattern::for_time_signature(time_signature)
   let drum_note_duration = Duration::from_milliseconds(50.0)
+
   Array::makei(measure_count, fn(measure_index) {
     let measure_start_ms = measure_index.to_double() * measure_duration_ms
     pattern.hits.map(fn(hit) {

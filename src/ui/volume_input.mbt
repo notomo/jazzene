@@ -8,6 +8,7 @@ fn volume_input(volume : @signal.Signal[Double]) -> @luna_dom.DomNode {
     |> Option::map(fn(percent) { volume.set(percent / 100.0) })
     |> ignore
   }
+
   @luna_dom.div(class="relative", [
     @luna_dom.button(
       class="p-3 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors shadow-lg",

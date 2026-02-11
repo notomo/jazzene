@@ -15,6 +15,7 @@ pub fn find_beam_groups(
   let mut current_beat_group = -1
   let mut current_is_triplet = false
   let mut current_beat_index = -1
+
   for i, pair in positioned {
     let (start_beat, note) = pair
     let is_beamable_duration = note.duration.is_beamable()
@@ -70,6 +71,7 @@ fn flush_beam_group(
         None => acc
       }
     })
+
   if note_count >= 2 {
     groups.push(current.copy())
   }

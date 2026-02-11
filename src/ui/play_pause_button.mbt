@@ -20,6 +20,7 @@ fn play_pause_button(
     is_playing.set(true)
     playback_position.set(start_position)
   }
+
   @luna_dom.button(
     class="px-4 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-semibold transition-colors shadow-lg",
     on=@luna_dom.events().click(on_click),

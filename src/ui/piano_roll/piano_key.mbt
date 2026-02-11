@@ -50,11 +50,9 @@ fn calc_key_areas(
   let min_note = min_key % 12
   let max_note = max_key % 12
 
-  // Calculate base offset ratio
   let (min_left_ratio, _) = key_ratio[min_note]
   let base_offset_ratio = min_octave.to_double() + min_left_ratio
 
-  // Calculate octave width
   let min_aligned = min_key + 12 - min_key % 12
   let max_aligned = max_key - max_key % 12
   let (_, max_right_ratio) = key_ratio[max_note]

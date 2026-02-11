@@ -51,6 +51,7 @@ pub fn KeySignature::pitch_class_to_diatonic_step(
     11 => 6 // B
     _ => 0
   }
+
   // In flat keys, black-key pitch classes that are flattened notes
   // should map to the step above (e.g., Bb is step 6, not step 5)
   match self.accidental_type {
@@ -84,11 +85,13 @@ pub fn KeySignature::pitch_class_accidental(
 ) -> Accidental {
   let step = self.pitch_class_to_diatonic_step(pitch_class)
   let is_altered_step = self.altered_steps.iter().any(fn(s) { s == step })
+
   // Check if the pitch class is a "black key" (chromatic)
   let is_black_key = match pitch_class {
     1 | 3 | 6 | 8 | 10 => true
     _ => false
   }
+
   match (is_black_key, is_altered_step) {
     (false, _) =>
       // White key -> always Natural
@@ -125,6 +128,7 @@ pub fn KeySignature::signature_midi_positions(
     Flat => flat_positions
     Natural => return []
   }
+
   positions.iter().take(count).collect()
 }
 

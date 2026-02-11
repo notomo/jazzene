@@ -108,12 +108,14 @@ fn calculate_stem_info(
   let rx = STAFF_LINE_SPACING * NOTE_HEAD_RX_RATIO
   let cos_25 = COS_NOTE_HEAD_ROTATION
   let sin_25 = SIN_NOTE_HEAD_ROTATION
+
   let (stem_x_offset, stem_y_offset) = if stem_up {
     (rx * cos_25, -(rx * sin_25))
   } else {
     (-(rx * cos_25), rx * sin_25)
   }
   let y1 = note_y + stem_y_offset
+
   {
     x: note_x + stem_x_offset,
     y1,

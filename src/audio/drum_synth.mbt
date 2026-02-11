@@ -101,6 +101,7 @@ fn DrumSynth::schedule_kick(
   velocity : Double,
 ) -> Unit {
   let duration = 0.25
+
   // Tone body: sine with pitch sweep for punch
   let osc = self.ctx.create_oscillator()
   osc.set_type("sine")
@@ -115,6 +116,7 @@ fn DrumSynth::schedule_kick(
   gain.connect(self.master_gain.as_audio_node())
   osc.start(start_time)
   osc.stop(start_time + duration)
+
   // Click transient: short noise burst for attack
   self.play_noise(start_time, 0.02, velocity * 0.3) |> ignore
 }
@@ -128,8 +130,10 @@ fn DrumSynth::schedule_snare(
   velocity : Double,
 ) -> Unit {
   let duration = 0.15
+
   // Noise component: the characteristic snare rattle
   self.play_noise(start_time, duration, velocity * 0.7) |> ignore
+
   // Body tone: triangle wave for warmth
   let body = self.ctx.create_oscillator()
   body.set_type("triangle")
@@ -158,8 +162,10 @@ fn DrumSynth::schedule_hihat(
   velocity : Double,
 ) -> Unit {
   let duration = 0.08
+
   // Noise burst: short and bright for metallic character
   self.play_noise(start_time, duration, velocity * 0.4) |> ignore
+
   // Add high-frequency shimmer with detuned square oscillators
   [1100.0, 1500.0].each(fn(hz) {
     let osc = self.ctx.create_oscillator()
@@ -186,6 +192,7 @@ pub fn DrumSynth::schedule_notes(
 ) -> Unit {
   let current_time = @music.Duration::from_seconds(self.ctx.current_time())
   let scaled_volume = volume * self.volume_scale
+
   for sound in sounds {
     let start_time = sound.start_time(current_time).to_seconds()
     match @music.DrumVoice::from_midi(sound.midi) {

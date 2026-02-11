@@ -27,6 +27,7 @@ fn spinbox(
 ) -> @luna_dom.DomNode {
   let drag_start_x : Ref[Double?] = Ref::new(None)
   let drag_start_value : Ref[Int] = Ref::new(0)
+
   fn clamp(value : Int) -> Int {
     @cmp.maximum(min, @cmp.minimum(max, value))
   }
@@ -43,6 +44,7 @@ fn spinbox(
   let on_increment : @luna_dom.MouseHandler = fn(_) {
     update_value(signal.get() + step)
   }
+
   let on_wheel : @luna_dom.WheelHandler = fn(e) {
     e.preventDefault()
     let delta_y = e.deltaY
@@ -66,12 +68,15 @@ fn spinbox(
   let on_mouseup : (@js_dom.MouseEvent) -> Unit = fn(_) {
     drag_start_x.val = None
   }
+
   let on_mousedown : @luna_dom.MouseHandler = fn(e) {
     drag_start_x.val = Some(e.clientX)
     drag_start_value.val = signal.get()
     add_document_drag_listeners(on_mousemove, on_mouseup)
   }
+
   let btn_class = "bg-blue-900/60 hover:bg-blue-800/70 border border-blue-700/50 rounded-lg w-9 py-1 text-lg text-blue-200 text-center cursor-pointer select-none"
+
   @luna_dom.div(
     class="flex items-center gap-2",
     on=@luna_dom.events().wheel(on_wheel).mousedown(on_mousedown),

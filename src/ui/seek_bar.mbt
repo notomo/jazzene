@@ -16,6 +16,7 @@ fn seek_bar(
     })
     |> ignore
   }
+
   @luna_dom.div(class="w-full flex gap-2 items-baseline bg-slate-800", [
     @luna_dom.div(
       class="flex justify-between text-sm text-slate-400 mb-2 text-nowrap",

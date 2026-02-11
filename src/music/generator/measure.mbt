@@ -241,6 +241,7 @@ fn generate_measure_notes(
     Some(n) => Playing(n)
     None => Resting
   }
+
   let initial_state = MeasureState::new(
     ctx.beats_per_measure.to_int(),
     ctx.incoming_stamina,
@@ -257,10 +258,12 @@ fn generate_measure_notes(
   }
 
   // Fill remaining measure with new notes
+
   let update_accidental = @music.create_accidental_calculator(ctx.key)
   let final_state = fill_remaining_measure(
     state_after_tie, ctx, settings, update_accidental, random_int,
   )
+
   // Convert PhraseState back to Int?
   let outgoing_phrase = match final_state.phrase {
     Playing(n) => Some(n)
@@ -285,6 +288,7 @@ fn process_incoming_tie(
   beats_per_measure : Double,
 ) -> (MeasureState, TieContext?) {
   let midi = tie_ctx.midi
+
   for remaining = tie_ctx.remaining_beats, state = state {
     guard remaining > 0.0 && state.measure_pos < beats_per_measure else {
       let outgoing = if remaining > 0.0 {
@@ -339,6 +343,7 @@ fn select_motif_guided_note(
     Some(t) => t
     None => return None // target out of valid MIDI range
   }
+
   let chord_tones = filter_by_interval(
     get_extended_tones(chord),
     last_midi,
@@ -351,6 +356,7 @@ fn select_motif_guided_note(
   )
   let all_tones = chord_tones + scale_tones
   guard not(all_tones.is_empty()) else { return None }
+
   let mut best = all_tones[0]
   let mut best_dist = target.distance(best)
   for tone in all_tones {
@@ -391,6 +397,7 @@ fn select_note_with_motif(
     )
     return (midi, state.motif_memory)
   }
+
   // Try motif-guided selection if replaying
   match state.motif_memory.next_replay_interval() {
     Some((interval, updated_memory)) =>
@@ -522,8 +529,10 @@ fn fill_remaining_measure(
     } else {
       remaining_in_group
     }
+
     // Get chord at current beat position
     let chord = ctx.chord_at(state.measure_pos)
+
     match state.phrase {
       Resting => {
         // Finish recording any motif from the previous phrase
@@ -547,6 +556,7 @@ fn fill_remaining_measure(
             random_int,
           )
         }
+
         // Emit a rest, then roll a new phrase
         match duration {
           Some(duration) => {
@@ -613,6 +623,7 @@ fn fill_remaining_measure(
               state, chord, ctx, settings, update_accidental, random_int, notes_left,
             )
         }
+
         // Select note using motif-guided or normal selection
         let (midi_opt, new_motif_memory) = select_note_with_motif(
           state, chord, ctx, settings, random_int,
@@ -806,6 +817,7 @@ fn decide_midi_number(
     rest_probability, stamina, stamina_max, last_was_rest,
   )
   guard random_int(100) >= actual_rest_prob else { return None }
+
   let chord_tones = get_extended_tones(chord)
   let tension_tones = get_extended_tension_tones(chord)
   let scale_tones = get_extended_scale_tones(chord, key)
@@ -819,6 +831,7 @@ fn decide_midi_number(
       let approach_tones = filter_by_interval(
         approach_tones, prev, max_interval,
       )
+
       // Calculate weights for chord tones
       let weighted_chord : Array[(Int, @music.MidiNumber)] = chord_tones
         .iter()
@@ -902,11 +915,13 @@ fn generate_triplet_group(
   // (avoids floating-point drift from 1/3 + 1/3 + 1/3 != 1.0)
   let start_pos = state.measure_pos
   let mut current_state = state
+
   for i = 0; i < 3; i = i + 1 {
     let current_chord = ctx.chord_at(current_state.measure_pos)
     let (midi_opt, new_motif_memory) = select_note_with_motif(
       current_state, current_chord, ctx, settings, random_int,
     )
+
     match midi_opt {
       Some(midi) => {
         let cost = match current_state.last_midi {

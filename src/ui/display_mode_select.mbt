@@ -68,6 +68,7 @@ pub fn DisplayMode::show_piano_roll(self : DisplayMode) -> Bool {
 /// Render display mode selection dropdown
 fn display_mode_select(mode : @signal.Signal[DisplayMode]) -> @luna_dom.DomNode {
   let all_modes = DisplayMode::all()
+
   @luna_dom.div(class="flex items-center gap-2", [
     @luna_dom.label(class="text-sm text-slate-400", [@luna_dom.text("View:")]),
     @luna_dom.create_element(

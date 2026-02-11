@@ -60,6 +60,7 @@ pub fn Duration::format(self : Duration) -> String {
   let total_seconds = self.seconds.to_int()
   let minutes = total_seconds / 60
   let secs = total_seconds % 60
+
   minutes.to_string() +
   ":" +
   (if secs < 10 { "0" } else { "" }) +
@@ -74,6 +75,7 @@ pub fn Duration::parse(input : String) -> Duration? {
   if parts.length() != 2 {
     return None
   }
+
   try {
     let minutes = @strconv.parse_int(parts[0])
     let seconds = @strconv.parse_int(parts[1])

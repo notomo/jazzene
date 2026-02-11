@@ -7,6 +7,7 @@ extern "js" fn get_event_target_value(e : @js.Any) -> String =
 /// Render key selection dropdown
 fn key_select(key : @signal.Signal[@music.KeySignature]) -> @luna_dom.DomNode {
   let all_roots = @music.KeySignature::all_roots()
+
   @luna_dom.div(class="flex items-center gap-2", [
     @luna_dom.label(class="text-sm text-slate-400", [@luna_dom.text("Key:")]),
     @luna_dom.create_element(

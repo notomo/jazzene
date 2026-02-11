@@ -48,6 +48,7 @@ fn beam_endpoints(
 ) -> (Double, Double) {
   let stem_height = STAFF_LINE_SPACING * STEM_HEIGHT_SPACES
   let min_stem_height = STAFF_LINE_SPACING * (STEM_HEIGHT_SPACES - 1.0)
+
   // Collect note_y values for non-rest notes
   let note_ys : Array[Double] = []
   for idx in group {
@@ -61,6 +62,7 @@ fn beam_endpoints(
     let y = staff_y + STAFF_LINE_SPACING * 2.0
     return (y, y)
   }
+
   let first_note_y = note_ys[0]
   let last_note_y = note_ys[note_ys.length() - 1]
   // Determine min/max of all note_ys
@@ -74,6 +76,7 @@ fn beam_endpoints(
       max_y = y
     }
   }
+
   // Determine slope (positive = descending pitch, since Y increases downward)
   let mut slope = last_note_y - first_note_y
   // Check horizontal conditions
@@ -95,11 +98,13 @@ fn beam_endpoints(
   } else if slope < -STAFF_LINE_SPACING {
     slope = -STAFF_LINE_SPACING
   }
+
   // Calculate base_y (the beam position for the "extreme" side)
   let base_y = if stem_up { min_y - stem_height } else { max_y + stem_height }
   // Distribute slope around base_y
   let mut first_beam_y = base_y - slope / 2.0
   let mut last_beam_y = base_y + slope / 2.0
+
   // Minimum stem length check: ensure every note has adequate stem length
   let mut max_violation = 0.0
   for i, y in note_ys {
@@ -164,6 +169,7 @@ fn render_beam_group(
   let mut first_x = 0.0
   let mut last_x = 0.0
   let mut found_first = false
+
   // First pass: find first_x and last_x
   for idx in group {
     let (_, note) = positioned[idx]
@@ -183,6 +189,7 @@ fn render_beam_group(
       None => ()
     }
   }
+
   // Second pass: render stems using interpolated beam_y
   for idx in group {
     let (_, note) = positioned[idx]
@@ -216,6 +223,7 @@ fn render_beam_group(
       None => ()
     }
   }
+
   // Render beam as polygon (parallelogram for angled beams)
   let (first_top, first_bottom, last_top, last_bottom) = if stem_up {
     (
@@ -234,6 +242,7 @@ fn render_beam_group(
   }
   let points = "\{first_x},\{first_top} \{last_x},\{last_top} \{last_x},\{last_bottom} \{first_x},\{first_bottom}"
   nodes.push(@luna_dom.svg_polygon(points~, stroke="none"))
+
   // Render triplet "3" label if all notes in the group are EighthTriplet
   // and the group has exactly 3 notes
   let is_triplet = group.length() == 3 &&
@@ -332,6 +341,7 @@ fn render_beams(
     let (first_beam_y, last_beam_y) = beam_endpoints(
       group, positioned, staff_y, key, stem_up,
     )
+
     // Find first_x and last_x for rest clearance interpolation
     let mut first_x = 0.0
     let mut last_x = 0.0

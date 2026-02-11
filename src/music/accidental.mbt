@@ -17,9 +17,11 @@ pub fn create_accidental_calculator(
   let note_states : Map[Int, Accidental] = {}
   // Key signature defaults per step (applies to all octaves)
   let key_defaults : Map[Int, Accidental] = {}
+
   for step in key.altered_steps {
     key_defaults[step] = key.accidental_type
   }
+
   fn(midi : MidiNumber) -> Accidental? {
     let step = key.pitch_class_to_diatonic_step(midi.pitch_class())
     let octave = midi.value / 12

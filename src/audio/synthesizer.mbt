@@ -70,10 +70,12 @@ fn schedule_note(
   let start_time_sec = start_time.to_seconds()
   let duration_sec = duration.to_seconds()
   let info = midi_to_sample_info(midi.value)
+
   let buffer = match bank.lookup(info.note_name) {
     Some(buf) => buf
     None => return
   }
+
   let gain = {
     let gain = synth.ctx.create_gain()
     let release_time = 0.05
@@ -89,6 +91,7 @@ fn schedule_note(
     gain.connect(synth.master_gain.as_audio_node())
     gain
   }
+
   let source = synth.ctx.create_buffer_source()
   source.set_buffer(buffer)
   if info.detune_cents != 0.0 {
@@ -110,7 +113,9 @@ pub fn Synthesizer::schedule_notes(
     Some(bank) => bank
     None => return
   }
+
   let current_time = @music.Duration::from_seconds(self.ctx.current_time())
+
   for sound in sounds {
     let start_time = sound.start_time(current_time)
     schedule_note(self, bank, sound.midi, start_time, sound.duration, volume)

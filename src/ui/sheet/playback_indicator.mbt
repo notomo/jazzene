@@ -25,7 +25,6 @@ fn render_playback_indicator(
   // Staff height (5 lines with spacing between them)
   let staff_height = (STAFF_LINES - 1).to_double() * STAFF_LINE_SPACING
 
-  // Vertical line from above chord symbols to below staff
   let line_top_offset = PLAYBACK_INDICATOR_TOP_OFFSET
   let line_bottom_offset = staff_height + PLAYBACK_INDICATOR_BOTTOM_OFFSET
   @luna_dom.svg_line(
@@ -104,6 +103,7 @@ fn calculate_indicator_x(
   let pos_ms = position.to_milliseconds()
   let ms_per_measure = @music.ms_per_measure(bpm, beats_per_measure~)
   let clef_and_key_width = CLEF_SPACE_WIDTH + key_signature_width(key)
+
   if ms_per_measure <= 0.0 || measure_count <= 0 {
     return MEASURE_START_X + clef_and_key_width
   }
