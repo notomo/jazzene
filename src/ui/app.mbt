@@ -60,7 +60,7 @@ pub fn render(
   display_mode : @signal.Signal[DisplayMode],
 ) -> Unit {
   let app = @luna_dom.div(
-    class="flex flex-col h-dvh overflow-hidden w-dvw bg-gradient-to-br from-slate-950 to-slate-900 text-white",
+    class="flex flex-col h-dvh overflow-hidden w-dvw bg-gradient-to-br from-slate-950 to-slate-900 text-white touch-manipulation",
     [
       @luna_dom.div(
         class="p-2 bg-slate-800 border-2 border-slate-700",
