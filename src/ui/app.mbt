@@ -132,10 +132,9 @@ pub fn render(
       @luna_dom.div(
         class="grid grid-cols-[1fr_auto_1fr] items-center px-3 py-1.5 bg-slate-800 border-t-2 border-slate-700",
         [
-          @luna_dom.div([]),
+          @luna_dom.div(class="justify-self-start", [volume_input(volume)]),
           play_pause_button(is_playing, playback_position, total_duration),
-          @luna_dom.div(class="flex items-center justify-around", [
-            volume_input(volume),
+          @luna_dom.div(class="flex items-center justify-between pl-6", [
             ab_loop(loop_a_measure, loop_b_measure, fn() { measure_count.get() }),
             display_mode_select(display_mode),
           ]),
