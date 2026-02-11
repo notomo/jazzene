@@ -70,7 +70,7 @@ pub fn render(
             key_select(key),
             chord_progression_input(raw_chord_progression, chord_parse_error),
             seed_input(seed),
-            measure_count_input(measure_count),
+            measure_count_input(measure_count, loop_b_measure),
             bpm_input(bpm),
           ]),
         ],
