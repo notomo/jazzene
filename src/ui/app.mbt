@@ -103,7 +103,7 @@ pub fn render(
             dyn_class=fn() {
               match display_mode.get() {
                 Sheet => "w-full min-h-0 overflow-auto"
-                Sheet_PianoRoll => "flex-2 min-h-0 overflow-auto"
+                Sheet_PianoRoll => "flex-1 min-h-0 overflow-auto"
                 PianoRoll => "hidden"
               }
             },
@@ -127,8 +127,8 @@ pub fn render(
           @luna_dom.div(
             dyn_class=fn() {
               match display_mode.get() {
-                PianoRoll => "flex flex-col flex-3 min-h-0"
-                Sheet_PianoRoll => "flex flex-col flex-3 min-h-0"
+                PianoRoll => "flex flex-col flex-1 min-h-0"
+                Sheet_PianoRoll => "flex flex-col flex-1 min-h-0"
                 Sheet => "hidden"
               }
             },
