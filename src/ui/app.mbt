@@ -91,7 +91,7 @@ pub fn render(
         dyn_class=fn() {
           let mode = display_mode.get()
           match (mode.show_sheet(), mode.show_piano_roll()) {
-            (true, false) => "flex justify-center h-full min-h-0"
+            (true, false) => "flex h-full min-h-0"
             (false, true) => "flex justify-center h-full min-h-0"
             _ => "flex h-full min-h-0"
           }
@@ -101,14 +101,25 @@ pub fn render(
           @luna_dom.div(
             dyn_class=fn() {
               match display_mode.get() {
-                Sheet => "w-4/5 min-h-0"
-                Sheet_PianoRoll => "flex-2 min-h-0"
+                Sheet => "w-full min-h-0 overflow-auto"
+                Sheet_PianoRoll => "flex-2 min-h-0 overflow-auto"
                 PianoRoll => "hidden"
               }
             },
+            attrs=[("id", @luna_dom.Attr::AttrString("lead-sheet-container"))],
             [
-              @sheet.lead_sheet(
-                measures, playback_position, bpm, key, time_signature,
+              @luna_dom.div(
+                dyn_class=fn() {
+                  match display_mode.get() {
+                    Sheet => "w-4/5 mx-auto"
+                    _ => ""
+                  }
+                },
+                [
+                  @sheet.lead_sheet(
+                    measures, playback_position, bpm, key, time_signature,
+                  ),
+                ],
               ),
             ],
           ),

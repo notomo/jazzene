@@ -96,59 +96,54 @@ pub fn lead_sheet(
   })
 
   // Return container with SVG
-  @luna_dom.div(
-    class="w-full h-full overflow-auto p-4",
-    attrs=[("id", @luna_dom.Attr::AttrString(LEAD_SHEET_CONTAINER_ID))],
-    [
-      @luna_dom.svg(
-        attrs=[
-          ("preserveAspectRatio", @luna_dom.Attr::AttrString("xMidYMin meet")),
-        ],
-        width="100%",
-        fill=COLOR_FOREGROUND,
-        stroke=COLOR_FOREGROUND,
-        dyn_attrs=[
-          (
-            "viewBox",
-            @luna_dom.AttrValue::Dynamic(fn() {
-              let measure_count = measures().length()
-              let rows = (measure_count + MEASURES_PER_ROW - 1) /
-                MEASURES_PER_ROW
-              let height = STAFF_TOP + rows.to_double() * ROW_HEIGHT
-              let key_sig_width = key_signature_width(key.get())
-              let viewbox_start_x = MEASURE_START_X - 15.0
-              let width = MEASURE_START_X -
-                viewbox_start_x +
-                CLEF_SPACE_WIDTH +
-                key_sig_width +
-                MEASURES_PER_ROW.to_double() * MEASURE_WIDTH
-              "\{viewbox_start_x.to_int()} \{0} \{width.to_int()} \{height.to_int()}"
-            }),
-          ),
-        ],
-        [
-          // Static measure elements (no current_measure_index dependency)
-          @luna_dom.for_each(measures, fn(m, idx) {
-            let ts = time_signature.get()
-            render_measure(
-              m,
-              idx,
-              playback_position,
-              key.get(),
-              ts.beats_per_measure(),
-              ts,
-            )
+  @luna_dom.div(class="w-full p-4", [
+    @luna_dom.svg(
+      attrs=[
+        ("preserveAspectRatio", @luna_dom.Attr::AttrString("xMidYMin meet")),
+      ],
+      width="100%",
+      fill=COLOR_FOREGROUND,
+      stroke=COLOR_FOREGROUND,
+      dyn_attrs=[
+        (
+          "viewBox",
+          @luna_dom.AttrValue::Dynamic(fn() {
+            let measure_count = measures().length()
+            let rows = (measure_count + MEASURES_PER_ROW - 1) / MEASURES_PER_ROW
+            let height = STAFF_TOP + rows.to_double() * ROW_HEIGHT
+            let key_sig_width = key_signature_width(key.get())
+            let viewbox_start_x = MEASURE_START_X - 15.0
+            let width = MEASURE_START_X -
+              viewbox_start_x +
+              CLEF_SPACE_WIDTH +
+              key_sig_width +
+              MEASURES_PER_ROW.to_double() * MEASURE_WIDTH
+            "\{viewbox_start_x.to_int()} \{0} \{width.to_int()} \{height.to_int()}"
           }),
-          // Playback position indicator overlay
-          render_playback_indicator(
+        ),
+      ],
+      [
+        // Static measure elements (no current_measure_index dependency)
+        @luna_dom.for_each(measures, fn(m, idx) {
+          let ts = time_signature.get()
+          render_measure(
+            m,
+            idx,
             playback_position,
-            bpm,
-            fn() { measures().length() },
-            key,
-            time_signature,
-          ),
-        ],
-      ),
-    ],
-  )
+            key.get(),
+            ts.beats_per_measure(),
+            ts,
+          )
+        }),
+        // Playback position indicator overlay
+        render_playback_indicator(
+          playback_position,
+          bpm,
+          fn() { measures().length() },
+          key,
+          time_signature,
+        ),
+      ],
+    ),
+  ])
 }
