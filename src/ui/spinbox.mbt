@@ -82,11 +82,11 @@ fn spinbox(
     on=@luna_dom.events().wheel(on_wheel).mousedown(on_mousedown),
     [
       @luna_dom.span(
-        class="text-sm text-slate-400 mr-1 select-none cursor-ew-resize",
+        class="text-base text-slate-400 mr-1 select-none cursor-ew-resize",
         [@luna_dom.text(label + ":")],
       ),
       @luna_dom.span(
-        class="text-white text-sm select-none cursor-ew-resize min-w-[3ch] text-center",
+        class="text-white text-base select-none cursor-ew-resize min-w-[3ch] text-center",
         attrs=[("aria-label", @luna_dom.Attr::AttrString(query_param))],
         [@luna_dom.text_dyn(fn() { signal.get().to_string() })],
       ),
