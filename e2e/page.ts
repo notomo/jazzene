@@ -58,9 +58,9 @@ export async function openJazzenePage({
     getSeedInput: () => page.getByLabel("seed"),
     getMeasuresInput: () => page.getByLabel("measures"),
     getKeySelect: () => page.getByLabel("key", { exact: true }),
-    getDisplayModeSelect: () => page.getByLabel("display mode"),
-    getActiveDisplayModeButton: () =>
-      page.getByLabel("display mode").locator("button.bg-blue-900"),
+    getViewModeSelect: () => page.getByLabel("view mode"),
+    getActiveViewModeButton: () =>
+      page.getByLabel("view mode").locator("button.bg-blue-900"),
     getLoopAInput: () => page.getByLabel("loop_a"),
     getLoopBInput: () => page.getByLabel("loop_b"),
     getTimeSignatureSelect: () => page.getByLabel("time signature"),

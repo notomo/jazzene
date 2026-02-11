@@ -56,7 +56,7 @@ pub fn render(
   measures : () -> Array[@music.Measure],
   key : @signal.Signal[@music.KeySignature],
   time_signature : @signal.Signal[@music.TimeSignature],
-  display_mode : @signal.Signal[DisplayMode],
+  view_mode : @signal.Signal[ViewMode],
 ) -> Unit {
   let app = @luna_dom.div(
     class="flex flex-col h-dvh overflow-hidden w-dvw bg-gradient-to-br from-slate-950 to-slate-900 text-white touch-manipulation",
@@ -77,7 +77,7 @@ pub fn render(
       ),
       @luna_dom.div(
         dyn_class=fn() {
-          let mode = display_mode.get()
+          let mode = view_mode.get()
           match (mode.show_sheet(), mode.show_piano_roll()) {
             (true, false) => "flex h-full min-h-0"
             (false, true) => "flex justify-center h-full min-h-0"
@@ -88,7 +88,7 @@ pub fn render(
         [
           @luna_dom.div(
             dyn_class=fn() {
-              match display_mode.get() {
+              match view_mode.get() {
                 Sheet => "w-full min-h-0 overflow-auto"
                 Sheet_PianoRoll => "flex-1 min-h-0 overflow-auto"
                 PianoRoll => "hidden"
@@ -98,7 +98,7 @@ pub fn render(
             [
               @luna_dom.div(
                 dyn_class=fn() {
-                  match display_mode.get() {
+                  match view_mode.get() {
                     Sheet => "w-4/5 mx-auto"
                     _ => ""
                   }
@@ -113,7 +113,7 @@ pub fn render(
           ),
           @luna_dom.div(
             dyn_class=fn() {
-              match display_mode.get() {
+              match view_mode.get() {
                 PianoRoll => "flex flex-col flex-1 min-h-0"
                 Sheet_PianoRoll => "flex flex-col flex-1 min-h-0"
                 Sheet => "hidden"
@@ -136,7 +136,7 @@ pub fn render(
           play_pause_button(is_playing, playback_position, total_duration),
           @luna_dom.div(class="flex items-center justify-between pl-4", [
             ab_loop(loop_a_measure, loop_b_measure, fn() { measure_count.get() }),
-            display_mode_select(display_mode),
+            view_mode_select(view_mode),
           ]),
         ],
       ),

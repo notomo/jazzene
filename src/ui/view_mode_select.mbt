@@ -1,13 +1,13 @@
 ///|
-/// Display mode for visualization panels
-pub(all) enum DisplayMode {
+/// View mode for visualization panels
+pub(all) enum ViewMode {
   Sheet_PianoRoll
   Sheet
   PianoRoll
 } derive(Eq)
 
 ///|
-fn DisplayMode::to_query_string(self : DisplayMode) -> String {
+fn ViewMode::to_query_string(self : ViewMode) -> String {
   match self {
     Sheet_PianoRoll => "both"
     Sheet => "sheet"
@@ -16,7 +16,7 @@ fn DisplayMode::to_query_string(self : DisplayMode) -> String {
 }
 
 ///|
-fn DisplayMode::from_query_string(s : String) -> DisplayMode? {
+fn ViewMode::from_query_string(s : String) -> ViewMode? {
   match s {
     "both" => Some(Sheet_PianoRoll)
     "sheet" => Some(Sheet)
@@ -26,7 +26,7 @@ fn DisplayMode::from_query_string(s : String) -> DisplayMode? {
 }
 
 ///|
-pub fn DisplayMode::show_sheet(self : DisplayMode) -> Bool {
+pub fn ViewMode::show_sheet(self : ViewMode) -> Bool {
   match self {
     Sheet_PianoRoll | Sheet => true
     PianoRoll => false
@@ -34,7 +34,7 @@ pub fn DisplayMode::show_sheet(self : DisplayMode) -> Bool {
 }
 
 ///|
-pub fn DisplayMode::show_piano_roll(self : DisplayMode) -> Bool {
+pub fn ViewMode::show_piano_roll(self : ViewMode) -> Bool {
   match self {
     Sheet_PianoRoll | PianoRoll => true
     Sheet => false
@@ -42,7 +42,7 @@ pub fn DisplayMode::show_piano_roll(self : DisplayMode) -> Bool {
 }
 
 ///|
-fn toggle_sheet(current : DisplayMode) -> DisplayMode {
+fn toggle_sheet(current : ViewMode) -> ViewMode {
   match current {
     Sheet_PianoRoll => PianoRoll
     Sheet => PianoRoll
@@ -51,7 +51,7 @@ fn toggle_sheet(current : DisplayMode) -> DisplayMode {
 }
 
 ///|
-fn toggle_piano(current : DisplayMode) -> DisplayMode {
+fn toggle_piano(current : ViewMode) -> ViewMode {
   match current {
     Sheet_PianoRoll => Sheet
     PianoRoll => Sheet
@@ -60,8 +60,8 @@ fn toggle_piano(current : DisplayMode) -> DisplayMode {
 }
 
 ///|
-/// Render display mode toggle buttons with "View:" label
-fn display_mode_select(mode : @signal.Signal[DisplayMode]) -> @luna_dom.DomNode {
+/// Render view mode toggle buttons with "View:" label
+fn view_mode_select(mode : @signal.Signal[ViewMode]) -> @luna_dom.DomNode {
   let base = "px-3 py-2 text-base font-medium cursor-pointer transition-colors"
   let active_class = "bg-blue-900 text-blue-200"
   let inactive_class = "bg-slate-800 text-slate-400 hover:bg-slate-700"
@@ -112,7 +112,7 @@ fn display_mode_select(mode : @signal.Signal[DisplayMode]) -> @luna_dom.DomNode 
       @luna_dom.div(
         [sheet_button, piano_button],
         class="flex items-center rounded-lg border border-slate-600",
-        attrs=[("aria-label", @luna_dom.Attr::AttrString("display mode"))],
+        attrs=[("aria-label", @luna_dom.Attr::AttrString("view mode"))],
       ),
     ],
     class="flex items-center",

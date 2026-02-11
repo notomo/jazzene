@@ -81,7 +81,7 @@ fn main {
     loop_b_measure, bpm, time_signature, synth, drum_synth,
   )
 
-  let display_mode = @signal.signal(@ui.get_initial_display_mode())
+  let view_mode = @signal.signal(@ui.get_initial_view_mode())
   let is_playing = @signal.signal(false)
   let _ = @signal.effect(fn() {
     if is_playing.get() {
@@ -97,7 +97,7 @@ fn main {
   @ui.render(
     is_playing, playback_position, volume, bpm, raw_chord_progression, seed, measure_count,
     sounds, total_duration, loop_a_measure, loop_b_measure, chord_parse_error, measures,
-    key, time_signature, display_mode,
+    key, time_signature, view_mode,
   )
 }
 

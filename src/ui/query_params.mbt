@@ -26,14 +26,12 @@ pub fn get_initial_int(name : String, default : Int) -> Int {
 }
 
 ///|
-/// Read the initial display mode from the URL query parameter
-pub fn get_initial_display_mode() -> DisplayMode {
+/// Read the initial view mode from the URL query parameter
+pub fn get_initial_view_mode() -> ViewMode {
   match get_query_param("view") {
     Some(value) =>
-      DisplayMode::from_query_string(value).unwrap_or(
-        DisplayMode::Sheet_PianoRoll,
-      )
-    None => DisplayMode::Sheet_PianoRoll
+      ViewMode::from_query_string(value).unwrap_or(ViewMode::Sheet_PianoRoll)
+    None => ViewMode::Sheet_PianoRoll
   }
 }
 
