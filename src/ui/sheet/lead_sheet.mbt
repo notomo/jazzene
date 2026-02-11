@@ -45,6 +45,7 @@ pub fn lead_sheet(
   time_signature : @signal.Signal[@music.TimeSignature],
 ) -> @luna_dom.DomNode {
   // Set up auto-scroll effect
+  let last_scrolled_row : Ref[Int] = Ref::new(-1)
   let _ = @signal.effect(fn() {
     let measure_count = measures().length()
     let beats_per_measure = time_signature.get().beats_per_measure()
@@ -54,6 +55,10 @@ pub fn lead_sheet(
       measure_count,
       beats_per_measure~,
     )
+    if current_row == last_scrolled_row.val {
+      return
+    }
+    last_scrolled_row.val = current_row
     match @js_dom.document().getElementById(LEAD_SHEET_CONTAINER_ID) {
       Some(container) => {
         // Get the SVG element to calculate the scale factor
