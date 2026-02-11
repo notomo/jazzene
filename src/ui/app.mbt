@@ -65,25 +65,13 @@ pub fn render(
         class="p-2 bg-slate-800 border-2 border-slate-700",
         attrs=[("aria-label", @luna_dom.Attr::AttrString("lead sheet"))],
         [
-          @luna_dom.div([
-            @luna_dom.div(class="flex gap-4 items-center p-1", [
-              time_signature_select(time_signature),
-              key_select(key),
-              chord_progression_input(raw_chord_progression, chord_parse_error),
-              seed_input(seed),
-              measure_count_input(measure_count),
-              bpm_input(bpm),
-            ]),
-            @luna_dom.div(class="flex gap-4 items-baseline p-1", [
-              play_pause_button(is_playing, playback_position, total_duration),
-              volume_input(volume),
-              @luna_dom.div(class="flex gap-2 w-full items-center", [
-                ab_loop(loop_a_measure, loop_b_measure, fn() {
-                  measure_count.get()
-                }),
-                display_mode_select(display_mode),
-              ]),
-            ]),
+          @luna_dom.div(class="flex gap-4 items-center p-1", [
+            time_signature_select(time_signature),
+            key_select(key),
+            chord_progression_input(raw_chord_progression, chord_parse_error),
+            seed_input(seed),
+            measure_count_input(measure_count),
+            bpm_input(bpm),
           ]),
         ],
       ),
@@ -139,6 +127,19 @@ pub fn render(
               @piano_roll.keyboard(sounds, playback_position),
             ],
           ),
+        ],
+      ),
+      @luna_dom.div(
+        class="grid grid-cols-[1fr_auto_1fr] items-center gap-4 px-3 py-1.5 bg-slate-800 border-t-2 border-slate-700",
+        [
+          @luna_dom.div(class="flex items-center gap-2 justify-self-end", [
+            volume_input(volume),
+          ]),
+          play_pause_button(is_playing, playback_position, total_duration),
+          @luna_dom.div(class="flex items-center gap-3 w-full", [
+            ab_loop(loop_a_measure, loop_b_measure, fn() { measure_count.get() }),
+            @luna_dom.div(class="ml-auto", [display_mode_select(display_mode)]),
+          ]),
         ],
       ),
     ],

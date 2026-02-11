@@ -38,7 +38,7 @@ fn ab_loop(
       @luna_dom.text("A:"),
       @luna_dom.input(
         type_="number",
-        class="w-16 px-1 py-0.5 bg-slate-900 text-slate-100 rounded border border-slate-600 focus:border-blue-500 focus:outline-none text-sm",
+        class="w-16 px-2 py-2 bg-slate-900 text-slate-100 rounded-lg border border-slate-600 focus:border-blue-500 focus:outline-none text-sm",
         attrs=[
           ("aria-label", @luna_dom.Attr::AttrString("A loop measure")),
           ("min", @luna_dom.Attr::AttrString("1")),
@@ -51,7 +51,7 @@ fn ab_loop(
       @luna_dom.text("B:"),
       @luna_dom.input(
         type_="number",
-        class="w-16 px-1 py-0.5 bg-slate-900 text-slate-100 rounded border border-slate-600 focus:border-blue-500 focus:outline-none text-sm",
+        class="w-16 px-2 py-2 bg-slate-900 text-slate-100 rounded-lg border border-slate-600 focus:border-blue-500 focus:outline-none text-sm",
         attrs=[
           ("aria-label", @luna_dom.Attr::AttrString("B loop measure")),
           ("min", @luna_dom.Attr::AttrString("1")),

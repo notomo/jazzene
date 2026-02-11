@@ -11,7 +11,7 @@ fn volume_input(volume : @signal.Signal[Double]) -> @luna_dom.DomNode {
 
   @luna_dom.div(class="relative", [
     @luna_dom.button(
-      class="p-3 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors shadow-lg",
+      class="h-10 w-10 flex items-center justify-center bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors shadow-lg text-sm",
       on=@luna_dom.events().click(fn(_) { show_popup.update(fn(v) { !v }) }),
       attrs=[("aria-label", @luna_dom.Attr::AttrString("Volume control"))],
       [@luna_dom.text("🔊")],
