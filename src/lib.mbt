@@ -62,7 +62,7 @@ fn main {
   let playback_position = @signal.signal(
     @music.Duration::from_milliseconds(0.0),
   )
-  let volume = @signal.signal(0.3)
+  let volume = @signal.signal(@ui.get_initial_int("volume", 30))
 
   let loop_a_measure = @signal.signal(@ui.get_initial_loop_a_measure())
   let loop_b_measure : @signal.Signal[Int?] = @signal.signal(
@@ -155,7 +155,7 @@ fn measure_to_duration(
 ///|
 fn make_tick(
   playback_position : @signal.Signal[@music.Duration],
-  volume : @signal.Signal[Double],
+  volume : @signal.Signal[Int],
   sounds : @signal.Signal[Array[@music.NoteValueSound]],
   drum_sounds : @signal.Signal[Array[@music.NoteValueSound]],
   total_duration : () -> @music.Duration,
@@ -198,14 +198,17 @@ fn make_tick(
       final_position,
       lookahead,
     )
-    synth.schedule_notes(audio_sounds, volume.get())
+    synth.schedule_notes(audio_sounds, volume.get().to_double() / 100.0)
 
     let drum_audio_sounds = @music.AudioSound::from(
       drum_sounds.get(),
       final_position,
       lookahead,
     )
-    drum_synth.schedule_notes(drum_audio_sounds, volume.get())
+    drum_synth.schedule_notes(
+      drum_audio_sounds,
+      volume.get().to_double() / 100.0,
+    )
 
     playback_position.set(final_position)
     false

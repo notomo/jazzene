@@ -43,7 +43,7 @@ pub fn setup_loop(
 pub fn render(
   is_playing : @signal.Signal[Bool],
   playback_position : @signal.Signal[@music.Duration],
-  volume : @signal.Signal[Double],
+  volume : @signal.Signal[Int],
   bpm : @signal.Signal[Int],
   raw_chord_progression : @signal.Signal[String],
   seed : @signal.Signal[Int],
