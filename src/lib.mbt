@@ -62,7 +62,7 @@ fn main {
   let playback_position = @signal.signal(
     @music.Duration::from_milliseconds(0.0),
   )
-  let volume = @signal.signal(@ui.get_initial_int("volume", 30))
+  let volume = @signal.signal(@ui.get_initial_int("volume", 50))
 
   let loop_a_measure = @signal.signal(@ui.get_initial_loop_a_measure())
   let loop_b_measure : @signal.Signal[Int?] = @signal.signal(

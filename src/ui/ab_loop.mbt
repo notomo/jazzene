@@ -30,9 +30,9 @@ fn ab_loop(
   let btn_base = "w-9 h-10 flex items-center justify-center bg-blue-900/60 hover:bg-blue-800/70 text-blue-200 transition-colors text-lg font-mono select-none cursor-pointer"
   let btn_left = btn_base + " rounded-l-lg"
   let btn_right = btn_base + " rounded-r-lg"
-  let value_class = "w-9 h-10 flex items-center justify-center bg-slate-800 text-slate-100 text-sm tabular-nums"
-  @luna_dom.div(class="flex items-center gap-3 text-sm text-slate-400", [
-    @luna_dom.span(class="text-slate-400 text-sm select-none", [
+  let value_class = "w-9 h-10 flex items-center justify-center bg-slate-800 text-slate-100 text-base tabular-nums"
+  @luna_dom.div(class="flex items-center gap-3 text-base text-slate-400", [
+    @luna_dom.span(class="text-slate-400 text-base select-none", [
       @luna_dom.text("Loop:"),
     ]),
     @luna_dom.div(class="flex rounded-lg border border-slate-600", [

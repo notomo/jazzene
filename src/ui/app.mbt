@@ -134,7 +134,7 @@ pub fn render(
         [
           @luna_dom.div(class="justify-self-start", [volume_input(volume)]),
           play_pause_button(is_playing, playback_position, total_duration),
-          @luna_dom.div(class="flex items-center justify-between pl-6", [
+          @luna_dom.div(class="flex items-center justify-between pl-4", [
             ab_loop(loop_a_measure, loop_b_measure, fn() { measure_count.get() }),
             display_mode_select(display_mode),
           ]),

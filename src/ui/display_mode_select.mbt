@@ -62,7 +62,7 @@ fn toggle_piano(current : DisplayMode) -> DisplayMode {
 ///|
 /// Render display mode toggle buttons with "View:" label
 fn display_mode_select(mode : @signal.Signal[DisplayMode]) -> @luna_dom.DomNode {
-  let base = "px-3 py-2 text-sm font-medium cursor-pointer transition-colors"
+  let base = "px-3 py-2 text-base font-medium cursor-pointer transition-colors"
   let active_class = "bg-blue-900 text-blue-200"
   let inactive_class = "bg-slate-800 text-slate-400 hover:bg-slate-700"
   let sheet_button = @luna_dom.button(
@@ -107,7 +107,7 @@ fn display_mode_select(mode : @signal.Signal[DisplayMode]) -> @luna_dom.DomNode 
     [
       @luna_dom.span(
         [@luna_dom.text("View:")],
-        class="text-sm text-slate-400 mr-2",
+        class="text-base text-slate-400 mr-2",
       ),
       @luna_dom.div(
         [sheet_button, piano_button],
