@@ -22,7 +22,7 @@ fn play_pause_button(
   }
 
   @luna_dom.button(
-    class="px-4 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-semibold transition-colors shadow-lg",
+    class="w-12 h-12 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-semibold transition-colors shadow-lg flex items-center justify-center",
     on=@luna_dom.events().click(on_click),
     [@luna_dom.text_dyn(fn() { if is_playing.get() { "■" } else { "▶" } })],
   )
