@@ -50,8 +50,8 @@ test.describe("Jazzene - Jazz Improvisation Web App", () => {
     await expect(paramJazzene.getMeasuresInput()).toHaveText("16");
     await expect(paramJazzene.getChordInput()).toHaveValue("IIIm7 | VIm7");
     await expect(paramJazzene.getDisplayModeSelect()).toHaveValue("Sheet");
-    await expect(paramJazzene.getLoopAInput()).toHaveValue("3");
-    await expect(paramJazzene.getLoopBInput()).toHaveValue("6");
+    await expect(paramJazzene.getLoopAInput()).toHaveText("3");
+    await expect(paramJazzene.getLoopBInput()).toHaveText("6");
   });
 
   test("should change playback position when clicking a measure", async () => {

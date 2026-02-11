@@ -136,9 +136,13 @@ pub fn render(
             volume_input(volume),
           ]),
           play_pause_button(is_playing, playback_position, total_duration),
-          @luna_dom.div(class="flex items-center gap-3 w-full", [
-            ab_loop(loop_a_measure, loop_b_measure, fn() { measure_count.get() }),
-            @luna_dom.div(class="ml-auto", [display_mode_select(display_mode)]),
+          @luna_dom.div(class="flex items-center w-full", [
+            @luna_dom.div(class="flex-1 flex justify-center", [
+              ab_loop(loop_a_measure, loop_b_measure, fn() {
+                measure_count.get()
+              }),
+            ]),
+            display_mode_select(display_mode),
           ]),
         ],
       ),
