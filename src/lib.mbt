@@ -185,9 +185,12 @@ fn make_tick(
         current_bpm,
         beats,
       )
-      if new_position >= b_time {
-        // A: start of the A measure
-        measure_to_duration(loop_a_measure.get(), current_bpm, beats)
+      // A: start of the A measure
+      let a_time = measure_to_duration(loop_a_measure.get(), current_bpm, beats)
+      if new_position < a_time {
+        a_time
+      } else if new_position >= b_time {
+        a_time
       } else {
         new_position
       }
