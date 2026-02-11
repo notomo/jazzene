@@ -38,7 +38,6 @@ test.describe("Jazzene - Jazz Improvisation Web App", () => {
       measures: "16",
       chords: "IIIm7 | VIm7",
       view: "sheet",
-      loop: "false",
       loop_a: "3",
       loop_b: "6",
     };
@@ -51,7 +50,6 @@ test.describe("Jazzene - Jazz Improvisation Web App", () => {
     await expect(paramJazzene.getMeasuresInput()).toHaveText("16");
     await expect(paramJazzene.getChordInput()).toHaveValue("IIIm7 | VIm7");
     await expect(paramJazzene.getDisplayModeSelect()).toHaveValue("Sheet");
-    await expect(paramJazzene.getLoopCheckbox()).not.toBeChecked();
     await expect(paramJazzene.getLoopAInput()).toHaveValue("3");
     await expect(paramJazzene.getLoopBInput()).toHaveValue("6");
   });

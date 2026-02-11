@@ -60,15 +60,6 @@ pub fn get_initial_chords() -> String {
 }
 
 ///|
-/// Read the initial loop enabled state from the URL query parameter
-pub fn get_initial_loop_enabled() -> Bool {
-  match get_query_param("loop") {
-    Some("false") => false
-    _ => true
-  }
-}
-
-///|
 /// Read the initial time signature from the URL query parameter, defaulting to 4/4
 pub fn get_initial_time_signature() -> @music.TimeSignature {
   match get_query_param("time") {
