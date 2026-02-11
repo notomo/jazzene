@@ -105,7 +105,8 @@ pub fn render(
                 },
                 [
                   @sheet.lead_sheet(
-                    measures, playback_position, bpm, key, time_signature,
+                    measures, playback_position, bpm, key, time_signature, loop_a_measure,
+                    loop_b_measure,
                   ),
                 ],
               ),
@@ -122,7 +123,8 @@ pub fn render(
             attrs=[("aria-label", @luna_dom.Attr::AttrString("visualization"))],
             [
               @piano_roll.note_display(
-                sounds, playback_position, bpm, total_duration, time_signature,
+                sounds, playback_position, bpm, total_duration, time_signature, loop_a_measure,
+                loop_b_measure,
               ),
               @piano_roll.keyboard(sounds, playback_position),
             ],

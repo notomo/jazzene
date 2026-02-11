@@ -6,6 +6,8 @@ pub fn note_display(
   bpm : @signal.Signal[Int],
   total_duration : () -> @music.Duration,
   time_signature : @signal.Signal[@music.TimeSignature],
+  loop_a_measure : @signal.Signal[Int],
+  loop_b_measure : @signal.Signal[Int],
 ) -> @luna_dom.DomNode {
   let { canvas, ctx } = create_canvas_context()
   let resize_trigger = create_resize_trigger(canvas)
@@ -43,6 +45,8 @@ pub fn note_display(
       playback_position.get().to_milliseconds(),
       bpm.get(),
       time_signature.get().beats_per_measure(),
+      loop_a_measure.get(),
+      loop_b_measure.get(),
     )
   })
   @luna_dom.div(

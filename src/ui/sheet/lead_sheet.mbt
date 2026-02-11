@@ -43,6 +43,8 @@ pub fn lead_sheet(
   bpm : @signal.Signal[Int],
   key : @signal.Signal[@music.KeySignature],
   time_signature : @signal.Signal[@music.TimeSignature],
+  loop_a_measure : @signal.Signal[Int],
+  loop_b_measure : @signal.Signal[Int],
 ) -> @luna_dom.DomNode {
   // Set up auto-scroll effect
   let last_scrolled_row : Ref[Int] = Ref::new(-1)
@@ -138,6 +140,11 @@ pub fn lead_sheet(
             key.get(),
             ts.beats_per_measure(),
             ts,
+            fn() {
+              let measure_number = idx + 1
+              measure_number < loop_a_measure.get() ||
+              measure_number > loop_b_measure.get()
+            },
           )
         }),
         // Playback position indicator overlay

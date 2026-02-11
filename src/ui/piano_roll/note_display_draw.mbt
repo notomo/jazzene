@@ -146,6 +146,46 @@ fn draw_measure_lines(
 }
 
 ///|
+/// Draw semi-transparent overlay for time regions outside the loop range
+fn draw_loop_overlay(
+  ctx : @canvas.CanvasRenderingContext2D,
+  width : Double,
+  height : Double,
+  current_pos : Double,
+  bpm : Int,
+  beats_per_measure : Double,
+  loop_a_measure : Int,
+  loop_b_measure : Int,
+) -> Unit {
+  let measure_ms = @music.ms_per_measure(bpm, beats_per_measure~)
+  let loop_start_ms = (loop_a_measure - 1).to_double() * measure_ms
+  let loop_end_ms = loop_b_measure.to_double() * measure_ms
+  ctx.fillStyle = "rgba(0,0,0,0.5)"
+
+  // Overlay for region before loop start
+  let before_offset = loop_start_ms - current_pos
+  if before_offset > 0.0 && before_offset < NOTE_DISPLAY_WINDOW_MS {
+    let percent = 100.0 - before_offset / NOTE_DISPLAY_WINDOW_MS * 100.0
+    let y = height * percent / 100.0
+    ctx.fillRect(0.0, y, width, height - y)
+  } else if current_pos < loop_start_ms {
+    // Entire visible window is before loop start
+    ctx.fillRect(0.0, 0.0, width, height)
+  }
+
+  // Overlay for region after loop end
+  let after_offset = loop_end_ms - current_pos
+  if after_offset >= 0.0 && after_offset < NOTE_DISPLAY_WINDOW_MS {
+    let percent = 100.0 - after_offset / NOTE_DISPLAY_WINDOW_MS * 100.0
+    let y = height * percent / 100.0
+    ctx.fillRect(0.0, 0.0, width, y)
+  } else if current_pos >= loop_end_ms {
+    // Entire visible window is after loop end
+    ctx.fillRect(0.0, 0.0, width, height)
+  }
+}
+
+///|
 /// Orchestrator: draw all note display elements
 fn draw_notes(
   ctx : @canvas.CanvasRenderingContext2D,
@@ -155,6 +195,8 @@ fn draw_notes(
   current_pos : Double,
   bpm : Int,
   beats_per_measure : Double,
+  loop_a_measure : Int,
+  loop_b_measure : Int,
 ) -> Unit {
   draw_notes_background(ctx, width, height)
   let rect = { left: 0.0, top: 0.0, width, height }
@@ -162,4 +204,7 @@ fn draw_notes(
   draw_falling_notes(ctx, height, note_positions, current_pos, key_areas)
   draw_key_grid_lines(ctx, height, key_areas)
   draw_measure_lines(ctx, width, height, current_pos, bpm, beats_per_measure)
+  draw_loop_overlay(
+    ctx, width, height, current_pos, bpm, beats_per_measure, loop_a_measure, loop_b_measure,
+  )
 }

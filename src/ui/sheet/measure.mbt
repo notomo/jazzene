@@ -344,6 +344,7 @@ fn render_measure(
   key : @music.KeySignature,
   beats_per_measure : Double,
   time_signature : @music.TimeSignature,
+  is_outside_loop : () -> Bool,
 ) -> @luna_dom.DomNode {
   let (x, y) = measure_position(display_index, key)
   let is_first_in_row = display_index % MEASURES_PER_ROW == 0
@@ -364,6 +365,17 @@ fn render_measure(
       render_clickable_background(
         x, y, measure_number, measure, playback_position,
       ),
+      @luna_dom.show(is_outside_loop, fn() {
+        @luna_dom.svg_rect(
+          x=x.to_string(),
+          y=(y + MEASURE_CLICKABLE_TOP_OFFSET).to_string(),
+          width=MEASURE_WIDTH.to_string(),
+          height=ROW_HEIGHT.to_string(),
+          fill="rgba(0,0,0,0.5)",
+          stroke="none",
+          attrs=[("pointer-events", @luna_dom.Attr::AttrString("none"))],
+        )
+      }),
     ],
   )
 }
