@@ -130,18 +130,13 @@ pub fn render(
         ],
       ),
       @luna_dom.div(
-        class="grid grid-cols-[1fr_auto_1fr] items-center gap-4 px-3 py-1.5 bg-slate-800 border-t-2 border-slate-700",
+        class="grid grid-cols-[1fr_auto_1fr] items-center px-3 py-1.5 bg-slate-800 border-t-2 border-slate-700",
         [
-          @luna_dom.div(class="flex items-center gap-2 justify-self-end", [
-            volume_input(volume),
-          ]),
+          @luna_dom.div([]),
           play_pause_button(is_playing, playback_position, total_duration),
-          @luna_dom.div(class="flex items-center w-full", [
-            @luna_dom.div(class="flex-1 flex justify-center", [
-              ab_loop(loop_a_measure, loop_b_measure, fn() {
-                measure_count.get()
-              }),
-            ]),
+          @luna_dom.div(class="flex items-center justify-around", [
+            volume_input(volume),
+            ab_loop(loop_a_measure, loop_b_measure, fn() { measure_count.get() }),
             display_mode_select(display_mode),
           ]),
         ],
