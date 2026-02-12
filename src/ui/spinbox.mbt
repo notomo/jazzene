@@ -34,12 +34,12 @@ extern "js" fn add_document_drag_listeners(
 /// Displays `{label}: {value} [-][+]` with wheel and drag support.
 fn spinbox(
   label~ : String,
-  signal : @signal.Signal[Int],
-  query_param~ : String,
-  default~ : Int,
+  get_value~ : () -> Int,
+  on_change~ : (Int, Int) -> Unit,
   min~ : Int,
   max~ : Int,
   step~ : Int,
+  aria_label? : String = "",
 ) -> @luna_dom.DomNode {
   let drag_start_x : Ref[Double?] = Ref::new(None)
   let drag_start_value : Ref[Int] = Ref::new(0)
@@ -49,29 +49,27 @@ fn spinbox(
   }
 
   fn update_value(new_value : Int) -> Unit {
+    let old_value = get_value()
     let clamped = clamp(new_value)
-    signal.set(clamped)
-    set_query_param(
-      query_param,
-      clamped.to_string(),
-      default=default.to_string(),
-    )
+    if clamped != old_value {
+      on_change(clamped, old_value)
+    }
   }
 
   let on_decrement : @luna_dom.MouseHandler = fn(_) {
-    update_value(signal.get() - step)
+    update_value(get_value() - step)
   }
   let on_increment : @luna_dom.MouseHandler = fn(_) {
-    update_value(signal.get() + step)
+    update_value(get_value() + step)
   }
 
   let on_wheel : @luna_dom.WheelHandler = fn(e) {
     e.preventDefault()
     let delta_y = e.deltaY
     if delta_y < 0.0 {
-      update_value(signal.get() + step)
+      update_value(get_value() + step)
     } else if delta_y > 0.0 {
-      update_value(signal.get() - step)
+      update_value(get_value() - step)
     }
   }
   let on_drag_move : (Double) -> Unit = fn(client_x) {
@@ -89,7 +87,7 @@ fn spinbox(
 
   fn start_drag(client_x : Double) -> Unit {
     drag_start_x.val = Some(client_x)
-    drag_start_value.val = signal.get()
+    drag_start_value.val = get_value()
     add_document_drag_listeners(on_drag_move, on_drag_end)
   }
 
@@ -100,6 +98,7 @@ fn spinbox(
     }
   }
 
+  let aria = if aria_label == "" { label } else { aria_label }
   let btn_class = "bg-blue-900/60 hover:bg-blue-800/70 border border-blue-700/50 rounded-lg w-9 py-1 text-lg text-blue-200 text-center cursor-pointer select-none"
 
   @luna_dom.div(
@@ -115,8 +114,8 @@ fn spinbox(
       ),
       @luna_dom.span(
         class="text-white text-base select-none cursor-ew-resize min-w-[3ch] text-center",
-        attrs=[("aria-label", @luna_dom.Attr::AttrString(query_param))],
-        [@luna_dom.text_dyn(fn() { signal.get().to_string() })],
+        attrs=[("aria-label", @luna_dom.Attr::AttrString(aria))],
+        [@luna_dom.text_dyn(fn() { get_value().to_string() })],
       ),
       @luna_dom.button(
         class=btn_class,

@@ -2,10 +2,16 @@
 /// Render volume control as a spinbox (0–100%)
 fn volume_input(volume : @signal.Signal[Int]) -> @luna_dom.DomNode {
   spinbox(
-    volume,
     label="Volume",
-    query_param="volume",
-    default=default_volume,
+    get_value=fn() { volume.get() },
+    on_change=fn(new_value, _old_value) {
+      volume.set(new_value)
+      set_query_param(
+        "volume",
+        new_value.to_string(),
+        default=default_volume.to_string(),
+      )
+    },
     min=0,
     max=100,
     step=5,
