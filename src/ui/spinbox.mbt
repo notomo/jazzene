@@ -99,21 +99,21 @@ fn spinbox(
   }
 
   let aria = if aria_label == "" { label } else { aria_label }
-  let btn_class = "bg-blue-900/60 hover:bg-blue-800/70 border border-blue-700/50 rounded-lg w-9 py-1 text-lg text-blue-200 text-center cursor-pointer select-none"
+  let btn_class = "bg-blue-900/60 hover:bg-blue-800/70 border border-blue-700/50 rounded-lg w-7 lg:w-9 py-1 text-base lg:text-lg text-blue-200 text-center cursor-pointer select-none"
 
   @luna_dom.div(
-    class="flex items-center gap-2",
+    class="flex items-center gap-1 lg:gap-2 shrink min-w-0",
     on=@luna_dom.events()
       .wheel(on_wheel)
       .mousedown(on_mousedown)
       .touchstart(on_touchstart),
     [
       @luna_dom.span(
-        class="text-base text-slate-400 mr-1 select-none cursor-ew-resize",
+        class="text-sm lg:text-base text-slate-400 select-none cursor-ew-resize whitespace-nowrap",
         [@luna_dom.text(label + ":")],
       ),
       @luna_dom.span(
-        class="text-white text-base select-none cursor-ew-resize min-w-[3ch] text-center",
+        class="text-white text-sm lg:text-base select-none cursor-ew-resize min-w-[2ch] lg:min-w-[3ch] text-center",
         attrs=[("aria-label", @luna_dom.Attr::AttrString(aria))],
         [@luna_dom.text_dyn(fn() { get_value().to_string() })],
       ),

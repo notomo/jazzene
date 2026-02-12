@@ -65,13 +65,22 @@ pub fn render(
         class="px-3 py-1.5 bg-slate-800 border-b-2 border-slate-700",
         attrs=[("aria-label", @luna_dom.Attr::AttrString("lead sheet"))],
         [
-          @luna_dom.div(class="flex gap-4 items-center", [
-            time_signature_select(time_signature),
-            key_select(key),
-            chord_progression_input(raw_chord_progression, chord_parse_error),
-            seed_input(seed),
-            measure_count_input(measure_count, loop_b_measure),
-            bpm_input(bpm),
+          @luna_dom.div(class="flex gap-2 lg:gap-4 items-center", [
+            @luna_dom.div(
+              class="flex gap-2 lg:gap-4 items-center min-w-0 flex-1",
+              [
+                time_signature_select(time_signature),
+                key_select(key),
+                chord_progression_input(
+                  raw_chord_progression, chord_parse_error,
+                ),
+              ],
+            ),
+            @luna_dom.div(class="flex gap-2 lg:gap-4 items-center shrink-0", [
+              seed_input(seed),
+              measure_count_input(measure_count, loop_b_measure),
+              bpm_input(bpm),
+            ]),
           ]),
         ],
       ),
@@ -138,10 +147,15 @@ pub fn render(
             volume_input(volume),
           ]),
           play_pause_button(is_playing),
-          @luna_dom.div(class="flex items-center justify-between pl-4", [
-            ab_loop(loop_a_measure, loop_b_measure, fn() { measure_count.get() }),
-            view_mode_select(view_mode),
-          ]),
+          @luna_dom.div(
+            class="flex items-center justify-between pl-2 lg:pl-4 gap-2",
+            [
+              ab_loop(loop_a_measure, loop_b_measure, fn() {
+                measure_count.get()
+              }),
+              view_mode_select(view_mode),
+            ],
+          ),
         ],
       ),
     ],
@@ -180,12 +194,22 @@ extern "js" fn request_wake_lock() -> Unit =
 ///|
 extern "js" fn lock_landscape() -> Unit =
   #|() => {
-  #|  if (window.innerWidth > 767 || !screen.orientation || !screen.orientation.lock) return;
-  #|  const lock = () => screen.orientation.lock('landscape-primary').catch(() => {});
+  #|  const so = screen.orientation;
+  #|  if (!so || !so.lock) return;
+  #|  const isNarrow = () => Math.min(window.innerWidth, window.innerHeight) <= 767;
+  #|  if (!isNarrow()) return;
+  #|  const lock = () => so.lock('landscape').catch(() => {});
+  #|  const goFullscreenAndLock = () => {
+  #|    if (document.fullscreenElement) { lock(); return; }
+  #|    const el = document.documentElement;
+  #|    const req = el.requestFullscreen || el.webkitRequestFullscreen;
+  #|    if (!req) return;
+  #|    req.call(el).then(() => lock()).catch(() => {});
+  #|  };
   #|  lock();
-  #|  document.addEventListener('click', () => {
-  #|    document.documentElement.requestFullscreen()
-  #|      .then(() => lock())
-  #|      .catch(() => {});
-  #|  }, { once: true });
+  #|  document.addEventListener('click', goFullscreenAndLock);
+  #|  document.addEventListener('touchend', goFullscreenAndLock, { once: true });
+  #|  document.addEventListener('fullscreenchange', () => {
+  #|    if (document.fullscreenElement) lock();
+  #|  });
   #|}

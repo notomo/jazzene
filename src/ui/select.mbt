@@ -8,15 +8,18 @@ fn select_input(
   on_change~ : (String) -> Unit,
   value~ : () -> String,
 ) -> @luna_dom.DomNode {
-  @luna_dom.div(class="flex items-center gap-2", [
-    @luna_dom.label(class="text-sm text-slate-400", [@luna_dom.text(label)]),
+  @luna_dom.div(class="flex items-center gap-1 lg:gap-2 shrink-0", [
+    @luna_dom.label(
+      class="hidden lg:inline text-sm text-slate-400 whitespace-nowrap",
+      [@luna_dom.text(label)],
+    ),
     @luna_dom.create_element(
       "select",
       [
         (
           "class",
           @luna_dom.AttrValue::Static(
-            "px-3 py-2 bg-slate-900 text-white rounded-lg border border-slate-600 focus:border-blue-500 focus:outline-none",
+            "px-1 lg:px-3 py-1 lg:py-2 bg-slate-900 text-white text-sm lg:text-base rounded-lg border border-slate-600 focus:border-blue-500 focus:outline-none",
           ),
         ),
         ("aria-label", @luna_dom.AttrValue::Static(aria_label)),

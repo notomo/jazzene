@@ -42,10 +42,10 @@ fn ab_loop_spinbox(
       start_drag(e.touches[0].clientX)
     }
   }
-  let btn_base = "w-9 flex items-center justify-center bg-blue-900/60 hover:bg-blue-800/70 text-blue-200 transition-colors text-lg font-mono select-none cursor-pointer"
+  let btn_base = "w-7 lg:w-9 flex items-center justify-center bg-blue-900/60 hover:bg-blue-800/70 text-blue-200 transition-colors text-base lg:text-lg font-mono select-none cursor-pointer"
   let btn_left = btn_base + " rounded-l-lg"
   let btn_right = btn_base + " rounded-r-lg"
-  let value_class = "w-9 flex items-center justify-center bg-slate-800 text-slate-100 text-base tabular-nums select-none cursor-ew-resize"
+  let value_class = "w-7 lg:w-9 flex items-center justify-center bg-slate-800 text-slate-100 text-sm lg:text-base tabular-nums select-none cursor-ew-resize"
   @luna_dom.div(
     class="flex rounded-lg border border-slate-600",
     on=@luna_dom.events()
@@ -104,12 +104,18 @@ fn ab_loop(
     )
   }
 
-  @luna_dom.div(class="flex items-center gap-3 text-base text-slate-400", [
-    @luna_dom.span(class="text-slate-400 text-base select-none", [
-      @luna_dom.text("Loop:"),
-    ]),
-    ab_loop_spinbox(on_a_change, fn() { loop_a_measure.get() }, "loop_a"),
-    @luna_dom.span(class="text-xl text-slate-200", [@luna_dom.text("~")]),
-    ab_loop_spinbox(on_b_change, fn() { loop_b_measure.get() }, "loop_b"),
-  ])
+  @luna_dom.div(
+    class="flex items-center gap-1 lg:gap-3 text-sm lg:text-base text-slate-400 shrink min-w-0",
+    [
+      @luna_dom.span(
+        class="text-slate-400 text-sm lg:text-base select-none whitespace-nowrap",
+        [@luna_dom.text("Loop:")],
+      ),
+      ab_loop_spinbox(on_a_change, fn() { loop_a_measure.get() }, "loop_a"),
+      @luna_dom.span(class="text-base lg:text-xl text-slate-200", [
+        @luna_dom.text("~"),
+      ]),
+      ab_loop_spinbox(on_b_change, fn() { loop_b_measure.get() }, "loop_b"),
+    ],
+  )
 }

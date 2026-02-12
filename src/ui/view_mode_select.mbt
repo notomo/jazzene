@@ -62,7 +62,7 @@ fn toggle_piano(current : ViewMode) -> ViewMode {
 ///|
 /// Render view mode toggle buttons with "View:" label
 fn view_mode_select(mode : @signal.Signal[ViewMode]) -> @luna_dom.DomNode {
-  let base = "px-3 py-2 text-base font-medium cursor-pointer transition-colors"
+  let base = "px-2 lg:px-3 py-1 lg:py-2 text-sm lg:text-base font-medium cursor-pointer transition-colors"
   let active_class = "bg-blue-900 text-blue-200"
   let inactive_class = "bg-slate-800 text-slate-400 hover:bg-slate-700"
   let sheet_button = @luna_dom.button(
@@ -107,7 +107,7 @@ fn view_mode_select(mode : @signal.Signal[ViewMode]) -> @luna_dom.DomNode {
     [
       @luna_dom.span(
         [@luna_dom.text("View:")],
-        class="text-base text-slate-400 mr-2",
+        class="text-sm lg:text-base text-slate-400 mr-1 lg:mr-2 whitespace-nowrap",
       ),
       @luna_dom.div(
         [sheet_button, piano_button],
@@ -115,6 +115,6 @@ fn view_mode_select(mode : @signal.Signal[ViewMode]) -> @luna_dom.DomNode {
         attrs=[("aria-label", @luna_dom.Attr::AttrString("view mode"))],
       ),
     ],
-    class="flex items-center",
+    class="flex items-center shrink min-w-0",
   )
 }

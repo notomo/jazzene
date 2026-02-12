@@ -14,7 +14,7 @@ fn chord_progression_input(
     type_="text",
     dyn_class=fn() {
       cn([
-        "w-full px-4 py-2 bg-slate-900 text-white rounded-lg border focus:outline-none text-lg font-mono",
+        "w-full px-2 lg:px-4 py-1 lg:py-2 bg-slate-900 text-white rounded-lg border focus:outline-none text-sm lg:text-lg font-mono",
         match parse_error.get() {
           Some(_) => "border-red-500"
           None => "border-slate-600 focus:border-blue-500"
