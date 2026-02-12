@@ -39,19 +39,21 @@ pub(all) struct MeasureNote {
 pub fn Measure::positioned_notes(
   self : Measure,
 ) -> Array[(Double, MeasureNote)] {
-  self.beats
-  .iter()
-  .flat_map(fn(beat) {
-    let mut offset = 0.0
-    beat.notes
-    .iter()
-    .map(fn(note) {
-      let pos = beat.count.to_double() + offset
-      offset = offset + note.duration.to_beats()
-      (pos, note)
-    })
-  })
-  .collect()
+  let result : Array[(Double, MeasureNote)] = []
+  let mut abs_pos = 0.0
+  for beat in self.beats {
+    let beat_start = beat.count.to_double()
+    // Carry overflow from previous beat (e.g. dotted quarter spanning beat boundary)
+    // but don't go backwards if previous beat had short notes
+    if abs_pos < beat_start {
+      abs_pos = beat_start
+    }
+    for note in beat.notes {
+      result.push((abs_pos, note))
+      abs_pos = abs_pos + note.duration.to_beats()
+    }
+  }
+  result
 }
 
 ///|
