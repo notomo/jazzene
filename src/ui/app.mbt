@@ -149,6 +149,7 @@ pub fn render(
 
   disable_pinch_zoom()
   request_wake_lock()
+  lock_landscape()
 
   @js_dom.document().getElementById("app")
   |> Option::map(fn(e) {
@@ -174,4 +175,17 @@ extern "js" fn request_wake_lock() -> Unit =
   #|  document.addEventListener('visibilitychange', () => {
   #|    if (document.visibilityState === 'visible') request();
   #|  });
+  #|}
+
+///|
+extern "js" fn lock_landscape() -> Unit =
+  #|() => {
+  #|  if (window.innerWidth > 767 || !screen.orientation || !screen.orientation.lock) return;
+  #|  const lock = () => screen.orientation.lock('landscape-primary').catch(() => {});
+  #|  lock();
+  #|  document.addEventListener('click', () => {
+  #|    document.documentElement.requestFullscreen()
+  #|      .then(() => lock())
+  #|      .catch(() => {});
+  #|  }, { once: true });
   #|}

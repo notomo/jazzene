@@ -39,7 +39,7 @@ pub fn keyboard(
     draw_keyboard(ctx, width, height, playing_notes())
   })
   @luna_dom.div(
-    class="w-full h-32 flex-shrink-0",
+    class="w-full h-[15%] min-h-10 shrink",
     attrs=[("aria-label", @luna_dom.Attr::AttrString("keyboard canvas"))],
     [canvas_to_dom_node(canvas)],
   )
