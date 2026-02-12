@@ -86,8 +86,10 @@ pub fn lead_sheet(
         let scroll_top = container.scrollTop()
         let visible_height = container.clientHeight()
         let visible_bottom = scroll_top + visible_height
-        // Margin to show the next/previous row
-        let margin = (ROW_HEIGHT * scale).to_int()
+        // Margin to show the next/previous row, capped so the current row stays visible
+        let row_height_px = row_bottom_px - row_top_px
+        let max_margin = @cmp.maximum(0, (visible_height - row_height_px) / 2)
+        let margin = @cmp.minimum((ROW_HEIGHT * scale).to_int(), max_margin)
         // Scroll up if the current row's top is above the visible area
         if row_top_px - margin < scroll_top {
           let new_scroll = row_top_px - margin
