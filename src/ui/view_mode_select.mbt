@@ -154,7 +154,7 @@ fn piano_icon(active : Bool) -> @luna_dom.DomNode {
 
 ///|
 /// Render view mode toggle buttons
-fn view_mode_select(mode : @signal.Signal[ViewMode]) -> @luna_dom.DomNode {
+fn view_mode_select(mode : @signals.Signal[ViewMode]) -> @luna_dom.DomNode {
   let base = "px-2 lg:px-3 py-1 lg:py-2 font-medium cursor-pointer transition-colors flex items-center"
   let active_class = "bg-blue-900 text-blue-200"
   let inactive_class = "bg-slate-800 text-slate-400 hover:bg-slate-700"

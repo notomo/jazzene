@@ -68,8 +68,8 @@ extern "js" fn set_canvas_style_height(
 /// Reading this signal in an effect ensures the effect re-runs on resize.
 fn create_resize_trigger(
   canvas : @js_dom.HTMLCanvasElement,
-) -> @signal.Signal[Int] {
-  let trigger = @signal.signal(0)
+) -> @signals.Signal[Int] {
+  let trigger = @signals.signal(0)
   observe_resize(canvas, fn() { trigger.update(fn(n) { n + 1 }) })
   trigger
 }

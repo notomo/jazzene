@@ -1,6 +1,6 @@
 ///|
 /// Render key selection dropdown
-fn key_select(key : @signal.Signal[@music.KeySignature]) -> @luna_dom.DomNode {
+fn key_select(key : @signals.Signal[@music.KeySignature]) -> @luna_dom.DomNode {
   select_input(
     label="Key:",
     aria_label="key",

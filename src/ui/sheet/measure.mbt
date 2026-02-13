@@ -59,7 +59,7 @@ fn render_clickable_background(
   y : Double,
   measure_number : Int,
   measure : @music.Measure,
-  playback_position : @signal.Signal[@music.Duration],
+  playback_position : @signals.Signal[@music.Duration],
 ) -> @luna_dom.DomNode {
   @luna_dom.svg_rect(
     x=x.to_string(),
@@ -340,7 +340,7 @@ fn render_measure_notes(
 fn render_measure(
   measure : @music.Measure,
   display_index : Int,
-  playback_position : @signal.Signal[@music.Duration],
+  playback_position : @signals.Signal[@music.Duration],
   key : @music.KeySignature,
   beats_per_measure : Double,
   time_signature : @music.TimeSignature,

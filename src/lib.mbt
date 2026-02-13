@@ -1,15 +1,15 @@
 ///|
 /// Jazzene - Jazz Improvisation Web App (Tick-based Architecture)
 fn main {
-  let bpm = @signal.signal(@ui.get_initial_bpm())
-  let raw_chord_progression = @signal.signal(@ui.get_initial_chords())
-  let seed = @signal.signal(@ui.get_initial_seed())
-  let measure_count = @signal.signal(@ui.get_initial_measures())
-  let key = @signal.signal(@ui.get_initial_key())
-  let time_signature = @signal.signal(@ui.get_initial_time_signature())
+  let bpm = @signals.signal(@ui.get_initial_bpm())
+  let raw_chord_progression = @signals.signal(@ui.get_initial_chords())
+  let seed = @signals.signal(@ui.get_initial_seed())
+  let measure_count = @signals.signal(@ui.get_initial_measures())
+  let key = @signals.signal(@ui.get_initial_key())
+  let time_signature = @signals.signal(@ui.get_initial_time_signature())
 
-  let chord_parse_error : @signal.Signal[String?] = @signal.signal(None)
-  let measure_chords = @signal.memo(fn() {
+  let chord_parse_error : @signals.Signal[String?] = @signals.signal(None)
+  let measure_chords = @signals.memo(fn() {
     match @music.parse_measure_progression(raw_chord_progression.get()) {
       Ok(degree_measures) => {
         chord_parse_error.set(None)
@@ -28,9 +28,9 @@ fn main {
   )
   let measures = fn() { measures_signal.get() }
 
-  let swing = @signal.signal(@music.SwingConfig::triplet())
-  let sounds : @signal.Signal[Array[@music.NoteValueSound]] = @signal.signal([])
-  let _ = @signal.effect(fn() {
+  let swing = @signals.signal(@music.SwingConfig::triplet())
+  let sounds : @signals.Signal[Array[@music.NoteValueSound]] = @signals.signal([])
+  let _ = @signals.effect(fn() {
     @music.convert_measures_to_sounds(
       measures_signal.get(),
       bpm.get(),
@@ -39,9 +39,9 @@ fn main {
     |> sound_list => { sounds.set(sound_list) }
   })
 
-  let drum_sounds : @signal.Signal[Array[@music.NoteValueSound]] = @signal.signal([],
+  let drum_sounds : @signals.Signal[Array[@music.NoteValueSound]] = @signals.signal([],
   )
-  let _ = @signal.effect(fn() {
+  let _ = @signals.effect(fn() {
     @music.generate_drum_sounds(
       bpm.get(),
       measure_count.get(),
@@ -51,7 +51,7 @@ fn main {
     |> drum_list => { drum_sounds.set(drum_list) }
   })
 
-  let total_duration = @signal.memo(fn() {
+  let total_duration = @signals.memo(fn() {
     @music.calculate_total_duration(
       bpm=bpm.get(),
       measure_count=measure_count.get(),
@@ -59,13 +59,13 @@ fn main {
     )
   })
 
-  let playback_position = @signal.signal(
+  let playback_position = @signals.signal(
     @music.Duration::from_milliseconds(0.0),
   )
-  let volume = @signal.signal(@ui.get_initial_volume())
+  let volume = @signals.signal(@ui.get_initial_volume())
 
-  let loop_a_measure = @signal.signal(@ui.get_initial_loop_a_measure())
-  let loop_b_measure = @signal.signal(
+  let loop_a_measure = @signals.signal(@ui.get_initial_loop_a_measure())
+  let loop_b_measure = @signals.signal(
     @ui.get_initial_loop_b_measure(measure_count.get()),
   )
 
@@ -81,9 +81,9 @@ fn main {
     loop_b_measure, bpm, time_signature, synth, drum_synth,
   )
 
-  let view_mode = @signal.signal(@ui.get_initial_view_mode())
-  let is_playing = @signal.signal(false)
-  let _ = @signal.effect(fn() {
+  let view_mode = @signals.signal(@ui.get_initial_view_mode())
+  let is_playing = @signals.signal(false)
+  let _ = @signals.effect(fn() {
     if is_playing.get() {
       synth.unmute()
       drum_synth.unmute()
@@ -104,14 +104,14 @@ fn main {
 ///|
 fn make_measures(
   measure_chords : () -> Array[Array[@music.Chord]],
-  seed : @signal.Signal[Int],
-  measure_count : @signal.Signal[Int],
-  bpm : @signal.Signal[Int],
-  key : @signal.Signal[@music.KeySignature],
-  time_signature : @signal.Signal[@music.TimeSignature],
-) -> @signal.Signal[Array[@music.Measure]] {
-  let measures : @signal.Signal[Array[@music.Measure]] = @signal.signal([])
-  let _ = @signal.effect(fn() {
+  seed : @signals.Signal[Int],
+  measure_count : @signals.Signal[Int],
+  bpm : @signals.Signal[Int],
+  key : @signals.Signal[@music.KeySignature],
+  time_signature : @signals.Signal[@music.TimeSignature],
+) -> @signals.Signal[Array[@music.Measure]] {
+  let measures : @signals.Signal[Array[@music.Measure]] = @signals.signal([])
+  let _ = @signals.effect(fn() {
     let ts = time_signature.get()
     let beats_per_measure = ts.beats_per_measure()
     let settings = @generator.Settings::default(seed.get())
@@ -154,15 +154,15 @@ fn measure_to_duration(
 
 ///|
 fn make_tick(
-  playback_position : @signal.Signal[@music.Duration],
-  volume : @signal.Signal[Int],
-  sounds : @signal.Signal[Array[@music.NoteValueSound]],
-  drum_sounds : @signal.Signal[Array[@music.NoteValueSound]],
+  playback_position : @signals.Signal[@music.Duration],
+  volume : @signals.Signal[Int],
+  sounds : @signals.Signal[Array[@music.NoteValueSound]],
+  drum_sounds : @signals.Signal[Array[@music.NoteValueSound]],
   total_duration : () -> @music.Duration,
-  loop_a_measure : @signal.Signal[Int],
-  loop_b_measure : @signal.Signal[Int],
-  bpm : @signal.Signal[Int],
-  time_signature : @signal.Signal[@music.TimeSignature],
+  loop_a_measure : @signals.Signal[Int],
+  loop_b_measure : @signals.Signal[Int],
+  bpm : @signals.Signal[Int],
+  time_signature : @signals.Signal[@music.TimeSignature],
   synth : @audio.Synthesizer,
   drum_synth : @audio.DrumSynth,
 ) -> (Double) -> Bool {

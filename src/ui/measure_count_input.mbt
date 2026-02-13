@@ -3,8 +3,8 @@
 /// When loop_b equals the current measure_count, changing measure_count
 /// also updates loop_b to follow along.
 fn measure_count_input(
-  measure_count : @signal.Signal[Int],
-  loop_b_measure : @signal.Signal[Int],
+  measure_count : @signals.Signal[Int],
+  loop_b_measure : @signals.Signal[Int],
 ) -> @luna_dom.DomNode {
   spinbox(
     label="Measures",

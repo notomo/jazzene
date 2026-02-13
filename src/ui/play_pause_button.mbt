@@ -12,7 +12,7 @@ extern "js" fn add_spacebar_listener(callback : () -> Unit) -> Unit =
 
 ///|
 /// Render play/pause button
-fn play_pause_button(is_playing : @signal.Signal[Bool]) -> @luna_dom.DomNode {
+fn play_pause_button(is_playing : @signals.Signal[Bool]) -> @luna_dom.DomNode {
   fn toggle() -> Unit {
     is_playing.update(fn(v) { not(v) })
   }

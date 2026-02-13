@@ -1,19 +1,19 @@
 ///|
 /// Render falling notes display component using Canvas API
 pub fn note_display(
-  sounds : @signal.Signal[Array[@music.NoteValueSound]],
-  playback_position : @signal.Signal[@music.Duration],
-  bpm : @signal.Signal[Int],
+  sounds : @signals.Signal[Array[@music.NoteValueSound]],
+  playback_position : @signals.Signal[@music.Duration],
+  bpm : @signals.Signal[Int],
   total_duration : () -> @music.Duration,
-  time_signature : @signal.Signal[@music.TimeSignature],
-  loop_a_measure : @signal.Signal[Int],
-  loop_b_measure : @signal.Signal[Int],
+  time_signature : @signals.Signal[@music.TimeSignature],
+  loop_a_measure : @signals.Signal[Int],
+  loop_b_measure : @signals.Signal[Int],
 ) -> @luna_dom.DomNode {
   let { canvas, ctx } = create_canvas_context()
   let resize_trigger = create_resize_trigger(canvas)
 
   // Pre-calculate note positions
-  let note_positions = @signal.memo(fn() {
+  let note_positions = @signals.memo(fn() {
     sounds
     .get()
     .filter_map(fn(sound) {
@@ -34,7 +34,7 @@ pub fn note_display(
   setup_drag_seek(canvas, playback_position, total_duration)
 
   // Redraw when position, notes, or canvas size change
-  let _ = @signal.effect(fn() {
+  let _ = @signals.effect(fn() {
     let _ = resize_trigger.get()
     let (width, height) = update_canvas_dpi(canvas, ctx)
     draw_notes(

@@ -1,7 +1,7 @@
 ///|
 /// Render time signature selection dropdown
 fn time_signature_select(
-  time_signature : @signal.Signal[@music.TimeSignature],
+  time_signature : @signals.Signal[@music.TimeSignature],
 ) -> @luna_dom.DomNode {
   select_input(
     label="Time:",

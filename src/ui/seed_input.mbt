@@ -1,6 +1,6 @@
 ///|
 /// Render seed input control for random number generation
-fn seed_input(seed : @signal.Signal[Int]) -> @luna_dom.DomNode {
+fn seed_input(seed : @signals.Signal[Int]) -> @luna_dom.DomNode {
   spinbox(
     label="Seed",
     get_value=fn() { seed.get() },

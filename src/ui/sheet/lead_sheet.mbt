@@ -39,16 +39,16 @@ fn calculate_playback_row(
 /// Main lead sheet component
 pub fn lead_sheet(
   measures : () -> Array[@music.Measure],
-  playback_position : @signal.Signal[@music.Duration],
-  bpm : @signal.Signal[Int],
-  key : @signal.Signal[@music.KeySignature],
-  time_signature : @signal.Signal[@music.TimeSignature],
-  loop_a_measure : @signal.Signal[Int],
-  loop_b_measure : @signal.Signal[Int],
+  playback_position : @signals.Signal[@music.Duration],
+  bpm : @signals.Signal[Int],
+  key : @signals.Signal[@music.KeySignature],
+  time_signature : @signals.Signal[@music.TimeSignature],
+  loop_a_measure : @signals.Signal[Int],
+  loop_b_measure : @signals.Signal[Int],
 ) -> @luna_dom.DomNode {
   // Set up auto-scroll effect
   let last_scrolled_row : Ref[Int] = Ref::new(-1)
-  let _ = @signal.effect(fn() {
+  let _ = @signals.effect(fn() {
     let measure_count = measures().length()
     let beats_per_measure = time_signature.get().beats_per_measure()
     let current_row = calculate_playback_row(

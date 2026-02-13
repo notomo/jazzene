@@ -52,10 +52,10 @@ Luna uses **fine-grained reactivity** with Signals:
 
 ```moonbit
 // Create reactive state
-let count = @signal.signal(0)
+let count = @signals.signal(0)
 
 // Computed values auto-track dependencies
-let doubled = @signal.memo(fn() { count.get() * 2 })
+let doubled = @signals.memo(fn() { count.get() * 2 })
 
 // DOM nodes with dynamic content
 @dom.div([
@@ -68,7 +68,7 @@ let doubled = @signal.memo(fn() { count.get() * 2 })
 ```
 
 **Key Luna imports** (from `src/moon.pkg`):
-- `mizchi/luna/luna/signal` → Signal primitives (`@signal.*`)
+- `mizchi/luna/luna/signal` → Signal primitives (`@signals.*`)
 - `mizchi/luna/platform/dom/element` (alias `@dom`) → DOM node constructors
 - `mizchi/js/browser/dom` (alias `@js_dom`) → Browser APIs (document, getElementById)
 

@@ -16,11 +16,11 @@ const PLAYBACK_INDICATOR_STROKE_WIDTH = "10"
 ///|
 /// Render a vertical line indicator showing the current playback position
 fn render_playback_indicator(
-  playback_position : @signal.Signal[@music.Duration],
-  bpm : @signal.Signal[Int],
+  playback_position : @signals.Signal[@music.Duration],
+  bpm : @signals.Signal[Int],
   measure_count : () -> Int,
-  key : @signal.Signal[@music.KeySignature],
-  time_signature : @signal.Signal[@music.TimeSignature],
+  key : @signals.Signal[@music.KeySignature],
+  time_signature : @signals.Signal[@music.TimeSignature],
 ) -> @luna_dom.DomNode {
   // Staff height (5 lines with spacing between them)
   let staff_height = (STAFF_LINES - 1).to_double() * STAFF_LINE_SPACING

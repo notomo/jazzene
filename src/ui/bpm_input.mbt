@@ -1,6 +1,6 @@
 ///|
 /// Render BPM input control
-fn bpm_input(bpm : @signal.Signal[Int]) -> @luna_dom.DomNode {
+fn bpm_input(bpm : @signals.Signal[Int]) -> @luna_dom.DomNode {
   spinbox(
     label="BPM",
     get_value=fn() { bpm.get() },

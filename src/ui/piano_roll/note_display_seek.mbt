@@ -75,7 +75,7 @@ extern "js" fn performance_now() -> Double =
 /// Set up mouse wheel seeking on the note display canvas
 fn setup_wheel_seek(
   canvas : @js_dom.HTMLCanvasElement,
-  playback_position : @signal.Signal[@music.Duration],
+  playback_position : @signals.Signal[@music.Duration],
   total_duration : () -> @music.Duration,
 ) -> Unit {
   let on_wheel : (@js_dom.WheelEvent) -> Unit = fn(e) {
@@ -111,7 +111,7 @@ fn clamp_position_ms(
 /// Set up drag-to-seek on the note display canvas with inertial scrolling
 fn setup_drag_seek(
   canvas : @js_dom.HTMLCanvasElement,
-  playback_position : @signal.Signal[@music.Duration],
+  playback_position : @signals.Signal[@music.Duration],
   total_duration : () -> @music.Duration,
 ) -> Unit {
   let drag_start_y : Ref[Double?] = { val: None }

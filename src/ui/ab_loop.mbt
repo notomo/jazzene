@@ -75,8 +75,8 @@ fn ab_loop_spinbox(
 ///|
 /// Render A-B loop control UI
 fn ab_loop(
-  loop_a_measure : @signal.Signal[Int],
-  loop_b_measure : @signal.Signal[Int],
+  loop_a_measure : @signals.Signal[Int],
+  loop_b_measure : @signals.Signal[Int],
   measure_count : () -> Int,
 ) -> @luna_dom.DomNode {
   let on_a_change = fn(delta : Int) {

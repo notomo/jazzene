@@ -1,7 +1,7 @@
 ///|
 /// Setup animation loop
 pub fn setup_loop(
-  is_playing : @signal.Signal[Bool],
+  is_playing : @signals.Signal[Bool],
   tick : (Double) -> Bool,
 ) -> Unit {
   let request_id : Ref[Int?] = { val: None }
@@ -17,7 +17,7 @@ pub fn setup_loop(
     }
   }
 
-  let _ = @signal.effect(fn() {
+  let _ = @signals.effect(fn() {
     if not(is_playing.get()) {
       cancel()
       return
@@ -41,22 +41,22 @@ pub fn setup_loop(
 ///|
 /// Render the application UI
 pub fn render(
-  is_playing : @signal.Signal[Bool],
-  playback_position : @signal.Signal[@music.Duration],
-  volume : @signal.Signal[Int],
-  bpm : @signal.Signal[Int],
-  raw_chord_progression : @signal.Signal[String],
-  seed : @signal.Signal[Int],
-  measure_count : @signal.Signal[Int],
-  sounds : @signal.Signal[Array[@music.NoteValueSound]],
+  is_playing : @signals.Signal[Bool],
+  playback_position : @signals.Signal[@music.Duration],
+  volume : @signals.Signal[Int],
+  bpm : @signals.Signal[Int],
+  raw_chord_progression : @signals.Signal[String],
+  seed : @signals.Signal[Int],
+  measure_count : @signals.Signal[Int],
+  sounds : @signals.Signal[Array[@music.NoteValueSound]],
   total_duration : () -> @music.Duration,
-  loop_a_measure : @signal.Signal[Int],
-  loop_b_measure : @signal.Signal[Int],
-  chord_parse_error : @signal.Signal[String?],
+  loop_a_measure : @signals.Signal[Int],
+  loop_b_measure : @signals.Signal[Int],
+  chord_parse_error : @signals.Signal[String?],
   measures : () -> Array[@music.Measure],
-  key : @signal.Signal[@music.KeySignature],
-  time_signature : @signal.Signal[@music.TimeSignature],
-  view_mode : @signal.Signal[ViewMode],
+  key : @signals.Signal[@music.KeySignature],
+  time_signature : @signals.Signal[@music.TimeSignature],
+  view_mode : @signals.Signal[ViewMode],
 ) -> Unit {
   let app = @luna_dom.div(
     class="flex flex-col h-dvh overflow-hidden w-dvw bg-gradient-to-br from-slate-950 to-slate-900 text-white touch-manipulation",

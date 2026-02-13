@@ -1,8 +1,8 @@
 ///|
 /// Render chord input textarea
 fn chord_progression_input(
-  raw_chord_progression : @signal.Signal[String],
-  parse_error : @signal.Signal[String?],
+  raw_chord_progression : @signals.Signal[String],
+  parse_error : @signals.Signal[String?],
 ) -> @luna_dom.DomNode {
   let on_input : @luna_dom.InputHandler = fn(e) {
     let value = get_input_value(e)

@@ -1,8 +1,7 @@
 import {
   "moonbitlang/core/cmp",
-  "mizchi/luna/signal",
   "mizchi/signals",
-  "mizchi/luna/dom/element" @luna_dom,
+  "mizchi/luna/dom" @luna_dom,
   "mizchi/js/browser/dom" @js_dom,
   "internal/jazzene/music" @music,
 }
