@@ -11,7 +11,8 @@ const NOTE_PLAYING_COLOR = "#3b82f6"
 const NOTE_DEFAULT_COLOR = "#60a5fa"
 
 ///|
-const NOTE_BORDER_COLOR = "#1e293b"
+/// Gap in pixels between consecutive notes to visually separate them
+const NOTE_GAP_PX = 2.0
 
 ///|
 const OCTAVE_LINE_COLOR = "rgba(255, 255, 255, 0.4)"
@@ -80,21 +81,14 @@ fn draw_falling_notes(
     } else {
       NOTE_DEFAULT_COLOR
     }
+    // Add gap at bottom to separate consecutive same-pitch notes
+    let note_height = bottom_y - top_y
+    let gap = if note_height > NOTE_GAP_PX * 2.0 { NOTE_GAP_PX } else { 0.0 }
     ctx.fillRect(
       key_area.rect.left,
       top_y,
       key_area.rect.width,
-      bottom_y - top_y,
-    )
-
-    // Draw border to distinguish consecutive notes
-    ctx.strokeStyle = NOTE_BORDER_COLOR
-    ctx.lineWidth = 1.0
-    ctx.strokeRect(
-      key_area.rect.left,
-      top_y,
-      key_area.rect.width,
-      bottom_y - top_y,
+      note_height - gap,
     )
   })
 }
