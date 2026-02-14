@@ -1,3 +1,14 @@
+// Drum voice durations (seconds)
+
+///|
+let kick_duration : Double = 0.25
+
+///|
+let snare_duration : Double = 0.15
+
+///|
+let hihat_duration : Double = 0.08
+
 ///|
 /// Drum synthesizer using noise buffer + oscillator hybrid synthesis
 pub struct DrumSynth {
@@ -58,17 +69,13 @@ extern "js" fn ffi_create_noise_buffer(
 ///|
 /// Mute drum output
 pub fn DrumSynth::mute(self : DrumSynth) -> Unit {
-  let gain_param = self.master_gain.gain()
-  gain_param.cancel_scheduled_values(0.0)
-  gain_param.value = 0.0
+  set_gain_immediate(self.master_gain, 0.0)
 }
 
 ///|
 /// Unmute drum output
 pub fn DrumSynth::unmute(self : DrumSynth) -> Unit {
-  let gain_param = self.master_gain.gain()
-  gain_param.cancel_scheduled_values(0.0)
-  gain_param.value = 1.0
+  set_gain_immediate(self.master_gain, 1.0)
 }
 
 ///|
@@ -100,7 +107,7 @@ fn DrumSynth::schedule_kick(
   start_time : Double,
   velocity : Double,
 ) -> Unit {
-  let duration = 0.25
+  let duration = kick_duration
 
   // Tone body: sine with pitch sweep for punch
   let osc = self.ctx.create_oscillator()
@@ -129,7 +136,7 @@ fn DrumSynth::schedule_snare(
   start_time : Double,
   velocity : Double,
 ) -> Unit {
-  let duration = 0.15
+  let duration = snare_duration
 
   // Noise component: the characteristic snare rattle
   self.play_noise(start_time, duration, velocity * 0.7) |> ignore
@@ -161,7 +168,7 @@ fn DrumSynth::schedule_hihat(
   start_time : Double,
   velocity : Double,
 ) -> Unit {
-  let duration = 0.08
+  let duration = hihat_duration
 
   // Noise burst: short and bright for metallic character
   self.play_noise(start_time, duration, velocity * 0.4) |> ignore

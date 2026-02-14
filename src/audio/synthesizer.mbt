@@ -44,17 +44,13 @@ pub fn Synthesizer::is_loaded(self : Synthesizer) -> Bool {
 ///|
 /// Mute all audio immediately by setting master gain to 0
 pub fn Synthesizer::mute(self : Synthesizer) -> Unit {
-  let gain_param = self.master_gain.gain()
-  gain_param.cancel_scheduled_values(0.0)
-  gain_param.value = 0.0
+  set_gain_immediate(self.master_gain, 0.0)
 }
 
 ///|
 /// Unmute audio by restoring master gain to 1
 pub fn Synthesizer::unmute(self : Synthesizer) -> Unit {
-  let gain_param = self.master_gain.gain()
-  gain_param.cancel_scheduled_values(0.0)
-  gain_param.value = 1.0
+  set_gain_immediate(self.master_gain, 1.0)
 }
 
 ///|

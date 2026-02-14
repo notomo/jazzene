@@ -805,10 +805,14 @@ fn fill_remaining_measure(
 
 ///|
 /// Get extended chord tones across multiple octaves
+/// Octave offsets for extending tone sets: one octave below, same, one above
+let octave_offsets : Array[Int] = [-1, 0, 1]
+
+///|
 fn extend_across_octaves(
   tones : Array[@music.MidiNumber],
 ) -> Array[@music.MidiNumber] {
-  [-1, 0, 1]
+  octave_offsets
   .iter()
   .flat_map(fn(octave_offset) {
     tones.iter().filter_map(fn(tone) { tone.shift_octave(octave_offset) })
