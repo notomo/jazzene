@@ -1,8 +1,8 @@
 ///|
-const KEYBOARD_MIN_KEY = 36
+const KEYBOARD_MIN_KEY = 21
 
 ///|
-const KEYBOARD_MAX_KEY = 96
+const KEYBOARD_MAX_KEY = 108
 
 ///|
 /// Rectangle - Basic geometry type for canvas calculations
