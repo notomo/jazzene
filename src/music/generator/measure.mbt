@@ -600,6 +600,174 @@ fn maybe_start_motif_replay(
 }
 
 ///|
+/// Result of a single step in fill_remaining_measure
+priv enum StepResult {
+  Continue(MeasureState)
+  Break(MeasureState)
+}
+
+///|
+/// Handle the Resting phase: emit a rest note and transition to a new Playing phrase
+fn handle_resting(
+  state : MeasureState,
+  remaining : Double,
+  settings : Settings,
+  random_int : (Int) -> Int,
+) -> StepResult {
+  let motif_memory = state.motif_memory.finish_recording()
+  // Syncopation: on downbeats, sometimes force eighth rest so phrase starts on upbeat
+  let is_on_downbeat = (state.measure_pos -
+    state.measure_pos.to_int().to_double()).abs() <
+    0.01
+  let use_syncopation = is_on_downbeat &&
+    random_int(100) < settings.syncopation_probability
+  let duration = if use_syncopation {
+    if remaining >= @music.Eighth.to_beats() {
+      Some(@music.Eighth)
+    } else {
+      None
+    }
+  } else {
+    random_duration_within(
+      remaining,
+      settings.rest_duration_weights,
+      random_int,
+    )
+  }
+  match duration {
+    Some(duration) => {
+      let recovery = (duration.to_beats() *
+      settings.stamina_recovery_per_beat.to_double()).to_int()
+      let new_stamina = @cmp.minimum(
+        state.stamina + recovery,
+        settings.stamina_max,
+      )
+      let beat_index = state.measure_pos.to_int()
+      state.beat_notes[beat_index].push(@music.MeasureNote::{
+        midi: None,
+        duration,
+        accidental: None,
+        tie: None,
+      })
+      let new_phrase_len = roll_phrase_length(settings, random_int)
+      let new_motif_memory = maybe_start_motif_replay(
+        motif_memory, settings, random_int,
+      )
+      Continue(MeasureState::{
+        measure_pos: state.measure_pos + duration.to_beats(),
+        beat_notes: state.beat_notes,
+        stamina: new_stamina,
+        last_midi: state.last_midi,
+        last_was_rest: true,
+        phrase: Playing(new_phrase_len),
+        motif_memory: new_motif_memory,
+        motif_first_note: true,
+      })
+    }
+    None => Break(MeasureState::{ ..state, motif_memory, })
+  }
+}
+
+///|
+/// Handle the Playing phase: generate a note or triplet, or transition to Resting
+fn handle_playing(
+  state : MeasureState,
+  notes_left : Int,
+  chord : @music.Chord,
+  ctx : MeasureContext,
+  remaining : Double,
+  settings : Settings,
+  update_accidental : (@music.MidiNumber) -> @music.Accidental?,
+  random_int : (Int) -> Int,
+) -> StepResult {
+  // Check for early phrase termination due to low stamina
+  let should_end_early = notes_left > 1 &&
+    state.stamina < settings.phrase_early_end_stamina &&
+    ({
+      let prob = effective_rest_probability(
+        settings.rest_probability,
+        state.stamina,
+        settings.stamina_max,
+        state.last_was_rest,
+      )
+      random_int(100) < prob
+    })
+  guard not(should_end_early) else {
+    return Continue(MeasureState::{ ..state, phrase: Resting })
+  }
+  // Try to generate a triplet group (3 eighth triplets = 1 beat)
+  let on_beat = (state.measure_pos - state.measure_pos.to_int().to_double()).abs() <
+    0.01
+  let use_triplet = on_beat &&
+    notes_left >= 3 &&
+    remaining >= 1.0 - 0.001 &&
+    random_int(100) < settings.triplet_probability
+  guard not(use_triplet) else {
+    return Continue(
+      generate_triplet_group(
+        state, chord, ctx, settings, update_accidental, random_int, notes_left,
+      ),
+    )
+  }
+  // Select note using motif-guided or normal selection
+  let (midi_opt, new_motif_memory) = select_note_with_motif(
+    state, chord, ctx, settings, random_int,
+  )
+  match midi_opt {
+    Some(midi) =>
+      match
+        random_duration_within(
+          remaining,
+          settings.note_duration_weights,
+          random_int,
+        ) {
+        Some(duration) => {
+          let cost = match state.last_midi {
+            Some(prev) => interval_cost(prev, midi)
+            None => 0
+          }
+          let new_stamina = @cmp.maximum(
+            0,
+            @cmp.minimum(
+              state.stamina - cost + settings.stamina_passive_recovery,
+              settings.stamina_max,
+            ),
+          )
+          let new_motif_memory = record_motif_interval(
+            new_motif_memory,
+            state.last_midi,
+            midi,
+            state.motif_first_note,
+          )
+          let beat_index = state.measure_pos.to_int()
+          state.beat_notes[beat_index].push(@music.MeasureNote::{
+            midi: Some(midi.value),
+            duration,
+            accidental: update_accidental(midi),
+            tie: None,
+          })
+          let next_phrase = match notes_left {
+            1 => Resting
+            n => Playing(n - 1)
+          }
+          Continue(MeasureState::{
+            measure_pos: state.measure_pos + duration.to_beats(),
+            beat_notes: state.beat_notes,
+            stamina: new_stamina,
+            last_midi: Some(midi),
+            last_was_rest: false,
+            phrase: next_phrase,
+            motif_memory: new_motif_memory,
+            motif_first_note: false,
+          })
+        }
+        None => Break(state)
+      }
+    None => Break(state)
+  }
+}
+
+///|
 /// Fill remaining measure with new notes using phrase-based generation
 fn fill_remaining_measure(
   state : MeasureState,
@@ -619,161 +787,18 @@ fn fill_remaining_measure(
     } else {
       remaining_in_group
     }
-
-    // Get chord at current beat position
     let chord = ctx.chord_at(state.measure_pos)
-
-    match state.phrase {
-      Resting => {
-        // Finish recording any motif from the previous phrase
-        let motif_memory = state.motif_memory.finish_recording()
-        // Syncopation: on downbeats, sometimes force eighth rest so phrase starts on upbeat
-        let is_on_downbeat = (state.measure_pos -
-          state.measure_pos.to_int().to_double()).abs() <
-          0.01
-        let use_syncopation = is_on_downbeat &&
-          random_int(100) < settings.syncopation_probability
-        let duration = if use_syncopation {
-          if remaining >= @music.Eighth.to_beats() {
-            Some(@music.Eighth)
-          } else {
-            None
-          }
-        } else {
-          random_duration_within(
-            remaining,
-            settings.rest_duration_weights,
-            random_int,
-          )
-        }
-
-        // Emit a rest, then roll a new phrase
-        match duration {
-          Some(duration) => {
-            let recovery = (duration.to_beats() *
-            settings.stamina_recovery_per_beat.to_double()).to_int()
-            let new_stamina = @cmp.minimum(
-              state.stamina + recovery,
-              settings.stamina_max,
-            )
-            let beat_index = state.measure_pos.to_int()
-            state.beat_notes[beat_index].push(@music.MeasureNote::{
-              midi: None,
-              duration,
-              accidental: None,
-              tie: None,
-            })
-            let new_phrase_len = roll_phrase_length(settings, random_int)
-            // Decide whether to replay a stored motif for this phrase
-            let new_motif_memory = maybe_start_motif_replay(
-              motif_memory, settings, random_int,
-            )
-            continue MeasureState::{
-                measure_pos: state.measure_pos + duration.to_beats(),
-                beat_notes: state.beat_notes,
-                stamina: new_stamina,
-                last_midi: state.last_midi,
-                last_was_rest: true,
-                phrase: Playing(new_phrase_len),
-                motif_memory: new_motif_memory,
-                motif_first_note: true,
-              }
-          }
-          None => break MeasureState::{ ..state, motif_memory, }
-        }
-      }
-      Playing(notes_left) => {
-        // Check for early phrase termination due to low stamina
-        let should_end_early = notes_left > 1 &&
-          state.stamina < settings.phrase_early_end_stamina &&
-          ({
-            let prob = effective_rest_probability(
-              settings.rest_probability,
-              state.stamina,
-              settings.stamina_max,
-              state.last_was_rest,
-            )
-            random_int(100) < prob
-          })
-        guard not(should_end_early) else {
-          // Transition to resting (will emit rest on next iteration)
-          continue MeasureState::{ ..state, phrase: Resting }
-        }
-        // Try to generate a triplet group (3 eighth triplets = 1 beat)
-        // Only start triplets on integer beat positions
-        let on_beat = (state.measure_pos -
-          state.measure_pos.to_int().to_double()).abs() <
-          0.01
-        let use_triplet = on_beat &&
-          notes_left >= 3 &&
-          remaining >= 1.0 - 0.001 &&
-          random_int(100) < settings.triplet_probability
-        guard not(use_triplet) else {
-          continue generate_triplet_group(
-              state, chord, ctx, settings, update_accidental, random_int, notes_left,
-            )
-        }
-
-        // Select note using motif-guided or normal selection
-        let (midi_opt, new_motif_memory) = select_note_with_motif(
-          state, chord, ctx, settings, random_int,
+    let result = match state.phrase {
+      Resting => handle_resting(state, remaining, settings, random_int)
+      Playing(notes_left) =>
+        handle_playing(
+          state, notes_left, chord, ctx, remaining, settings, update_accidental,
+          random_int,
         )
-        match midi_opt {
-          Some(midi) =>
-            match
-              random_duration_within(
-                remaining,
-                settings.note_duration_weights,
-                random_int,
-              ) {
-              Some(duration) => {
-                let cost = match state.last_midi {
-                  Some(prev) => interval_cost(prev, midi)
-                  None => 0
-                }
-                let new_stamina = @cmp.maximum(
-                  0,
-                  @cmp.minimum(
-                    state.stamina - cost + settings.stamina_passive_recovery,
-                    settings.stamina_max,
-                  ),
-                )
-                // Record interval for motif memory
-                let new_motif_memory = record_motif_interval(
-                  new_motif_memory,
-                  state.last_midi,
-                  midi,
-                  state.motif_first_note,
-                )
-                let beat_index = state.measure_pos.to_int()
-                state.beat_notes[beat_index].push(@music.MeasureNote::{
-                  midi: Some(midi.value),
-                  duration,
-                  accidental: update_accidental(midi),
-                  tie: None,
-                })
-                let next_phrase = match notes_left {
-                  1 => Resting
-                  n => Playing(n - 1)
-                }
-                continue MeasureState::{
-                    measure_pos: state.measure_pos + duration.to_beats(),
-                    beat_notes: state.beat_notes,
-                    stamina: new_stamina,
-                    last_midi: Some(midi),
-                    last_was_rest: false,
-                    phrase: next_phrase,
-                    motif_memory: new_motif_memory,
-                    motif_first_note: false,
-                  }
-              }
-              None => break state
-            }
-          None =>
-            // Shouldn't happen with rest_probability=0, but handle gracefully
-            break state
-        }
-      }
+    }
+    match result {
+      Continue(next) => continue next
+      Break(final_state) => break final_state
     }
   }
 }
@@ -866,72 +891,24 @@ fn decide_midi_number(
   let approach_tones = extend_across_octaves(chord.approach_tones())
   match last_midi {
     Some(prev) => {
-      // Filter candidates by max interval
-      let chord_tones = filter_by_interval(chord_tones, prev, max_interval)
-      let tension_tones = filter_by_interval(tension_tones, prev, max_interval)
-      let scale_tones = filter_by_interval(scale_tones, prev, max_interval)
-      let approach_tones = filter_by_interval(
-        approach_tones, prev, max_interval,
-      )
-
-      // Calculate weights for chord tones
-      let weighted_chord : Array[(Int, @music.MidiNumber)] = chord_tones
+      let weight_tones = fn(
+        tones : Array[@music.MidiNumber],
+        weight_ratio : Int,
+      ) -> Array[(Int, @music.MidiNumber)] {
+        filter_by_interval(tones, prev, max_interval)
         .iter()
         .map(fn(tone) {
           let cost = interval_cost(prev, tone)
-          let weight = note_selection_weight(stamina, cost)
-          (weight, tone)
-        })
-        .collect()
-      // Calculate weights for tension tones (between chord and scale)
-      let weighted_tension : Array[(Int, @music.MidiNumber)] = tension_tones
-        .iter()
-        .map(fn(tone) {
-          let cost = interval_cost(prev, tone)
-          let weight = note_selection_weight(stamina, cost) *
-            tension_weight_ratio /
-            100
+          let weight = note_selection_weight(stamina, cost) * weight_ratio / 100
           (@cmp.maximum(1, weight), tone)
         })
         .collect()
-      // Calculate weights for scale tones (reduced by ratio)
-      let weighted_scale : Array[(Int, @music.MidiNumber)] = scale_tones
-        .iter()
-        .map(fn(tone) {
-          let cost = interval_cost(prev, tone)
-          let weight = note_selection_weight(stamina, cost) *
-            scale_tone_weight_ratio /
-            100
-          (@cmp.maximum(1, weight), tone)
-        })
-        .collect()
-      // Calculate weights for approach tones (chromatic half-steps to chord tones)
-      let weighted_approach : Array[(Int, @music.MidiNumber)] = approach_tones
-        .iter()
-        .map(fn(tone) {
-          let cost = interval_cost(prev, tone)
-          let weight = note_selection_weight(stamina, cost) *
-            approach_weight_ratio /
-            100
-          (@cmp.maximum(1, weight), tone)
-        })
-        .collect()
-      let weighted_tones = weighted_chord +
-        weighted_tension +
-        weighted_scale +
-        weighted_approach
-      let total = weighted_tones
-        .iter()
-        .fold(init=0, fn(acc, pair) { acc + pair.0 })
-      let r = random_int(total)
-      let mut cumulative = 0
-      for pair in weighted_tones {
-        cumulative = cumulative + pair.0
-        if r < cumulative {
-          return Some(pair.1)
-        }
       }
-      Some(weighted_tones[weighted_tones.length() - 1].1)
+      let weighted_tones = weight_tones(chord_tones, 100) +
+        weight_tones(tension_tones, tension_weight_ratio) +
+        weight_tones(scale_tones, scale_tone_weight_ratio) +
+        weight_tones(approach_tones, approach_weight_ratio)
+      weighted_random_select(weighted_tones, random_int)
     }
     None => {
       // First note: uniform random from chord tones only
@@ -939,6 +916,25 @@ fn decide_midi_number(
       Some(chord_tones[index])
     }
   }
+}
+
+///|
+/// Select a random element from weighted candidates
+fn weighted_random_select(
+  weighted : Array[(Int, @music.MidiNumber)],
+  random_int : (Int) -> Int,
+) -> @music.MidiNumber? {
+  guard not(weighted.is_empty()) else { return None }
+  let total = weighted.iter().fold(init=0, fn(acc, pair) { acc + pair.0 })
+  let r = random_int(total)
+  let mut cumulative = 0
+  for pair in weighted {
+    cumulative = cumulative + pair.0
+    if r < cumulative {
+      return Some(pair.1)
+    }
+  }
+  Some(weighted[weighted.length() - 1].1)
 }
 
 ///|

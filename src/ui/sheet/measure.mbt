@@ -197,71 +197,86 @@ fn compute_note_positions(
     positions.push(x)
   }
 
-  // If rightmost position exceeds the available area, compress only the extra
-  // space beyond minimum spacing so that accidental gaps are preserved.
-  let right_edge = note_area_start + note_area_width
-  if n > 1 && positions[n - 1] > right_edge {
-    let first_pos = positions[0]
-    let available_span = right_edge - first_pos
-    // Collect minimum spacing and extra space for each gap
-    let min_gaps : Array[Double] = []
-    let extras : Array[Double] = []
-    let mut total_min = 0.0
-    let mut total_extra = 0.0
-    for i = 1; i < n; i = i + 1 {
-      let min_sp = note_min_spacing(i, positioned, beamed_indices)
-      let gap = positions[i] - positions[i - 1]
-      let extra = gap - min_sp
-      min_gaps.push(min_sp)
-      extras.push(extra)
-      total_min = total_min + min_sp
-      total_extra = total_extra + extra
-    }
-    if available_span >= total_min {
-      // Compress only the extra space beyond minimums
-      let extra_scale = if total_extra > 0.0 {
-        (available_span - total_min) / total_extra
-      } else {
-        0.0
-      }
-      for i = 1; i < n; i = i + 1 {
-        positions[i] = positions[i - 1] +
-          min_gaps[i - 1] +
-          extras[i - 1] * extra_scale
-      }
+  compress_overflow(
+    positions,
+    positioned,
+    beamed_indices,
+    note_area_start + note_area_width,
+  )
+  positions
+}
+
+///|
+/// Compress positions that overflow the available area by scaling extra space
+/// beyond minimum spacing. Falls back to critical/flexible gap strategy when
+/// even minimums exceed the available span.
+fn compress_overflow(
+  positions : Array[Double],
+  positioned : Array[(Double, @music.MeasureNote)],
+  beamed_indices : Map[Int, Bool],
+  right_edge : Double,
+) -> Unit {
+  let n = positions.length()
+  guard n > 1 && positions[n - 1] > right_edge else { return }
+  let first_pos = positions[0]
+  let available_span = right_edge - first_pos
+  // Collect minimum spacing and extra space for each gap
+  let min_gaps : Array[Double] = []
+  let extras : Array[Double] = []
+  let mut total_min = 0.0
+  let mut total_extra = 0.0
+  for i = 1; i < n; i = i + 1 {
+    let min_sp = note_min_spacing(i, positioned, beamed_indices)
+    let gap = positions[i] - positions[i - 1]
+    let extra = gap - min_sp
+    min_gaps.push(min_sp)
+    extras.push(extra)
+    total_min = total_min + min_sp
+    total_extra = total_extra + extra
+  }
+  if available_span >= total_min {
+    // Compress only the extra space beyond minimums
+    let extra_scale = if total_extra > 0.0 {
+      (available_span - total_min) / total_extra
     } else {
-      // Not enough space for all minimums: preserve critical gaps (flagged eighths),
-      // compress flexible gaps proportionally to fill remaining space.
-      let mut critical_total = 0.0
-      let mut flexible_total = 0.0
-      let is_critical : Array[Bool] = []
-      for i = 0; i < min_gaps.length(); i = i + 1 {
-        let critical = min_gaps[i] > MIN_NOTE_SPACING
-        is_critical.push(critical)
-        if critical {
-          critical_total = critical_total + min_gaps[i]
-        } else {
-          flexible_total = flexible_total + (min_gaps[i] + extras[i])
-        }
-      }
-      let flexible_available = available_span - critical_total
-      let flexible_scale = if flexible_total > 0.0 {
-        @cmp.maximum(0.0, flexible_available / flexible_total)
+      0.0
+    }
+    for i = 1; i < n; i = i + 1 {
+      positions[i] = positions[i - 1] +
+        min_gaps[i - 1] +
+        extras[i - 1] * extra_scale
+    }
+  } else {
+    // Not enough space for all minimums: preserve critical gaps (flagged eighths),
+    // compress flexible gaps proportionally to fill remaining space.
+    let mut critical_total = 0.0
+    let mut flexible_total = 0.0
+    let is_critical : Array[Bool] = []
+    for i = 0; i < min_gaps.length(); i = i + 1 {
+      let critical = min_gaps[i] > MIN_NOTE_SPACING
+      is_critical.push(critical)
+      if critical {
+        critical_total = critical_total + min_gaps[i]
       } else {
-        0.0
+        flexible_total = flexible_total + (min_gaps[i] + extras[i])
       }
-      for i = 1; i < n; i = i + 1 {
-        let gap_idx = i - 1
-        let new_gap = if is_critical[gap_idx] {
-          min_gaps[gap_idx]
-        } else {
-          (min_gaps[gap_idx] + extras[gap_idx]) * flexible_scale
-        }
-        positions[i] = positions[i - 1] + new_gap
+    }
+    let flexible_available = available_span - critical_total
+    let flexible_scale = if flexible_total > 0.0 {
+      @cmp.maximum(0.0, flexible_available / flexible_total)
+    } else {
+      0.0
+    }
+    for i = 1; i < n; i = i + 1 {
+      let gap_idx = i - 1
+      let new_gap = if is_critical[gap_idx] {
+        min_gaps[gap_idx]
+      } else {
+        (min_gaps[gap_idx] + extras[gap_idx]) * flexible_scale
       }
+      positions[i] = positions[i - 1] + new_gap
     }
   }
-  positions
 }
 
 ///|
