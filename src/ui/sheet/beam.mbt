@@ -249,10 +249,12 @@ fn render_beam_group(
     group.iter().all(fn(idx) { positioned[idx].1.duration is EighthTriplet })
   if is_triplet {
     let center_x = (first_x + last_x) / 2.0
+    // SVG text y is the baseline; for stem-down the "3" extends upward
+    // from the baseline by the font ascent, so add extra clearance.
     let label_y = if stem_up {
       (first_beam_y + last_beam_y) / 2.0 - TRIPLET_LABEL_OFFSET
     } else {
-      (first_beam_y + last_beam_y) / 2.0 + TRIPLET_LABEL_OFFSET
+      (first_beam_y + last_beam_y) / 2.0 + TRIPLET_LABEL_OFFSET + 14.0
     }
     nodes.push(
       @luna_dom.svg_text(
