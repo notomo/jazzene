@@ -435,12 +435,12 @@ fn select_motif_guided_note(
   }
 
   let chord_tones = filter_by_interval(
-    get_extended_tones(chord),
+    extend_across_octaves(chord.tones()),
     last_midi,
     max_interval,
   )
   let scale_tones = filter_by_interval(
-    get_extended_scale_tones(chord, key),
+    extend_across_octaves(chord.scale_tones(key)),
     last_midi,
     max_interval,
   )
@@ -780,61 +780,13 @@ fn fill_remaining_measure(
 
 ///|
 /// Get extended chord tones across multiple octaves
-fn get_extended_tones(chord : @music.Chord) -> Array[@music.MidiNumber] {
-  [-1, 0, 1]
-  .iter()
-  .flat_map(fn(octave_offset) {
-    chord
-    .tones()
-    .iter()
-    .filter_map(fn(tone) { tone.shift_octave(octave_offset) })
-  })
-  .collect()
-}
-
-///|
-/// Get extended scale tones (non-chord diatonic tones) across multiple octaves
-fn get_extended_scale_tones(
-  chord : @music.Chord,
-  key : @music.KeySignature,
+fn extend_across_octaves(
+  tones : Array[@music.MidiNumber],
 ) -> Array[@music.MidiNumber] {
   [-1, 0, 1]
   .iter()
   .flat_map(fn(octave_offset) {
-    chord
-    .scale_tones(key)
-    .iter()
-    .filter_map(fn(tone) { tone.shift_octave(octave_offset) })
-  })
-  .collect()
-}
-
-///|
-/// Get extended tension tones across multiple octaves
-fn get_extended_tension_tones(chord : @music.Chord) -> Array[@music.MidiNumber] {
-  [-1, 0, 1]
-  .iter()
-  .flat_map(fn(octave_offset) {
-    chord
-    .tension_tones()
-    .iter()
-    .filter_map(fn(tone) { tone.shift_octave(octave_offset) })
-  })
-  .collect()
-}
-
-///|
-/// Get extended approach tones (chromatic half-step above/below chord tones) across multiple octaves
-fn get_extended_approach_tones(
-  chord : @music.Chord,
-) -> Array[@music.MidiNumber] {
-  [-1, 0, 1]
-  .iter()
-  .flat_map(fn(octave_offset) {
-    chord
-    .approach_tones()
-    .iter()
-    .filter_map(fn(tone) { tone.shift_octave(octave_offset) })
+    tones.iter().filter_map(fn(tone) { tone.shift_octave(octave_offset) })
   })
   .collect()
 }
@@ -908,10 +860,10 @@ fn decide_midi_number(
   )
   guard random_int(100) >= actual_rest_prob else { return None }
 
-  let chord_tones = get_extended_tones(chord)
-  let tension_tones = get_extended_tension_tones(chord)
-  let scale_tones = get_extended_scale_tones(chord, key)
-  let approach_tones = get_extended_approach_tones(chord)
+  let chord_tones = extend_across_octaves(chord.tones())
+  let tension_tones = extend_across_octaves(chord.tension_tones())
+  let scale_tones = extend_across_octaves(chord.scale_tones(key))
+  let approach_tones = extend_across_octaves(chord.approach_tones())
   match last_midi {
     Some(prev) => {
       // Filter candidates by max interval
