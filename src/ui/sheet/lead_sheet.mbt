@@ -135,19 +135,11 @@ pub fn lead_sheet(
         // Static measure elements (no current_measure_index dependency)
         @luna_dom.for_each(measures, fn(m, idx) {
           let ts = time_signature.get()
-          render_measure(
-            m,
-            idx,
-            playback_position,
-            key.get(),
-            ts.beats_per_measure(),
-            ts,
-            fn() {
-              let measure_number = idx + 1
-              measure_number < loop_a_measure.get() ||
-              measure_number > loop_b_measure.get()
-            },
-          )
+          render_measure(m, idx, playback_position, key.get(), ts, fn() {
+            let measure_number = idx + 1
+            measure_number < loop_a_measure.get() ||
+            measure_number > loop_b_measure.get()
+          })
         }),
         // Playback position indicator overlay
         render_playback_indicator(
