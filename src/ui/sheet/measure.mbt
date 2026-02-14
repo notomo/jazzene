@@ -305,14 +305,20 @@ fn render_measure_notes(
   time_signature : @music.TimeSignature,
 ) -> Array[@luna_dom.DomNode] {
   let positioned = measure.positioned_notes()
-  let beam_groups = @music.find_beam_groups(positioned, time_signature)
+  let apply_8va = should_apply_8va(positioned)
+  let display = if apply_8va {
+    shift_for_ottava(positioned)
+  } else {
+    positioned
+  }
+  let beam_groups = @music.find_beam_groups(display, time_signature)
   let beamed_indices : Map[Int, Bool] = {}
   beam_groups.each(fn(group) {
     group.each(fn(idx) { beamed_indices[idx] = true })
   })
 
-  let note_positions = compute_note_positions(positioned, x, beamed_indices)
-  let note_nodes : Array[@luna_dom.DomNode] = positioned
+  let note_positions = compute_note_positions(display, x, beamed_indices)
+  let note_nodes : Array[@luna_dom.DomNode] = display
     .iter()
     .mapi(fn(i, _pair) {
       let (_, note) = _pair
@@ -333,7 +339,7 @@ fn render_measure_notes(
           }
           let next_note_x : Double? = match note.tie {
             Some(@music.TieStart | @music.TieBoth) =>
-              if i + 1 < positioned.length() {
+              if i + 1 < display.length() {
                 Some(note_positions[i + 1])
               } else {
                 None
@@ -356,8 +362,13 @@ fn render_measure_notes(
     .flatten()
     .collect()
 
-  let beam_nodes = render_beams(beam_groups, positioned, note_positions, y, key)
-  [..note_nodes, ..beam_nodes]
+  let beam_nodes = render_beams(beam_groups, display, note_positions, y, key)
+  let ottava_nodes = if apply_8va {
+    render_8va_marking(x, y, MEASURE_WIDTH)
+  } else {
+    []
+  }
+  [..note_nodes, ..beam_nodes, ..ottava_nodes]
 }
 
 ///|
