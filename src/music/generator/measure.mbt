@@ -615,24 +615,20 @@ fn handle_resting(
   random_int : (Int) -> Int,
 ) -> StepResult {
   let motif_memory = state.motif_memory.finish_recording()
-  // Syncopation: on downbeats, sometimes force eighth rest so phrase starts on upbeat
-  let is_on_downbeat = (state.measure_pos -
-    state.measure_pos.to_int().to_double()).abs() <
-    0.01
-  let use_syncopation = is_on_downbeat &&
-    random_int(100) < settings.syncopation_probability
-  let duration = if use_syncopation {
-    if remaining >= @music.Eighth.to_beats() {
-      Some(@music.Eighth)
-    } else {
-      None
-    }
-  } else {
-    random_duration_within(
+  let duration = match
+    syncopation_rest(
+      state.measure_pos,
       remaining,
-      settings.rest_duration_weights,
+      settings.syncopation_probability,
       random_int,
-    )
+    ) {
+    Some(d) => Some(d)
+    None =>
+      random_duration_within(
+        remaining,
+        settings.rest_duration_weights,
+        random_int,
+      )
   }
   match duration {
     Some(duration) => {
@@ -696,13 +692,15 @@ fn handle_playing(
     return Continue(MeasureState::{ ..state, phrase: Resting })
   }
   // Try to generate a triplet group (3 eighth triplets = 1 beat)
-  let on_beat = (state.measure_pos - state.measure_pos.to_int().to_double()).abs() <
-    0.01
-  let use_triplet = on_beat &&
-    notes_left >= 3 &&
-    remaining >= 1.0 - 0.001 &&
-    random_int(100) < settings.triplet_probability
-  guard not(use_triplet) else {
+  guard not(
+    should_generate_triplet(
+      state.measure_pos,
+      notes_left,
+      remaining,
+      settings.triplet_probability,
+      random_int,
+    ),
+  ) else {
     return Continue(
       generate_triplet_group(
         state, chord, ctx, settings, update_accidental, random_int, notes_left,
@@ -895,23 +893,18 @@ fn decide_midi_number(
   let approach_tones = extend_across_octaves(chord.approach_tones())
   match last_midi {
     Some(prev) => {
-      let weight_tones = fn(
-        tones : Array[@music.MidiNumber],
-        weight_ratio : Int,
-      ) -> Array[(Int, @music.MidiNumber)] {
-        filter_by_interval(tones, prev, max_interval)
-        .iter()
-        .map(fn(tone) {
-          let cost = interval_cost(prev, tone)
-          let weight = note_selection_weight(stamina, cost) * weight_ratio / 100
-          (@cmp.maximum(1, weight), tone)
-        })
-        .collect()
-      }
-      let weighted_tones = weight_tones(chord_tones, 100) +
-        weight_tones(tension_tones, tension_weight_ratio) +
-        weight_tones(scale_tones, scale_tone_weight_ratio) +
-        weight_tones(approach_tones, approach_weight_ratio)
+      let weighted_tones = weighted_tone_candidates(
+          chord_tones, prev, stamina, max_interval, 100,
+        ) +
+        weighted_tone_candidates(
+          tension_tones, prev, stamina, max_interval, tension_weight_ratio,
+        ) +
+        weighted_tone_candidates(
+          scale_tones, prev, stamina, max_interval, scale_tone_weight_ratio,
+        ) +
+        weighted_tone_candidates(
+          approach_tones, prev, stamina, max_interval, approach_weight_ratio,
+        )
       weighted_random_select(weighted_tones, random_int)
     }
     None => {
@@ -939,82 +932,4 @@ fn weighted_random_select(
     }
   }
   Some(weighted[weighted.length() - 1].1)
-}
-
-///|
-/// Generate a group of 3 eighth-note triplets (totaling 1 beat)
-fn generate_triplet_group(
-  state : MeasureState,
-  _chord : @music.Chord,
-  ctx : MeasureContext,
-  settings : Settings,
-  update_accidental : (@music.MidiNumber) -> @music.Accidental?,
-  random_int : (Int) -> Int,
-  notes_left : Int,
-) -> MeasureState {
-  let triplet_duration = @music.EighthTriplet
-  // Remember the start position so we can snap to exact integer after 3 triplets
-  // (avoids floating-point drift from 1/3 + 1/3 + 1/3 != 1.0)
-  let start_pos = state.measure_pos
-  let mut current_state = state
-
-  for i = 0; i < 3; i = i + 1 {
-    let current_chord = ctx.chord_at(current_state.measure_pos)
-    let (midi_opt, new_motif_memory) = select_note_with_motif(
-      current_state, current_chord, ctx, settings, random_int,
-    )
-
-    match midi_opt {
-      Some(midi) => {
-        let cost = match current_state.last_midi {
-          Some(prev) => interval_cost(prev, midi)
-          None => 0
-        }
-        let new_stamina = @cmp.maximum(
-          0,
-          @cmp.minimum(
-            current_state.stamina - cost + settings.stamina_passive_recovery,
-            settings.stamina_max,
-          ),
-        )
-        let new_motif_memory = record_motif_interval(
-          new_motif_memory,
-          current_state.last_midi,
-          midi,
-          current_state.motif_first_note,
-        )
-        let beat_index = current_state.measure_pos.to_int()
-        current_state.beat_notes[beat_index].push(@music.MeasureNote::{
-          midi: Some(midi.value),
-          duration: triplet_duration,
-          accidental: update_accidental(midi),
-          tie: None,
-        })
-        let remaining_after = notes_left - (i + 1)
-        let next_phrase = if remaining_after <= 0 {
-          Resting
-        } else {
-          Playing(remaining_after)
-        }
-        // After the last triplet, snap to exact integer to avoid floating-point drift
-        let new_pos = if i == 2 {
-          start_pos + 1.0
-        } else {
-          current_state.measure_pos + triplet_duration.to_beats()
-        }
-        current_state = MeasureState::{
-          measure_pos: new_pos,
-          beat_notes: current_state.beat_notes,
-          stamina: new_stamina,
-          last_midi: Some(midi),
-          last_was_rest: false,
-          phrase: next_phrase,
-          motif_memory: new_motif_memory,
-          motif_first_note: false,
-        }
-      }
-      None => break
-    }
-  }
-  current_state
 }
