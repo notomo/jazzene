@@ -321,8 +321,11 @@ fn render_measure_notes(
 ) -> Array[@luna_dom.DomNode] {
   let positioned = measure.positioned_notes()
   let apply_8va = should_apply_8va(positioned)
+  let apply_8vb = should_apply_8vb(positioned, key)
   let display = if apply_8va {
-    shift_for_ottava(positioned)
+    shift_for_8va(positioned)
+  } else if apply_8vb {
+    shift_for_8vb(positioned)
   } else {
     positioned
   }
@@ -380,6 +383,8 @@ fn render_measure_notes(
   let beam_nodes = render_beams(beam_groups, display, note_positions, y, key)
   let ottava_nodes = if apply_8va {
     render_8va_marking(x, y, MEASURE_WIDTH)
+  } else if apply_8vb {
+    render_8vb_marking(x, y, MEASURE_WIDTH)
   } else {
     []
   }
