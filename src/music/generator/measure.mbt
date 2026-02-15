@@ -230,24 +230,6 @@ fn note_selection_weight(stamina : Int, cost : Int) -> Int {
 }
 
 ///|
-/// Transpose a MidiNumber by a semitone offset, clamping to valid range
-fn transpose_midi(midi : @music.MidiNumber, offset : Int) -> @music.MidiNumber {
-  @music.MidiNumber::new(midi.value + offset).unwrap_or(midi)
-}
-
-///|
-/// Transpose a chord's root by a semitone offset
-fn transpose_chord(chord : @music.Chord, offset : Int) -> @music.Chord {
-  let new_pc = (chord.root.midi() - 60 + offset + 120) % 12
-  let new_root = @music.ChordRoot::from_pitch_class(new_pc)
-  let new_bass = chord.bass.map(fn(b) {
-    let bp = (b.midi() - 60 + offset + 120) % 12
-    @music.ChordRoot::from_pitch_class(bp)
-  })
-  @music.Chord::{ root: new_root, quality: chord.quality, bass: new_bass }
-}
-
-///|
 /// Generate notes for one measure
 fn generate_measure_notes(
   ctx : MeasureContext,
@@ -262,19 +244,19 @@ fn generate_measure_notes(
   // Transpose input to C
   let c_chords = ctx.chords.map(fn(seg) {
     ChordSegment::{
-      chord: transpose_chord(seg.chord, neg_offset),
+      chord: seg.chord.transpose(neg_offset),
       start_beat: seg.start_beat,
       end_beat: seg.end_beat,
     }
   })
   let c_incoming_tie = ctx.incoming_tie.map(fn(tie) {
     TieContext::{
-      midi: transpose_midi(tie.midi, neg_offset),
+      midi: tie.midi.transpose(neg_offset),
       remaining_beats: tie.remaining_beats,
     }
   })
   let c_incoming_last_midi = ctx.incoming_last_midi.map(fn(m) {
-    transpose_midi(m, neg_offset)
+    m.transpose(neg_offset)
   })
   let c_ctx = MeasureContext::{
     chords: c_chords,
@@ -328,10 +310,9 @@ fn generate_measure_notes(
         notes: beat.notes.map(fn(note) {
           match note.midi {
             Some(midi_val) => {
-              let real_midi = transpose_midi(
-                @music.MidiNumber::new(midi_val).unwrap(),
-                offset,
-              )
+              let real_midi = @music.MidiNumber::new(midi_val)
+                .unwrap()
+                .transpose(offset)
               @music.MeasureNote::{
                 midi: Some(real_midi.value),
                 duration: note.duration,
@@ -352,12 +333,12 @@ fn generate_measure_notes(
   }
   let real_outgoing_tie = outgoing_tie.map(fn(tie) {
     TieContext::{
-      midi: transpose_midi(tie.midi, offset),
+      midi: tie.midi.transpose(offset),
       remaining_beats: tie.remaining_beats,
     }
   })
   let real_outgoing_last_midi = final_state.last_midi.map(fn(m) {
-    transpose_midi(m, offset)
+    m.transpose(offset)
   })
   MeasureResult::{
     beats,

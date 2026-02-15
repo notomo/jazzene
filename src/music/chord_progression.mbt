@@ -15,6 +15,18 @@ pub fn Chord::tones(self : Chord) -> Array[MidiNumber] {
 }
 
 ///|
+/// Transpose a chord's root by a semitone offset
+pub fn Chord::transpose(self : Chord, offset : Int) -> Chord {
+  let new_pc = (self.root.midi() - 60 + offset + 120) % 12
+  let new_root = ChordRoot::from_pitch_class(new_pc)
+  let new_bass = self.bass.map(fn(b) {
+    let bp = (b.midi() - 60 + offset + 120) % 12
+    ChordRoot::from_pitch_class(bp)
+  })
+  Chord::{ root: new_root, quality: self.quality, bass: new_bass }
+}
+
+///|
 /// Format complete chord symbol
 pub fn format_chord(chord : Chord) -> String {
   let base = chord.root.to_string() + chord.quality.to_string()

@@ -14,6 +14,12 @@ pub fn MidiNumber::new(value : Int) -> MidiNumber? {
 }
 
 ///|
+/// Transpose by a semitone offset, clamping to valid range
+pub fn MidiNumber::transpose(self : MidiNumber, offset : Int) -> MidiNumber {
+  MidiNumber::new(self.value + offset).unwrap_or(self)
+}
+
+///|
 /// Shift by octaves (positive = up, negative = down)
 /// Returns None if result would be outside valid MIDI range (0-127)
 pub fn MidiNumber::shift_octave(

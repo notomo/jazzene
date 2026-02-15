@@ -29,3 +29,16 @@ test "MidiNumber accidental" {
   inspect(MidiNumber::{ value: 68 }.accidental(), content="Flat") // Ab
   inspect(MidiNumber::{ value: 70 }.accidental(), content="Flat") // Bb
 }
+
+///|
+test "MidiNumber transpose" {
+  let c4 = MidiNumber::{ value: 60 }
+  // Up 7 semitones: C4 -> G4
+  assert_eq(c4.transpose(7), MidiNumber::{ value: 67 })
+  // Down 3 semitones: C4 -> A3
+  assert_eq(c4.transpose(-3), MidiNumber::{ value: 57 })
+  // Clamp to upper bound
+  assert_eq(MidiNumber::{ value: 125 }.transpose(10), MidiNumber::{ value: 125 })
+  // Clamp to lower bound
+  assert_eq(MidiNumber::{ value: 3 }.transpose(-10), MidiNumber::{ value: 3 })
+}

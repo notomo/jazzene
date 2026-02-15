@@ -146,6 +146,22 @@ test "resolve bVII in C major" {
 }
 
 ///|
+test "Chord transpose" {
+  let cmaj7 = Chord::{ root: C, quality: Major7, bass: None }
+  // Up 2 semitones: Cmaj7 -> Dmaj7
+  let dmaj7 = cmaj7.transpose(2)
+  assert_eq(dmaj7.root, D)
+  assert_eq(dmaj7.quality, Major7)
+  assert_eq(dmaj7.bass, None)
+  // With slash bass: G7/D up 5 semitones -> C7/G
+  let g7_d = Chord::{ root: G, quality: Dominant7, bass: Some(D) }
+  let c7_g = g7_d.transpose(5)
+  assert_eq(c7_g.root, C)
+  assert_eq(c7_g.quality, Dominant7)
+  assert_eq(c7_g.bass, Some(G))
+}
+
+///|
 test "Chord tones" {
   let cmaj7 = Chord::{ root: C, quality: Major7, bass: None }
   // C E G B
