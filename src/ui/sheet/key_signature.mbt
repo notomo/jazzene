@@ -2,21 +2,7 @@
 /// Key signature rendering on staff
 
 ///|
-const KEY_SIG_SYMBOL_SPACING = 12.0
-
-///|
 const KEY_SIG_START_OFFSET = 30.0
-
-///|
-/// Calculate the width of the key signature rendering area
-fn key_signature_width(key : @music.KeySignature) -> Double {
-  let count = key.altered_steps.length()
-  if count == 0 {
-    0.0
-  } else {
-    count.to_double() * KEY_SIG_SYMBOL_SPACING + 5.0
-  }
-}
 
 ///|
 /// Render key signature accidentals after the treble clef
@@ -29,16 +15,14 @@ fn render_key_signature(
   if positions.is_empty() {
     return []
   }
-  // Use C major for key signature position calculation since these are
-  // standard treble clef positions independent of the current key
   let c_major = @music.KeySignature::c_major()
   positions
   .iter()
   .mapi(fn(i, midi) {
     let symbol_x = x +
       KEY_SIG_START_OFFSET +
-      i.to_double() * KEY_SIG_SYMBOL_SPACING
-    let symbol_y = midi_to_staff_y(midi, y, c_major)
+      i.to_double() * @music.KEY_SIG_SYMBOL_SPACING
+    let symbol_y = @music.midi_to_staff_y(midi, y, c_major)
     match key.accidental_type {
       Sharp => render_sharp(symbol_x, symbol_y)
       Flat => render_flat(symbol_x, symbol_y)
@@ -60,7 +44,7 @@ fn render_measure_key_signature(
     true =>
       render_key_signature(
         key,
-        x - CLEF_SPACE_WIDTH - key_signature_width(key),
+        x - @music.CLEF_SPACE_WIDTH - @music.key_signature_layout_width(key),
         y,
       )
     false => []

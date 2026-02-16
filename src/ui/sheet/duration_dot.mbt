@@ -16,9 +16,9 @@ fn render_duration_dot(
 ) -> @luna_dom.DomNode? {
   match duration {
     DottedEighth | DottedQuarter | DottedHalf => {
-      let dot_radius = STAFF_LINE_SPACING * DOT_RADIUS_RATIO
-      let dot_x = x + STAFF_LINE_SPACING * DOT_X_OFFSET_RATIO
-      let dot_y = if on_line { y - STAFF_LINE_SPACING / 2.0 } else { y }
+      let dot_radius = @music.STAFF_LINE_SPACING * DOT_RADIUS_RATIO
+      let dot_x = x + @music.STAFF_LINE_SPACING * DOT_X_OFFSET_RATIO
+      let dot_y = if on_line { y - @music.STAFF_LINE_SPACING / 2.0 } else { y }
       Some(
         @luna_dom.svg_circle(
           cx=dot_x.to_string(),

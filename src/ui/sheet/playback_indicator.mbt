@@ -22,8 +22,8 @@ fn render_playback_indicator(
   key : @signals.Signal[@music.KeySignature],
   time_signature : @signals.Signal[@music.TimeSignature],
 ) -> @luna_dom.DomNode {
-  // Staff height (5 lines with spacing between them)
-  let staff_height = (STAFF_LINES - 1).to_double() * STAFF_LINE_SPACING
+  let staff_height = (@music.STAFF_LINES - 1).to_double() *
+    @music.STAFF_LINE_SPACING
 
   let line_top_offset = PLAYBACK_INDICATOR_TOP_OFFSET
   let line_bottom_offset = staff_height + PLAYBACK_INDICATOR_BOTTOM_OFFSET
@@ -102,33 +102,29 @@ fn calculate_indicator_x(
 ) -> Double {
   let pos_ms = position.to_milliseconds()
   let ms_per_measure = @music.ms_per_measure(bpm, beats_per_measure~)
-  let clef_and_key_width = CLEF_SPACE_WIDTH + key_signature_width(key)
+  let clef_and_key_width = @music.CLEF_SPACE_WIDTH +
+    @music.key_signature_layout_width(key)
 
   if ms_per_measure <= 0.0 || measure_count <= 0 {
-    return MEASURE_START_X + clef_and_key_width
+    return @music.MEASURE_START_X + clef_and_key_width
   }
 
-  // Calculate current measure index and progress within measure
   let measure_idx = (pos_ms / ms_per_measure).to_int()
   let raw_progress = (pos_ms - measure_idx.to_double() * ms_per_measure) /
     ms_per_measure
 
-  // Clamp to valid measure range
-  // When at or past the end, set progress to 1.0 to show indicator at end of last measure
   let (clamped_idx, progress) = if measure_idx >= measure_count {
     (measure_count - 1, 1.0)
   } else {
     (measure_idx, raw_progress)
   }
 
-  // Calculate column position
-  let col = clamped_idx % MEASURES_PER_ROW
+  let col = clamped_idx % @music.MEASURES_PER_ROW
 
-  // X position: start of measure + progress within measure (with clef space offset)
-  let measure_x = MEASURE_START_X +
+  let measure_x = @music.MEASURE_START_X +
     clef_and_key_width +
-    col.to_double() * MEASURE_WIDTH
-  measure_x + progress * MEASURE_WIDTH
+    col.to_double() * @music.MEASURE_WIDTH
+  measure_x + progress * @music.MEASURE_WIDTH
 }
 
 ///|
@@ -142,22 +138,18 @@ fn calculate_indicator_y(
   let pos_ms = position.to_milliseconds()
   let ms_per_measure = @music.ms_per_measure(bpm, beats_per_measure~)
   if ms_per_measure <= 0.0 || measure_count <= 0 {
-    return STAFF_TOP
+    return @music.STAFF_TOP
   }
 
-  // Calculate current measure index
   let measure_idx = (pos_ms / ms_per_measure).to_int()
 
-  // Clamp to valid measure range
   let clamped_idx = if measure_idx >= measure_count {
     measure_count - 1
   } else {
     measure_idx
   }
 
-  // Calculate row position
-  let row = clamped_idx / MEASURES_PER_ROW
+  let row = clamped_idx / @music.MEASURES_PER_ROW
 
-  // Y position: staff top for this row
-  STAFF_TOP + row.to_double() * ROW_HEIGHT
+  @music.STAFF_TOP + row.to_double() * @music.ROW_HEIGHT
 }

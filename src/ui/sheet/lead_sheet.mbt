@@ -32,7 +32,7 @@ fn calculate_playback_row(
     measure_idx
   }
 
-  clamped_idx / MEASURES_PER_ROW
+  clamped_idx / @music.MEASURES_PER_ROW
 }
 
 ///|
@@ -63,39 +63,36 @@ pub fn lead_sheet(
     last_scrolled_row.val = current_row
     match @js_dom.document().getElementById(LEAD_SHEET_CONTAINER_ID) {
       Some(container) => {
-        // Get the SVG element to calculate the scale factor
         let svg = container.querySelector("svg")
         guard svg is Some(svg_element) else { return }
         let svg_height = svg_element.clientHeight()
         if svg_height <= 0 {
           return
         }
-        // Calculate total rows and SVG viewBox height
-        let total_rows = (measure_count + MEASURES_PER_ROW - 1) /
-          MEASURES_PER_ROW
-        let viewbox_height = STAFF_TOP + total_rows.to_double() * ROW_HEIGHT
-        // Scale factor: how many pixels per SVG unit
+        let total_rows = (measure_count + @music.MEASURES_PER_ROW - 1) /
+          @music.MEASURES_PER_ROW
+        let viewbox_height = @music.STAFF_TOP +
+          total_rows.to_double() * @music.ROW_HEIGHT
         let scale = svg_height.to_double() / viewbox_height
-        // Current row's position in pixels
-        let row_top_svg = STAFF_TOP + current_row.to_double() * ROW_HEIGHT
+        let row_top_svg = @music.STAFF_TOP +
+          current_row.to_double() * @music.ROW_HEIGHT
         let row_top_px = (row_top_svg * scale).to_int()
-        let row_bottom_svg = STAFF_TOP +
-          (current_row + 1).to_double() * ROW_HEIGHT
+        let row_bottom_svg = @music.STAFF_TOP +
+          (current_row + 1).to_double() * @music.ROW_HEIGHT
         let row_bottom_px = (row_bottom_svg * scale).to_int()
-        // Visible area
         let scroll_top = container.scrollTop()
         let visible_height = container.clientHeight()
         let visible_bottom = scroll_top + visible_height
-        // Margin to show the next/previous row, capped so the current row stays visible
         let row_height_px = row_bottom_px - row_top_px
         let max_margin = @cmp.maximum(0, (visible_height - row_height_px) / 2)
-        let margin = @cmp.minimum((ROW_HEIGHT * scale).to_int(), max_margin)
-        // Scroll up if the current row's top is above the visible area
+        let margin = @cmp.minimum(
+          (@music.ROW_HEIGHT * scale).to_int(),
+          max_margin,
+        )
         if row_top_px - margin < scroll_top {
           let new_scroll = row_top_px - margin
           scroll_element_to(container, @cmp.maximum(0, new_scroll))
         } else if row_bottom_px + margin > visible_bottom {
-          // Scroll down if the current row's bottom is below the visible area
           let new_scroll = row_bottom_px + margin - visible_height
           scroll_element_to(container, new_scroll)
         }
@@ -118,21 +115,21 @@ pub fn lead_sheet(
           "viewBox",
           @luna_dom.AttrValue::Dynamic(fn() {
             let measure_count = measures().length()
-            let rows = (measure_count + MEASURES_PER_ROW - 1) / MEASURES_PER_ROW
-            let height = STAFF_TOP + rows.to_double() * ROW_HEIGHT
-            let key_sig_width = key_signature_width(key.get())
-            let viewbox_start_x = MEASURE_START_X - 15.0
-            let width = MEASURE_START_X -
+            let rows = (measure_count + @music.MEASURES_PER_ROW - 1) /
+              @music.MEASURES_PER_ROW
+            let height = @music.STAFF_TOP + rows.to_double() * @music.ROW_HEIGHT
+            let key_sig_width = @music.key_signature_layout_width(key.get())
+            let viewbox_start_x = @music.MEASURE_START_X - 15.0
+            let width = @music.MEASURE_START_X -
               viewbox_start_x +
-              CLEF_SPACE_WIDTH +
+              @music.CLEF_SPACE_WIDTH +
               key_sig_width +
-              MEASURES_PER_ROW.to_double() * MEASURE_WIDTH
+              @music.MEASURES_PER_ROW.to_double() * @music.MEASURE_WIDTH
             "\{viewbox_start_x.to_int()} \{0} \{width.to_int()} \{height.to_int()}"
           }),
         ),
       ],
       [
-        // Static measure elements (no current_measure_index dependency)
         @luna_dom.for_each(measures, fn(m, idx) {
           let ts = time_signature.get()
           render_measure(m, idx, playback_position, key.get(), ts, fn() {
@@ -141,7 +138,6 @@ pub fn lead_sheet(
             measure_number > loop_b_measure.get()
           })
         }),
-        // Playback position indicator overlay
         render_playback_indicator(
           playback_position,
           bpm,
