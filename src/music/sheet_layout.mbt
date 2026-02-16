@@ -83,7 +83,7 @@ pub(all) struct SheetMeasure {
 
 ///|
 /// Calculate diatonic steps from E4 (bottom line of treble clef)
-pub fn midi_to_diatonic_step(midi : Int, key : KeySignature) -> Int {
+fn midi_to_diatonic_step(midi : Int, key : KeySignature) -> Int {
   let pitch_class = midi % 12
   let octave = midi / 12 - 1
   let e4_pitch_class = 4
@@ -131,7 +131,7 @@ pub fn ledger_steps_above(step : Int) -> Array[Int] {
 
 ///|
 /// Returns true if any pitched note in the measure has MIDI >= threshold
-pub fn should_apply_8va(positioned : Array[(Double, MeasureNote)]) -> Bool {
+fn should_apply_8va(positioned : Array[(Double, MeasureNote)]) -> Bool {
   positioned
   .iter()
   .any(fn(pair) {
@@ -144,7 +144,7 @@ pub fn should_apply_8va(positioned : Array[(Double, MeasureNote)]) -> Bool {
 
 ///|
 /// Returns true if any pitched note needs >= threshold ledger lines below the staff
-pub fn should_apply_8vb(
+fn should_apply_8vb(
   positioned : Array[(Double, MeasureNote)],
   key : KeySignature,
 ) -> Bool {
@@ -163,7 +163,7 @@ pub fn should_apply_8vb(
 
 ///|
 /// Creates a copy with all MIDI values shifted down by OTTAVA_SHIFT
-pub fn shift_for_8va(
+fn shift_for_8va(
   positioned : Array[(Double, MeasureNote)],
 ) -> Array[(Double, MeasureNote)] {
   positioned.map(fn(pair) {
@@ -175,7 +175,7 @@ pub fn shift_for_8va(
 
 ///|
 /// Creates a copy with all MIDI values shifted up by OTTAVA_SHIFT
-pub fn shift_for_8vb(
+fn shift_for_8vb(
   positioned : Array[(Double, MeasureNote)],
 ) -> Array[(Double, MeasureNote)] {
   positioned.map(fn(pair) {
@@ -216,7 +216,7 @@ pub fn measure_position(
 
 ///|
 /// Visual weight for duration-proportional spacing
-pub fn duration_visual_weight(duration : NoteDuration) -> Double {
+fn duration_visual_weight(duration : NoteDuration) -> Double {
   match duration {
     EighthTriplet => 0.545
     Eighth => 0.667
@@ -231,7 +231,7 @@ pub fn duration_visual_weight(duration : NoteDuration) -> Double {
 
 ///|
 /// Calculate minimum spacing between note at index i and its predecessor.
-pub fn note_min_spacing(
+fn note_min_spacing(
   i : Int,
   positioned : Array[(Double, MeasureNote)],
   beamed_indices : Map[Int, Bool],
@@ -255,7 +255,7 @@ pub fn note_min_spacing(
 
 ///|
 /// Compute x positions for all notes in a measure
-pub fn compute_note_positions(
+fn compute_note_positions(
   positioned : Array[(Double, MeasureNote)],
   measure_x : Double,
   beamed_indices : Map[Int, Bool],
@@ -374,7 +374,7 @@ fn compress_overflow(
 
 ///|
 /// Determine stem direction for a beam group.
-pub fn beam_stem_up(
+fn beam_stem_up(
   group : Array[Int],
   positioned : Array[(Double, MeasureNote)],
 ) -> Bool {
@@ -397,7 +397,7 @@ pub fn beam_stem_up(
 
 ///|
 /// Calculate beam endpoints (first_beam_y, last_beam_y) with angled beam support.
-pub fn beam_endpoints(
+fn beam_endpoints(
   group : Array[Int],
   positioned : Array[(Double, MeasureNote)],
   staff_y : Double,
@@ -478,7 +478,7 @@ pub fn beam_endpoints(
 
 ///|
 /// Linear interpolation of beam Y at a given x position.
-pub fn beam_y_at(
+fn beam_y_at(
   x : Double,
   first_x : Double,
   last_x : Double,
