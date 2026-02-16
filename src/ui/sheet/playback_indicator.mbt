@@ -22,8 +22,8 @@ fn render_playback_indicator(
   key : @signals.Signal[@music.KeySignature],
   time_signature : @signals.Signal[@music.TimeSignature],
 ) -> @luna_dom.DomNode {
-  let staff_height = (@music.STAFF_LINES - 1).to_double() *
-    @music.STAFF_LINE_SPACING
+  let staff_height = (@sheet_layout.STAFF_LINES - 1).to_double() *
+    @sheet_layout.STAFF_LINE_SPACING
 
   let line_top_offset = PLAYBACK_INDICATOR_TOP_OFFSET
   let line_bottom_offset = staff_height + PLAYBACK_INDICATOR_BOTTOM_OFFSET
@@ -102,11 +102,11 @@ fn calculate_indicator_x(
 ) -> Double {
   let pos_ms = position.to_milliseconds()
   let ms_per_measure = @music.ms_per_measure(bpm, beats_per_measure~)
-  let clef_and_key_width = @music.CLEF_SPACE_WIDTH +
-    @music.key_signature_layout_width(key)
+  let clef_and_key_width = @sheet_layout.CLEF_SPACE_WIDTH +
+    @sheet_layout.key_signature_layout_width(key)
 
   if ms_per_measure <= 0.0 || measure_count <= 0 {
-    return @music.MEASURE_START_X + clef_and_key_width
+    return @sheet_layout.MEASURE_START_X + clef_and_key_width
   }
 
   let measure_idx = (pos_ms / ms_per_measure).to_int()
@@ -119,12 +119,12 @@ fn calculate_indicator_x(
     (measure_idx, raw_progress)
   }
 
-  let col = clamped_idx % @music.MEASURES_PER_ROW
+  let col = clamped_idx % @sheet_layout.MEASURES_PER_ROW
 
-  let measure_x = @music.MEASURE_START_X +
+  let measure_x = @sheet_layout.MEASURE_START_X +
     clef_and_key_width +
-    col.to_double() * @music.MEASURE_WIDTH
-  measure_x + progress * @music.MEASURE_WIDTH
+    col.to_double() * @sheet_layout.MEASURE_WIDTH
+  measure_x + progress * @sheet_layout.MEASURE_WIDTH
 }
 
 ///|
@@ -138,7 +138,7 @@ fn calculate_indicator_y(
   let pos_ms = position.to_milliseconds()
   let ms_per_measure = @music.ms_per_measure(bpm, beats_per_measure~)
   if ms_per_measure <= 0.0 || measure_count <= 0 {
-    return @music.STAFF_TOP
+    return @sheet_layout.STAFF_TOP
   }
 
   let measure_idx = (pos_ms / ms_per_measure).to_int()
@@ -149,7 +149,7 @@ fn calculate_indicator_y(
     measure_idx
   }
 
-  let row = clamped_idx / @music.MEASURES_PER_ROW
+  let row = clamped_idx / @sheet_layout.MEASURES_PER_ROW
 
-  @music.STAFF_TOP + row.to_double() * @music.ROW_HEIGHT
+  @sheet_layout.STAFF_TOP + row.to_double() * @sheet_layout.ROW_HEIGHT
 }

@@ -28,14 +28,14 @@ const TIE_STROKE_WIDTH = "0.5"
 ///|
 /// Render tie arcs from pre-computed SheetTieArc data
 fn render_tie_arcs_from_sheet(
-  arcs : Array[@music.SheetTieArc],
+  arcs : Array[@sheet_layout.SheetTieArc],
 ) -> Array[@luna_dom.DomNode] {
   arcs.map(fn(arc) { render_tie_arc(arc) })
 }
 
 ///|
 /// Render a single tie arc from SheetTieArc data
-fn render_tie_arc(arc : @music.SheetTieArc) -> @luna_dom.DomNode {
+fn render_tie_arc(arc : @sheet_layout.SheetTieArc) -> @luna_dom.DomNode {
   let arc_height = if arc.stem_up { TIE_ARC_HEIGHT } else { -TIE_ARC_HEIGHT }
   let y_offset = if arc.stem_up { TIE_Y_OFFSET } else { -TIE_Y_OFFSET }
 

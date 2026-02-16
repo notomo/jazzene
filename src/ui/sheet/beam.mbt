@@ -7,7 +7,7 @@ const TRIPLET_LABEL_FONT_SIZE = "20"
 ///|
 /// Render a single beam group from pre-computed data
 fn render_beam_group_from_sheet(
-  group : @music.SheetBeamGroup,
+  group : @sheet_layout.SheetBeamGroup,
 ) -> Array[@luna_dom.DomNode] {
   let nodes : Array[@luna_dom.DomNode] = []
 
@@ -28,15 +28,15 @@ fn render_beam_group_from_sheet(
   let (first_top, first_bottom, last_top, last_bottom) = if group.stem_up {
     (
       group.first_beam_y,
-      group.first_beam_y + @music.BEAM_THICKNESS,
+      group.first_beam_y + @sheet_layout.BEAM_THICKNESS,
       group.last_beam_y,
-      group.last_beam_y + @music.BEAM_THICKNESS,
+      group.last_beam_y + @sheet_layout.BEAM_THICKNESS,
     )
   } else {
     (
-      group.first_beam_y - @music.BEAM_THICKNESS,
+      group.first_beam_y - @sheet_layout.BEAM_THICKNESS,
       group.first_beam_y,
-      group.last_beam_y - @music.BEAM_THICKNESS,
+      group.last_beam_y - @sheet_layout.BEAM_THICKNESS,
       group.last_beam_y,
     )
   }
@@ -72,7 +72,7 @@ fn render_beam_group_from_sheet(
 ///|
 /// Render all beam groups from pre-computed data
 fn render_beams_from_sheet(
-  beam_groups : Array[@music.SheetBeamGroup],
+  beam_groups : Array[@sheet_layout.SheetBeamGroup],
 ) -> Array[@luna_dom.DomNode] {
   beam_groups
   .iter()

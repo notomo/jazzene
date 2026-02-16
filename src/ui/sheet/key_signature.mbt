@@ -21,8 +21,8 @@ fn render_key_signature(
   .mapi(fn(i, midi) {
     let symbol_x = x +
       KEY_SIG_START_OFFSET +
-      i.to_double() * @music.KEY_SIG_SYMBOL_SPACING
-    let symbol_y = @music.midi_to_staff_y(midi, y, c_major)
+      i.to_double() * @sheet_layout.KEY_SIG_SYMBOL_SPACING
+    let symbol_y = @sheet_layout.midi_to_staff_y(midi, y, c_major)
     match key.accidental_type {
       Sharp => render_sharp(symbol_x, symbol_y)
       Flat => render_flat(symbol_x, symbol_y)
@@ -44,7 +44,9 @@ fn render_measure_key_signature(
     true =>
       render_key_signature(
         key,
-        x - @music.CLEF_SPACE_WIDTH - @music.key_signature_layout_width(key),
+        x -
+        @sheet_layout.CLEF_SPACE_WIDTH -
+        @sheet_layout.key_signature_layout_width(key),
         y,
       )
     false => []

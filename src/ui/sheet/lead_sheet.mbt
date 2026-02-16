@@ -32,7 +32,7 @@ fn calculate_playback_row(
     measure_idx
   }
 
-  clamped_idx / @music.MEASURES_PER_ROW
+  clamped_idx / @sheet_layout.MEASURES_PER_ROW
 }
 
 ///|
@@ -69,16 +69,16 @@ pub fn lead_sheet(
         if svg_height <= 0 {
           return
         }
-        let total_rows = (measure_count + @music.MEASURES_PER_ROW - 1) /
-          @music.MEASURES_PER_ROW
-        let viewbox_height = @music.STAFF_TOP +
-          total_rows.to_double() * @music.ROW_HEIGHT
+        let total_rows = (measure_count + @sheet_layout.MEASURES_PER_ROW - 1) /
+          @sheet_layout.MEASURES_PER_ROW
+        let viewbox_height = @sheet_layout.STAFF_TOP +
+          total_rows.to_double() * @sheet_layout.ROW_HEIGHT
         let scale = svg_height.to_double() / viewbox_height
-        let row_top_svg = @music.STAFF_TOP +
-          current_row.to_double() * @music.ROW_HEIGHT
+        let row_top_svg = @sheet_layout.STAFF_TOP +
+          current_row.to_double() * @sheet_layout.ROW_HEIGHT
         let row_top_px = (row_top_svg * scale).to_int()
-        let row_bottom_svg = @music.STAFF_TOP +
-          (current_row + 1).to_double() * @music.ROW_HEIGHT
+        let row_bottom_svg = @sheet_layout.STAFF_TOP +
+          (current_row + 1).to_double() * @sheet_layout.ROW_HEIGHT
         let row_bottom_px = (row_bottom_svg * scale).to_int()
         let scroll_top = container.scrollTop()
         let visible_height = container.clientHeight()
@@ -86,7 +86,7 @@ pub fn lead_sheet(
         let row_height_px = row_bottom_px - row_top_px
         let max_margin = @cmp.maximum(0, (visible_height - row_height_px) / 2)
         let margin = @cmp.minimum(
-          (@music.ROW_HEIGHT * scale).to_int(),
+          (@sheet_layout.ROW_HEIGHT * scale).to_int(),
           max_margin,
         )
         if row_top_px - margin < scroll_top {
@@ -115,16 +115,20 @@ pub fn lead_sheet(
           "viewBox",
           @luna_dom.AttrValue::Dynamic(fn() {
             let measure_count = measures().length()
-            let rows = (measure_count + @music.MEASURES_PER_ROW - 1) /
-              @music.MEASURES_PER_ROW
-            let height = @music.STAFF_TOP + rows.to_double() * @music.ROW_HEIGHT
-            let key_sig_width = @music.key_signature_layout_width(key.get())
-            let viewbox_start_x = @music.MEASURE_START_X - 15.0
-            let width = @music.MEASURE_START_X -
+            let rows = (measure_count + @sheet_layout.MEASURES_PER_ROW - 1) /
+              @sheet_layout.MEASURES_PER_ROW
+            let height = @sheet_layout.STAFF_TOP +
+              rows.to_double() * @sheet_layout.ROW_HEIGHT
+            let key_sig_width = @sheet_layout.key_signature_layout_width(
+              key.get(),
+            )
+            let viewbox_start_x = @sheet_layout.MEASURE_START_X - 15.0
+            let width = @sheet_layout.MEASURE_START_X -
               viewbox_start_x +
-              @music.CLEF_SPACE_WIDTH +
+              @sheet_layout.CLEF_SPACE_WIDTH +
               key_sig_width +
-              @music.MEASURES_PER_ROW.to_double() * @music.MEASURE_WIDTH
+              @sheet_layout.MEASURES_PER_ROW.to_double() *
+              @sheet_layout.MEASURE_WIDTH
             "\{viewbox_start_x.to_int()} \{0} \{width.to_int()} \{height.to_int()}"
           }),
         ),

@@ -4,6 +4,7 @@ import {
   "mizchi/luna/dom" @luna_dom,
   "mizchi/js/browser/dom" @js_dom,
   "internal/jazzene/music" @music,
+  "internal/jazzene/music/sheet" @sheet_layout,
 }
 
 options(

@@ -26,16 +26,16 @@ fn render_time_signature_display(
   x : Double,
   y : Double,
 ) -> Array[@luna_dom.DomNode] {
-  let staff_center = y + @music.STAFF_LINE_SPACING * 2.0
+  let staff_center = y + @sheet_layout.STAFF_LINE_SPACING * 2.0
   let ts_x = x -
-    @music.CLEF_SPACE_WIDTH +
+    @sheet_layout.CLEF_SPACE_WIDTH +
     TREBLE_CLEF_X_OFFSET +
     KEY_SIG_START_OFFSET
   [
     // Numerator (top half of staff)
     @luna_dom.svg_text(
       x=ts_x.to_string(),
-      y=(staff_center - @music.STAFF_LINE_SPACING * 0.1).to_string(),
+      y=(staff_center - @sheet_layout.STAFF_LINE_SPACING * 0.1).to_string(),
       font_size=TIME_SIG_FONT_SIZE,
       text_anchor="middle",
       dominant_baseline="auto",
@@ -48,7 +48,7 @@ fn render_time_signature_display(
     // Denominator (bottom half of staff)
     @luna_dom.svg_text(
       x=ts_x.to_string(),
-      y=(staff_center + @music.STAFF_LINE_SPACING * 0.1).to_string(),
+      y=(staff_center + @sheet_layout.STAFF_LINE_SPACING * 0.1).to_string(),
       font_size=TIME_SIG_FONT_SIZE,
       text_anchor="middle",
       dominant_baseline="hanging",
