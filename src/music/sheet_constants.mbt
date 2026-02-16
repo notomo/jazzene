@@ -24,19 +24,19 @@ pub const MEASURE_START_X : Double = 40.0
 pub const ROW_HEIGHT : Double = 300.0
 
 ///|
-pub const NOTE_AREA_START_OFFSET : Double = 40.0
+const NOTE_AREA_START_OFFSET : Double = 40.0
 
 ///|
-pub const NOTE_AREA_PADDING : Double = 75.0
+const NOTE_AREA_PADDING : Double = 75.0
 
 ///|
-pub const MIN_NOTE_SPACING : Double = 32.0
+const MIN_NOTE_SPACING : Double = 32.0
 
 ///|
-pub const FLAGGED_EIGHTH_EXTRA_SPACING : Double = 15.0
+const FLAGGED_EIGHTH_EXTRA_SPACING : Double = 15.0
 
 ///|
-pub const ACCIDENTAL_EXTRA_SPACING : Double = 14.0
+const ACCIDENTAL_EXTRA_SPACING : Double = 14.0
 
 // --- Staff ---
 
@@ -47,13 +47,13 @@ pub const STAFF_LINE_SPACING : Double = 15.0
 pub const STAFF_LINES : Int = 5
 
 ///|
-pub const FIRST_LEDGER_LINE_BELOW_STEP : Int = -2
+const FIRST_LEDGER_LINE_BELOW_STEP : Int = -2
 
 ///|
-pub const UPPER_LEDGER_LINE_THRESHOLD : Int = 8
+const UPPER_LEDGER_LINE_THRESHOLD : Int = 8
 
 ///|
-pub const FIRST_LEDGER_LINE_ABOVE_STEP : Int = 10
+const FIRST_LEDGER_LINE_ABOVE_STEP : Int = 10
 
 // --- Note ---
 
@@ -73,7 +73,7 @@ pub const COS_NOTE_HEAD_ROTATION : Double = 0.906308
 pub const SIN_NOTE_HEAD_ROTATION : Double = 0.422618
 
 ///|
-pub const STEM_DIRECTION_MIDI_THRESHOLD : Int = 71
+const STEM_DIRECTION_MIDI_THRESHOLD : Int = 71
 
 // --- Beam ---
 
@@ -81,18 +81,18 @@ pub const STEM_DIRECTION_MIDI_THRESHOLD : Int = 71
 pub const BEAM_THICKNESS : Double = 3.5
 
 ///|
-pub const BEAM_REST_CLEARANCE : Double = 8.0
+const BEAM_REST_CLEARANCE : Double = 8.0
 
 // --- Ottava ---
 
 ///|
-pub const OTTAVA_ALTA_THRESHOLD_MIDI : Int = 84
+const OTTAVA_ALTA_THRESHOLD_MIDI : Int = 84
 
 ///|
-pub const OTTAVA_BASSA_LEDGER_LINE_THRESHOLD : Int = 4
+const OTTAVA_BASSA_LEDGER_LINE_THRESHOLD : Int = 4
 
 ///|
-pub const OTTAVA_SHIFT : Int = 12
+const OTTAVA_SHIFT : Int = 12
 
 // --- Key signature ---
 
