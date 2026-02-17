@@ -71,6 +71,20 @@ fn stem_y_offset(stem_up : Bool) -> Double {
 }
 
 ///|
+/// Calculate stem position (x, y1, y2) from note position and stem direction
+pub fn calculate_stem(
+  note_x : Double,
+  note_y : Double,
+  stem_up : Bool,
+) -> (Double, Double, Double) {
+  let stem_height = STAFF_LINE_SPACING * STEM_HEIGHT_SPACES
+  let stem_x = note_x + stem_x_offset(stem_up)
+  let y1 = note_y + stem_y_offset(stem_up)
+  let y2 = if stem_up { y1 - stem_height } else { y1 + stem_height }
+  (stem_x, y1, y2)
+}
+
+///|
 /// Visual weight for duration-proportional spacing
 fn duration_visual_weight(duration : @music.NoteDuration) -> Double {
   match duration {

@@ -71,39 +71,6 @@ fn render_note_head(
 }
 
 ///|
-/// Calculate stem position from SheetNote data
-fn calculate_stem(
-  note_x : Double,
-  note_y : Double,
-  stem_up : Bool,
-) -> (Double, Double, Double) {
-  let stem_height = @sheet_layout.STAFF_LINE_SPACING *
-    @sheet_layout.STEM_HEIGHT_SPACES
-  let x_off = if stem_up {
-    @sheet_layout.STAFF_LINE_SPACING *
-    @sheet_layout.NOTE_HEAD_RX_RATIO *
-    @sheet_layout.COS_NOTE_HEAD_ROTATION
-  } else {
-    -(@sheet_layout.STAFF_LINE_SPACING *
-    @sheet_layout.NOTE_HEAD_RX_RATIO *
-    @sheet_layout.COS_NOTE_HEAD_ROTATION)
-  }
-  let y_off = if stem_up {
-    -(@sheet_layout.STAFF_LINE_SPACING *
-    @sheet_layout.NOTE_HEAD_RX_RATIO *
-    @sheet_layout.SIN_NOTE_HEAD_ROTATION)
-  } else {
-    @sheet_layout.STAFF_LINE_SPACING *
-    @sheet_layout.NOTE_HEAD_RX_RATIO *
-    @sheet_layout.SIN_NOTE_HEAD_ROTATION
-  }
-  let stem_x = note_x + x_off
-  let y1 = note_y + y_off
-  let y2 = if stem_up { y1 - stem_height } else { y1 + stem_height }
-  (stem_x, y1, y2)
-}
-
-///|
 /// Render stem line
 fn render_stem_line(
   stem_x : Double,
@@ -157,11 +124,15 @@ fn render_stem_and_flag(
   match duration {
     Whole => []
     Eighth | DottedEighth | EighthTriplet => {
-      let (stem_x, y1, y2) = calculate_stem(note_x, note_y, stem_up)
+      let (stem_x, y1, y2) = @sheet_layout.calculate_stem(
+        note_x, note_y, stem_up,
+      )
       [render_stem_line(stem_x, y1, y2), render_flag(stem_x, y2, stem_up)]
     }
     Quarter | DottedQuarter | Half | DottedHalf => {
-      let (stem_x, y1, y2) = calculate_stem(note_x, note_y, stem_up)
+      let (stem_x, y1, y2) = @sheet_layout.calculate_stem(
+        note_x, note_y, stem_up,
+      )
       [render_stem_line(stem_x, y1, y2)]
     }
   }
