@@ -12,11 +12,12 @@ fn render_clickable_background(
   measure_number : Int,
   measure : @music.Measure,
   playback_position : @signals.Signal[@music.Duration],
+  measure_width~ : Double,
 ) -> @luna_dom.DomNode {
   @luna_dom.svg_rect(
     x=x.to_string(),
     y=(y + MEASURE_CLICKABLE_TOP_OFFSET).to_string(),
-    width=@sheet_layout.MEASURE_WIDTH.to_string(),
+    width=measure_width.to_string(),
     height=@sheet_layout.ROW_HEIGHT.to_string(),
     fill="transparent",
     stroke="none",
@@ -38,17 +39,14 @@ fn render_measure_staff_lines(
   y : Double,
   is_first_in_row : Bool,
   key : @music.KeySignature,
+  measure_width~ : Double,
 ) -> @luna_dom.DomNode {
   let extra_width = @sheet_layout.CLEF_SPACE_WIDTH +
     @sheet_layout.key_signature_layout_width(key)
   match is_first_in_row {
     true =>
-      render_staff_lines(
-        x - extra_width,
-        y,
-        width=@sheet_layout.MEASURE_WIDTH + extra_width,
-      )
-    false => render_staff_lines(x, y)
+      render_staff_lines(x - extra_width, y, width=measure_width + extra_width)
+    false => render_staff_lines(x, y, width=measure_width)
   }
 }
 
@@ -92,9 +90,14 @@ fn render_measure_notes(
   key : @music.KeySignature,
   time_signature : @music.TimeSignature,
   display_index : Int,
+  measure_width~ : Double,
 ) -> Array[@luna_dom.DomNode] {
   let sheet = @sheet_layout.compute_sheet_measure(
-    measure, display_index, key, time_signature,
+    measure,
+    display_index,
+    key,
+    time_signature,
+    measure_width~,
   )
 
   let note_nodes : Array[@luna_dom.DomNode] = sheet.notes
@@ -104,8 +107,8 @@ fn render_measure_notes(
 
   let beam_nodes = render_beams_from_sheet(sheet.beam_groups)
   let ottava_nodes = match sheet.ottava {
-    OttavaAlta => render_8va_marking(x, y, @sheet_layout.MEASURE_WIDTH)
-    OttavaBassa => render_8vb_marking(x, y, @sheet_layout.MEASURE_WIDTH)
+    OttavaAlta => render_8va_marking(x, y, measure_width)
+    OttavaBassa => render_8vb_marking(x, y, measure_width)
     OttavaNone => []
   }
   [..note_nodes, ..beam_nodes, ..ottava_nodes]
@@ -119,30 +122,48 @@ fn render_measure(
   playback_position : @signals.Signal[@music.Duration],
   key : @music.KeySignature,
   time_signature : @music.TimeSignature,
+  measure_width? : Double = @sheet_layout.MIN_MEASURE_WIDTH,
   is_outside_loop : () -> Bool,
 ) -> @luna_dom.DomNode {
-  let (x, y) = @sheet_layout.measure_position(display_index, key)
+  let (x, y) = @sheet_layout.measure_position(
+    display_index,
+    key,
+    measure_width~,
+  )
   let is_first_in_row = display_index % @sheet_layout.MEASURES_PER_ROW == 0
   let is_first_measure = display_index == 0
   let measure_number = display_index + 1
 
   @luna_dom.svg_g(
     [
-      render_measure_staff_lines(x, y, is_first_in_row, key),
+      render_measure_staff_lines(x, y, is_first_in_row, key, measure_width~),
       ..render_measure_clef(x, y, is_first_in_row, key),
       ..render_measure_key_signature(key, x, y, is_first_in_row),
       ..render_measure_time_signature(time_signature, x, y, is_first_measure),
       ..render_chord_symbol(measure, x, y),
-      ..render_measure_notes(measure, x, y, key, time_signature, display_index),
-      render_bar_line(x + @sheet_layout.MEASURE_WIDTH, y),
+      ..render_measure_notes(
+        measure,
+        x,
+        y,
+        key,
+        time_signature,
+        display_index,
+        measure_width~,
+      ),
+      render_bar_line(x + measure_width, y),
       render_clickable_background(
-        x, y, measure_number, measure, playback_position,
+        x,
+        y,
+        measure_number,
+        measure,
+        playback_position,
+        measure_width~,
       ),
       @luna_dom.show(is_outside_loop, fn() {
         @luna_dom.svg_rect(
           x=x.to_string(),
           y=(y + MEASURE_CLICKABLE_TOP_OFFSET).to_string(),
-          width=@sheet_layout.MEASURE_WIDTH.to_string(),
+          width=measure_width.to_string(),
           height=@sheet_layout.ROW_HEIGHT.to_string(),
           fill="rgba(0,0,0,0.5)",
           stroke="none",

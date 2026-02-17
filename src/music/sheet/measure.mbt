@@ -5,7 +5,7 @@ pub const STAFF_TOP : Double = 120.0
 pub const MEASURES_PER_ROW : Int = 4
 
 ///|
-pub const MEASURE_WIDTH : Double = 320.0
+pub const MIN_MEASURE_WIDTH : Double = 320.0
 
 ///|
 pub const CLEF_SPACE_WIDTH : Double = 50.0
@@ -47,11 +47,12 @@ pub fn key_signature_layout_width(key : @music.KeySignature) -> Double {
 pub fn measure_position(
   measure_index : Int,
   key : @music.KeySignature,
+  measure_width? : Double = MIN_MEASURE_WIDTH,
 ) -> (Double, Double) {
   let col = measure_index % MEASURES_PER_ROW
   let row = measure_index / MEASURES_PER_ROW
   let clef_offset = CLEF_SPACE_WIDTH + key_signature_layout_width(key)
-  let x = MEASURE_START_X + clef_offset + col.to_double() * MEASURE_WIDTH
+  let x = MEASURE_START_X + clef_offset + col.to_double() * measure_width
   let y = STAFF_TOP + row.to_double() * ROW_HEIGHT
   (x, y)
 }

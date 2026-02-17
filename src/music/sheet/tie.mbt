@@ -17,11 +17,12 @@ fn compute_tie_arcs(
   key : @music.KeySignature,
   prev_note_x : Double?,
   next_note_x : Double?,
+  measure_width? : Double = MIN_MEASURE_WIDTH,
 ) -> Array[SheetTieArc] {
   let note_y = midi_to_staff_y(midi, staff_y, key)
   let stem_up = midi < STEM_DIRECTION_MIDI_THRESHOLD
   let measure_start_x = measure_x
-  let measure_end_x = measure_x + MEASURE_WIDTH
+  let measure_end_x = measure_x + measure_width
   match tie {
     Some(TieStart) => {
       let end_x = match next_note_x {

@@ -129,13 +129,14 @@ fn compute_note_positions(
   positioned : Array[(Double, @music.MeasureNote)],
   measure_x : Double,
   beamed_indices : Map[Int, Bool],
+  measure_width? : Double = MIN_MEASURE_WIDTH,
 ) -> Array[Double] {
   let n = positioned.length()
   if n == 0 {
     return []
   }
   let note_area_start = measure_x + NOTE_AREA_START_OFFSET
-  let note_area_width = MEASURE_WIDTH - NOTE_AREA_PADDING
+  let note_area_width = measure_width - NOTE_AREA_PADDING
   let cumulative_weights : Array[Double] = Array::make(n, 0.0)
   let mut total_weight = 0.0
   for i = 0; i < n; i = i + 1 {
@@ -147,7 +148,7 @@ fn compute_note_positions(
   for i, pair in positioned {
     let (_, note) = pair
     let proportional_x = match (note.midi, note.duration) {
-      (None, Whole) => measure_x + MEASURE_WIDTH / 2.0
+      (None, Whole) => measure_x + measure_width / 2.0
       _ =>
         if total_weight > 0.0 {
           note_area_start +
@@ -164,78 +165,24 @@ fn compute_note_positions(
     }
     positions.push(x)
   }
-  compress_overflow(
-    positions,
-    positioned,
-    beamed_indices,
-    note_area_start + note_area_width,
-  )
   positions
 }
 
 ///|
-/// Compress positions that overflow the available area
-fn compress_overflow(
-  positions : Array[Double],
+/// Compute the ideal measure width needed to fit all notes without compression.
+/// Uses sum of minimum spacings to determine the width where no collisions occur.
+pub fn compute_ideal_measure_width(
   positioned : Array[(Double, @music.MeasureNote)],
   beamed_indices : Map[Int, Bool],
-  right_edge : Double,
-) -> Unit {
-  let n = positions.length()
-  guard n > 1 && positions[n - 1] > right_edge else { return }
-  let first_pos = positions[0]
-  let available_span = right_edge - first_pos
-  let min_gaps : Array[Double] = []
-  let extras : Array[Double] = []
-  let mut total_min = 0.0
-  let mut total_extra = 0.0
-  for i = 1; i < n; i = i + 1 {
-    let min_sp = note_min_spacing(i, positioned, beamed_indices)
-    let gap = positions[i] - positions[i - 1]
-    let extra = gap - min_sp
-    min_gaps.push(min_sp)
-    extras.push(extra)
-    total_min = total_min + min_sp
-    total_extra = total_extra + extra
+) -> Double {
+  let n = positioned.length()
+  if n <= 1 {
+    return MIN_MEASURE_WIDTH
   }
-  if available_span >= total_min {
-    let extra_scale = if total_extra > 0.0 {
-      (available_span - total_min) / total_extra
-    } else {
-      0.0
-    }
-    for i = 1; i < n; i = i + 1 {
-      positions[i] = positions[i - 1] +
-        min_gaps[i - 1] +
-        extras[i - 1] * extra_scale
-    }
-  } else {
-    let mut critical_total = 0.0
-    let mut flexible_total = 0.0
-    let is_critical : Array[Bool] = []
-    for i = 0; i < min_gaps.length(); i = i + 1 {
-      let critical = min_gaps[i] > MIN_NOTE_SPACING
-      is_critical.push(critical)
-      if critical {
-        critical_total = critical_total + min_gaps[i]
-      } else {
-        flexible_total = flexible_total + (min_gaps[i] + extras[i])
-      }
-    }
-    let flexible_available = available_span - critical_total
-    let flexible_scale = if flexible_total > 0.0 {
-      @cmp.maximum(0.0, flexible_available / flexible_total)
-    } else {
-      0.0
-    }
-    for i = 1; i < n; i = i + 1 {
-      let gap_idx = i - 1
-      let new_gap = if is_critical[gap_idx] {
-        min_gaps[gap_idx]
-      } else {
-        (min_gaps[gap_idx] + extras[gap_idx]) * flexible_scale
-      }
-      positions[i] = positions[i - 1] + new_gap
-    }
-  }
+  let total_min_spacing = (1)
+    .until(n)
+    .fold(init=0.0, fn(acc, i) {
+      acc + note_min_spacing(i, positioned, beamed_indices)
+    })
+  total_min_spacing + NOTE_AREA_PADDING
 }

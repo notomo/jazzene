@@ -39,7 +39,7 @@ test "compute_tie_arcs - TieStart without next_note_x falls back to measure end"
   )
   inspect(arcs.length(), content="1")
   inspect(arcs[0].start_x, content="100")
-  inspect(arcs[0].end_x, content="400") // measure_x + MEASURE_WIDTH
+  inspect(arcs[0].end_x, content="400") // measure_x + MIN_MEASURE_WIDTH
 }
 
 ///|
@@ -119,7 +119,7 @@ test "compute_tie_arcs - TieBoth without neighbors falls back to measure bounds"
   inspect(arcs[0].start_x, content="80") // measure_x
   inspect(arcs[0].end_x, content="150")
   inspect(arcs[1].start_x, content="150")
-  inspect(arcs[1].end_x, content="400") // measure_x + MEASURE_WIDTH
+  inspect(arcs[1].end_x, content="400") // measure_x + MIN_MEASURE_WIDTH
 }
 
 ///|

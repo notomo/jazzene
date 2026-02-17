@@ -33,7 +33,7 @@ fn render_staff_line(
 fn render_staff_lines(
   x : Double,
   y : Double,
-  width? : Double = @sheet_layout.MEASURE_WIDTH,
+  width? : Double = @sheet_layout.MIN_MEASURE_WIDTH,
 ) -> @luna_dom.DomNode {
   @luna_dom.svg_g(
     Array::makei(@sheet_layout.STAFF_LINES, fn(i) {

@@ -114,21 +114,22 @@ pub fn lead_sheet(
         (
           "viewBox",
           @luna_dom.AttrValue::Dynamic(fn() {
-            let measure_count = measures().length()
+            let ms = measures()
+            let measure_count = ms.length()
             let rows = (measure_count + @sheet_layout.MEASURES_PER_ROW - 1) /
               @sheet_layout.MEASURES_PER_ROW
             let height = @sheet_layout.STAFF_TOP +
               rows.to_double() * @sheet_layout.ROW_HEIGHT
-            let key_sig_width = @sheet_layout.key_signature_layout_width(
-              key.get(),
-            )
+            let k = key.get()
+            let ts = time_signature.get()
+            let key_sig_width = @sheet_layout.key_signature_layout_width(k)
+            let mw = @sheet_layout.compute_unified_measure_width(ms, ts)
             let viewbox_start_x = @sheet_layout.MEASURE_START_X - 15.0
             let width = @sheet_layout.MEASURE_START_X -
               viewbox_start_x +
               @sheet_layout.CLEF_SPACE_WIDTH +
               key_sig_width +
-              @sheet_layout.MEASURES_PER_ROW.to_double() *
-              @sheet_layout.MEASURE_WIDTH
+              @sheet_layout.MEASURES_PER_ROW.to_double() * mw
             "\{viewbox_start_x.to_int()} \{0} \{width.to_int()} \{height.to_int()}"
           }),
         ),
@@ -136,7 +137,9 @@ pub fn lead_sheet(
       [
         @luna_dom.for_each(measures, fn(m, idx) {
           let ts = time_signature.get()
-          render_measure(m, idx, playback_position, key.get(), ts, fn() {
+          let k = key.get()
+          let mw = @sheet_layout.compute_unified_measure_width(measures(), ts)
+          render_measure(m, idx, playback_position, k, ts, measure_width=mw, fn() {
             let measure_number = idx + 1
             measure_number < loop_a_measure.get() ||
             measure_number > loop_b_measure.get()
@@ -148,6 +151,10 @@ pub fn lead_sheet(
           fn() { measures().length() },
           key,
           time_signature,
+          fn() {
+            let ts = time_signature.get()
+            @sheet_layout.compute_unified_measure_width(measures(), ts)
+          },
         ),
       ],
     ),

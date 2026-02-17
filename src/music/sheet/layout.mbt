@@ -1,12 +1,35 @@
 ///|
+/// Compute the unified measure width needed across all measures
+pub fn compute_unified_measure_width(
+  measures : Array[@music.Measure],
+  time_signature : @music.TimeSignature,
+) -> Double {
+  let max_ideal = measures
+    .iter()
+    .fold(init=0.0, fn(acc, measure) {
+      let positioned = measure.positioned_notes()
+      let beam_groups_indices = @music.find_beam_groups(
+        positioned, time_signature,
+      )
+      let beamed_indices : Map[Int, Bool] = {}
+      beam_groups_indices.each(fn(group) {
+        group.each(fn(idx) { beamed_indices[idx] = true })
+      })
+      @cmp.maximum(acc, compute_ideal_measure_width(positioned, beamed_indices))
+    })
+  @cmp.maximum(MIN_MEASURE_WIDTH, max_ideal)
+}
+
+///|
 /// Compute complete layout data for a measure
 pub fn compute_sheet_measure(
   measure : @music.Measure,
   measure_index : Int,
   key : @music.KeySignature,
   time_signature : @music.TimeSignature,
+  measure_width? : Double = MIN_MEASURE_WIDTH,
 ) -> SheetMeasure {
-  let (x, y) = measure_position(measure_index, key)
+  let (x, y) = measure_position(measure_index, key, measure_width~)
   let is_first_in_row = measure_index % MEASURES_PER_ROW == 0
 
   // Get positioned notes and apply ottava
@@ -34,7 +57,12 @@ pub fn compute_sheet_measure(
   })
 
   // Note x positions
-  let note_positions = compute_note_positions(display, x, beamed_indices)
+  let note_positions = compute_note_positions(
+    display,
+    x,
+    beamed_indices,
+    measure_width~,
+  )
 
   // Build SheetNote array
   let notes : Array[SheetNote] = display
@@ -82,6 +110,7 @@ pub fn compute_sheet_measure(
             key,
             prev_note_x,
             next_note_x,
+            measure_width~,
           )
         None => []
       }
@@ -110,7 +139,7 @@ pub fn compute_sheet_measure(
   SheetMeasure::{
     x,
     y,
-    width: MEASURE_WIDTH,
+    width: measure_width,
     notes,
     beam_groups,
     ottava,

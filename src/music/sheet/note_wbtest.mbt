@@ -61,5 +61,5 @@ test "compute_note_positions - whole rest centered" {
   let measure_x = 90.0
   let beamed : Map[Int, Bool] = {}
   let positions = compute_note_positions(positioned, measure_x, beamed)
-  inspect(positions[0], content="250") // measure_x + MEASURE_WIDTH / 2.0
+  inspect(positions[0], content="250") // measure_x + MIN_MEASURE_WIDTH / 2.0
 }
