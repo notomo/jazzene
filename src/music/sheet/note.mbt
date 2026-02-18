@@ -116,8 +116,7 @@ fn note_min_spacing(
       _ => false
     }
   }
-  let has_accidental_space = note.accidental is Some(_) &&
-    not(beamed_indices.contains(i))
+  let has_accidental_space = note.accidental is Some(_)
   MIN_NOTE_SPACING +
   (if prev_has_flag { FLAGGED_EIGHTH_EXTRA_SPACING } else { 0.0 }) +
   (if has_accidental_space { ACCIDENTAL_EXTRA_SPACING } else { 0.0 })
