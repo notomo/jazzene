@@ -17,10 +17,10 @@ pub const SIN_NOTE_HEAD_ROTATION : Double = 0.422618
 const STEM_DIRECTION_MIDI_THRESHOLD : Int = 71
 
 ///|
-const NOTE_AREA_START_OFFSET : Double = 40.0
+const NOTE_AREA_START_OFFSET : Double = 42.0
 
 ///|
-const NOTE_AREA_PADDING : Double = 75.0
+const NOTE_AREA_PADDING : Double = 84.0
 
 ///|
 const MIN_NOTE_SPACING : Double = 32.0

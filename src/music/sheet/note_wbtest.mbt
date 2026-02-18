@@ -25,7 +25,7 @@ test "compute_note_positions - single note" {
   let beamed : Map[Int, Bool] = {}
   let positions = compute_note_positions(positioned, measure_x, beamed)
   inspect(positions.length(), content="1")
-  inspect(positions[0], content="130") // measure_x + NOTE_AREA_START_OFFSET
+  inspect(positions[0], content="132") // measure_x + NOTE_AREA_START_OFFSET
 }
 
 ///|
@@ -42,7 +42,7 @@ test "compute_note_positions - two equal notes" {
   let positions = compute_note_positions(positioned, measure_x, beamed)
   inspect(positions.length(), content="2")
   // First note at start, second proportionally placed
-  inspect(positions[0], content="130")
+  inspect(positions[0], content="132")
 }
 
 ///|
