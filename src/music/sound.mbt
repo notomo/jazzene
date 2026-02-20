@@ -126,6 +126,12 @@ pub fn convert_measures_to_backing_sounds(
         let chord_start_ms = measure_start_ms +
           i.to_double() * chord_duration_ms
         let chord_end_ms = chord_start_ms + chord_duration_ms
+        // Jazz syncopation: anticipate chord changes (except beat 1) by one 8th note
+        let actual_start_ms = if i == 0 {
+          chord_start_ms
+        } else {
+          chord_start_ms - beat_duration_ms * 0.5
+        }
         let intervals = chord.quality.intervals()
         let base_midi = chord.root.midi() - 12
         let guide_intervals = if intervals.length() >= 4 {
@@ -164,6 +170,23 @@ pub fn convert_measures_to_backing_sounds(
           }
         }
 
+        // Generate syncopated hit positions within this chord slot.
+        // First hit uses actual_start_ms (anticipated for i > 0).
+        // Additional hits are placed at syncopated positions relative to the
+        // chord's written start, creating comping rhythm even in long chords.
+        let hit_start_times : Array[Double] = [actual_start_ms]
+        let is_last_chord = i == n - 1
+        // Add "and of 2" (1.5 beats in) only when it won't collide with the
+        // next chord's anticipated hit (beats_per_chord - 0.5 beats in).
+        // Collision happens when beats_per_chord == 2.0, so skip in that case
+        // unless this is the last chord (no anticipation follows).
+        if beats_per_chord >= 2.0 && (is_last_chord || beats_per_chord > 2.0) {
+          hit_start_times.push(chord_start_ms + beat_duration_ms * 1.5)
+        }
+        if beats_per_chord >= 4.0 {
+          // beat 4: 3.0 beats into the chord slot
+          hit_start_times.push(chord_start_ms + beat_duration_ms * 3.0)
+        }
         for interval in guide_intervals {
           let raw_midi = base_midi + interval
           // Lower the note by octaves until it is below the melody's lowest note
@@ -180,14 +203,16 @@ pub fn convert_measures_to_backing_sounds(
           }
           match MidiNumber::new(midi_val) {
             Some(m) =>
-              sounds.push(NoteValueSound::{
-                note_value: Note(
-                  midi=m,
-                  duration=NoteDuration::from_beats(beats_per_chord),
-                ),
-                duration: Duration::from_milliseconds(chord_duration_ms),
-                start_time: Duration::from_milliseconds(chord_start_ms),
-              })
+              for hit_start_ms in hit_start_times {
+                sounds.push(NoteValueSound::{
+                  note_value: Note(
+                    midi=m,
+                    duration=NoteDuration::from_beats(beats_per_chord),
+                  ),
+                  duration: Duration::from_milliseconds(beat_duration_ms * 0.5),
+                  start_time: Duration::from_milliseconds(hit_start_ms),
+                })
+              }
             None => ()
           }
         }
