@@ -39,7 +39,7 @@ test "convert_measures_to_backing_sounds: 3-7 voicing for non-F/G/A root (Cmaj7)
   ]
   let sounds = convert_measures_to_backing_sounds(measures, 60, [])
   // 3 hits per guide tone (beat 1, and-of-2, beat 4): 2 tones × 3 hits = 6 sounds
-  inspect(backing_midis(sounds), content="[52, 52, 52, 59, 59, 59]")
+  inspect(backing_midis(sounds), content="[52, 59, 52, 59, 52, 59]")
   // BPM=60 → beat_duration_ms=1000ms; duration=beat_duration_ms*0.5=500ms
   assert_eq(sounds[0].start_time, Duration::from_milliseconds(0.0))
   assert_eq(sounds[0].duration, Duration::from_milliseconds(500.0))
@@ -56,7 +56,7 @@ test "convert_measures_to_backing_sounds: 7-3 voicing for G root (G7)" {
     ),
   ]
   let sounds = convert_measures_to_backing_sounds(measures, 60, [])
-  inspect(backing_midis(sounds), content="[53, 53, 53, 59, 59, 59]")
+  inspect(backing_midis(sounds), content="[53, 59, 53, 59, 53, 59]")
 }
 
 ///|
@@ -67,7 +67,7 @@ test "convert_measures_to_backing_sounds: 7-3 voicing for F root (Fmaj7)" {
     make_4beat_measure([Chord::{ root: F, quality: Major7, bass: None }], 0.0),
   ]
   let sounds = convert_measures_to_backing_sounds(measures, 60, [])
-  inspect(backing_midis(sounds), content="[52, 52, 52, 57, 57, 57]")
+  inspect(backing_midis(sounds), content="[52, 57, 52, 57, 52, 57]")
 }
 
 ///|
@@ -78,7 +78,7 @@ test "convert_measures_to_backing_sounds: 7-3 voicing for A root (Am7)" {
     make_4beat_measure([Chord::{ root: A, quality: Minor7, bass: None }], 0.0),
   ]
   let sounds = convert_measures_to_backing_sounds(measures, 60, [])
-  inspect(backing_midis(sounds), content="[55, 55, 55, 60, 60, 60]")
+  inspect(backing_midis(sounds), content="[55, 60, 55, 60, 55, 60]")
 }
 
 ///|
@@ -89,7 +89,7 @@ test "convert_measures_to_backing_sounds: triad uses 3rd and 5th" {
     make_4beat_measure([Chord::{ root: C, quality: Major, bass: None }], 0.0),
   ]
   let sounds = convert_measures_to_backing_sounds(measures, 60, [])
-  inspect(backing_midis(sounds), content="[52, 52, 52, 55, 55, 55]")
+  inspect(backing_midis(sounds), content="[52, 55, 52, 55, 52, 55]")
 }
 
 ///|
@@ -102,7 +102,7 @@ test "convert_measures_to_backing_sounds: melody avoidance lowers overlapping gu
   ]
   let melody = [make_melody_note(60, 0.0, 4000.0)]
   let sounds = convert_measures_to_backing_sounds(measures, 60, melody)
-  inspect(backing_midis(sounds), content="[53, 53, 53, 48, 48, 48]")
+  inspect(backing_midis(sounds), content="[53, 48, 53, 48, 53, 48]")
 }
 
 ///|
@@ -114,7 +114,7 @@ test "convert_measures_to_backing_sounds: melody below guide tones causes no shi
   ]
   let melody = [make_melody_note(64, 0.0, 4000.0)]
   let sounds = convert_measures_to_backing_sounds(measures, 60, melody)
-  inspect(backing_midis(sounds), content="[53, 53, 53, 60, 60, 60]")
+  inspect(backing_midis(sounds), content="[53, 60, 53, 60, 53, 60]")
 }
 
 ///|
@@ -126,7 +126,7 @@ test "convert_measures_to_backing_sounds: melody outside chord time range does n
   let melody = [make_melody_note(60, 4000.0, 4000.0)]
   let sounds = convert_measures_to_backing_sounds(measures, 60, melody)
   // No melody overlap → raw values used: F3(53), C4(60)
-  inspect(backing_midis(sounds), content="[53, 53, 53, 60, 60, 60]")
+  inspect(backing_midis(sounds), content="[53, 60, 53, 60, 53, 60]")
 }
 
 ///|
@@ -151,8 +151,8 @@ test "convert_measures_to_backing_sounds: two chords split timing evenly" {
   // G7 anticipated: 2000ms - 500ms = 1500ms
   assert_eq(sounds[2].start_time, Duration::from_milliseconds(1500.0))
   assert_eq(sounds[2].duration, Duration::from_milliseconds(500.0))
-  // Cmaj7: E3(52), B3(59) × 1 hit; G7: F3(53) × 2 hits, B3(59) × 2 hits
-  inspect(backing_midis(sounds), content="[52, 59, 53, 53, 59, 59]")
+  // Cmaj7: E3(52), B3(59) × 1 hit; G7: F3(53), B3(59) × 2 hits each
+  inspect(backing_midis(sounds), content="[52, 59, 53, 59, 53, 59]")
 }
 
 ///|

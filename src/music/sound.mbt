@@ -187,23 +187,27 @@ pub fn convert_measures_to_backing_sounds(
           // beat 4: 3.0 beats into the chord slot
           hit_start_times.push(chord_start_ms + beat_duration_ms * 3.0)
         }
-        for interval in guide_intervals {
-          let raw_midi = base_midi + interval
-          // Lower the note by octaves until it is below the melody's lowest note
-          let midi_val = match min_melody_midi {
-            Some(min_mel) => {
-              let v = if raw_midi >= min_mel { raw_midi - 12 } else { raw_midi }
-              if v >= min_mel {
-                v - 12
-              } else {
-                v
+        for hit_start_ms in hit_start_times {
+          for interval in guide_intervals {
+            let raw_midi = base_midi + interval
+            // Lower the note by octaves until it is below the melody's lowest note
+            let midi_val = match min_melody_midi {
+              Some(min_mel) => {
+                let v = if raw_midi >= min_mel {
+                  raw_midi - 12
+                } else {
+                  raw_midi
+                }
+                if v >= min_mel {
+                  v - 12
+                } else {
+                  v
+                }
               }
+              None => raw_midi
             }
-            None => raw_midi
-          }
-          match MidiNumber::new(midi_val) {
-            Some(m) =>
-              for hit_start_ms in hit_start_times {
+            match MidiNumber::new(midi_val) {
+              Some(m) =>
                 sounds.push(NoteValueSound::{
                   note_value: Note(
                     midi=m,
@@ -212,8 +216,8 @@ pub fn convert_measures_to_backing_sounds(
                   duration: Duration::from_milliseconds(beat_duration_ms * 0.5),
                   start_time: Duration::from_milliseconds(hit_start_ms),
                 })
-              }
-            None => ()
+              None => ()
+            }
           }
         }
       }
