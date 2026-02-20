@@ -11,10 +11,10 @@ const WHITE_KEY_PLAYING_COLOR = "#60a5fa"
 const BLACK_KEY_PLAYING_COLOR = "#3b82f6"
 
 ///|
-const WHITE_KEY_BACKING_COLOR = "#4ade80"
+const WHITE_KEY_BACKING_COLOR = "#9ca3af"
 
 ///|
-const BLACK_KEY_BACKING_COLOR = "#22c55e"
+const BLACK_KEY_BACKING_COLOR = "#6b7280"
 
 ///|
 const KEY_BORDER_COLOR = "#d1d5db"

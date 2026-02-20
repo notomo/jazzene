@@ -11,10 +11,10 @@ const NOTE_PLAYING_COLOR = "#3b82f6"
 const NOTE_DEFAULT_COLOR = "#60a5fa"
 
 ///|
-const BACKING_PLAYING_COLOR = "#22c55e"
+const BACKING_PLAYING_COLOR = "#6b7280"
 
 ///|
-const BACKING_DEFAULT_COLOR = "#4ade80"
+const BACKING_DEFAULT_COLOR = "#9ca3af"
 
 ///|
 /// Gap in pixels between consecutive notes to visually separate them
