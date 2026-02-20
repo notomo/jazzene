@@ -11,6 +11,12 @@ const WHITE_KEY_PLAYING_COLOR = "#60a5fa"
 const BLACK_KEY_PLAYING_COLOR = "#3b82f6"
 
 ///|
+const WHITE_KEY_BACKING_COLOR = "#4ade80"
+
+///|
+const BLACK_KEY_BACKING_COLOR = "#22c55e"
+
+///|
 const KEY_BORDER_COLOR = "#d1d5db"
 
 ///|
@@ -20,6 +26,7 @@ const BLACK_KEY_HEIGHT_RATIO = 0.6
 /// Render piano keyboard component using Canvas API
 pub fn keyboard(
   sounds : @signals.Signal[Array[@music.NoteValueSound]],
+  backing_sounds : @signals.Signal[Array[@music.NoteValueSound]],
   playback_position : @signals.Signal[@music.Duration],
 ) -> @luna_dom.DomNode {
   let { canvas, ctx } = create_canvas_context()
@@ -32,11 +39,21 @@ pub fn keyboard(
     .map(fn(m) { m.value })
   })
 
+  // Calculate currently playing backing notes
+  let backing_playing_notes = @signals.memo(fn() {
+    @music.calculate_playing_notes(
+      backing_sounds.get(),
+      playback_position.get(),
+    )
+    .filter_map(fn(s) { s.midi() })
+    .map(fn(m) { m.value })
+  })
+
   // Redraw when playing notes or canvas size change
   let _ = @signals.effect(fn() {
     let _ = resize_trigger.get()
     let (width, height) = update_canvas_dpi(canvas, ctx)
-    draw_keyboard(ctx, width, height, playing_notes())
+    draw_keyboard(ctx, width, height, playing_notes(), backing_playing_notes())
   })
   @luna_dom.div(
     class="w-full h-[15%] min-h-10 shrink",
@@ -52,6 +69,7 @@ fn draw_keyboard(
   width : Double,
   height : Double,
   playing_notes : Array[Int],
+  backing_playing_notes : Array[Int],
 ) -> Unit {
   ctx.clearRect(0.0, 0.0, width, height)
   ctx.fillStyle = NOTE_DISPLAY_BG_COLOR
@@ -66,8 +84,11 @@ fn draw_keyboard(
   .filter(fn(a) { not(a.is_black) })
   .each(fn(area) {
     let is_playing = playing_notes.contains(area.midi)
+    let is_backing = backing_playing_notes.contains(area.midi)
     ctx.fillStyle = if is_playing {
       WHITE_KEY_PLAYING_COLOR
+    } else if is_backing {
+      WHITE_KEY_BACKING_COLOR
     } else {
       WHITE_KEY_COLOR
     }
@@ -92,8 +113,11 @@ fn draw_keyboard(
   .filter(fn(a) { a.is_black })
   .each(fn(area) {
     let is_playing = playing_notes.contains(area.midi)
+    let is_backing = backing_playing_notes.contains(area.midi)
     ctx.fillStyle = if is_playing {
       BLACK_KEY_PLAYING_COLOR
+    } else if is_backing {
+      BLACK_KEY_BACKING_COLOR
     } else {
       BLACK_KEY_COLOR
     }

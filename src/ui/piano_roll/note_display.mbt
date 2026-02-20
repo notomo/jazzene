@@ -2,6 +2,7 @@
 /// Render falling notes display component using Canvas API
 pub fn note_display(
   sounds : @signals.Signal[Array[@music.NoteValueSound]],
+  backing_sounds : @signals.Signal[Array[@music.NoteValueSound]],
   playback_position : @signals.Signal[@music.Duration],
   bpm : @signals.Signal[Int],
   total_duration : () -> @music.Duration,
@@ -29,6 +30,23 @@ pub fn note_display(
     })
   })
 
+  // Pre-calculate backing note positions
+  let backing_positions = @signals.memo(fn() {
+    backing_sounds
+    .get()
+    .filter_map(fn(sound) {
+      match sound.note_value {
+        Note(midi=midi_val, ..) =>
+          Some({
+            midi: midi_val.value,
+            start_ms: sound.start_time.to_milliseconds(),
+            duration_ms: sound.duration.to_milliseconds(),
+          })
+        Rest(..) => None
+      }
+    })
+  })
+
   // Set up seek interactions
   setup_wheel_seek(canvas, playback_position, total_duration)
   setup_drag_seek(canvas, playback_position, total_duration)
@@ -42,6 +60,7 @@ pub fn note_display(
       width,
       height,
       note_positions(),
+      backing_positions(),
       playback_position.get().to_milliseconds(),
       bpm.get(),
       time_signature.get().beats_per_measure(),

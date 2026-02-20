@@ -51,6 +51,17 @@ fn main {
     |> drum_list => { drum_sounds.set(drum_list) }
   })
 
+  let backing_sounds : @signals.Signal[Array[@music.NoteValueSound]] = @signals.signal([],
+  )
+  let _ = @signals.effect(fn() {
+    @music.convert_measures_to_backing_sounds(
+      measures_signal.get(),
+      bpm.get(),
+      sounds.get(),
+    )
+    |> bs => { backing_sounds.set(bs) }
+  })
+
   let total_duration = @signals.memo(fn() {
     @music.calculate_total_duration(
       bpm=bpm.get(),
@@ -77,8 +88,8 @@ fn main {
   )
 
   let tick = make_tick(
-    playback_position, volume, sounds, drum_sounds, total_duration, loop_a_measure,
-    loop_b_measure, bpm, time_signature, synth, drum_synth,
+    playback_position, volume, sounds, drum_sounds, backing_sounds, total_duration,
+    loop_a_measure, loop_b_measure, bpm, time_signature, synth, drum_synth,
   )
 
   let view_mode = @signals.signal(@ui.get_initial_view_mode())
@@ -96,8 +107,8 @@ fn main {
   @ui.setup_loop(is_playing, tick)
   @ui.render(
     is_playing, playback_position, volume, bpm, raw_chord_progression, seed, measure_count,
-    sounds, total_duration, loop_a_measure, loop_b_measure, chord_parse_error, measures,
-    key, time_signature, view_mode,
+    sounds, backing_sounds, total_duration, loop_a_measure, loop_b_measure, chord_parse_error,
+    measures, key, time_signature, view_mode,
   )
 }
 
@@ -158,6 +169,7 @@ fn make_tick(
   volume : @signals.Signal[Int],
   sounds : @signals.Signal[Array[@music.NoteValueSound]],
   drum_sounds : @signals.Signal[Array[@music.NoteValueSound]],
+  backing_sounds : @signals.Signal[Array[@music.NoteValueSound]],
   total_duration : () -> @music.Duration,
   loop_a_measure : @signals.Signal[Int],
   loop_b_measure : @signals.Signal[Int],
@@ -212,6 +224,13 @@ fn make_tick(
       drum_audio_sounds,
       volume.get().to_double() / 100.0,
     )
+
+    let backing_audio_sounds = @music.AudioSound::from(
+      backing_sounds.get(),
+      final_position,
+      lookahead,
+    )
+    synth.schedule_notes(backing_audio_sounds, volume.get().to_double() / 100.0)
 
     playback_position.set(final_position)
     false

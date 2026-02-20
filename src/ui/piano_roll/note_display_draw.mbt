@@ -11,6 +11,12 @@ const NOTE_PLAYING_COLOR = "#3b82f6"
 const NOTE_DEFAULT_COLOR = "#60a5fa"
 
 ///|
+const BACKING_PLAYING_COLOR = "#22c55e"
+
+///|
+const BACKING_DEFAULT_COLOR = "#4ade80"
+
+///|
 /// Gap in pixels between consecutive notes to visually separate them
 const NOTE_GAP_PX = 2.0
 
@@ -50,6 +56,8 @@ fn draw_falling_notes(
   note_positions : Array[NotePosition],
   current_pos : Double,
   key_areas : Array[KeyArea],
+  playing_color : String,
+  default_color : String,
 ) -> Unit {
   note_positions
   .iter()
@@ -76,11 +84,7 @@ fn draw_falling_notes(
     // Determine color based on playing state
     let is_playing = current_pos >= note.start_ms &&
       current_pos < note.start_ms + note.duration_ms
-    ctx.fillStyle = if is_playing {
-      NOTE_PLAYING_COLOR
-    } else {
-      NOTE_DEFAULT_COLOR
-    }
+    ctx.fillStyle = if is_playing { playing_color } else { default_color }
     // Add gap at bottom to separate consecutive same-pitch notes
     let note_height = bottom_y - top_y
     let gap = if note_height > NOTE_GAP_PX * 2.0 { NOTE_GAP_PX } else { 0.0 }
@@ -186,6 +190,7 @@ fn draw_notes(
   width : Double,
   height : Double,
   note_positions : Array[NotePosition],
+  backing_positions : Array[NotePosition],
   current_pos : Double,
   bpm : Int,
   beats_per_measure : Double,
@@ -195,7 +200,24 @@ fn draw_notes(
   draw_notes_background(ctx, width, height)
   let rect = { left: 0.0, top: 0.0, width, height }
   let key_areas = calc_key_areas(rect, KEYBOARD_MIN_KEY, KEYBOARD_MAX_KEY)
-  draw_falling_notes(ctx, height, note_positions, current_pos, key_areas)
+  draw_falling_notes(
+    ctx,
+    height,
+    backing_positions,
+    current_pos,
+    key_areas,
+    BACKING_PLAYING_COLOR,
+    BACKING_DEFAULT_COLOR,
+  )
+  draw_falling_notes(
+    ctx,
+    height,
+    note_positions,
+    current_pos,
+    key_areas,
+    NOTE_PLAYING_COLOR,
+    NOTE_DEFAULT_COLOR,
+  )
   draw_key_grid_lines(ctx, height, key_areas)
   draw_measure_lines(ctx, width, height, current_pos, bpm, beats_per_measure)
   draw_loop_overlay(
