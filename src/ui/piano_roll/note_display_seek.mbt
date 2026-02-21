@@ -24,46 +24,51 @@ extern "js" fn add_wheel_listener_notes(
   #|(canvas, handler) => { canvas.addEventListener('wheel', handler); }
 
 ///|
-extern "js" fn add_drag_listeners_notes(
-  canvas : @js_dom.HTMLCanvasElement,
-  on_drag_start : (@js_dom.MouseEvent) -> Unit,
-  on_drag_move : (Double) -> Unit,
-  on_drag_end : () -> Unit,
+/// Register document-level drag listeners for vertical (Y-axis) drag.
+/// Call this from a mousedown/touchstart handler to track the drag until release.
+extern "js" fn add_document_drag_listeners_y(
+  on_move : (Double) -> Unit,
+  on_up : () -> Unit,
 ) -> Unit =
-  #|(canvas, onDragStart, onDragMove, onDragEnd) => {
-  #|  function startDocumentListeners() {
-  #|    const moveHandler = (e) => onDragMove(e.clientY);
-  #|    const upHandler = () => {
-  #|      onDragEnd();
-  #|      document.removeEventListener('mousemove', moveHandler);
-  #|      document.removeEventListener('mouseup', upHandler);
-  #|    };
-  #|    document.addEventListener('mousemove', moveHandler);
-  #|    document.addEventListener('mouseup', upHandler);
-  #|    const touchMoveHandler = (e) => {
-  #|      if (e.touches.length > 0) {
-  #|        e.preventDefault();
-  #|        onDragMove(e.touches[0].clientY);
-  #|      }
-  #|    };
-  #|    const touchEndHandler = () => {
-  #|      onDragEnd();
-  #|      document.removeEventListener('touchmove', touchMoveHandler);
-  #|      document.removeEventListener('touchend', touchEndHandler);
-  #|      document.removeEventListener('touchcancel', touchEndHandler);
-  #|    };
-  #|    document.addEventListener('touchmove', touchMoveHandler, { passive: false });
-  #|    document.addEventListener('touchend', touchEndHandler);
-  #|    document.addEventListener('touchcancel', touchEndHandler);
-  #|  }
+  #|(onMove, onUp) => {
+  #|  const moveHandler = (e) => onMove(e.clientY);
+  #|  const upHandler = () => {
+  #|    onUp();
+  #|    document.removeEventListener('mousemove', moveHandler);
+  #|    document.removeEventListener('mouseup', upHandler);
+  #|  };
+  #|  document.addEventListener('mousemove', moveHandler);
+  #|  document.addEventListener('mouseup', upHandler);
+  #|  const touchMoveHandler = (e) => {
+  #|    if (e.touches.length > 0) {
+  #|      e.preventDefault();
+  #|      onMove(e.touches[0].clientY);
+  #|    }
+  #|  };
+  #|  const touchEndHandler = () => {
+  #|    onUp();
+  #|    document.removeEventListener('touchmove', touchMoveHandler);
+  #|    document.removeEventListener('touchend', touchEndHandler);
+  #|    document.removeEventListener('touchcancel', touchEndHandler);
+  #|  };
+  #|  document.addEventListener('touchmove', touchMoveHandler, { passive: false });
+  #|  document.addEventListener('touchend', touchEndHandler);
+  #|  document.addEventListener('touchcancel', touchEndHandler);
+  #|}
+
+///|
+/// Attach mousedown/touchstart listeners to a canvas element.
+/// Calls on_start with the clientY coordinate when drag begins.
+extern "js" fn add_canvas_drag_start_listeners(
+  canvas : @js_dom.HTMLCanvasElement,
+  on_start : (Double) -> Unit,
+) -> Unit =
+  #|(canvas, onStart) => {
   #|  canvas.addEventListener('mousedown', (e) => {
-  #|    if (e.button === 0) { onDragStart(e); startDocumentListeners(); }
+  #|    if (e.button === 0) { onStart(e.clientY); }
   #|  });
   #|  canvas.addEventListener('touchstart', (e) => {
-  #|    if (e.touches.length > 0) {
-  #|      onDragStart({ clientY: e.touches[0].clientY });
-  #|      startDocumentListeners();
-  #|    }
+  #|    if (e.touches.length > 0) { onStart(e.touches[0].clientY); }
   #|  });
   #|}
 
@@ -131,14 +136,6 @@ fn setup_drag_seek(
     }
   }
 
-  let on_drag_start : (@js_dom.MouseEvent) -> Unit = fn(e) {
-    cancel_inertia()
-    drag_start_y.val = Some(e.clientY)
-    drag_start_position_ms.val = Some(playback_position.get().to_milliseconds())
-    last_y.val = e.clientY
-    last_time.val = performance_now()
-    smoothed_velocity.val = 0.0
-  }
   let on_drag_move : (Double) -> Unit = fn(client_y) {
     match (drag_start_y.val, drag_start_position_ms.val) {
       (Some(start_y), Some(start_pos)) => {
@@ -202,5 +199,13 @@ fn setup_drag_seek(
     }
   }
 
-  add_drag_listeners_notes(canvas, on_drag_start, on_drag_move, on_drag_end)
+  add_canvas_drag_start_listeners(canvas, fn(client_y) {
+    cancel_inertia()
+    drag_start_y.val = Some(client_y)
+    drag_start_position_ms.val = Some(playback_position.get().to_milliseconds())
+    last_y.val = client_y
+    last_time.val = performance_now()
+    smoothed_velocity.val = 0.0
+    add_document_drag_listeners_y(on_drag_move, on_drag_end)
+  })
 }
