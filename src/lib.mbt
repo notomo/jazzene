@@ -30,37 +30,27 @@ fn main {
     }
   })
 
-  let measures_signal = make_measures(
+  let measures = make_measures(
     measure_chords, seed, measure_count, bpm, key, time_signature,
   )
-  let measures = fn() { measures_signal.get() }
 
   let swing = @signals.signal(@music.SwingConfig::triplet())
-  // Use memo so melody sounds are always fresh when read by backing_sounds,
-  // preventing stale reads when seed changes trigger both computations.
   let sounds : () -> Array[@music.NoteValueSound] = @signals.memo(fn() {
-    @music.convert_measures_to_sounds(
-      measures_signal.get(),
-      bpm.get(),
-      swing=swing.get(),
-    )
+    @music.convert_measures_to_sounds(measures(), bpm.get(), swing=swing.get())
   })
 
-  let drum_sounds : @signals.Signal[Array[@music.NoteValueSound]] = @signals.signal([],
-  )
-  let _ = @signals.effect(fn() {
+  let drum_sounds : () -> Array[@music.NoteValueSound] = @signals.memo(fn() {
     @music.generate_drum_sounds(
       bpm.get(),
       measure_count.get(),
       time_signature=time_signature.get(),
       swing=swing.get(),
     )
-    |> drum_list => { drum_sounds.set(drum_list) }
   })
 
   let backing_sounds : () -> Array[@music.NoteValueSound] = @signals.memo(fn() {
     @music.convert_measures_to_backing_sounds(
-      measures_signal.get(),
+      measures(),
       bpm.get(),
       sounds(),
       seed=seed.get(),
@@ -125,36 +115,32 @@ fn make_measures(
   bpm : @signals.Signal[Int],
   key : @signals.Signal[@music.KeySignature],
   time_signature : @signals.Signal[@music.TimeSignature],
-) -> @signals.Signal[Array[@music.Measure]] {
-  let measures : @signals.Signal[Array[@music.Measure]] = @signals.signal([])
-  let _ = @signals.effect(fn() {
+) -> () -> Array[@music.Measure] {
+  @signals.memo(fn() {
     let ts = time_signature.get()
     let beats_per_measure = ts.beats_per_measure()
     let settings = @generator.Settings::default(seed.get())
-    settings
-    |> @generator.create_measure_generator
-    |> @generator.improvisation(
-      measure_chords(),
-      bpm.get(),
-      measure_count.get() - 2,
-      key.get(),
-      settings,
-      time_signature=ts,
-      beats_per_measure~,
-      start_offset=1,
-    )
-    |> music_measures => {
-      let leading_rest = @generator.leading_rest_measure(beats_per_measure~)
-      let trailing_rest_start = (measure_count.get() - 1).to_double() *
-        @music.ms_per_measure(bpm.get(), beats_per_measure~)
-      let trailing_rest = @generator.trailing_rest_measure(
-        start_time=@music.Duration::from_milliseconds(trailing_rest_start),
+    let music_measures = settings
+      |> @generator.create_measure_generator
+      |> @generator.improvisation(
+        measure_chords(),
+        bpm.get(),
+        measure_count.get() - 2,
+        key.get(),
+        settings,
+        time_signature=ts,
         beats_per_measure~,
+        start_offset=1,
       )
-      measures.set(leading_rest + music_measures + trailing_rest)
-    }
+    let leading_rest = @generator.leading_rest_measure(beats_per_measure~)
+    let trailing_rest_start = (measure_count.get() - 1).to_double() *
+      @music.ms_per_measure(bpm.get(), beats_per_measure~)
+    let trailing_rest = @generator.trailing_rest_measure(
+      start_time=@music.Duration::from_milliseconds(trailing_rest_start),
+      beats_per_measure~,
+    )
+    leading_rest + music_measures + trailing_rest
   })
-  measures
 }
 
 ///|
@@ -173,7 +159,7 @@ fn make_tick(
   playback_position : @signals.Signal[@music.Duration],
   volume : @signals.Signal[Int],
   sounds : () -> Array[@music.NoteValueSound],
-  drum_sounds : @signals.Signal[Array[@music.NoteValueSound]],
+  drum_sounds : () -> Array[@music.NoteValueSound],
   backing_sounds : () -> Array[@music.NoteValueSound],
   total_duration : () -> @music.Duration,
   loop_a_measure : @signals.Signal[Int],
@@ -221,7 +207,7 @@ fn make_tick(
     synth.schedule_notes(audio_sounds, volume.get().to_double() / 100.0)
 
     let drum_audio_sounds = @music.AudioSound::from(
-      drum_sounds.get(),
+      drum_sounds(),
       final_position,
       lookahead,
     )
