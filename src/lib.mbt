@@ -29,14 +29,14 @@ fn main {
   let measures = fn() { measures_signal.get() }
 
   let swing = @signals.signal(@music.SwingConfig::triplet())
-  let sounds : @signals.Signal[Array[@music.NoteValueSound]] = @signals.signal([])
-  let _ = @signals.effect(fn() {
+  // Use memo so melody sounds are always fresh when read by backing_sounds,
+  // preventing stale reads when seed changes trigger both computations.
+  let sounds : () -> Array[@music.NoteValueSound] = @signals.memo(fn() {
     @music.convert_measures_to_sounds(
       measures_signal.get(),
       bpm.get(),
       swing=swing.get(),
     )
-    |> sound_list => { sounds.set(sound_list) }
   })
 
   let drum_sounds : @signals.Signal[Array[@music.NoteValueSound]] = @signals.signal([],
@@ -51,16 +51,13 @@ fn main {
     |> drum_list => { drum_sounds.set(drum_list) }
   })
 
-  let backing_sounds : @signals.Signal[Array[@music.NoteValueSound]] = @signals.signal([],
-  )
-  let _ = @signals.effect(fn() {
+  let backing_sounds : () -> Array[@music.NoteValueSound] = @signals.memo(fn() {
     @music.convert_measures_to_backing_sounds(
       measures_signal.get(),
       bpm.get(),
-      sounds.get(),
+      sounds(),
       seed=seed.get(),
     )
-    |> bs => { backing_sounds.set(bs) }
   })
 
   let total_duration = @signals.memo(fn() {
@@ -168,9 +165,9 @@ fn measure_to_duration(
 fn make_tick(
   playback_position : @signals.Signal[@music.Duration],
   volume : @signals.Signal[Int],
-  sounds : @signals.Signal[Array[@music.NoteValueSound]],
+  sounds : () -> Array[@music.NoteValueSound],
   drum_sounds : @signals.Signal[Array[@music.NoteValueSound]],
-  backing_sounds : @signals.Signal[Array[@music.NoteValueSound]],
+  backing_sounds : () -> Array[@music.NoteValueSound],
   total_duration : () -> @music.Duration,
   loop_a_measure : @signals.Signal[Int],
   loop_b_measure : @signals.Signal[Int],
@@ -210,7 +207,7 @@ fn make_tick(
     }
 
     let audio_sounds = @music.AudioSound::from(
-      sounds.get(),
+      sounds(),
       final_position,
       lookahead,
     )
@@ -227,7 +224,7 @@ fn make_tick(
     )
 
     let backing_audio_sounds = @music.AudioSound::from(
-      backing_sounds.get(),
+      backing_sounds(),
       final_position,
       lookahead,
     )

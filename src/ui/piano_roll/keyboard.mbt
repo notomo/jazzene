@@ -25,8 +25,8 @@ const BLACK_KEY_HEIGHT_RATIO = 0.6
 ///|
 /// Render piano keyboard component using Canvas API
 pub fn keyboard(
-  sounds : @signals.Signal[Array[@music.NoteValueSound]],
-  backing_sounds : @signals.Signal[Array[@music.NoteValueSound]],
+  sounds : () -> Array[@music.NoteValueSound],
+  backing_sounds : () -> Array[@music.NoteValueSound],
   playback_position : @signals.Signal[@music.Duration],
 ) -> @luna_dom.DomNode {
   let { canvas, ctx } = create_canvas_context()
@@ -34,17 +34,14 @@ pub fn keyboard(
 
   // Calculate currently playing notes
   let playing_notes = @signals.memo(fn() {
-    @music.calculate_playing_notes(sounds.get(), playback_position.get())
+    @music.calculate_playing_notes(sounds(), playback_position.get())
     .filter_map(fn(s) { s.midi() })
     .map(fn(m) { m.value })
   })
 
   // Calculate currently playing backing notes
   let backing_playing_notes = @signals.memo(fn() {
-    @music.calculate_playing_notes(
-      backing_sounds.get(),
-      playback_position.get(),
-    )
+    @music.calculate_playing_notes(backing_sounds(), playback_position.get())
     .filter_map(fn(s) { s.midi() })
     .map(fn(m) { m.value })
   })
