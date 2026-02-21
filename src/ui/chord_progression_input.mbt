@@ -2,7 +2,7 @@
 /// Render chord input textarea
 fn chord_progression_input(
   raw_chord_progression : @signals.Signal[String],
-  parse_error : @signals.Signal[String?],
+  parse_error : () -> String?,
 ) -> @luna_dom.DomNode {
   let on_input : @luna_dom.InputHandler = fn(e) {
     let value = get_input_value(e)
@@ -15,7 +15,7 @@ fn chord_progression_input(
     dyn_class=fn() {
       cn([
         "w-full px-2 lg:px-4 py-1 lg:py-2 bg-slate-900 text-white rounded-lg border focus:outline-none text-sm lg:text-lg font-mono",
-        match parse_error.get() {
+        match parse_error() {
           Some(_) => "border-red-500"
           None => "border-slate-600 focus:border-blue-500"
         },

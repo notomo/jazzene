@@ -53,7 +53,7 @@ pub fn render(
   total_duration : () -> @music.Duration,
   loop_a_measure : @signals.Signal[Int],
   loop_b_measure : @signals.Signal[Int],
-  chord_parse_error : @signals.Signal[String?],
+  chord_parse_error : () -> String?,
   measures : () -> Array[@music.Measure],
   key : @signals.Signal[@music.KeySignature],
   time_signature : @signals.Signal[@music.TimeSignature],

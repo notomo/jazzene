@@ -8,18 +8,25 @@ fn main {
   let key = @signals.signal(@ui.get_initial_key())
   let time_signature = @signals.signal(@ui.get_initial_time_signature())
 
-  let chord_parse_error : @signals.Signal[String?] = @signals.signal(None)
+  // Parse once; both measure_chords and chord_parse_error derive from it.
+  // This avoids signal mutation inside a memo, ensuring chord_parse_error
+  // is always in sync with the parsed result without timing issues.
+  let parsed_progression = @signals.memo(fn() {
+    @music.parse_measure_progression(raw_chord_progression.get())
+  })
   let measure_chords = @signals.memo(fn() {
-    match @music.parse_measure_progression(raw_chord_progression.get()) {
+    match parsed_progression() {
       Ok(degree_measures) => {
-        chord_parse_error.set(None)
         let key_root = key.get().root
         degree_measures.map(fn(dm) { dm.resolve(key_root) })
       }
-      Err(error_msg) => {
-        chord_parse_error.set(Some(error_msg))
-        []
-      }
+      Err(_) => []
+    }
+  })
+  let chord_parse_error : () -> String? = @signals.memo(fn() {
+    match parsed_progression() {
+      Ok(_) => None
+      Err(msg) => Some(msg)
     }
   })
 
