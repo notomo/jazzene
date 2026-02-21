@@ -8,6 +8,7 @@ test "beam_stem_up - low note goes up" {
         duration: Eighth,
         accidental: None,
         tie: None,
+        tone_origin: None,
       },
     ),
   ]
@@ -24,6 +25,7 @@ test "beam_stem_up - high note goes down" {
         duration: Eighth,
         accidental: None,
         tie: None,
+        tone_origin: None,
       },
     ),
   ]

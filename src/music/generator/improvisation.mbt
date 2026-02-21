@@ -51,6 +51,7 @@ fn rest_notes_for_beats(beats : Double) -> Array[@music.MeasureNote] {
           duration,
           accidental: None,
           tie: None,
+          tone_origin: None,
         })
         continue remaining - duration.to_beats()
       }

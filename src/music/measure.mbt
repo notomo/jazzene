@@ -10,6 +10,20 @@ pub(all) enum Tie {
 } derive(Eq, Show)
 
 ///|
+/// Records which jazz improvisation technique produced a note.
+/// Used for educational highlighting and visualization.
+pub(all) enum ToneOrigin {
+  ChordTone // Chord tone (1st, 3rd, 5th, 7th)
+  Tension(Int) // Tension tone (9th, 11th, 13th etc.); Int is the jazz degree
+  ScaleTone // Diatonic scale tone (non-chord tone from chord scale)
+  ApproachTone // Chromatic approach tone (half-step above/below chord tone)
+  Enclosure // Enclosure pattern (surrounding a chord tone from above and below)
+  PassingTone // Passing tone (connecting scale tone)
+  MotifReplay // Note produced by replaying a stored motif
+  GuideTone // Guide tone (3rd/7th smooth voice leading)
+} derive(Eq, Show)
+
+///|
 /// A single beat within a measure
 pub(all) struct Beat {
   count : Int // 0-indexed beat number (0,1,2,3 for 4/4)
@@ -31,6 +45,7 @@ pub(all) struct MeasureNote {
   duration : NoteDuration
   accidental : Accidental? // Sharp, Flat, or Natural symbol to display
   tie : Tie? // Tie connection state
+  tone_origin : ToneOrigin? // Which technique produced this note (None for rests and ties)
 }
 
 ///|

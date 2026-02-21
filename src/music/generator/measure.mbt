@@ -318,6 +318,7 @@ fn generate_measure_notes(
                 duration: note.duration,
                 accidental: real_update_accidental(real_midi),
                 tie: note.tie,
+                tone_origin: note.tone_origin,
               }
             }
             None => note
@@ -385,6 +386,7 @@ fn process_incoming_tie(
         duration: fitted,
         accidental: None,
         tie: Some(tie),
+        tone_origin: None,
       },
       state.phrase,
     )
@@ -442,17 +444,17 @@ fn select_motif_guided_note(
 
 ///|
 /// Select a note, using motif-guided selection if replaying, otherwise normal selection.
-/// Returns (midi_option, updated_motif_memory).
+/// Returns (midi_option, tone_origin_option, updated_motif_memory).
 fn select_note_with_motif(
   state : MeasureState,
   chord : @music.Chord,
   ctx : MeasureContext,
   settings : Settings,
   random_int : (Int) -> Int,
-) -> (@music.MidiNumber?, MotifMemory) {
+) -> (@music.MidiNumber?, @music.ToneOrigin?, MotifMemory) {
   // First note of phrase: always use normal selection
   guard not(state.motif_first_note) else {
-    let midi = decide_midi_number(
+    let (midi, origin) = decide_midi_number(
       chord,
       ctx.key,
       state.last_midi,
@@ -466,7 +468,7 @@ fn select_note_with_motif(
       settings.max_interval,
       random_int,
     )
-    return (midi, state.motif_memory)
+    return (midi, origin, state.motif_memory)
   }
 
   // Try motif-guided selection if replaying
@@ -483,10 +485,10 @@ fn select_note_with_motif(
               prev,
               settings.max_interval,
             ) {
-            Some(midi) => (Some(midi), updated_memory)
+            Some(midi) => (Some(midi), Some(@music.MotifReplay), updated_memory)
             None => {
               // Motif interval didn't work, fall back to normal selection
-              let midi = decide_midi_number(
+              let (midi, origin) = decide_midi_number(
                 chord,
                 ctx.key,
                 state.last_midi,
@@ -500,12 +502,12 @@ fn select_note_with_motif(
                 settings.max_interval,
                 random_int,
               )
-              (midi, MotifMemory::{ ..updated_memory, replaying: None })
+              (midi, origin, MotifMemory::{ ..updated_memory, replaying: None })
             }
           }
         }
         None => {
-          let midi = decide_midi_number(
+          let (midi, origin) = decide_midi_number(
             chord,
             ctx.key,
             state.last_midi,
@@ -519,12 +521,12 @@ fn select_note_with_motif(
             settings.max_interval,
             random_int,
           )
-          (midi, state.motif_memory)
+          (midi, origin, state.motif_memory)
         }
       }
     None => {
       // Not replaying or replay finished, use normal selection
-      let midi = decide_midi_number(
+      let (midi, origin) = decide_midi_number(
         chord,
         ctx.key,
         state.last_midi,
@@ -538,7 +540,7 @@ fn select_note_with_motif(
         settings.max_interval,
         random_int,
       )
-      (midi, state.motif_memory)
+      (midi, origin, state.motif_memory)
     }
   }
 }
@@ -625,6 +627,7 @@ fn handle_resting(
         duration,
         accidental: None,
         tie: None,
+        tone_origin: None,
       })
       let new_phrase_len = roll_phrase_length(settings, random_int)
       let new_motif_memory = maybe_start_motif_replay(
@@ -689,7 +692,7 @@ fn handle_playing(
     )
   }
   // Select note using motif-guided or normal selection
-  let (midi_opt, new_motif_memory) = select_note_with_motif(
+  let (midi_opt, tone_origin, new_motif_memory) = select_note_with_motif(
     state, chord, ctx, settings, random_int,
   )
   match midi_opt {
@@ -724,6 +727,7 @@ fn handle_playing(
             duration,
             accidental: update_accidental(midi),
             tie: None,
+            tone_origin,
           })
           let next_phrase = match notes_left {
             1 => Resting
@@ -847,8 +851,9 @@ fn filter_by_interval(
 }
 
 ///|
-/// Decide whether to generate a note or rest, and if note, which MIDI number
-/// Uses stamina-based weighted selection for chord tones
+/// Decide whether to generate a note or rest, and if note, which MIDI number.
+/// Returns (midi, tone_origin) pair: both None for rests, both Some for notes.
+/// Uses stamina-based weighted selection for chord tones.
 fn decide_midi_number(
   chord : @music.Chord,
   key : @music.KeySignature,
@@ -862,55 +867,72 @@ fn decide_midi_number(
   approach_weight_ratio : Int,
   max_interval : Int,
   random_int : (Int) -> Int,
-) -> @music.MidiNumber? {
+) -> (@music.MidiNumber?, @music.ToneOrigin?) {
   let actual_rest_prob = effective_rest_probability(
     rest_probability, stamina, stamina_max, last_was_rest,
   )
-  guard random_int(100) >= actual_rest_prob else { return None }
+  guard random_int(100) >= actual_rest_prob else { return (None, None) }
 
   let chord_tones = extend_across_octaves(chord.tones())
   let tension_tones = extend_across_octaves(chord.tension_tones())
   let scale_tones = extend_across_octaves(chord.scale_tones(key))
   let approach_tones = extend_across_octaves(chord.approach_tones())
+  let root_midi = chord.root.midi()
   match last_midi {
     Some(prev) => {
-      let weighted_tones = weighted_tone_candidates(
-          chord_tones, prev, stamina, max_interval, 100,
+      let weighted_tones : Array[(Int, @music.MidiNumber, @music.ToneOrigin)] = weighted_tone_candidates_tagged(
+          chord_tones,
+          prev,
+          stamina,
+          max_interval,
+          100,
+          @music.ChordTone,
         ) +
-        weighted_tone_candidates(
-          tension_tones, prev, stamina, max_interval, tension_weight_ratio,
+        weighted_tone_candidates_tagged(
+          tension_tones,
+          prev,
+          stamina,
+          max_interval,
+          tension_weight_ratio,
+          @music.Tension(0), // placeholder; will be replaced per-tone below
         ) +
-        weighted_tone_candidates(
-          scale_tones, prev, stamina, max_interval, scale_tone_weight_ratio,
+        weighted_tone_candidates_tagged(
+          scale_tones,
+          prev,
+          stamina,
+          max_interval,
+          scale_tone_weight_ratio,
+          @music.ScaleTone,
         ) +
-        weighted_tone_candidates(
-          approach_tones, prev, stamina, max_interval, approach_weight_ratio,
+        weighted_tone_candidates_tagged(
+          approach_tones,
+          prev,
+          stamina,
+          max_interval,
+          approach_weight_ratio,
+          @music.ApproachTone,
         )
-      weighted_random_select(weighted_tones, random_int)
+      // Fix tension degrees now that we have the candidates
+      let fixed_tones = weighted_tones.map(fn(tuple) {
+        let (weight, tone, origin) = tuple
+        let fixed_origin = match origin {
+          @music.Tension(_) => {
+            let degree = tension_degree(root_midi, tone)
+            @music.Tension(degree)
+          }
+          other => other
+        }
+        (weight, tone, fixed_origin)
+      })
+      match weighted_random_select_tagged(fixed_tones, random_int) {
+        Some((midi, origin)) => (Some(midi), Some(origin))
+        None => (None, None)
+      }
     }
     None => {
       // First note: uniform random from chord tones only
       let index = random_int(chord_tones.length())
-      Some(chord_tones[index])
+      (Some(chord_tones[index]), Some(@music.ChordTone))
     }
   }
-}
-
-///|
-/// Select a random element from weighted candidates
-fn weighted_random_select(
-  weighted : Array[(Int, @music.MidiNumber)],
-  random_int : (Int) -> Int,
-) -> @music.MidiNumber? {
-  guard not(weighted.is_empty()) else { return None }
-  let total = weighted.iter().fold(init=0, fn(acc, pair) { acc + pair.0 })
-  let r = random_int(total)
-  let mut cumulative = 0
-  for pair in weighted {
-    cumulative = cumulative + pair.0
-    if r < cumulative {
-      return Some(pair.1)
-    }
-  }
-  Some(weighted[weighted.length() - 1].1)
 }

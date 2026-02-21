@@ -18,6 +18,7 @@ test "compute_note_positions - single note" {
         duration: Quarter,
         accidental: None,
         tie: None,
+        tone_origin: None,
       },
     ),
   ]
@@ -35,6 +36,7 @@ test "compute_note_positions - two equal notes" {
     duration: Quarter,
     accidental: None,
     tie: None,
+    tone_origin: None,
   }
   let positioned = [(0.0, note), (1.0, note)]
   let measure_x = 90.0
@@ -55,6 +57,7 @@ test "compute_note_positions - whole rest centered" {
         duration: Whole,
         accidental: None,
         tie: None,
+        tone_origin: None,
       },
     ),
   ]

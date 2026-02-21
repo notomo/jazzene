@@ -1,11 +1,11 @@
 ///|
 fn make_note(midi : Int, duration : NoteDuration) -> MeasureNote {
-  { midi: Some(midi), duration, accidental: None, tie: None }
+  { midi: Some(midi), duration, accidental: None, tie: None, tone_origin: None }
 }
 
 ///|
 fn make_rest(duration : NoteDuration) -> MeasureNote {
-  { midi: None, duration, accidental: None, tie: None }
+  { midi: None, duration, accidental: None, tie: None, tone_origin: None }
 }
 
 ///|

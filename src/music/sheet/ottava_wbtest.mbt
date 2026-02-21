@@ -8,6 +8,7 @@ test "should_apply_8va - high note triggers" {
         duration: Quarter,
         accidental: None,
         tie: None,
+        tone_origin: None,
       },
     ),
   ]
@@ -24,6 +25,7 @@ test "should_apply_8va - normal note does not trigger" {
         duration: Quarter,
         accidental: None,
         tie: None,
+        tone_origin: None,
       },
     ),
   ]
@@ -40,6 +42,7 @@ test "shift_for_8va - shifts midi down by 12" {
         duration: Quarter,
         accidental: None,
         tie: None,
+        tone_origin: None,
       },
     ),
   ]
@@ -57,6 +60,7 @@ test "shift_for_8vb - shifts midi up by 12" {
         duration: Quarter,
         accidental: None,
         tie: None,
+        tone_origin: None,
       },
     ),
   ]

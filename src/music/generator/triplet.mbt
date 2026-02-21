@@ -36,7 +36,7 @@ fn generate_triplet_group(
 
   for i = 0; i < 3; i = i + 1 {
     let current_chord = ctx.chord_at(current_state.measure_pos)
-    let (midi_opt, new_motif_memory) = select_note_with_motif(
+    let (midi_opt, tone_origin, new_motif_memory) = select_note_with_motif(
       current_state, current_chord, ctx, settings, random_int,
     )
 
@@ -65,6 +65,7 @@ fn generate_triplet_group(
           duration: triplet_duration,
           accidental: update_accidental(midi),
           tie: None,
+          tone_origin,
         })
         let remaining_after = notes_left - (i + 1)
         let next_phrase = if remaining_after <= 0 {
