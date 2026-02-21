@@ -28,6 +28,29 @@ fn render_playback_indicator(
 
   let line_top_offset = PLAYBACK_INDICATOR_TOP_OFFSET
   let line_bottom_offset = staff_height + PLAYBACK_INDICATOR_BOTTOM_OFFSET
+
+  // Memoize x and y to avoid duplicate calculation for x1/x2 and y1/y2
+  let indicator_x = @signals.memo(fn() {
+    let beats_per_measure = time_signature.get().beats_per_measure()
+    calculate_indicator_x(
+      playback_position.get(),
+      bpm.get(),
+      measure_count(),
+      key.get(),
+      beats_per_measure~,
+      measure_width=measure_width(),
+    )
+  })
+  let indicator_y = @signals.memo(fn() {
+    let beats_per_measure = time_signature.get().beats_per_measure()
+    calculate_indicator_y(
+      playback_position.get(),
+      bpm.get(),
+      measure_count(),
+      beats_per_measure~,
+    )
+  })
+
   @luna_dom.svg_line(
     stroke=PLAYBACK_INDICATOR_COLOR,
     stroke_width=PLAYBACK_INDICATOR_STROKE_WIDTH,
@@ -36,60 +59,18 @@ fn render_playback_indicator(
       ("stroke-opacity", @luna_dom.Attr::AttrString("0.5")),
     ],
     dyn_attrs=[
-      (
-        "x1",
-        @luna_dom.AttrValue::Dynamic(fn() {
-          let beats_per_measure = time_signature.get().beats_per_measure()
-          let mw = measure_width()
-          calculate_indicator_x(
-            playback_position.get(),
-            bpm.get(),
-            measure_count(),
-            key.get(),
-            beats_per_measure~,
-            measure_width=mw,
-          ).to_string()
-        }),
-      ),
-      (
-        "x2",
-        @luna_dom.AttrValue::Dynamic(fn() {
-          let beats_per_measure = time_signature.get().beats_per_measure()
-          let mw = measure_width()
-          calculate_indicator_x(
-            playback_position.get(),
-            bpm.get(),
-            measure_count(),
-            key.get(),
-            beats_per_measure~,
-            measure_width=mw,
-          ).to_string()
-        }),
-      ),
+      ("x1", @luna_dom.AttrValue::Dynamic(fn() { indicator_x().to_string() })),
+      ("x2", @luna_dom.AttrValue::Dynamic(fn() { indicator_x().to_string() })),
       (
         "y1",
         @luna_dom.AttrValue::Dynamic(fn() {
-          let beats_per_measure = time_signature.get().beats_per_measure()
-          let y = calculate_indicator_y(
-            playback_position.get(),
-            bpm.get(),
-            measure_count(),
-            beats_per_measure~,
-          )
-          (y + line_top_offset).to_string()
+          (indicator_y() + line_top_offset).to_string()
         }),
       ),
       (
         "y2",
         @luna_dom.AttrValue::Dynamic(fn() {
-          let beats_per_measure = time_signature.get().beats_per_measure()
-          let y = calculate_indicator_y(
-            playback_position.get(),
-            bpm.get(),
-            measure_count(),
-            beats_per_measure~,
-          )
-          (y + line_bottom_offset).to_string()
+          (indicator_y() + line_bottom_offset).to_string()
         }),
       ),
     ],
