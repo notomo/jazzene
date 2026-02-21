@@ -37,7 +37,7 @@ fn generate_triplet_group(
   for i = 0; i < 3; i = i + 1 {
     let current_chord = ctx.chord_at(current_state.measure_pos)
     let (midi_opt, tone_origin, new_motif_memory) = select_note_with_motif(
-      current_state, current_chord, ctx, settings, random_int,
+      current_state, current_chord, settings, random_int,
     )
 
     match midi_opt {

@@ -71,8 +71,7 @@ test "ChordQuality::chord_scale - Augmented → WholeTone" {
 /// Verify Chord::scale_tones uses chord scale theory (not just major scale)
 test "Chord::scale_tones - Cmaj7 in C (Ionian from C)" {
   let chord = Chord::{ root: C, quality: Major7, bass: None }
-  let key = KeySignature::c_major()
-  let scale_tones = chord.scale_tones(key)
+  let scale_tones = chord.scale_tones()
   // Ionian from C: [0,2,4,5,7,9,11]; chord tones Cmaj7: [0,4,7,11]
   // Scale tones: D(2), F(5), A(9)
   let pitch_classes = scale_tones.map(fn(m) { m.pitch_class() })
@@ -82,8 +81,7 @@ test "Chord::scale_tones - Cmaj7 in C (Ionian from C)" {
 ///|
 test "Chord::scale_tones - Dm7 (Dorian from D = D E F G A B C)" {
   let chord = Chord::{ root: D, quality: Minor7, bass: None }
-  let key = KeySignature::c_major()
-  let scale_tones = chord.scale_tones(key)
+  let scale_tones = chord.scale_tones()
   // Dorian from D (root=62): [0,2,3,5,7,9,10]
   // D(62)=chord, E(64)=scale, F(65)=chord, G(67)=scale, A(69)=chord, B(71)=scale, C(72)=chord
   let pitch_classes = scale_tones.map(fn(m) { m.pitch_class() })
@@ -93,8 +91,7 @@ test "Chord::scale_tones - Dm7 (Dorian from D = D E F G A B C)" {
 ///|
 test "Chord::scale_tones - G7 (Mixolydian from G = G A B C D E F)" {
   let chord = Chord::{ root: G, quality: Dominant7, bass: None }
-  let key = KeySignature::c_major()
-  let scale_tones = chord.scale_tones(key)
+  let scale_tones = chord.scale_tones()
   // Mixolydian from G (root=67): [0,2,4,5,7,9,10]
   // G7 chord tones: G(7), B(11), D(2), F(5)
   // Non-chord: A(9), C(0), E(4)
@@ -110,9 +107,8 @@ test "Chord::scale_tones - G7 (Mixolydian from G = G A B C D E F)" {
 ///|
 test "Chord::scale_tones - none are chord tones" {
   let chord = Chord::{ root: C, quality: Minor7, bass: None }
-  let key = KeySignature::c_major()
   let chord_pcs = chord.tones().map(fn(m) { m.pitch_class() })
-  let scale_tones = chord.scale_tones(key)
+  let scale_tones = chord.scale_tones()
   for tone in scale_tones {
     assert_false(chord_pcs.contains(tone.pitch_class()))
   }

@@ -81,10 +81,9 @@ test "select_motif_guided_note finds closest chord tone to target" {
     quality: @music.Major7,
     bass: None,
   }
-  let key = @music.KeySignature::c_major()
   let last_midi = @music.MidiNumber::new(60).unwrap() // C4
   // Target: 62 (D4) - should snap to closest chord/scale tone
-  let result = select_motif_guided_note(62, chord, key, last_midi, 7)
+  let result = select_motif_guided_note(62, chord, last_midi, 7)
   // D4 (62) is a scale tone of C major, should be selected
   assert_eq(result.unwrap().value, 62)
 }
@@ -96,10 +95,9 @@ test "select_motif_guided_note returns None for out-of-range target" {
     quality: @music.Major7,
     bass: None,
   }
-  let key = @music.KeySignature::c_major()
   let last_midi = @music.MidiNumber::new(60).unwrap()
   // Target: 200 (invalid MIDI)
-  let result = select_motif_guided_note(200, chord, key, last_midi, 7)
+  let result = select_motif_guided_note(200, chord, last_midi, 7)
   assert_true(result is None)
 }
 

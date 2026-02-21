@@ -100,6 +100,7 @@ pub(all) struct Settings {
   scale_tone_weight_ratio : Int // 0-100, scale tone weight as % of chord tone weight
   tension_weight_ratio : Int // 0-100, tension tone weight as % of chord tone weight
   approach_weight_ratio : Int // 0-100, approach tone weight as % of chord tone weight
+  enclosure_weight_ratio : Int // 0-100, enclosure tone weight as % of chord tone weight
   phrase_length_min : Int // Minimum notes in a phrase (default: 2)
   phrase_length_max : Int // Maximum notes in a phrase (default: 8)
   phrase_early_end_stamina : Int // Below this stamina, phrase may end early (default: 15)
@@ -124,6 +125,7 @@ pub fn Settings::default(seed : Int) -> Settings {
     scale_tone_weight_ratio: 30,
     tension_weight_ratio: 50,
     approach_weight_ratio: 20,
+    enclosure_weight_ratio: 15,
     phrase_length_min: 2,
     phrase_length_max: 8,
     phrase_early_end_stamina: 15,
@@ -408,7 +410,6 @@ fn roll_phrase_length(settings : Settings, random_int : (Int) -> Int) -> Int {
 fn select_motif_guided_note(
   target_value : Int,
   chord : @music.Chord,
-  key : @music.KeySignature,
   last_midi : @music.MidiNumber,
   max_interval : Int,
 ) -> @music.MidiNumber? {
@@ -423,7 +424,7 @@ fn select_motif_guided_note(
     max_interval,
   )
   let scale_tones = filter_by_interval(
-    extend_across_octaves(chord.scale_tones(key)),
+    extend_across_octaves(chord.scale_tones()),
     last_midi,
     max_interval,
   )
@@ -448,7 +449,6 @@ fn select_motif_guided_note(
 fn select_note_with_motif(
   state : MeasureState,
   chord : @music.Chord,
-  ctx : MeasureContext,
   settings : Settings,
   random_int : (Int) -> Int,
 ) -> (@music.MidiNumber?, @music.ToneOrigin?, MotifMemory) {
@@ -456,7 +456,6 @@ fn select_note_with_motif(
   guard not(state.motif_first_note) else {
     let (midi, origin) = decide_midi_number(
       chord,
-      ctx.key,
       state.last_midi,
       state.stamina,
       settings.stamina_max,
@@ -465,6 +464,7 @@ fn select_note_with_motif(
       settings.scale_tone_weight_ratio,
       settings.tension_weight_ratio,
       settings.approach_weight_ratio,
+      settings.enclosure_weight_ratio,
       settings.max_interval,
       random_int,
     )
@@ -478,19 +478,12 @@ fn select_note_with_motif(
         Some(prev) => {
           let target = prev.value + interval
           match
-            select_motif_guided_note(
-              target,
-              chord,
-              ctx.key,
-              prev,
-              settings.max_interval,
-            ) {
+            select_motif_guided_note(target, chord, prev, settings.max_interval) {
             Some(midi) => (Some(midi), Some(@music.MotifReplay), updated_memory)
             None => {
               // Motif interval didn't work, fall back to normal selection
               let (midi, origin) = decide_midi_number(
                 chord,
-                ctx.key,
                 state.last_midi,
                 state.stamina,
                 settings.stamina_max,
@@ -499,6 +492,7 @@ fn select_note_with_motif(
                 settings.scale_tone_weight_ratio,
                 settings.tension_weight_ratio,
                 settings.approach_weight_ratio,
+                settings.enclosure_weight_ratio,
                 settings.max_interval,
                 random_int,
               )
@@ -509,7 +503,6 @@ fn select_note_with_motif(
         None => {
           let (midi, origin) = decide_midi_number(
             chord,
-            ctx.key,
             state.last_midi,
             state.stamina,
             settings.stamina_max,
@@ -518,6 +511,7 @@ fn select_note_with_motif(
             settings.scale_tone_weight_ratio,
             settings.tension_weight_ratio,
             settings.approach_weight_ratio,
+            settings.enclosure_weight_ratio,
             settings.max_interval,
             random_int,
           )
@@ -528,7 +522,6 @@ fn select_note_with_motif(
       // Not replaying or replay finished, use normal selection
       let (midi, origin) = decide_midi_number(
         chord,
-        ctx.key,
         state.last_midi,
         state.stamina,
         settings.stamina_max,
@@ -537,6 +530,7 @@ fn select_note_with_motif(
         settings.scale_tone_weight_ratio,
         settings.tension_weight_ratio,
         settings.approach_weight_ratio,
+        settings.enclosure_weight_ratio,
         settings.max_interval,
         random_int,
       )
@@ -693,7 +687,7 @@ fn handle_playing(
   }
   // Select note using motif-guided or normal selection
   let (midi_opt, tone_origin, new_motif_memory) = select_note_with_motif(
-    state, chord, ctx, settings, random_int,
+    state, chord, settings, random_int,
   )
   match midi_opt {
     Some(midi) =>
@@ -856,7 +850,6 @@ fn filter_by_interval(
 /// Uses stamina-based weighted selection for chord tones.
 fn decide_midi_number(
   chord : @music.Chord,
-  key : @music.KeySignature,
   last_midi : @music.MidiNumber?,
   stamina : Int,
   stamina_max : Int,
@@ -865,6 +858,7 @@ fn decide_midi_number(
   scale_tone_weight_ratio : Int,
   tension_weight_ratio : Int,
   approach_weight_ratio : Int,
+  enclosure_weight_ratio : Int,
   max_interval : Int,
   random_int : (Int) -> Int,
 ) -> (@music.MidiNumber?, @music.ToneOrigin?) {
@@ -875,8 +869,9 @@ fn decide_midi_number(
 
   let chord_tones = extend_across_octaves(chord.tones())
   let tension_tones = extend_across_octaves(chord.tension_tones())
-  let scale_tones = extend_across_octaves(chord.scale_tones(key))
+  let scale_tones = extend_across_octaves(chord.scale_tones())
   let approach_tones = extend_across_octaves(chord.approach_tones())
+  let enclosure_tones = extend_across_octaves(chord.enclosure_tones())
   let root_midi = chord.root.midi()
   match last_midi {
     Some(prev) => {
@@ -911,6 +906,14 @@ fn decide_midi_number(
           max_interval,
           approach_weight_ratio,
           @music.ApproachTone,
+        ) +
+        weighted_tone_candidates_tagged(
+          enclosure_tones,
+          prev,
+          stamina,
+          max_interval,
+          enclosure_weight_ratio,
+          @music.Enclosure,
         )
       // Fix tension degrees now that we have the candidates
       let fixed_tones = weighted_tones.map(fn(tuple) {

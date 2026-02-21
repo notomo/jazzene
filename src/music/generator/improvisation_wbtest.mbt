@@ -5,10 +5,9 @@ test "Chord::scale_tones returns non-chord diatonic tones for Cmaj7 in C" {
     quality: @music.Major7,
     bass: None,
   }
-  let key = @music.KeySignature::c_major()
-  let scale_tones = chord.scale_tones(key)
+  let scale_tones = chord.scale_tones()
   // Cmaj7 chord tones: C(0), E(4), G(7), B(11)
-  // C major scale: C(0), D(2), E(4), F(5), G(7), A(9), B(11)
+  // Ionian scale from C: C(0), D(2), E(4), F(5), G(7), A(9), B(11)
   // Scale tones (non-chord): D(62), F(65), A(69)
   let pitch_classes = scale_tones.map(fn(m) { m.pitch_class() })
   inspect(pitch_classes, content="[2, 5, 9]")
@@ -26,10 +25,9 @@ test "Chord::scale_tones returns non-chord diatonic tones for Dm7 in C" {
     quality: @music.Minor7,
     bass: None,
   }
-  let key = @music.KeySignature::c_major()
-  let scale_tones = chord.scale_tones(key)
+  let scale_tones = chord.scale_tones()
   // Dm7 chord tones: D(2), F(5), A(9), C(0)
-  // C major scale: C(0), D(2), E(4), F(5), G(7), A(9), B(11)
+  // Dorian scale from D: D E F G A B C
   // Scale tones (non-chord): E(64), G(67), B(71)
   let pitch_classes = scale_tones.map(fn(m) { m.pitch_class() })
   inspect(pitch_classes, content="[4, 7, 11]")

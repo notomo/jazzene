@@ -4,6 +4,7 @@ test "Techniques::default enables all techniques" {
   assert_true(t.tension_tones)
   assert_true(t.scale_tones)
   assert_true(t.approach_tones)
+  assert_true(t.enclosure_tones)
   assert_true(t.syncopation)
   assert_true(t.triplets)
   assert_true(t.motif_reuse)
@@ -17,6 +18,7 @@ test "Settings::with_techniques preserves values when all enabled" {
   assert_eq(result.tension_weight_ratio, s.tension_weight_ratio)
   assert_eq(result.scale_tone_weight_ratio, s.scale_tone_weight_ratio)
   assert_eq(result.approach_weight_ratio, s.approach_weight_ratio)
+  assert_eq(result.enclosure_weight_ratio, s.enclosure_weight_ratio)
   assert_eq(result.syncopation_probability, s.syncopation_probability)
   assert_eq(result.triplet_probability, s.triplet_probability)
   assert_eq(result.motif_reuse_probability, s.motif_reuse_probability)
@@ -79,6 +81,7 @@ test "Settings::with_techniques zeros multiple techniques" {
     tension_tones: false,
     scale_tones: false,
     approach_tones: false,
+    enclosure_tones: false,
     syncopation: true,
     triplets: true,
     motif_reuse: false,
@@ -87,6 +90,7 @@ test "Settings::with_techniques zeros multiple techniques" {
   assert_eq(result.tension_weight_ratio, 0)
   assert_eq(result.scale_tone_weight_ratio, 0)
   assert_eq(result.approach_weight_ratio, 0)
+  assert_eq(result.enclosure_weight_ratio, 0)
   assert_eq(result.syncopation_probability, s.syncopation_probability)
   assert_eq(result.triplet_probability, s.triplet_probability)
   assert_eq(result.motif_reuse_probability, 0)

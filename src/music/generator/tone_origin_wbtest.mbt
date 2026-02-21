@@ -6,11 +6,9 @@ test "decide_midi_number first note always returns ChordTone" {
     quality: @music.Major7,
     bass: None,
   }
-  let key = @music.KeySignature::c_major()
   let rng = create_random_int(0)
   let (midi, origin) = decide_midi_number(
     chord,
-    key,
     None,
     50,
     50,
@@ -19,6 +17,7 @@ test "decide_midi_number first note always returns ChordTone" {
     30,
     50,
     20,
+    0,
     7,
     rng,
   )
@@ -34,12 +33,10 @@ test "decide_midi_number rest returns None for both midi and origin" {
     quality: @music.Major7,
     bass: None,
   }
-  let key = @music.KeySignature::c_major()
   // Force rest by passing rest_probability=100
   let always_rest = fn(_max : Int) -> Int { 0 } // always 0, so 0 < 100 → rest
   let (midi, origin) = decide_midi_number(
     chord,
-    key,
     Some(@music.MidiNumber::new(60).unwrap()),
     50,
     50,
@@ -48,6 +45,7 @@ test "decide_midi_number rest returns None for both midi and origin" {
     30,
     50,
     20,
+    0,
     7,
     always_rest,
   )
@@ -63,16 +61,15 @@ test "decide_midi_number chord tone returns ChordTone origin" {
     quality: @music.Major7,
     bass: None,
   }
-  let key = @music.KeySignature::c_major()
   // Use weight ratios that only enable chord tones (scale/tension/approach all 0)
   let rng = create_random_int(42)
   let (midi, origin) = decide_midi_number(
     chord,
-    key,
     Some(@music.MidiNumber::new(60).unwrap()),
     50,
     50,
     false,
+    0,
     0,
     0,
     0,
@@ -101,21 +98,11 @@ test "decide_midi_number origin is always a valid ToneOrigin variant" {
     quality: @music.Major7,
     bass: None,
   }
-  let key = @music.KeySignature::c_major()
-  let valid_origins : Array[@music.ToneOrigin] = [
-    @music.ChordTone,
-    @music.Tension(9),
-    @music.Tension(11),
-    @music.Tension(13),
-    @music.ScaleTone,
-    @music.ApproachTone,
-  ]
   // Run many trials with different seeds and verify all origins are valid
   for seed = 0; seed < 20; seed = seed + 1 {
     let rng = create_random_int(seed)
     let (midi, origin) = decide_midi_number(
       chord,
-      key,
       Some(@music.MidiNumber::new(60).unwrap()),
       50,
       50,
@@ -124,6 +111,7 @@ test "decide_midi_number origin is always a valid ToneOrigin variant" {
       30,
       50,
       20,
+      15,
       7,
       rng,
     )
@@ -132,12 +120,14 @@ test "decide_midi_number origin is always a valid ToneOrigin variant" {
       (Some(_), Some(o)) => {
         // Origin must be a recognized tone category
         let is_valid = match o {
-          @music.ChordTone | @music.ScaleTone | @music.ApproachTone => true
+          @music.ChordTone
+          | @music.ScaleTone
+          | @music.ApproachTone
+          | @music.Enclosure => true
           @music.Tension(degree) => degree >= 9 && degree <= 13
           _ => false
         }
         assert_true(is_valid)
-        ignore(valid_origins)
       }
       _ => fail("Inconsistent midi/origin pair")
     }
@@ -152,13 +142,11 @@ test "Tension origin carries valid jazz degree" {
     quality: @music.Dominant7,
     bass: None,
   }
-  let key = @music.KeySignature::c_major()
   // Run many trials and collect all Tension origins to verify degrees
   for seed = 0; seed < 50; seed = seed + 1 {
     let rng = create_random_int(seed)
     let (_, origin) = decide_midi_number(
       chord,
-      key,
       Some(@music.MidiNumber::new(62).unwrap()),
       50,
       50,
@@ -166,6 +154,7 @@ test "Tension origin carries valid jazz degree" {
       0,
       0,
       100,
+      0,
       0,
       12,
       rng, // high max_interval to reach tensions

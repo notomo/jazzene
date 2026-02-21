@@ -75,14 +75,48 @@ pub fn Chord::approach_tones(self : Chord) -> Array[MidiNumber] {
 }
 
 ///|
+/// Get enclosure tones: notes 2 semitones away from each chord tone.
+/// These form the "outer" note of an enclosure approach pattern,
+/// creating a strong directional pull toward the target chord tone.
+/// Returns MIDI numbers that are NOT already chord tones or approach tones.
+pub fn Chord::enclosure_tones(self : Chord) -> Array[MidiNumber] {
+  let chord_pitch_classes : Array[Int] = self
+    .tones()
+    .map(fn(tone) { tone.pitch_class() })
+  let approach_pitch_classes : Array[Int] = self
+    .approach_tones()
+    .map(fn(tone) { tone.pitch_class() })
+  self
+  .tones()
+  .iter()
+  .flat_map(fn(tone) {
+    // Two semitones below and above each chord tone
+    [tone.value - 2, tone.value + 2]
+    .iter()
+    .filter_map(fn(v) {
+      match MidiNumber::new(v) {
+        None => None
+        Some(midi) => {
+          let pc = midi.pitch_class()
+          // Exclude chord tones and approach tones (avoid duplicates)
+          if chord_pitch_classes.contains(pc) ||
+            approach_pitch_classes.contains(pc) {
+            None
+          } else {
+            Some(midi)
+          }
+        }
+      }
+    })
+  })
+  .collect()
+}
+
+///|
 /// Get scale tones for this chord using chord-scale theory.
 /// Uses the appropriate scale for the chord quality (e.g., Dorian for m7, Mixolydian for 7).
 /// Returns non-chord-tone scale degrees built from the chord root.
-/// The key parameter is retained for API compatibility.
-pub fn Chord::scale_tones(
-  self : Chord,
-  _key : KeySignature,
-) -> Array[MidiNumber] {
+pub fn Chord::scale_tones(self : Chord) -> Array[MidiNumber] {
   let chord_scale = self.quality.chord_scale()
   let scale_intervals = chord_scale.intervals()
   let root_midi = self.root.midi()
