@@ -151,6 +151,7 @@ fn hit_times_for_pattern(
     // Sparse: single sustained hit on beat 1
     Sparse => [(actual_start_ms, 1.5)]
     // Standard: downbeat sustains, off-beat and-of-2 is a short stab, beat 4 medium
+    // In 3/4: beat 1 + and-of-2 + beat 3 (waltz feel)
     Standard => {
       let pairs = [(actual_start_ms, 0.75)]
       // Add "and of 2" only when it won't collide with the next chord's
@@ -160,17 +161,28 @@ fn hit_times_for_pattern(
       }
       if beats_per_chord >= 4.0 {
         pairs.push((chord_start_ms + beat_duration_ms * 3.0, 0.5))
+      } else if beats_per_chord >= 3.0 {
+        // 3/4: add beat 3 for waltz feel
+        pairs.push((chord_start_ms + beat_duration_ms * 2.0, 0.5))
       }
       pairs
     }
     // TwoFour: beat 2 sustains (Freddie Green feel), beat 4 medium
+    // In 3/4: beats 2 and 3 (waltz "chick-chick"), shorter beat-2 duration to avoid
+    // overlapping with beat-3 (which starts only 1 beat later vs 2 beats in 4/4)
     TwoFour => {
       let pairs : Array[(Double, Double)] = []
       if beats_per_chord >= 2.0 {
-        pairs.push((chord_start_ms + beat_duration_ms * 1.0, 1.5))
+        // In 4/4 beat-4 is 2 beats away so 1.5 is safe; in 3/4 beat-3 is only
+        // 1 beat away, so cap at 0.75 to prevent overlap even with max jitter.
+        let beat2_dur = if beats_per_chord >= 4.0 { 1.5 } else { 0.75 }
+        pairs.push((chord_start_ms + beat_duration_ms * 1.0, beat2_dur))
       }
       if beats_per_chord >= 4.0 {
         pairs.push((chord_start_ms + beat_duration_ms * 3.0, 0.75))
+      } else if beats_per_chord >= 3.0 {
+        // 3/4: add beat 3 instead of beat 4
+        pairs.push((chord_start_ms + beat_duration_ms * 2.0, 0.75))
       }
       pairs
     }

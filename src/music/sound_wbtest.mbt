@@ -1,4 +1,17 @@
 ///|
+fn make_3beat_measure(chords : Array[Chord], start_ms : Double) -> Measure {
+  Measure::{
+    chords,
+    beats: [
+      Beat::{ count: 0, notes: [] },
+      Beat::{ count: 1, notes: [] },
+      Beat::{ count: 2, notes: [] },
+    ],
+    start_time: Duration::from_milliseconds(start_ms),
+  }
+}
+
+///|
 fn make_4beat_measure(chords : Array[Chord], start_ms : Double) -> Measure {
   Measure::{
     chords,
@@ -286,6 +299,53 @@ test "convert_measures_to_backing_sounds: pattern cycles back at index 4" {
   assert_eq(sounds[14].start_time, Duration::from_milliseconds(16000.0))
   assert_eq(sounds[16].start_time, Duration::from_milliseconds(17500.0))
   assert_eq(sounds[18].start_time, Duration::from_milliseconds(19000.0))
+}
+
+///|
+test "convert_measures_to_backing_sounds: 3/4 Standard includes beat 3" {
+  // BPM=60 → 1000ms/beat; 3/4 measure: beats_per_chord=3.0
+  // Standard(mi=0): beat-1(0ms), and-of-2(1500ms), beat-3(2000ms) - all survive at seed=0
+  // Cmaj7: E3(52), B3(59) × 3 hits = 6 sounds
+  let measures = [
+    make_3beat_measure([Chord::{ root: C, quality: Major7, bass: None }], 0.0),
+  ]
+  let sounds = convert_measures_to_backing_sounds(measures, 60, [])
+  assert_eq(sounds.length(), 6)
+  assert_eq(sounds[0].start_time, Duration::from_milliseconds(0.0))
+  assert_eq(sounds[2].start_time, Duration::from_milliseconds(1500.0))
+  // beat-3 at 2000ms (NEW for 3/4; was missing before)
+  assert_eq(sounds[4].start_time, Duration::from_milliseconds(2000.0))
+  inspect(backing_midis(sounds), content="[52, 59, 52, 59, 52, 59]")
+}
+
+///|
+test "convert_measures_to_backing_sounds: 3/4 TwoFour beat-2 duration fits before beat-3" {
+  // BPM=60; 3/4 TwoFour: beat-2 at 1000ms with duration 0.75 beats (not 1.5).
+  // Max jitter=1.2 → beat-2 ends at 1000+750*1.2=1900ms < 2000ms (beat-3 start).
+  // beat-3(hi=1) is omitted at seed=0 (rand_key=2019 < 0.25 threshold).
+  let measures = [
+    make_3beat_measure([Chord::{ root: C, quality: Major7, bass: None }], 0.0),
+    make_3beat_measure(
+      [Chord::{ root: C, quality: Major7, bass: None }],
+      3000.0,
+    ),
+    make_3beat_measure(
+      [Chord::{ root: C, quality: Major7, bass: None }],
+      6000.0,
+    ),
+  ]
+  let sounds = convert_measures_to_backing_sounds(measures, 60, [])
+  // TwoFour beat-2 (hi=0) is always present; beat-3 (hi=1) omitted at seed=0
+  let twofour_start = sounds
+    .iter()
+    .filter(fn(s) { s.start_time == Duration::from_milliseconds(7000.0) })
+    .collect()
+  assert_eq(twofour_start.length(), 2) // beat-2 only: 2 tones
+  // Verify beat-2 duration doesn't reach beat-3 start (2000ms offset in measure)
+  for s in twofour_start {
+    let end_ms = s.start_time.to_milliseconds() + s.duration.to_milliseconds()
+    assert_true(end_ms <= 8000.0) // must end before beat-3 at 6000+2000=8000ms
+  }
 }
 
 ///|
