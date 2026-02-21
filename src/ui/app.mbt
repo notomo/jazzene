@@ -40,25 +40,27 @@ pub fn setup_loop(
 
 ///|
 /// Render the application UI
-pub fn render(
-  is_playing : @signals.Signal[Bool],
-  playback_position : @signals.Signal[@music.Duration],
-  volume : @signals.Signal[Int],
-  bpm : @signals.Signal[Int],
-  raw_chord_progression : @signals.Signal[String],
-  seed : @signals.Signal[Int],
-  measure_count : @signals.Signal[Int],
-  sounds : () -> Array[@music.NoteValueSound],
-  backing_sounds : () -> Array[@music.NoteValueSound],
-  total_duration : () -> @music.Duration,
-  loop_a_measure : @signals.Signal[Int],
-  loop_b_measure : @signals.Signal[Int],
-  chord_parse_error : () -> String?,
-  measures : () -> Array[@music.Measure],
-  key : @signals.Signal[@music.KeySignature],
-  time_signature : @signals.Signal[@music.TimeSignature],
-  view_mode : @signals.Signal[ViewMode],
-) -> Unit {
+pub fn render(state : AppState) -> Unit {
+  let {
+    bpm,
+    raw_chord_progression,
+    seed,
+    measure_count,
+    key,
+    time_signature,
+    playback_position,
+    volume,
+    loop_a_measure,
+    loop_b_measure,
+    view_mode,
+    is_playing,
+    measures,
+    sounds,
+    backing_sounds,
+    total_duration,
+    chord_parse_error,
+    ..,
+  } = state
   let app = @luna_dom.div(
     class="flex flex-col h-dvh overflow-hidden w-dvw bg-gradient-to-br from-slate-950 to-slate-900 text-white touch-manipulation",
     [
