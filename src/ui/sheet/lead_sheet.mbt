@@ -36,17 +36,13 @@ fn calculate_playback_row(
 }
 
 ///|
-/// Main lead sheet component
-pub fn lead_sheet(
+/// Set up auto-scroll effect that follows the current playback row
+fn setup_auto_scroll(
   measures : () -> Array[@music.Measure],
   playback_position : @signals.Signal[@music.Duration],
   bpm : @signals.Signal[Int],
-  key : @signals.Signal[@music.KeySignature],
   time_signature : @signals.Signal[@music.TimeSignature],
-  loop_a_measure : @signals.Signal[Int],
-  loop_b_measure : @signals.Signal[Int],
-) -> @luna_dom.DomNode {
-  // Set up auto-scroll effect
+) -> Unit {
   let last_scrolled_row : Ref[Int] = Ref::new(-1)
   let _ = @signals.effect(fn() {
     let measure_count = measures().length()
@@ -100,6 +96,28 @@ pub fn lead_sheet(
       None => ()
     }
   })
+}
+
+///|
+/// Main lead sheet component
+pub fn lead_sheet(
+  measures : () -> Array[@music.Measure],
+  playback_position : @signals.Signal[@music.Duration],
+  bpm : @signals.Signal[Int],
+  key : @signals.Signal[@music.KeySignature],
+  time_signature : @signals.Signal[@music.TimeSignature],
+  loop_a_measure : @signals.Signal[Int],
+  loop_b_measure : @signals.Signal[Int],
+) -> @luna_dom.DomNode {
+  setup_auto_scroll(measures, playback_position, bpm, time_signature)
+
+  // Memoize measure_width to avoid O(N) recomputation per measure in for_each
+  let measure_width = @signals.memo(fn() {
+    @sheet_layout.compute_unified_measure_width(
+      measures(),
+      time_signature.get(),
+    )
+  })
 
   // Return container with SVG
   @luna_dom.div(class="w-full p-4", [
@@ -121,9 +139,8 @@ pub fn lead_sheet(
             let height = @sheet_layout.STAFF_TOP +
               rows.to_double() * @sheet_layout.ROW_HEIGHT
             let k = key.get()
-            let ts = time_signature.get()
             let key_sig_width = @sheet_layout.key_signature_layout_width(k)
-            let mw = @sheet_layout.compute_unified_measure_width(ms, ts)
+            let mw = measure_width()
             let viewbox_start_x = @sheet_layout.MEASURE_START_X - 15.0
             let width = @sheet_layout.MEASURE_START_X -
               viewbox_start_x +
@@ -138,7 +155,7 @@ pub fn lead_sheet(
         @luna_dom.for_each(measures, fn(m, idx) {
           let ts = time_signature.get()
           let k = key.get()
-          let mw = @sheet_layout.compute_unified_measure_width(measures(), ts)
+          let mw = measure_width()
           render_measure(m, idx, playback_position, k, ts, measure_width=mw, fn() {
             let measure_number = idx + 1
             measure_number < loop_a_measure.get() ||
@@ -151,10 +168,7 @@ pub fn lead_sheet(
           fn() { measures().length() },
           key,
           time_signature,
-          fn() {
-            let ts = time_signature.get()
-            @sheet_layout.compute_unified_measure_width(measures(), ts)
-          },
+          measure_width,
         ),
       ],
     ),
