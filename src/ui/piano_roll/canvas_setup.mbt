@@ -16,7 +16,8 @@ fn create_canvas_context() -> CanvasContext {
 }
 
 ///|
-/// Update canvas buffer size for high-DPI displays and return logical dimensions
+/// Update canvas buffer size for high-DPI displays and return logical dimensions.
+/// Skips resizing if the canvas buffer dimensions are already correct.
 fn update_canvas_dpi(
   canvas : @js_dom.HTMLCanvasElement,
   ctx : @canvas.CanvasRenderingContext2D,
@@ -25,10 +26,14 @@ fn update_canvas_dpi(
   let client_width = canvas.clientWidth()
   let client_height = canvas.clientHeight()
   if client_width > 0 && client_height > 0 {
-    canvas.width = (client_width.to_double() * dpr).to_int()
-    canvas.height = (client_height.to_double() * dpr).to_int()
-    ctx.setTransform(1.0, 0.0, 0.0, 1.0, 0.0, 0.0)
-    ctx.scale(dpr, dpr)
+    let new_width = (client_width.to_double() * dpr).to_int()
+    let new_height = (client_height.to_double() * dpr).to_int()
+    if canvas.width != new_width || canvas.height != new_height {
+      canvas.width = new_width
+      canvas.height = new_height
+      ctx.setTransform(1.0, 0.0, 0.0, 1.0, 0.0, 0.0)
+      ctx.scale(dpr, dpr)
+    }
   }
   (client_width.to_double(), client_height.to_double())
 }

@@ -32,18 +32,22 @@ pub fn keyboard(
   let { canvas, ctx } = create_canvas_context()
   let resize_trigger = create_resize_trigger(canvas)
 
-  // Calculate currently playing notes
+  // Calculate currently playing notes as a boolean lookup array (O(1) key lookup)
   let playing_notes = @signals.memo(fn() {
+    let set = Array::make(128, false)
     @music.calculate_playing_notes(sounds(), playback_position.get())
     .filter_map(fn(s) { s.midi() })
-    .map(fn(m) { m.value })
+    .each(fn(m) { set[m.value] = true })
+    set
   })
 
-  // Calculate currently playing backing notes
+  // Calculate currently playing backing notes as a boolean lookup array (O(1) key lookup)
   let backing_playing_notes = @signals.memo(fn() {
+    let set = Array::make(128, false)
     @music.calculate_playing_notes(backing_sounds(), playback_position.get())
     .filter_map(fn(s) { s.midi() })
-    .map(fn(m) { m.value })
+    .each(fn(m) { set[m.value] = true })
+    set
   })
 
   // Redraw when playing notes or canvas size change
@@ -65,8 +69,8 @@ fn draw_keyboard(
   ctx : @canvas.CanvasRenderingContext2D,
   width : Double,
   height : Double,
-  playing_notes : Array[Int],
-  backing_playing_notes : Array[Int],
+  playing_notes : Array[Bool],
+  backing_playing_notes : Array[Bool],
 ) -> Unit {
   ctx.clearRect(0.0, 0.0, width, height)
   ctx.fillStyle = NOTE_DISPLAY_BG_COLOR
@@ -80,8 +84,8 @@ fn draw_keyboard(
   .iter()
   .filter(fn(a) { not(a.is_black) })
   .each(fn(area) {
-    let is_playing = playing_notes.contains(area.midi)
-    let is_backing = backing_playing_notes.contains(area.midi)
+    let is_playing = playing_notes[area.midi]
+    let is_backing = backing_playing_notes[area.midi]
     ctx.fillStyle = if is_playing {
       WHITE_KEY_PLAYING_COLOR
     } else if is_backing {
@@ -109,8 +113,8 @@ fn draw_keyboard(
   .iter()
   .filter(fn(a) { a.is_black })
   .each(fn(area) {
-    let is_playing = playing_notes.contains(area.midi)
-    let is_backing = backing_playing_notes.contains(area.midi)
+    let is_playing = playing_notes[area.midi]
+    let is_backing = backing_playing_notes[area.midi]
     ctx.fillStyle = if is_playing {
       BLACK_KEY_PLAYING_COLOR
     } else if is_backing {
