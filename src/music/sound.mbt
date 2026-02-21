@@ -217,7 +217,6 @@ pub fn convert_measures_to_backing_sounds(
         let chord = measure.chords[i]
         let chord_start_ms = measure_start_ms +
           i.to_double() * chord_duration_ms
-        let chord_end_ms = chord_start_ms + chord_duration_ms
         // Jazz syncopation: anticipate chord changes (except beat 1) by one 8th note
         let actual_start_ms = if i == 0 {
           chord_start_ms
@@ -242,26 +241,6 @@ pub fn convert_measures_to_backing_sounds(
           [intervals[1], intervals[2]]
         }
 
-        // Find the lowest melody note overlapping this chord's time range
-        let mut min_melody_midi : Int? = None
-        for s in melody_sounds {
-          let s_start = s.start_time.to_milliseconds()
-          let s_end = s_start + s.duration.to_milliseconds()
-          if chord_start_ms < s_end && chord_end_ms > s_start {
-            match s.midi() {
-              Some(m) =>
-                match min_melody_midi {
-                  None => min_melody_midi = Some(m.value)
-                  Some(cur) =>
-                    if m.value < cur {
-                      min_melody_midi = Some(m.value)
-                    }
-                }
-              None => ()
-            }
-          }
-        }
-
         let is_last_chord = i == n - 1
         let hits = hit_times_for_pattern(
           pattern, chord_start_ms, actual_start_ms, beats_per_chord, beat_duration_ms,
@@ -283,23 +262,39 @@ pub fn convert_measures_to_backing_sounds(
           } else {
             raw_duration_ms
           }
+          // Per-hit: find the lowest melody note that overlaps this hit's exact time range.
+          // This catches crossing regardless of when within the chord the hit falls.
+          let hit_end_ms = hit_start_ms + jittered_duration_ms
+          let mut min_melody_midi : Int? = None
+          for s in melody_sounds {
+            let s_start = s.start_time.to_milliseconds()
+            let s_end = s_start + s.duration.to_milliseconds()
+            if hit_start_ms < s_end && hit_end_ms > s_start {
+              match s.midi() {
+                Some(m) =>
+                  match min_melody_midi {
+                    None => min_melody_midi = Some(m.value)
+                    Some(cur) =>
+                      if m.value < cur {
+                        min_melody_midi = Some(m.value)
+                      }
+                  }
+                None => ()
+              }
+            }
+          }
           for interval in guide_intervals {
             let raw_midi = base_midi + interval
-            // Lower the note by octaves until it is below the melody's lowest note
-            let midi_val = match min_melody_midi {
-              Some(min_mel) => {
-                let v = if raw_midi >= min_mel {
-                  raw_midi - 12
-                } else {
-                  raw_midi
+            // Lower the note by octaves until at least a perfect fourth (5 semitones)
+            // below the lowest melody note, preventing near-crossing that makes
+            // simultaneous play uncomfortable.
+            let mut midi_val = raw_midi
+            match min_melody_midi {
+              Some(min_mel) =>
+                while midi_val > min_mel - 5 {
+                  midi_val = midi_val - 12
                 }
-                if v >= min_mel {
-                  v - 12
-                } else {
-                  v
-                }
-              }
-              None => raw_midi
+              None => ()
             }
             match MidiNumber::new(midi_val) {
               Some(m) =>

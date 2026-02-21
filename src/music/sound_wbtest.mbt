@@ -108,15 +108,27 @@ test "convert_measures_to_backing_sounds: melody avoidance lowers overlapping gu
 }
 
 ///|
-test "convert_measures_to_backing_sounds: melody below guide tones causes no shift" {
+test "convert_measures_to_backing_sounds: melody far above guide tones causes no shift" {
   // D root Dm7: raw=F3(53), C4(60)
-  // melody min=E4(64): both 53<64 and 60<64, no shift
+  // melody min=G4(67): gaps are 14 and 7, both >= 5 → no shift
+  let measures = [
+    make_4beat_measure([Chord::{ root: D, quality: Minor7, bass: None }], 0.0),
+  ]
+  let melody = [make_melody_note(67, 0.0, 4000.0)]
+  let sounds = convert_measures_to_backing_sounds(measures, 60, melody)
+  inspect(backing_midis(sounds), content="[53, 60, 53, 60, 53, 60]")
+}
+
+///|
+test "convert_measures_to_backing_sounds: melody within 4 semitones triggers octave shift" {
+  // D root Dm7: raw=F3(53), C4(60)
+  // melody min=E4(64): gap(C4,E4)=4 < 5 → C4 shifts to C3(48); gap(F3,E4)=11 → stays
   let measures = [
     make_4beat_measure([Chord::{ root: D, quality: Minor7, bass: None }], 0.0),
   ]
   let melody = [make_melody_note(64, 0.0, 4000.0)]
   let sounds = convert_measures_to_backing_sounds(measures, 60, melody)
-  inspect(backing_midis(sounds), content="[53, 60, 53, 60, 53, 60]")
+  inspect(backing_midis(sounds), content="[53, 48, 53, 48, 53, 48]")
 }
 
 ///|
