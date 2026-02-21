@@ -75,18 +75,21 @@ pub fn Chord::approach_tones(self : Chord) -> Array[MidiNumber] {
 }
 
 ///|
-/// Get diatonic scale tones that are NOT chord tones for the given key
-/// Returns non-chord scale degrees in octave 4
+/// Get scale tones for this chord using chord-scale theory.
+/// Uses the appropriate scale for the chord quality (e.g., Dorian for m7, Mixolydian for 7).
+/// Returns non-chord-tone scale degrees built from the chord root.
+/// The key parameter is retained for API compatibility.
 pub fn Chord::scale_tones(
   self : Chord,
-  key : KeySignature,
+  _key : KeySignature,
 ) -> Array[MidiNumber] {
-  let major_scale_intervals = [0, 2, 4, 5, 7, 9, 11]
-  let root_midi = key.root.midi()
+  let chord_scale = self.quality.chord_scale()
+  let scale_intervals = chord_scale.intervals()
+  let root_midi = self.root.midi()
   let chord_pitch_classes : Array[Int] = self
     .tones()
     .map(fn(tone) { tone.pitch_class() })
-  major_scale_intervals
+  scale_intervals
   .iter()
   .filter_map(fn(interval) {
     let midi_value = root_midi + interval
