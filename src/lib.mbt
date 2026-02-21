@@ -58,6 +58,7 @@ fn main {
       measures_signal.get(),
       bpm.get(),
       sounds.get(),
+      seed=seed.get(),
     )
     |> bs => { backing_sounds.set(bs) }
   })

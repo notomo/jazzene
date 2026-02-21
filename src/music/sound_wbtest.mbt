@@ -38,11 +38,13 @@ test "convert_measures_to_backing_sounds: 3-7 voicing for non-F/G/A root (Cmaj7)
     make_4beat_measure([Chord::{ root: C, quality: Major7, bass: None }], 0.0),
   ]
   let sounds = convert_measures_to_backing_sounds(measures, 60, [])
-  // 3 hits per guide tone (beat 1, and-of-2, beat 4): 2 tones × 3 hits = 6 sounds
+  // Standard (mi=0): all 3 hits present (beat1 never omitted; and-of-2, beat4 survive at seed=0)
+  // 2 tones × 3 hits = 6 sounds
   inspect(backing_midis(sounds), content="[52, 59, 52, 59, 52, 59]")
-  // BPM=60 → beat_duration_ms=1000ms; duration=beat_duration_ms*0.5=500ms
+  // Beat positions are stable; durations have ±20% jitter so not checked exactly
   assert_eq(sounds[0].start_time, Duration::from_milliseconds(0.0))
-  assert_eq(sounds[0].duration, Duration::from_milliseconds(500.0))
+  assert_eq(sounds[2].start_time, Duration::from_milliseconds(1500.0))
+  assert_eq(sounds[4].start_time, Duration::from_milliseconds(3000.0))
 }
 
 ///|
@@ -143,16 +145,14 @@ test "convert_measures_to_backing_sounds: two chords split timing evenly" {
   ]
   let sounds = convert_measures_to_backing_sounds(measures, 60, [])
   // Cmaj7 (i=0): 1 hit at beat 1 → 2 sounds
-  // G7 (i=1, last): anticipated hit + "and of 2" → 2 hits → 4 sounds; total 6
-  assert_eq(sounds.length(), 6)
-  // Cmaj7 at beat 1 (0ms), duration = beat_duration_ms * 0.5 = 500ms
+  // G7 (i=1, last): anticipated hit always present; and-of-2 may be omitted (seed=0 omits it)
+  // total = 4 (2 per chord × 2 chords, and-of-2 omitted at seed=0)
+  assert_eq(sounds.length(), 4)
   assert_eq(sounds[0].start_time, Duration::from_milliseconds(0.0))
-  assert_eq(sounds[0].duration, Duration::from_milliseconds(500.0))
   // G7 anticipated: 2000ms - 500ms = 1500ms
   assert_eq(sounds[2].start_time, Duration::from_milliseconds(1500.0))
-  assert_eq(sounds[2].duration, Duration::from_milliseconds(500.0))
-  // Cmaj7: E3(52), B3(59) × 1 hit; G7: F3(53), B3(59) × 2 hits each
-  inspect(backing_midis(sounds), content="[52, 59, 53, 59, 53, 59]")
+  // Cmaj7: E3(52), B3(59) × 1 hit; G7: F3(53), B3(59) × 1 hit (and-of-2 omitted at seed=0)
+  inspect(backing_midis(sounds), content="[52, 59, 53, 59]")
 }
 
 ///|
@@ -173,6 +173,107 @@ test "convert_measures_to_backing_sounds: no chords produces no sounds" {
   let measures = [make_4beat_measure([], 0.0)]
   let sounds = convert_measures_to_backing_sounds(measures, 60, [])
   assert_eq(sounds.length(), 0)
+}
+
+///|
+test "convert_measures_to_backing_sounds: Dense pattern (measure index 1)" {
+  // BPM=60 → beat_duration_ms=1000ms; Cmaj7: E3(52), B3(59)
+  // Dense hits at 4-beat chord: beat1(4000), and-2(5500), beat3(6000), and-4(7500)
+  // → 4 hits × 2 tones = 8 sounds
+  let measures = [
+    make_4beat_measure([Chord::{ root: C, quality: Major7, bass: None }], 0.0),
+    make_4beat_measure(
+      [Chord::{ root: C, quality: Major7, bass: None }],
+      4000.0,
+    ),
+  ]
+  let sounds = convert_measures_to_backing_sounds(measures, 60, [])
+  // Standard(6) + Dense(some hits omitted at seed=0) = 10
+  assert_eq(sounds.length(), 10)
+  // Dense beat1 (hi=0, never omitted) is at 4000ms
+  assert_eq(sounds[6].start_time, Duration::from_milliseconds(4000.0))
+}
+
+///|
+test "convert_measures_to_backing_sounds: TwoFour pattern (measure index 2)" {
+  // BPM=60; Cmaj7: E3(52), B3(59)
+  // TwoFour hits at 4-beat chord: beat2(9000), beat4(11000) → 2 hits × 2 = 4 sounds
+  let measures = [
+    make_4beat_measure([Chord::{ root: C, quality: Major7, bass: None }], 0.0),
+    make_4beat_measure(
+      [Chord::{ root: C, quality: Major7, bass: None }],
+      4000.0,
+    ),
+    make_4beat_measure(
+      [Chord::{ root: C, quality: Major7, bass: None }],
+      8000.0,
+    ),
+  ]
+  let sounds = convert_measures_to_backing_sounds(measures, 60, [])
+  // Standard(6) + Dense(4) + TwoFour(beat2 present, beat4 omitted at seed=0) = 12
+  assert_eq(sounds.length(), 12)
+  // TwoFour beat2 (hi=0, never omitted) is at chord_start + 1 beat = 9000ms
+  assert_eq(sounds[10].start_time, Duration::from_milliseconds(9000.0))
+  inspect(backing_midis(sounds[10:12].iter().collect()), content="[52, 59]")
+}
+
+///|
+test "convert_measures_to_backing_sounds: Sparse pattern (measure index 3)" {
+  // BPM=60; Cmaj7: E3(52), B3(59)
+  // Sparse: beat1 only → 1 hit × 2 = 2 sounds
+  let measures = [
+    make_4beat_measure([Chord::{ root: C, quality: Major7, bass: None }], 0.0),
+    make_4beat_measure(
+      [Chord::{ root: C, quality: Major7, bass: None }],
+      4000.0,
+    ),
+    make_4beat_measure(
+      [Chord::{ root: C, quality: Major7, bass: None }],
+      8000.0,
+    ),
+    make_4beat_measure(
+      [Chord::{ root: C, quality: Major7, bass: None }],
+      12000.0,
+    ),
+  ]
+  let sounds = convert_measures_to_backing_sounds(measures, 60, [])
+  // Standard(6) + Dense(4) + TwoFour(2) + Sparse(2) = 14
+  assert_eq(sounds.length(), 14)
+  // Sparse beat1 (hi=0, never omitted) at 12000ms
+  assert_eq(sounds[12].start_time, Duration::from_milliseconds(12000.0))
+  assert_eq(sounds[13].start_time, Duration::from_milliseconds(12000.0))
+}
+
+///|
+test "convert_measures_to_backing_sounds: pattern cycles back at index 4" {
+  // Index 4 mod 4 = 0 → Standard again; same hit count as index 0
+  let measures = [
+    make_4beat_measure([Chord::{ root: C, quality: Major7, bass: None }], 0.0),
+    make_4beat_measure(
+      [Chord::{ root: C, quality: Major7, bass: None }],
+      4000.0,
+    ),
+    make_4beat_measure(
+      [Chord::{ root: C, quality: Major7, bass: None }],
+      8000.0,
+    ),
+    make_4beat_measure(
+      [Chord::{ root: C, quality: Major7, bass: None }],
+      12000.0,
+    ),
+    make_4beat_measure(
+      [Chord::{ root: C, quality: Major7, bass: None }],
+      16000.0,
+    ),
+  ]
+  let sounds = convert_measures_to_backing_sounds(measures, 60, [])
+  // Standard(6) + Dense(4) + TwoFour(2) + Sparse(2) + Standard(6) = 20
+  assert_eq(sounds.length(), 20)
+  // mi=4 Standard: all 3 hits present at seed=0 (different rand_keys from mi=0)
+  // beat1(16000), and-2(17500), beat4(19000); guide tones interleaved: 2 per hit
+  assert_eq(sounds[14].start_time, Duration::from_milliseconds(16000.0))
+  assert_eq(sounds[16].start_time, Duration::from_milliseconds(17500.0))
+  assert_eq(sounds[18].start_time, Duration::from_milliseconds(19000.0))
 }
 
 ///|

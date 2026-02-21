@@ -74,16 +74,24 @@ fn schedule_note(
 
   let gain = {
     let gain = synth.ctx.create_gain()
-    let release_time = 0.05
+    // Release time scales with note length: 40% of duration, clamped [50ms, 300ms].
+    // Short notes get a full-length decay (staccato feel); long notes get a natural release.
+    let r = duration_sec * 0.4
+    let release_time = if r < 0.05 { 0.05 } else if r > 0.3 { 0.3 } else { r }
+    let hold_end_sec = if duration_sec > release_time {
+      start_time_sec + duration_sec - release_time
+    } else {
+      start_time_sec
+    }
     let gain_param = gain.gain()
-    // Let the natural piano sample play at full volume
     gain_param.set_value_at_time(volume, start_time_sec)
-    // Quick fade-out at the end to avoid clicks
-    gain_param.set_value_at_time(
-      volume,
-      start_time_sec + duration_sec - release_time,
+    // Hold at full volume until release begins
+    gain_param.set_value_at_time(volume, hold_end_sec)
+    // Exponential decay to near-silence: avoids the click that linear-to-0 causes
+    gain_param.exponential_ramp_to_value_at_time(
+      0.001,
+      start_time_sec + duration_sec,
     )
-    gain_param.linear_ramp_to_value_at_time(0.0, start_time_sec + duration_sec)
     gain.connect(synth.master_gain.as_audio_node())
     gain
   }
