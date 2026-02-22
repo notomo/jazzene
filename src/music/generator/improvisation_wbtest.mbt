@@ -316,3 +316,46 @@ test "improvisation preserves tie when not at last measure" {
   let third_first_note = third_notes[0]
   inspect(third_first_note.tie, content="Some(TieEnd)")
 }
+
+///|
+test "with_techniques disabling non-chord-tone techniques: generated notes use only chord tones" {
+  // Disable all techniques that produce non-chord tones
+  let techniques = Techniques::{
+    tension_tones: false,
+    scale_tones: false,
+    approach_tones: false,
+    enclosure_tones: false,
+    syncopation: true,
+    triplets: true,
+    motif_reuse: false,
+    bebop_scales: false,
+  }
+  let settings = ImprovisationConfig::default(42)
+    |> ImprovisationConfig::with_techniques(techniques)
+  let chords = [
+    [@music.Chord::{ root: @music.C, quality: @music.Major7, bass: None }],
+    [@music.Chord::{ root: @music.G, quality: @music.Dominant7, bass: None }],
+  ]
+  let generator = create_measure_generator(settings)
+  let measures = improvisation(
+    generator,
+    chords,
+    120,
+    2,
+    @music.KeySignature::c_major(),
+    settings,
+    time_signature=@music.TimeSignature::default(),
+    beats_per_measure=4.0,
+  )
+  // All notes with a tone_origin should be ChordTone only
+  let non_chord_origins : Array[String] = []
+  for measure in measures {
+    for note in measure.all_notes() {
+      match note.tone_origin {
+        Some(@music.ChordTone) | None => ()
+        Some(origin) => non_chord_origins.push(origin.to_string())
+      }
+    }
+  }
+  assert_eq(non_chord_origins, [])
+}
