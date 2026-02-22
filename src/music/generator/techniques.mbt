@@ -10,6 +10,7 @@ pub(all) struct Techniques {
   syncopation : Bool // Syncopation (off-beat phrase starts)
   triplets : Bool // Eighth-note triplets
   motif_reuse : Bool // Motif replay
+  bebop_scales : Bool // Bebop passing tones (major 7th for dom7, #5 for maj7)
 } derive(Eq, Show)
 
 ///|
@@ -23,6 +24,7 @@ pub fn Techniques::default() -> Techniques {
     syncopation: true,
     triplets: true,
     motif_reuse: true,
+    bebop_scales: false, // disabled by default; opt-in feature
   }
 }
 
@@ -68,6 +70,11 @@ pub fn Settings::with_techniques(
     },
     motif_reuse_probability: if techniques.motif_reuse {
       self.motif_reuse_probability
+    } else {
+      0
+    },
+    bebop_weight_ratio: if techniques.bebop_scales {
+      self.bebop_weight_ratio
     } else {
       0
     },

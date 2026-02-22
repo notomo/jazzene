@@ -135,6 +135,23 @@ pub fn Chord::scale_tones(self : Chord) -> Array[MidiNumber] {
 }
 
 ///|
+/// Get bebop passing tones: the extra notes added by bebop scales.
+/// For Dominant7: the major 7th (half-step between b7 and root when descending)
+/// For Major7: the #5 (half-step between 5th and 6th)
+/// These are distinct from chord tones and regular scale tones.
+pub fn Chord::bebop_passing_tones(self : Chord) -> Array[MidiNumber] {
+  let root_midi = self.root.midi()
+  let passing_intervals = match self.quality {
+    Dominant7 => [11] // Major 7th passing tone (between b7=10 and octave root)
+    Major7 => [8] // #5 passing tone (between 5th=7 and 6th=9)
+    _ => []
+  }
+  passing_intervals.filter_map(fn(interval) {
+    MidiNumber::new(root_midi + interval)
+  })
+}
+
+///|
 /// Scale degree in a major scale
 pub(all) enum ScaleDegree {
   I

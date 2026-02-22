@@ -1,5 +1,5 @@
 ///|
-test "Techniques::default enables all techniques" {
+test "Techniques::default enables standard techniques, bebop disabled by default" {
   let t = Techniques::default()
   assert_true(t.tension_tones)
   assert_true(t.scale_tones)
@@ -8,6 +8,8 @@ test "Techniques::default enables all techniques" {
   assert_true(t.syncopation)
   assert_true(t.triplets)
   assert_true(t.motif_reuse)
+  // bebop_scales is opt-in; disabled by default
+  assert_false(t.bebop_scales)
 }
 
 ///|
@@ -22,6 +24,24 @@ test "Settings::with_techniques preserves values when all enabled" {
   assert_eq(result.syncopation_probability, s.syncopation_probability)
   assert_eq(result.triplet_probability, s.triplet_probability)
   assert_eq(result.motif_reuse_probability, s.motif_reuse_probability)
+  assert_eq(result.bebop_weight_ratio, 0) // bebop disabled by default
+}
+
+///|
+test "Settings::with_techniques enables bebop when flag is true" {
+  // Set a non-zero bebop_weight_ratio and enable the flag
+  let s = Settings::{ ..Settings::default(42), bebop_weight_ratio: 40 }
+  let t = Techniques::{ ..Techniques::default(), bebop_scales: true }
+  let result = s.with_techniques(t)
+  assert_eq(result.bebop_weight_ratio, 40)
+}
+
+///|
+test "Settings::with_techniques zeros bebop when flag is false" {
+  let s = Settings::{ ..Settings::default(42), bebop_weight_ratio: 40 }
+  let t = Techniques::{ ..Techniques::default(), bebop_scales: false }
+  let result = s.with_techniques(t)
+  assert_eq(result.bebop_weight_ratio, 0)
 }
 
 ///|
@@ -85,6 +105,7 @@ test "Settings::with_techniques zeros multiple techniques" {
     syncopation: true,
     triplets: true,
     motif_reuse: false,
+    bebop_scales: false,
   }
   let result = s.with_techniques(t)
   assert_eq(result.tension_weight_ratio, 0)

@@ -349,3 +349,42 @@ test "parse measure progression with slash chord" {
     Some(DegreeBass::{ accidental: 0, degree: II }),
   )
 }
+
+///|
+/// Bebop passing tones: major 7th for Dominant7 (between b7 and root)
+test "Chord::bebop_passing_tones - Dominant7 returns major 7th passing tone" {
+  let chord = Chord::{ root: C, quality: Dominant7, bass: None }
+  let tones = chord.bebop_passing_tones()
+  // C7: root=C(60), major7=B(71) = interval 11
+  let pitch_classes = tones.map(fn(m) { m.pitch_class() })
+  inspect(pitch_classes, content="[11]") // B (major 7th)
+}
+
+///|
+/// Bebop passing tones: #5 for Major7 (between 5th and 6th)
+test "Chord::bebop_passing_tones - Major7 returns sharp-5 passing tone" {
+  let chord = Chord::{ root: C, quality: Major7, bass: None }
+  let tones = chord.bebop_passing_tones()
+  // Cmaj7: root=C(60), #5=G#(68) = interval 8
+  let pitch_classes = tones.map(fn(m) { m.pitch_class() })
+  inspect(pitch_classes, content="[8]") // G# (#5)
+}
+
+///|
+/// Minor7 and other chords have no standard bebop passing tone
+test "Chord::bebop_passing_tones - Minor7 returns empty" {
+  let chord = Chord::{ root: D, quality: Minor7, bass: None }
+  let tones = chord.bebop_passing_tones()
+  assert_eq(tones.length(), 0)
+}
+
+///|
+/// Passing tones are not chord tones
+test "Chord::bebop_passing_tones - not a chord tone for Dominant7" {
+  let chord = Chord::{ root: C, quality: Dominant7, bass: None }
+  let chord_pcs = chord.tones().map(fn(m) { m.pitch_class() })
+  let passing = chord.bebop_passing_tones()
+  for tone in passing {
+    assert_false(chord_pcs.contains(tone.pitch_class()))
+  }
+}

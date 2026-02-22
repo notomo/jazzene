@@ -108,6 +108,7 @@ pub(all) struct Settings {
   syncopation_probability : Int // 0-100, chance of forcing off-beat phrase start on downbeats (default: 40)
   motif_reuse_probability : Int // 0-100, chance of replaying a stored motif when starting a new phrase (default: 30)
   triplet_probability : Int // 0-100, chance of generating eighth-note triplet group when playing (default: 15)
+  bebop_weight_ratio : Int // 0-100, bebop passing tone weight as % of chord tone weight (default: 0 = disabled)
 } derive(Eq, Show)
 
 ///|
@@ -133,6 +134,7 @@ pub fn Settings::default(seed : Int) -> Settings {
     syncopation_probability: 40,
     motif_reuse_probability: 30,
     triplet_probability: 8,
+    bebop_weight_ratio: 0,
   }
 }
 
@@ -465,6 +467,7 @@ fn select_note_with_motif(
       settings.tension_weight_ratio,
       settings.approach_weight_ratio,
       settings.enclosure_weight_ratio,
+      settings.bebop_weight_ratio,
       settings.max_interval,
       random_int,
     )
@@ -493,6 +496,7 @@ fn select_note_with_motif(
                 settings.tension_weight_ratio,
                 settings.approach_weight_ratio,
                 settings.enclosure_weight_ratio,
+                settings.bebop_weight_ratio,
                 settings.max_interval,
                 random_int,
               )
@@ -512,6 +516,7 @@ fn select_note_with_motif(
             settings.tension_weight_ratio,
             settings.approach_weight_ratio,
             settings.enclosure_weight_ratio,
+            settings.bebop_weight_ratio,
             settings.max_interval,
             random_int,
           )
@@ -531,6 +536,7 @@ fn select_note_with_motif(
         settings.tension_weight_ratio,
         settings.approach_weight_ratio,
         settings.enclosure_weight_ratio,
+        settings.bebop_weight_ratio,
         settings.max_interval,
         random_int,
       )
@@ -859,6 +865,7 @@ fn decide_midi_number(
   tension_weight_ratio : Int,
   approach_weight_ratio : Int,
   enclosure_weight_ratio : Int,
+  bebop_weight_ratio : Int,
   max_interval : Int,
   random_int : (Int) -> Int,
 ) -> (@music.MidiNumber?, @music.ToneOrigin?) {
@@ -872,6 +879,7 @@ fn decide_midi_number(
   let scale_tones = extend_across_octaves(chord.scale_tones())
   let approach_tones = extend_across_octaves(chord.approach_tones())
   let enclosure_tones = extend_across_octaves(chord.enclosure_tones())
+  let bebop_tones = extend_across_octaves(chord.bebop_passing_tones())
   let root_midi = chord.root.midi()
   match last_midi {
     Some(prev) => {
@@ -914,6 +922,14 @@ fn decide_midi_number(
           max_interval,
           enclosure_weight_ratio,
           @music.Enclosure,
+        ) +
+        weighted_tone_candidates_tagged(
+          bebop_tones,
+          prev,
+          stamina,
+          max_interval,
+          bebop_weight_ratio,
+          @music.PassingTone,
         )
       // Fix tension degrees now that we have the candidates
       let fixed_tones = weighted_tones.map(fn(tuple) {
