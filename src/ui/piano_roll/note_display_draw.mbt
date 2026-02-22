@@ -221,6 +221,64 @@ fn compute_scale_bands(
 }
 
 ///|
+/// Draw approach tone arrows: small chevrons on approach/enclosure notes
+/// indicating the resolution direction toward the next note
+fn draw_approach_arrows(
+  ctx : @canvas.CanvasRenderingContext2D,
+  height : Double,
+  note_positions : Array[NotePosition],
+  current_pos : Double,
+  key_areas : Array[KeyArea],
+) -> Unit {
+  let n = note_positions.length()
+  for i = 0; i < n - 1; i = i + 1 {
+    let note = note_positions[i]
+    let is_approach = match note.tone_origin {
+      Some(ApproachTone | Enclosure) => true
+      _ => false
+    }
+    if not(is_approach) {
+      continue
+    }
+    let start_offset = note.start_ms - current_pos
+    if start_offset > NOTE_DISPLAY_WINDOW_MS ||
+      note.start_ms + note.duration_ms < current_pos {
+      continue
+    }
+    let next_note = note_positions[i + 1]
+    let direction_up = next_note.midi > note.midi
+    let key_index = note.midi - KEYBOARD_MIN_KEY
+    if key_index < 0 || key_index >= key_areas.length() {
+      continue
+    }
+    let area = key_areas[key_index]
+    let bottom_percent = 100.0 - start_offset / NOTE_DISPLAY_WINDOW_MS * 100.0
+    let end_offset = note.start_ms + note.duration_ms - current_pos
+    let top_percent = 100.0 - end_offset / NOTE_DISPLAY_WINDOW_MS * 100.0
+    let bottom_y = height * bottom_percent / 100.0
+    let top_y = height * top_percent / 100.0
+    let mid_y = (top_y + bottom_y) / 2.0
+    let arrow_size = 5.0
+    let arrow_x = area.rect.left + area.rect.width + 1.0
+
+    // Draw a small triangle pointing up or down
+    ctx.fillStyle = "#fb923c"
+    ctx.beginPath()
+    if direction_up {
+      ctx.moveTo(arrow_x, mid_y + arrow_size)
+      ctx.lineTo(arrow_x + arrow_size, mid_y + arrow_size)
+      ctx.lineTo(arrow_x + arrow_size / 2.0, mid_y)
+    } else {
+      ctx.moveTo(arrow_x, mid_y - arrow_size)
+      ctx.lineTo(arrow_x + arrow_size, mid_y - arrow_size)
+      ctx.lineTo(arrow_x + arrow_size / 2.0, mid_y)
+    }
+    ctx.closePath()
+    ctx.fill()
+  }
+}
+
+///|
 /// Draw scale band overlays: dim non-scale keys in the background
 fn draw_scale_bands(
   ctx : @canvas.CanvasRenderingContext2D,
@@ -453,6 +511,7 @@ fn draw_notes(
     NOTE_PLAYING_COLOR,
     NOTE_DEFAULT_COLOR,
   )
+  draw_approach_arrows(ctx, height, note_positions, current_pos, key_areas)
   draw_key_grid_lines(ctx, height, key_areas)
   draw_measure_lines(ctx, width, height, current_pos, bpm, beats_per_measure)
   draw_loop_overlay(
