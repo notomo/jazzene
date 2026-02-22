@@ -3,6 +3,7 @@
 pub fn note_display(
   sounds : () -> Array[@music.ScheduledSound],
   backing_sounds : () -> Array[@music.ScheduledSound],
+  measures : () -> Array[@music.Measure],
   playback_position : @signals.Signal[@music.Duration],
   bpm : @signals.Signal[Int],
   total_duration : () -> @music.Duration,
@@ -45,6 +46,11 @@ pub fn note_display(
     })
   })
 
+  // Pre-calculate scale bands from chord progression
+  let scale_bands = @signals.memo(fn() {
+    compute_scale_bands(measures(), bpm.get())
+  })
+
   // Set up seek interactions
   setup_wheel_seek(canvas, playback_position, total_duration)
   setup_drag_seek(canvas, playback_position, total_duration)
@@ -59,6 +65,7 @@ pub fn note_display(
       height,
       note_positions(),
       backing_positions(),
+      scale_bands(),
       playback_position.get().to_milliseconds(),
       bpm.get(),
       time_signature.get().beats_per_measure(),

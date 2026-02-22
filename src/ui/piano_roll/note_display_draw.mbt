@@ -70,6 +70,99 @@ priv struct NotePosition {
 }
 
 ///|
+/// A time-segmented region showing which pitch classes are in the chord scale
+priv struct ScaleBand {
+  start_ms : Double
+  end_ms : Double
+  scale_pitch_classes : Array[Int] // 0-11 pitch classes in scale
+}
+
+///|
+/// Compute scale bands from measures (one band per measure chord)
+fn compute_scale_bands(
+  measures : Array[@music.Measure],
+  bpm : Int,
+) -> Array[ScaleBand] {
+  let beat_duration_ms = @music.ms_per_beat(bpm)
+  measures
+  .iter()
+  .flat_map(fn(measure) {
+    let measure_start_ms = measure.start_time.to_milliseconds()
+    let n_chords = measure.chords.length()
+    if n_chords == 0 {
+      return [].iter()
+    }
+    // Estimate beats per measure from note count or use 4.0 as default
+    // Assign equal chord slots within the measure
+    // Use the measure notes to determine total beats
+    let total_beats = measure.beats.length().to_double()
+    let beats_per_chord = if n_chords > 0 {
+      total_beats / n_chords.to_double()
+    } else {
+      total_beats
+    }
+    measure.chords
+    .iter()
+    .mapi(fn(i, chord) {
+      let chord_start_ms = measure_start_ms +
+        i.to_double() * beats_per_chord * beat_duration_ms
+      let chord_end_ms = measure_start_ms +
+        (i + 1).to_double() * beats_per_chord * beat_duration_ms
+      let chord_scale = chord.quality.chord_scale()
+      let root_pc = chord.root.midi() % 12
+      let scale_pcs = chord_scale
+        .intervals()
+        .map(fn(interval) { (root_pc + interval) % 12 })
+      ScaleBand::{
+        start_ms: chord_start_ms,
+        end_ms: chord_end_ms,
+        scale_pitch_classes: scale_pcs,
+      }
+    })
+  })
+  .collect()
+}
+
+///|
+/// Draw scale band overlays: dim non-scale keys in the background
+fn draw_scale_bands(
+  ctx : @canvas.CanvasRenderingContext2D,
+  height : Double,
+  scale_bands : Array[ScaleBand],
+  current_pos : Double,
+  key_areas : Array[KeyArea],
+) -> Unit {
+  scale_bands
+  .iter()
+  .filter(fn(band) {
+    let end_offset = band.end_ms - current_pos
+    let start_offset = band.start_ms - current_pos
+    end_offset >= 0.0 && start_offset <= NOTE_DISPLAY_WINDOW_MS
+  })
+  .each(fn(band) {
+    let start_offset = band.start_ms - current_pos
+    let end_offset = band.end_ms - current_pos
+    let bottom_percent = 100.0 - start_offset / NOTE_DISPLAY_WINDOW_MS * 100.0
+    let top_percent = 100.0 - end_offset / NOTE_DISPLAY_WINDOW_MS * 100.0
+    let bottom_y = height * bottom_percent / 100.0
+    let top_y = height * top_percent / 100.0
+    let band_height = bottom_y - top_y
+
+    // Highlight scale tones with a subtle glow
+    key_areas
+    .iter()
+    .filter(fn(area) {
+      let pc = area.midi % 12
+      band.scale_pitch_classes.iter().any(fn(scale_pc) { scale_pc == pc })
+    })
+    .each(fn(area) {
+      ctx.fillStyle = "rgba(255, 255, 255, 0.06)"
+      ctx.fillRect(area.rect.left, top_y, area.rect.width, band_height)
+    })
+  })
+}
+
+///|
 /// Draw the note display background
 fn draw_notes_background(
   ctx : @canvas.CanvasRenderingContext2D,
@@ -232,6 +325,7 @@ fn draw_notes(
   height : Double,
   note_positions : Array[NotePosition],
   backing_positions : Array[NotePosition],
+  scale_bands : Array[ScaleBand],
   current_pos : Double,
   bpm : Int,
   beats_per_measure : Double,
@@ -241,6 +335,7 @@ fn draw_notes(
   draw_notes_background(ctx, width, height)
   let rect = { left: 0.0, top: 0.0, width, height }
   let key_areas = calc_key_areas(rect, KEYBOARD_MIN_KEY, KEYBOARD_MAX_KEY)
+  draw_scale_bands(ctx, height, scale_bands, current_pos, key_areas)
   draw_falling_notes(
     ctx,
     height,

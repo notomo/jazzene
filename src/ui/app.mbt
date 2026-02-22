@@ -135,8 +135,8 @@ pub fn render(state : AppState) -> Unit {
             attrs=[("aria-label", @luna_dom.Attr::AttrString("visualization"))],
             [
               @piano_roll.note_display(
-                sounds, backing_sounds, playback_position, bpm, total_duration, time_signature,
-                loop_a_measure, loop_b_measure,
+                sounds, backing_sounds, measures, playback_position, bpm, total_duration,
+                time_signature, loop_a_measure, loop_b_measure,
               ),
               @piano_roll.keyboard(sounds, backing_sounds, playback_position),
             ],
