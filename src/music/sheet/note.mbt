@@ -46,6 +46,7 @@ pub(all) struct SheetNote {
   on_line : Bool
   tie_arcs : Array[SheetTieArc]
   midi : Int?
+  tone_origin : @music.ToneOrigin?
 } derive(Show)
 
 ///|

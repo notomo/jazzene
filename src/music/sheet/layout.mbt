@@ -127,6 +127,7 @@ pub fn compute_sheet_measure(
         on_line,
         tie_arcs,
         midi: note.midi,
+        tone_origin: note.tone_origin,
       }
     })
     .collect()

@@ -139,16 +139,70 @@ fn render_stem_and_flag(
 }
 
 ///|
+/// Map ToneOrigin to a highlight color for sheet music
+fn tone_origin_color(origin : @music.ToneOrigin) -> String {
+  match origin {
+    ChordTone => "#60a5fa"
+    Tension(_) => "#4ade80"
+    ApproachTone | Enclosure | PassingTone => "#fb923c"
+    ScaleTone => "#fbbf24"
+    GuideTone => "#c084fc"
+    MotifReplay => "#f472b6"
+  }
+}
+
+///|
+/// Render a tension degree label (e.g. "9", "11", "13") above a note
+fn render_tension_label(
+  degree : Int,
+  note_x : Double,
+  note_y : Double,
+) -> @luna_dom.DomNode {
+  let label_y = note_y - @sheet_layout.STAFF_LINE_SPACING * 1.5
+  @luna_dom.svg_text(
+    x=note_x.to_string(),
+    y=label_y.to_string(),
+    text_anchor="middle",
+    font_size="12",
+    font_family="sans-serif",
+    attrs=[
+      ("stroke", @luna_dom.Attr::AttrString("none")),
+      ("fill", @luna_dom.Attr::AttrString("#4ade80")),
+    ],
+    [@luna_dom.text(degree.to_string())],
+  )
+}
+
+///|
 /// Render a note from pre-computed SheetNote data
 fn render_note_from_sheet(
   note : @sheet_layout.SheetNote,
 ) -> Array[@luna_dom.DomNode] {
   let note_x = note.x
   let note_y = note.y
+  let note_head = render_note_head(note.duration, note_x, note_y)
+  let colored_head = match note.tone_origin {
+    Some(origin) => {
+      let color = tone_origin_color(origin)
+      @luna_dom.svg_g(
+        attrs=[
+          ("fill", @luna_dom.Attr::AttrString(color)),
+          ("stroke", @luna_dom.Attr::AttrString(color)),
+        ],
+        [note_head],
+      )
+    }
+    None => note_head
+  }
+  let tension_label : @luna_dom.DomNode? = match note.tone_origin {
+    Some(Tension(degree)) => Some(render_tension_label(degree, note_x, note_y))
+    _ => None
+  }
   [
     ..render_note_accidental(note.accidental, note_x, note_y),
     ..render_ledger_lines_from_sheet(note),
-    render_note_head(note.duration, note_x, note_y),
+    colored_head,
+    ..tension_label,
     ..if note.beamed {
       []
     } else {
