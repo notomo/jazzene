@@ -14,10 +14,10 @@ pub struct AppState {
   view_mode : @signals.Signal[ViewMode]
   is_playing : @signals.Signal[Bool]
   measures : () -> Array[@music.Measure]
-  sounds : () -> Array[@music.NoteValueSound]
-  drum_sounds : () -> Array[@music.NoteValueSound]
-  backing_sounds : () -> Array[@music.NoteValueSound]
-  bass_sounds : () -> Array[@music.NoteValueSound]
+  sounds : () -> Array[@music.ScheduledSound]
+  drum_sounds : () -> Array[@music.ScheduledSound]
+  backing_sounds : () -> Array[@music.ScheduledSound]
+  bass_sounds : () -> Array[@music.ScheduledSound]
   total_duration : () -> @music.Duration
   chord_parse_error : () -> String?
 }
@@ -64,10 +64,10 @@ pub fn AppState::new() -> AppState {
   let measures = make_app_measures(
     measure_chords, seed, measure_count, bpm, key, time_signature,
   )
-  let sounds : () -> Array[@music.NoteValueSound] = @signals.memo(fn() {
+  let sounds : () -> Array[@music.ScheduledSound] = @signals.memo(fn() {
     @music.convert_measures_to_sounds(measures(), bpm.get(), swing=swing.get())
   })
-  let drum_sounds : () -> Array[@music.NoteValueSound] = @signals.memo(fn() {
+  let drum_sounds : () -> Array[@music.ScheduledSound] = @signals.memo(fn() {
     @music.generate_drum_sounds(
       bpm.get(),
       measure_count.get(),
@@ -75,7 +75,7 @@ pub fn AppState::new() -> AppState {
       swing=swing.get(),
     )
   })
-  let backing_sounds : () -> Array[@music.NoteValueSound] = @signals.memo(fn() {
+  let backing_sounds : () -> Array[@music.ScheduledSound] = @signals.memo(fn() {
     @music.generate_comping_sounds(
       measures(),
       bpm.get(),
@@ -83,7 +83,7 @@ pub fn AppState::new() -> AppState {
       seed=seed.get(),
     )
   })
-  let bass_sounds : () -> Array[@music.NoteValueSound] = @signals.memo(fn() {
+  let bass_sounds : () -> Array[@music.ScheduledSound] = @signals.memo(fn() {
     @music.generate_walking_bass_sounds(
       measures(),
       bpm.get(),

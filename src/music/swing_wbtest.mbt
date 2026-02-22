@@ -71,15 +71,31 @@ test "SwingConfig::hard_swing creates ratio 0.75" {
 ///|
 test "swing_offset with light swing applies smaller delay than triplet" {
   let beat_duration_ms = 500.0 // 120 BPM
-  let light_delay = swing_offset(0.5, beat_duration_ms, SwingConfig::light_swing())
-  let triplet_delay = swing_offset(0.5, beat_duration_ms, SwingConfig::triplet())
+  let light_delay = swing_offset(
+    0.5,
+    beat_duration_ms,
+    SwingConfig::light_swing(),
+  )
+  let triplet_delay = swing_offset(
+    0.5,
+    beat_duration_ms,
+    SwingConfig::triplet(),
+  )
   assert_true(light_delay < triplet_delay)
 }
 
 ///|
 test "swing_offset with hard swing applies larger delay than triplet" {
   let beat_duration_ms = 500.0 // 120 BPM
-  let hard_delay = swing_offset(0.5, beat_duration_ms, SwingConfig::hard_swing())
-  let triplet_delay = swing_offset(0.5, beat_duration_ms, SwingConfig::triplet())
+  let hard_delay = swing_offset(
+    0.5,
+    beat_duration_ms,
+    SwingConfig::hard_swing(),
+  )
+  let triplet_delay = swing_offset(
+    0.5,
+    beat_duration_ms,
+    SwingConfig::triplet(),
+  )
   assert_true(hard_delay > triplet_delay)
 }

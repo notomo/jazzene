@@ -25,8 +25,8 @@ const BLACK_KEY_HEIGHT_RATIO = 0.6
 ///|
 /// Render piano keyboard component using Canvas API
 pub fn keyboard(
-  sounds : () -> Array[@music.NoteValueSound],
-  backing_sounds : () -> Array[@music.NoteValueSound],
+  sounds : () -> Array[@music.ScheduledSound],
+  backing_sounds : () -> Array[@music.ScheduledSound],
   playback_position : @signals.Signal[@music.Duration],
 ) -> @luna_dom.DomNode {
   let { canvas, ctx } = create_canvas_context()

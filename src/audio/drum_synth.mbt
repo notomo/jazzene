@@ -206,6 +206,7 @@ pub fn DrumSynth::schedule_notes(
       Some(Kick) => self.schedule_kick(start_time, scaled_volume)
       Some(Snare) => self.schedule_snare(start_time, scaled_volume)
       Some(HiHat) => self.schedule_hihat(start_time, scaled_volume)
+      Some(Ride) => self.schedule_hihat(start_time, scaled_volume * 0.7)
       None => ()
     }
   }

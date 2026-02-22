@@ -1,8 +1,8 @@
 ///|
 /// Render falling notes display component using Canvas API
 pub fn note_display(
-  sounds : () -> Array[@music.NoteValueSound],
-  backing_sounds : () -> Array[@music.NoteValueSound],
+  sounds : () -> Array[@music.ScheduledSound],
+  backing_sounds : () -> Array[@music.ScheduledSound],
   playback_position : @signals.Signal[@music.Duration],
   bpm : @signals.Signal[Int],
   total_duration : () -> @music.Duration,
@@ -16,7 +16,7 @@ pub fn note_display(
   // Pre-calculate note positions
   let note_positions = @signals.memo(fn() {
     sounds().filter_map(fn(sound) {
-      match sound.note_value {
+      match sound.sound_event {
         Note(midi=midi_val, ..) =>
           Some({
             midi: midi_val.value,
@@ -31,7 +31,7 @@ pub fn note_display(
   // Pre-calculate backing note positions
   let backing_positions = @signals.memo(fn() {
     backing_sounds().filter_map(fn(sound) {
-      match sound.note_value {
+      match sound.sound_event {
         Note(midi=midi_val, ..) =>
           Some({
             midi: midi_val.value,

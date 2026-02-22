@@ -7,12 +7,12 @@ pub struct AudioSound {
 } derive(Eq, Show)
 
 ///|
-/// Create AudioSound array from NoteValueSound array within lookahead window
+/// Create AudioSound array from ScheduledSound array within lookahead window
 /// Only includes sounds where start_time is in [current_pos, current_pos + lookahead)
 /// offset = sound.start_time - current_pos
 /// Filters out Rest notes (only includes actual notes with MIDI values)
 pub fn AudioSound::from(
-  sounds : Array[NoteValueSound],
+  sounds : Array[ScheduledSound],
   current_pos : Duration,
   lookahead : Duration,
 ) -> Array[AudioSound] {

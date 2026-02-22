@@ -115,11 +115,11 @@ pub fn comping_rhythm(
 pub fn generate_comping_sounds(
   measures : Array[Measure],
   bpm : Int,
-  melody_sounds : Array[NoteValueSound],
+  melody_sounds : Array[ScheduledSound],
   seed? : Int = 0,
-) -> Array[NoteValueSound] {
+) -> Array[ScheduledSound] {
   let beat_duration_ms = ms_per_beat(bpm)
-  let sounds : Array[NoteValueSound] = []
+  let sounds : Array[ScheduledSound] = []
   let mut prev_voicing : Voicing? = None
   for mi = 0; mi < measures.length(); mi = mi + 1 {
     let measure = measures[mi]
@@ -198,8 +198,8 @@ pub fn generate_comping_sounds(
             }
             match MidiNumber::new(midi_val) {
               Some(m) =>
-                sounds.push(NoteValueSound::{
-                  note_value: Note(
+                sounds.push(ScheduledSound::{
+                  sound_event: Note(
                     midi=m,
                     duration=NoteDuration::from_beats(beats_per_chord),
                   ),

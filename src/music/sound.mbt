@@ -1,21 +1,21 @@
 ///|
-/// NoteValue with pre-calculated duration and start time based on BPM
-pub struct NoteValueSound {
-  note_value : NoteValue
+/// SoundEvent with pre-calculated duration and start time based on BPM
+pub struct ScheduledSound {
+  sound_event : SoundEvent
   duration : Duration
   start_time : Duration
 } derive(Eq, Show)
 
 ///|
 /// Get MIDI value if this is a Note sound
-pub fn NoteValueSound::midi(self : NoteValueSound) -> MidiNumber? {
-  self.note_value.midi()
+pub fn ScheduledSound::midi(self : ScheduledSound) -> MidiNumber? {
+  self.sound_event.midi()
 }
 
 ///|
 /// Check if this note is playing at the given position
-pub fn NoteValueSound::in_range(
-  self : NoteValueSound,
+pub fn ScheduledSound::in_range(
+  self : ScheduledSound,
   position : Duration,
 ) -> Bool {
   self.start_time <= position && position < self.start_time + self.duration
@@ -24,9 +24,9 @@ pub fn NoteValueSound::in_range(
 ///|
 /// Calculate which notes are currently playing at a given playback position
 pub fn calculate_playing_notes(
-  sounds : Array[NoteValueSound],
+  sounds : Array[ScheduledSound],
   position : Duration,
-) -> Array[NoteValueSound] {
+) -> Array[ScheduledSound] {
   sounds
   .iter()
   .take_while(fn(sound) { sound.start_time <= position })
@@ -36,13 +36,13 @@ pub fn calculate_playing_notes(
 
 ///|
 /// Convert measures array to sounds array
-/// Combines tied notes into single NoteValueSound entries
+/// Combines tied notes into single ScheduledSound entries
 /// Applies swing timing to off-beat eighth notes
 pub fn convert_measures_to_sounds(
   measures : Array[Measure],
   bpm : Int,
   swing? : SwingConfig = SwingConfig::straight(),
-) -> Array[NoteValueSound] {
+) -> Array[ScheduledSound] {
   let beat_duration_ms = ms_per_beat(bpm)
 
   // Flatten all notes with their absolute start times
@@ -66,7 +66,7 @@ pub fn convert_measures_to_sounds(
 
   // Convert to sounds, combining tied notes
 
-  let sounds : Array[NoteValueSound] = []
+  let sounds : Array[ScheduledSound] = []
   for i = 0; i < flat_notes.length(); i = i + 1 {
     let (start_ms, note) = flat_notes[i]
 
@@ -85,7 +85,7 @@ pub fn convert_measures_to_sounds(
     }
     let duration_ms = total_beats * beat_duration_ms
 
-    let note_value : NoteValue = match note.midi {
+    let sound_event : SoundEvent = match note.midi {
       Some(midi) =>
         match MidiNumber::new(midi) {
           Some(m) =>
@@ -95,8 +95,8 @@ pub fn convert_measures_to_sounds(
       None => Rest(duration=NoteDuration::from_beats(total_beats))
     }
 
-    sounds.push(NoteValueSound::{
-      note_value,
+    sounds.push(ScheduledSound::{
+      sound_event,
       duration: Duration::from_milliseconds(duration_ms),
       start_time: Duration::from_milliseconds(start_ms),
     })

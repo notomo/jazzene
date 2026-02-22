@@ -74,9 +74,9 @@ pub fn generate_walking_bass_sounds(
   measures : Array[Measure],
   bpm : Int,
   style : BassStyle,
-) -> Array[NoteValueSound] {
+) -> Array[ScheduledSound] {
   let beat_duration_ms = ms_per_beat(bpm)
-  let sounds : Array[NoteValueSound] = []
+  let sounds : Array[ScheduledSound] = []
   let mut prev_bass_midi = bass_default_ref
   for mi = 0; mi < measures.length(); mi = mi + 1 {
     let measure = measures[mi]
@@ -107,8 +107,8 @@ pub fn generate_walking_bass_sounds(
           prev_bass_midi = midi_val
           match MidiNumber::new(midi_val) {
             Some(m) =>
-              sounds.push(NoteValueSound::{
-                note_value: Note(
+              sounds.push(ScheduledSound::{
+                sound_event: Note(
                   midi=m,
                   duration=NoteDuration::from_beats(beats_per_chord),
                 ),
@@ -138,8 +138,8 @@ pub fn generate_walking_bass_sounds(
           prev_bass_midi = root_midi
           match MidiNumber::new(root_midi) {
             Some(m) =>
-              sounds.push(NoteValueSound::{
-                note_value: Note(
+              sounds.push(ScheduledSound::{
+                sound_event: Note(
                   midi=m,
                   duration=NoteDuration::from_beats(beats_per_chord / 2.0),
                 ),
@@ -159,8 +159,8 @@ pub fn generate_walking_bass_sounds(
             prev_bass_midi = fifth_midi
             match MidiNumber::new(fifth_midi) {
               Some(m) =>
-                sounds.push(NoteValueSound::{
-                  note_value: Note(
+                sounds.push(ScheduledSound::{
+                  sound_event: Note(
                     midi=m,
                     duration=NoteDuration::from_beats(beats_per_chord / 2.0),
                   ),
@@ -209,8 +209,8 @@ pub fn generate_walking_bass_sounds(
           prev_bass_midi = bass_midi
           match MidiNumber::new(bass_midi) {
             Some(m) =>
-              sounds.push(NoteValueSound::{
-                note_value: Note(midi=m, duration=Quarter),
+              sounds.push(ScheduledSound::{
+                sound_event: Note(midi=m, duration=Quarter),
                 duration: Duration::from_milliseconds(beat_duration_ms * 0.85),
                 start_time: Duration::from_milliseconds(beat_start_ms),
               })

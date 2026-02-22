@@ -35,10 +35,10 @@ pub fn DrumVoice::from_midi(midi : MidiNumber) -> DrumVoice? {
 ///|
 /// Drum pattern style
 pub(all) enum DrumPatternStyle {
-  Basic      // Basic jazz pattern (hi-hat every beat, kick 1&3, snare 2&4)
-  SwingRide  // Swing ride pattern (ride spang-a-lang, hi-hat foot 2&4)
-  BossaNova  // Bossa nova pattern
-  Brushes    // Brush pattern for ballads
+  Basic // Basic jazz pattern (hi-hat every beat, kick 1&3, snare 2&4)
+  SwingRide // Swing ride pattern (ride spang-a-lang, hi-hat foot 2&4)
+  BossaNova // Bossa nova pattern
+  Brushes // Brush pattern for ballads
 } derive(Eq, Show)
 
 ///|
@@ -171,14 +171,14 @@ fn DrumPattern::for_time_signature(
 
 ///|
 /// Generate drum sounds for the given number of measures
-/// Returns NoteValueSound array using GM drum MIDI numbers
+/// Returns ScheduledSound array using GM drum MIDI numbers
 pub fn generate_drum_sounds(
   bpm : Int,
   measure_count : Int,
   time_signature~ : TimeSignature,
   swing? : SwingConfig = SwingConfig::straight(),
-  pattern_style~ : DrumPatternStyle = Basic,
-) -> Array[NoteValueSound] {
+  pattern_style? : DrumPatternStyle = Basic,
+) -> Array[ScheduledSound] {
   let beats_per_measure = time_signature.beats_per_measure()
   let beat_duration_ms = ms_per_beat(bpm)
   let measure_duration_ms = ms_per_measure(bpm, beats_per_measure~)
@@ -192,8 +192,8 @@ pub fn generate_drum_sounds(
       let start_ms = measure_start_ms +
         hit.beat * beat_duration_ms +
         swing_delay
-      NoteValueSound::{
-        note_value: Note(
+      ScheduledSound::{
+        sound_event: Note(
           midi=hit.voice.midi_number(),
           duration=NoteDuration::Eighth,
         ),

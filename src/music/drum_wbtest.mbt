@@ -96,7 +96,7 @@ test "generate_drum_sounds all notes are Eighth duration" {
   let time_sig = TimeSignature::{ numerator: 4, denominator: 4 }
   let sounds = generate_drum_sounds(120, 1, time_signature=time_sig)
   for sound in sounds {
-    match sound.note_value {
+    match sound.sound_event {
       Note(duration=Eighth, ..) => ()
       other => fail("expected Eighth note, got \{other}")
     }
@@ -109,7 +109,7 @@ test "generate_drum_sounds uses drum MIDI numbers" {
   let sounds = generate_drum_sounds(120, 1, time_signature=time_sig)
   let drum_midis = [36, 38, 42]
   for sound in sounds {
-    match sound.note_value {
+    match sound.sound_event {
       Note(midi~, ..) => assert_true(drum_midis.contains(midi.value))
       other => fail("expected Note, got \{other}")
     }
@@ -120,7 +120,10 @@ test "generate_drum_sounds uses drum MIDI numbers" {
 test "SwingRide pattern produces 12 hits per measure" {
   let time_sig = TimeSignature::{ numerator: 4, denominator: 4 }
   let sounds = generate_drum_sounds(
-    120, 1, time_signature=time_sig, pattern_style=SwingRide,
+    120,
+    1,
+    time_signature=time_sig,
+    pattern_style=SwingRide,
   )
   assert_eq(sounds.length(), 12)
 }
@@ -129,14 +132,19 @@ test "SwingRide pattern produces 12 hits per measure" {
 test "SwingRide pattern includes Ride cymbal" {
   let time_sig = TimeSignature::{ numerator: 4, denominator: 4 }
   let sounds = generate_drum_sounds(
-    120, 1, time_signature=time_sig, pattern_style=SwingRide,
+    120,
+    1,
+    time_signature=time_sig,
+    pattern_style=SwingRide,
   )
-  let has_ride = sounds.iter().any(fn(s) {
-    match s.note_value {
-      Note(midi~, ..) => midi.value == 51
-      _ => false
-    }
-  })
+  let has_ride = sounds
+    .iter()
+    .any(fn(s) {
+      match s.sound_event {
+        Note(midi~, ..) => midi.value == 51
+        _ => false
+      }
+    })
   assert_true(has_ride)
 }
 
@@ -144,7 +152,10 @@ test "SwingRide pattern includes Ride cymbal" {
 test "Brushes pattern produces 5 hits per measure" {
   let time_sig = TimeSignature::{ numerator: 4, denominator: 4 }
   let sounds = generate_drum_sounds(
-    120, 1, time_signature=time_sig, pattern_style=Brushes,
+    120,
+    1,
+    time_signature=time_sig,
+    pattern_style=Brushes,
   )
   assert_eq(sounds.length(), 5)
 }
@@ -153,7 +164,10 @@ test "Brushes pattern produces 5 hits per measure" {
 test "BossaNova pattern produces 13 hits per measure" {
   let time_sig = TimeSignature::{ numerator: 4, denominator: 4 }
   let sounds = generate_drum_sounds(
-    120, 1, time_signature=time_sig, pattern_style=BossaNova,
+    120,
+    1,
+    time_signature=time_sig,
+    pattern_style=BossaNova,
   )
   assert_eq(sounds.length(), 13)
 }
@@ -161,9 +175,13 @@ test "BossaNova pattern produces 13 hits per measure" {
 ///|
 test "3/4 time uses waltz pattern regardless of style" {
   let time_sig = TimeSignature::{ numerator: 3, denominator: 4 }
-  for style in ([Basic, SwingRide, BossaNova, Brushes] : Array[DrumPatternStyle]) {
+  for
+    style in ([Basic, SwingRide, BossaNova, Brushes] : Array[DrumPatternStyle]) {
     let sounds = generate_drum_sounds(
-      120, 1, time_signature=time_sig, pattern_style=style,
+      120,
+      1,
+      time_signature=time_sig,
+      pattern_style=style,
     )
     assert_eq(sounds.length(), 3)
   }

@@ -30,16 +30,16 @@ fn make_melody_note(
   midi_val : Int,
   start_ms : Double,
   dur_ms : Double,
-) -> NoteValueSound {
-  NoteValueSound::{
-    note_value: Note(midi=MidiNumber::{ value: midi_val }, duration=Quarter),
+) -> ScheduledSound {
+  ScheduledSound::{
+    sound_event: Note(midi=MidiNumber::{ value: midi_val }, duration=Quarter),
     duration: Duration::from_milliseconds(dur_ms),
     start_time: Duration::from_milliseconds(start_ms),
   }
 }
 
 ///|
-fn comping_midis(sounds : Array[NoteValueSound]) -> Array[Int] {
+fn comping_midis(sounds : Array[ScheduledSound]) -> Array[Int] {
   sounds.filter_map(fn(s) { s.midi() }).map(fn(m) { m.value })
 }
 

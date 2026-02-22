@@ -2,8 +2,8 @@
 test "AudioSound::from creates audio sounds" {
   let midi = MidiNumber::{ value: 60 }
   let sounds = [
-    NoteValueSound::{
-      note_value: Note(midi~, duration=Quarter),
+    ScheduledSound::{
+      sound_event: Note(midi~, duration=Quarter),
       duration: Duration::from_milliseconds(500),
       start_time: Duration::from_milliseconds(0),
     },
@@ -22,23 +22,23 @@ test "AudioSound::from creates audio sounds" {
 test "AudioSound::from filters out rests" {
   let midi = MidiNumber::{ value: 60 }
   let sounds = [
-    NoteValueSound::{
-      note_value: Note(midi~, duration=Quarter),
+    ScheduledSound::{
+      sound_event: Note(midi~, duration=Quarter),
       duration: Duration::from_milliseconds(500),
       start_time: Duration::from_milliseconds(0),
     },
-    NoteValueSound::{
-      note_value: Rest(duration=Quarter),
+    ScheduledSound::{
+      sound_event: Rest(duration=Quarter),
       duration: Duration::from_milliseconds(500),
       start_time: Duration::from_milliseconds(500),
     },
-    NoteValueSound::{
-      note_value: Note(midi~, duration=Quarter),
+    ScheduledSound::{
+      sound_event: Note(midi~, duration=Quarter),
       duration: Duration::from_milliseconds(500),
       start_time: Duration::from_milliseconds(1000),
     },
-    NoteValueSound::{
-      note_value: Note(midi~, duration=Quarter),
+    ScheduledSound::{
+      sound_event: Note(midi~, duration=Quarter),
       duration: Duration::from_milliseconds(500),
       start_time: Duration::from_milliseconds(1500),
     },
@@ -56,18 +56,18 @@ test "AudioSound::from filters out rests" {
 ///|
 test "AudioSound::from extracts notes in lookahead range" {
   let sounds = [
-    NoteValueSound::{
-      note_value: Note(midi=MidiNumber::{ value: 60 }, duration=Quarter),
+    ScheduledSound::{
+      sound_event: Note(midi=MidiNumber::{ value: 60 }, duration=Quarter),
       duration: Duration::from_milliseconds(500),
       start_time: Duration::from_milliseconds(0),
     },
-    NoteValueSound::{
-      note_value: Note(midi=MidiNumber::{ value: 62 }, duration=Quarter),
+    ScheduledSound::{
+      sound_event: Note(midi=MidiNumber::{ value: 62 }, duration=Quarter),
       duration: Duration::from_milliseconds(500),
       start_time: Duration::from_milliseconds(500),
     },
-    NoteValueSound::{
-      note_value: Note(midi=MidiNumber::{ value: 64 }, duration=Quarter),
+    ScheduledSound::{
+      sound_event: Note(midi=MidiNumber::{ value: 64 }, duration=Quarter),
       duration: Duration::from_milliseconds(500),
       start_time: Duration::from_milliseconds(1000),
     },

@@ -28,7 +28,7 @@ fn make_4beat_bass_measure(chords : Array[Chord], start_ms : Double) -> Measure 
 }
 
 ///|
-fn bass_midis(sounds : Array[NoteValueSound]) -> Array[Int] {
+fn bass_midis(sounds : Array[ScheduledSound]) -> Array[Int] {
   sounds.filter_map(fn(s) { s.midi() }).map(fn(m) { m.value })
 }
 
