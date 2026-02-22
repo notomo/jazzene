@@ -55,16 +55,15 @@ test "CompingPattern::from_measure_index cycles every 4 measures" {
 }
 
 ///|
-test "generate_comping_sounds: 3-7 voicing for non-F/G/A root (Cmaj7)" {
-  // C root: base=C3(48), Major7 intervals=[0,4,7,11]
-  // 3-7 voicing: intervals[1]=4 → E3(52), intervals[3]=11 → B3(59)
+test "generate_comping_sounds: shell voicing for Cmaj7" {
+  // shell_voicing(Cmaj7, None): 3rd=E4(64), 7th=B3(59)
   let measures = [
     make_4beat_measure([Chord::{ root: C, quality: Major7, bass: None }], 0.0),
   ]
   let sounds = generate_comping_sounds(measures, 60, [])
   // Standard (mi=0): all 3 hits present (beat1 never omitted; and-of-2, beat4 survive at seed=0)
   // 2 tones × 3 hits = 6 sounds
-  inspect(comping_midis(sounds), content="[52, 59, 52, 59, 52, 59]")
+  inspect(comping_midis(sounds), content="[64, 59, 64, 59, 64, 59]")
   // Beat positions are stable; durations have ±20% jitter so not checked exactly
   assert_eq(sounds[0].start_time, Duration::from_milliseconds(0.0))
   assert_eq(sounds[2].start_time, Duration::from_milliseconds(1500.0))
@@ -72,9 +71,9 @@ test "generate_comping_sounds: 3-7 voicing for non-F/G/A root (Cmaj7)" {
 }
 
 ///|
-test "generate_comping_sounds: 7-3 voicing for G root (G7)" {
-  // G root: base=G3(55), Dominant7 intervals=[0,4,7,10]
-  // 7-3 voicing: intervals[3]-12=-2 → F3(53), intervals[1]=4 → B3(59)
+test "generate_comping_sounds: shell voicing for G7" {
+  // shell_voicing(G7, None): 3rd=B3(59), 7th=F4(65)
+  // closest to C4(60): B3(59) is 1 away, F4(65) is 5 away
   let measures = [
     make_4beat_measure(
       [Chord::{ root: G, quality: Dominant7, bass: None }],
@@ -82,40 +81,40 @@ test "generate_comping_sounds: 7-3 voicing for G root (G7)" {
     ),
   ]
   let sounds = generate_comping_sounds(measures, 60, [])
-  inspect(comping_midis(sounds), content="[53, 59, 53, 59, 53, 59]")
+  inspect(comping_midis(sounds), content="[59, 65, 59, 65, 59, 65]")
 }
 
 ///|
-test "generate_comping_sounds: 7-3 voicing for F root (Fmaj7)" {
-  // F root: base=F3(53), Major7 intervals=[0,4,7,11]
-  // 7-3 voicing: intervals[3]-12=-1 → E3(52), intervals[1]=4 → A3(57)
+test "generate_comping_sounds: shell voicing for Fmaj7" {
+  // shell_voicing(Fmaj7, None): 3rd=A3(57), 7th=E4(64)
+  // closest to C4(60): A3(57) is 3 away, E4(64) is 4 away
   let measures = [
     make_4beat_measure([Chord::{ root: F, quality: Major7, bass: None }], 0.0),
   ]
   let sounds = generate_comping_sounds(measures, 60, [])
-  inspect(comping_midis(sounds), content="[52, 57, 52, 57, 52, 57]")
+  inspect(comping_midis(sounds), content="[57, 64, 57, 64, 57, 64]")
 }
 
 ///|
-test "generate_comping_sounds: 7-3 voicing for A root (Am7)" {
-  // A root: base=A3(57), Minor7 intervals=[0,3,7,10]
-  // 7-3 voicing: intervals[3]-12=-2 → G3(55), intervals[1]=3 → C4(60)
+test "generate_comping_sounds: shell voicing for Am7" {
+  // shell_voicing(Am7, None): 3rd=C4(60), 7th=G3(55)
+  // closest to C4(60): C4(60) is 0 away, G3(55) is 5 away
   let measures = [
     make_4beat_measure([Chord::{ root: A, quality: Minor7, bass: None }], 0.0),
   ]
   let sounds = generate_comping_sounds(measures, 60, [])
-  inspect(comping_midis(sounds), content="[55, 60, 55, 60, 55, 60]")
+  inspect(comping_midis(sounds), content="[60, 55, 60, 55, 60, 55]")
 }
 
 ///|
 test "generate_comping_sounds: triad uses 3rd and 5th" {
-  // C root: base=C3(48), Major intervals=[0,4,7]
-  // intervals.length()=3: intervals[1]=4 → E3(52), intervals[2]=7 → G3(55)
+  // shell_voicing(C Major, None): 3rd=E4(64), 5th=G3(55)
+  // closest to C4(60): E4(64) is 4 away, G3(55) is 5 away
   let measures = [
     make_4beat_measure([Chord::{ root: C, quality: Major, bass: None }], 0.0),
   ]
   let sounds = generate_comping_sounds(measures, 60, [])
-  inspect(comping_midis(sounds), content="[52, 55, 52, 55, 52, 55]")
+  inspect(comping_midis(sounds), content="[64, 55, 64, 55, 64, 55]")
 }
 
 ///|
@@ -132,9 +131,10 @@ test "generate_comping_sounds: melody avoidance lowers overlapping guide tone" {
 }
 
 ///|
-test "generate_comping_sounds: melody far above guide tones causes no shift" {
-  // D root Dm7: raw=F3(53), C4(60)
-  // melody min=G4(67): gaps are 14 and 7, both >= 5 → no shift
+test "generate_comping_sounds: melody near guide tone triggers octave shift" {
+  // shell_voicing(Dm7, None): 3rd=F4(65), 7th=C4(60)
+  // melody min=G4(67): F4(65) is only 2 semitones below → shifts to F3(53)
+  //                    C4(60) is 7 semitones below → stays at C4(60)
   let measures = [
     make_4beat_measure([Chord::{ root: D, quality: Minor7, bass: None }], 0.0),
   ]
@@ -158,13 +158,14 @@ test "generate_comping_sounds: melody within 4 semitones triggers octave shift" 
 ///|
 test "generate_comping_sounds: melody outside chord time range does not affect" {
   // Dm7 at 0-4000ms; melody C4(60) starts at 4000ms (no overlap)
+  // shell_voicing(Dm7, None): 3rd=F4(65), 7th=C4(60)
   let measures = [
     make_4beat_measure([Chord::{ root: D, quality: Minor7, bass: None }], 0.0),
   ]
   let melody = [make_melody_note(60, 4000.0, 4000.0)]
   let sounds = generate_comping_sounds(measures, 60, melody)
-  // No melody overlap → raw values used: F3(53), C4(60)
-  inspect(comping_midis(sounds), content="[53, 60, 53, 60, 53, 60]")
+  // No melody overlap → shell voicing values used: F4(65), C4(60)
+  inspect(comping_midis(sounds), content="[65, 60, 65, 60, 65, 60]")
 }
 
 ///|
@@ -187,8 +188,8 @@ test "generate_comping_sounds: two chords split timing evenly" {
   assert_eq(sounds[0].start_time, Duration::from_milliseconds(0.0))
   // G7 anticipated: 2000ms - 500ms = 1500ms
   assert_eq(sounds[2].start_time, Duration::from_milliseconds(1500.0))
-  // Cmaj7: E3(52), B3(59) × 1 hit; G7: F3(53), B3(59) × 1 hit (and-of-2 omitted at seed=0)
-  inspect(comping_midis(sounds), content="[52, 59, 53, 59]")
+  // Cmaj7: E4(64), B3(59) × 1 hit; G7 with smooth VL: B3(59), F3(53) × 1 hit (and-of-2 omitted)
+  inspect(comping_midis(sounds), content="[64, 59, 59, 53]")
 }
 
 ///|
@@ -250,7 +251,8 @@ test "generate_comping_sounds: TwoFour pattern (measure index 2)" {
   assert_eq(sounds.length(), 12)
   // TwoFour beat2 (hi=0, never omitted) is at chord_start + 1 beat = 9000ms
   assert_eq(sounds[10].start_time, Duration::from_milliseconds(9000.0))
-  inspect(comping_midis(sounds[10:12].iter().collect()), content="[52, 59]")
+  // After 3 consecutive Cmaj7 measures, voice leading keeps E4(64), B3(59)
+  inspect(comping_midis(sounds[10:12].iter().collect()), content="[64, 59]")
 }
 
 ///|
@@ -316,7 +318,7 @@ test "generate_comping_sounds: pattern cycles back at index 4" {
 test "generate_comping_sounds: 3/4 Standard includes beat 3" {
   // BPM=60 → 1000ms/beat; 3/4 measure: beats_per_chord=3.0
   // Standard(mi=0): beat-1(0ms), and-of-2(1500ms), beat-3(2000ms) - all survive at seed=0
-  // Cmaj7: E3(52), B3(59) × 3 hits = 6 sounds
+  // shell_voicing(Cmaj7, None): E4(64), B3(59) × 3 hits = 6 sounds
   let measures = [
     make_3beat_measure([Chord::{ root: C, quality: Major7, bass: None }], 0.0),
   ]
@@ -326,7 +328,7 @@ test "generate_comping_sounds: 3/4 Standard includes beat 3" {
   assert_eq(sounds[2].start_time, Duration::from_milliseconds(1500.0))
   // beat-3 at 2000ms (NEW for 3/4; was missing before)
   assert_eq(sounds[4].start_time, Duration::from_milliseconds(2000.0))
-  inspect(comping_midis(sounds), content="[52, 59, 52, 59, 52, 59]")
+  inspect(comping_midis(sounds), content="[64, 59, 64, 59, 64, 59]")
 }
 
 ///|

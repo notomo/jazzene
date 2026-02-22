@@ -106,11 +106,12 @@ pub fn comping_rhythm(
 }
 
 ///|
-/// Generate comping sounds (guide tones: 3rd and 7th/5th) for a chord progression.
+/// Generate comping sounds (shell voicing: 3rd and 7th/5th) for a chord progression.
 /// Chords are evenly distributed across each measure's beats.
-/// Each guide tone is placed below the lowest melody note in the same chord window.
+/// Each voicing note is placed below the lowest melody note in the same chord window.
 /// Rhythm pattern cycles every 4 measures: Standard → Dense → TwoFour → Sparse.
 /// seed controls duration jitter (±20%) and occasional hit omission (~25%).
+/// Smooth voice leading is applied across all chords using shell_voicing().
 pub fn generate_comping_sounds(
   measures : Array[Measure],
   bpm : Int,
@@ -119,6 +120,7 @@ pub fn generate_comping_sounds(
 ) -> Array[NoteValueSound] {
   let beat_duration_ms = ms_per_beat(bpm)
   let sounds : Array[NoteValueSound] = []
+  let mut prev_voicing : Voicing? = None
   for mi = 0; mi < measures.length(); mi = mi + 1 {
     let measure = measures[mi]
     let pattern = CompingPattern::from_measure_index(mi)
@@ -137,24 +139,9 @@ pub fn generate_comping_sounds(
         } else {
           chord_start_ms - beat_duration_ms * 0.5
         }
-        let intervals = chord.quality.intervals()
-        let base_midi = chord.root.midi() - 12
-        let voice_leading_intervals = if intervals.length() >= 4 {
-          // F, G, A roots use 7-3 voicing (7th below, 3rd above)
-          // for smooth voice leading in II-V-I progressions
-          let use_73_voicing = match chord.root {
-            F | G | A => true
-            _ => false
-          }
-          if use_73_voicing {
-            [intervals[3] - 12, intervals[1]]
-          } else {
-            [intervals[1], intervals[3]]
-          }
-        } else {
-          [intervals[1], intervals[2]]
-        }
-
+        // Use smooth voice leading via shell_voicing instead of fixed interval offsets
+        let voicing = shell_voicing(chord, prev_voicing)
+        prev_voicing = Some(voicing)
         let is_last_chord = i == n - 1
         let hits = comping_rhythm(
           pattern, chord_start_ms, actual_start_ms, beats_per_chord, beat_duration_ms,
@@ -197,12 +184,11 @@ pub fn generate_comping_sounds(
               }
             }
           }
-          for interval in voice_leading_intervals {
-            let raw_midi = base_midi + interval
+          for note in voicing.notes {
             // Lower the note by octaves until at least a perfect fourth (5 semitones)
             // below the lowest melody note, preventing near-crossing that makes
             // simultaneous play uncomfortable.
-            let mut midi_val = raw_midi
+            let mut midi_val = note.value
             match min_melody_midi {
               Some(min_mel) =>
                 while midi_val > min_mel - 5 {
