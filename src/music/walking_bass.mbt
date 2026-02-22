@@ -116,6 +116,7 @@ pub fn generate_walking_bass_sounds(
                   beat_duration_ms * beats_per_chord * 0.9,
                 ),
                 start_time: Duration::from_milliseconds(start_ms),
+                tone_origin: None,
               })
             None => ()
           }
@@ -147,6 +148,7 @@ pub fn generate_walking_bass_sounds(
                   beat_duration_ms * (beats_per_chord / 2.0) * 0.9,
                 ),
                 start_time: Duration::from_milliseconds(root_ms),
+                tone_origin: None,
               })
             None => ()
           }
@@ -168,6 +170,7 @@ pub fn generate_walking_bass_sounds(
                     beat_duration_ms * (beats_per_chord / 2.0) * 0.9,
                   ),
                   start_time: Duration::from_milliseconds(fifth_ms),
+                  tone_origin: None,
                 })
               None => ()
             }
@@ -213,6 +216,7 @@ pub fn generate_walking_bass_sounds(
                 sound_event: Note(midi=m, duration=Quarter),
                 duration: Duration::from_milliseconds(beat_duration_ms * 0.85),
                 start_time: Duration::from_milliseconds(beat_start_ms),
+                tone_origin: None,
               })
             None => ()
           }

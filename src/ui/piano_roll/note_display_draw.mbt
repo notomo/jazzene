@@ -17,6 +17,38 @@ const BACKING_PLAYING_COLOR = "#6b7280"
 const BACKING_DEFAULT_COLOR = "#9ca3af"
 
 ///|
+/// Technique highlight colors (default/upcoming state)
+const COLOR_CHORD_TONE = "#60a5fa"
+
+///|
+const COLOR_TENSION = "#4ade80"
+
+///|
+const COLOR_APPROACH = "#fb923c"
+
+///|
+const COLOR_SCALE_TONE = "#fbbf24"
+
+///|
+const COLOR_GUIDE_TONE = "#c084fc"
+
+///|
+const COLOR_MOTIF_REPLAY = "#f472b6"
+
+///|
+/// Map ToneOrigin to display color
+fn tone_origin_color(origin : @music.ToneOrigin) -> String {
+  match origin {
+    ChordTone => COLOR_CHORD_TONE
+    Tension(_) => COLOR_TENSION
+    ApproachTone | Enclosure | PassingTone => COLOR_APPROACH
+    ScaleTone => COLOR_SCALE_TONE
+    GuideTone => COLOR_GUIDE_TONE
+    MotifReplay => COLOR_MOTIF_REPLAY
+  }
+}
+
+///|
 /// Gap in pixels between consecutive notes to visually separate them
 const NOTE_GAP_PX = 2.0
 
@@ -34,6 +66,7 @@ priv struct NotePosition {
   midi : Int
   start_ms : Double
   duration_ms : Double
+  tone_origin : @music.ToneOrigin?
 }
 
 ///|
@@ -75,16 +108,24 @@ fn draw_falling_notes(
     let end_offset = note.start_ms + note.duration_ms - current_pos
     let key_area = key_areas[note.midi - KEYBOARD_MIN_KEY]
 
-    // Calculate vertical position (inverted: future at top, now at bottom) (inverted: future at top, now at bottom)
+    // Calculate vertical position (inverted: future at top, now at bottom)
     let bottom_percent = 100.0 - start_offset / NOTE_DISPLAY_WINDOW_MS * 100.0
     let top_percent = 100.0 - end_offset / NOTE_DISPLAY_WINDOW_MS * 100.0
     let bottom_y = height * bottom_percent / 100.0
     let top_y = height * top_percent / 100.0
 
-    // Determine color based on playing state
+    // Determine color: use technique color when available, fall back to defaults
     let is_playing = current_pos >= note.start_ms &&
       current_pos < note.start_ms + note.duration_ms
-    ctx.fillStyle = if is_playing { playing_color } else { default_color }
+    ctx.fillStyle = match note.tone_origin {
+      Some(origin) =>
+        if is_playing {
+          playing_color
+        } else {
+          tone_origin_color(origin)
+        }
+      None => if is_playing { playing_color } else { default_color }
+    }
     // Add gap at bottom to separate consecutive same-pitch notes
     let note_height = bottom_y - top_y
     let gap = if note_height > NOTE_GAP_PX * 2.0 { NOTE_GAP_PX } else { 0.0 }

@@ -35,6 +35,7 @@ fn make_melody_note(
     sound_event: Note(midi=MidiNumber::{ value: midi_val }, duration=Quarter),
     duration: Duration::from_milliseconds(dur_ms),
     start_time: Duration::from_milliseconds(start_ms),
+    tone_origin: None,
   }
 }
 

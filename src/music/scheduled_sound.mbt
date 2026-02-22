@@ -4,6 +4,7 @@ pub struct ScheduledSound {
   sound_event : SoundEvent
   duration : Duration
   start_time : Duration
+  tone_origin : ToneOrigin?
 } derive(Eq, Show)
 
 ///|
@@ -99,6 +100,7 @@ pub fn convert_measures_to_sounds(
       sound_event,
       duration: Duration::from_milliseconds(duration_ms),
       start_time: Duration::from_milliseconds(start_ms),
+      tone_origin: note.tone_origin,
     })
   }
   sounds

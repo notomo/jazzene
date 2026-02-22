@@ -22,6 +22,7 @@ pub fn note_display(
             midi: midi_val.value,
             start_ms: sound.start_time.to_milliseconds(),
             duration_ms: sound.duration.to_milliseconds(),
+            tone_origin: sound.tone_origin,
           })
         Rest(..) => None
       }
@@ -37,6 +38,7 @@ pub fn note_display(
             midi: midi_val.value,
             start_ms: sound.start_time.to_milliseconds(),
             duration_ms: sound.duration.to_milliseconds(),
+            tone_origin: None,
           })
         Rest(..) => None
       }
