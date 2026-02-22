@@ -38,7 +38,7 @@ pub fn AppState::new() -> AppState {
   let loop_b_measure = @signals.signal(
     get_initial_loop_b_measure(measure_count.get()),
   )
-  let jazz_style = @signals.signal(JazzStyle::default())
+  let jazz_style = @signals.signal(get_initial_jazz_style())
   let view_mode = @signals.signal(get_initial_view_mode())
   let is_playing = @signals.signal(false)
 
@@ -114,6 +114,9 @@ pub fn AppState::new() -> AppState {
       beats_per_measure=time_signature.get().beats_per_measure(),
     )
   })
+
+  // Persist jazz_style changes to URL query parameters
+  let _ = @signals.effect(fn() { save_jazz_style(jazz_style.get()) })
 
   {
     bpm,

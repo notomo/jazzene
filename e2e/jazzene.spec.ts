@@ -81,6 +81,43 @@ test.describe("Jazzene - Jazz Improvisation Web App", () => {
     await expect(panel).toContainText("Full Band");
   });
 
+  test("should persist jazz style to URL when changed", async ({ page }) => {
+    await jazzene.openSettingsPanel();
+    const panel = jazzene.getSettingsPanel();
+
+    // Click "Straight" preset which disables swing and accompaniment
+    await panel.getByRole("button", { name: "Straight" }).click();
+
+    // URL should be updated with jazz style params
+    await page.waitForFunction(() =>
+      new URLSearchParams(window.location.search).has("swing")
+    );
+    const url = new URL(page.url());
+    expect(url.searchParams.get("swing")).toBe("straight");
+    expect(url.searchParams.get("comping")).toBe("off");
+    expect(url.searchParams.get("drums")).toBe("off");
+    expect(url.searchParams.get("bass")).toBe("off");
+  });
+
+  test("should restore jazz style from URL query parameters", async ({ page }) => {
+    const params = {
+      swing: "hard",
+      techniques: "00000000",
+      comping: "off",
+      drums: "sride",
+      bass: "root",
+    };
+    const paramJazzene = await openJazzenePage({ page, queryParams: params });
+
+    // Open settings panel to verify the restored state
+    await paramJazzene.openSettingsPanel();
+    const panel = paramJazzene.getSettingsPanel();
+    await expect(panel).toBeVisible();
+
+    // Comping should show as disabled (toggle off)
+    await expect(panel).toContainText("Drums");
+  });
+
   test("should change playback position when clicking a measure", async () => {
     await jazzene.play();
     await jazzene.clickMeasure(5);
