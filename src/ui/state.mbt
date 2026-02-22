@@ -17,6 +17,7 @@ pub struct AppState {
   sounds : () -> Array[@music.NoteValueSound]
   drum_sounds : () -> Array[@music.NoteValueSound]
   backing_sounds : () -> Array[@music.NoteValueSound]
+  bass_sounds : () -> Array[@music.NoteValueSound]
   total_duration : () -> @music.Duration
   chord_parse_error : () -> String?
 }
@@ -82,6 +83,13 @@ pub fn AppState::new() -> AppState {
       seed=seed.get(),
     )
   })
+  let bass_sounds : () -> Array[@music.NoteValueSound] = @signals.memo(fn() {
+    @music.generate_walking_bass_sounds(
+      measures(),
+      bpm.get(),
+      @music.WalkingBass,
+    )
+  })
   let total_duration = @signals.memo(fn() {
     @music.calculate_total_duration(
       bpm=bpm.get(),
@@ -108,6 +116,7 @@ pub fn AppState::new() -> AppState {
     sounds,
     drum_sounds,
     backing_sounds,
+    bass_sounds,
     total_duration,
     chord_parse_error,
   }

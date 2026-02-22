@@ -18,11 +18,14 @@ pub(all) struct Voicing {
   notes : Array[MidiNumber]
 }
 
+///|
 /// Comfortable MIDI range for comping voicings (C3 to E5)
 let voicing_min : Int = 48 // C3
 
+///|
 let voicing_max : Int = 76 // E5
 
+///|
 let voicing_default_ref : Int = 60 // C4 as default reference when no prev
 
 ///|
@@ -30,11 +33,15 @@ let voicing_default_ref : Int = 60 // C4 as default reference when no prev
 /// reference MIDI value, clamped to the comfortable voicing range.
 fn closest_voicing_midi(pitch_class : Int, reference : Int) -> Int {
   // Find base: pitch class placed in the same octave region as reference
-  let base = (reference / 12) * 12 + pitch_class
+  let base = reference / 12 * 12 + pitch_class
   // Compare base-12, base, base+12 and pick the one closest to reference
   let candidates = [base - 12, base, base + 12]
   let best = candidates.fold(init=base, fn(best, c) {
-    if (c - reference).abs() < (best - reference).abs() { c } else { best }
+    if (c - reference).abs() < (best - reference).abs() {
+      c
+    } else {
+      best
+    }
   })
   // Clamp to comfortable voicing range by octave transposition
   let mut m = best
@@ -72,10 +79,12 @@ pub fn shell_voicing(chord : Chord, prev : Voicing?) -> Voicing {
     Some(v) if v.notes.length() >= 2 => (v.notes[0].value, v.notes[1].value)
     _ => (voicing_default_ref, voicing_default_ref)
   }
-  let notes = [
-    closest_voicing_midi(pc1, ref1),
-    closest_voicing_midi(pc2, ref2),
-  ].filter_map(fn(v) { MidiNumber::new(v) })
+  let notes = [closest_voicing_midi(pc1, ref1), closest_voicing_midi(pc2, ref2)].filter_map(fn(
+      v,
+    ) {
+      MidiNumber::new(v)
+    },
+  )
   Voicing::{ notes, }
 }
 

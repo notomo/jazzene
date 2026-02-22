@@ -105,6 +105,16 @@ fn make_tick(
       state.volume.get().to_double() / 100.0,
     )
 
+    let bass_audio_sounds = @music.AudioSound::from(
+      (state.bass_sounds)(),
+      final_position,
+      lookahead,
+    )
+    synth.schedule_notes(
+      bass_audio_sounds,
+      state.volume.get().to_double() / 100.0,
+    )
+
     state.playback_position.set(final_position)
     false
   }
