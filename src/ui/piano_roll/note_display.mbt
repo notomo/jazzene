@@ -51,6 +51,11 @@ pub fn note_display(
     compute_scale_bands(measures(), bpm.get())
   })
 
+  // Pre-calculate guide tone marks from chord progression
+  let guide_marks = @signals.memo(fn() {
+    compute_guide_tone_marks(measures(), bpm.get())
+  })
+
   // Set up seek interactions
   setup_wheel_seek(canvas, playback_position, total_duration)
   setup_drag_seek(canvas, playback_position, total_duration)
@@ -66,6 +71,7 @@ pub fn note_display(
       note_positions(),
       backing_positions(),
       scale_bands(),
+      guide_marks(),
       playback_position.get().to_milliseconds(),
       bpm.get(),
       time_signature.get().beats_per_measure(),

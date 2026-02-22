@@ -70,6 +70,103 @@ priv struct NotePosition {
 }
 
 ///|
+/// Guide tone mark: a 3rd/7th voice-leading position at a specific time
+priv struct GuideToneMark {
+  midi_third : Int
+  midi_seventh : Int
+  start_ms : Double
+  end_ms : Double
+}
+
+///|
+/// Compute guide tone marks from measures
+fn compute_guide_tone_marks(
+  measures : Array[@music.Measure],
+  bpm : Int,
+) -> Array[GuideToneMark] {
+  let beat_duration_ms = @music.ms_per_beat(bpm)
+  // Flatten: (chord, start_ms, end_ms)
+  let chord_timings : Array[(@music.Chord, Double, Double)] = []
+  for measure in measures {
+    let measure_start_ms = measure.start_time.to_milliseconds()
+    let n = measure.chords.length()
+    if n == 0 {
+      continue
+    }
+    let total_beats = measure.beats.length().to_double()
+    let beats_per_chord = total_beats / n.to_double()
+    for i = 0; i < n; i = i + 1 {
+      let start_ms = measure_start_ms +
+        i.to_double() * beats_per_chord * beat_duration_ms
+      let end_ms = measure_start_ms +
+        (i + 1).to_double() * beats_per_chord * beat_duration_ms
+      chord_timings.push((measure.chords[i], start_ms, end_ms))
+    }
+  }
+  if chord_timings.is_empty() {
+    return []
+  }
+  let chords = chord_timings.map(fn(t) { t.0 })
+  let guide_pairs = @music.guide_tone_line(chords)
+  chord_timings
+  .iter()
+  .mapi(fn(i, timing) {
+    let (_, start_ms, end_ms) = timing
+    let pair = guide_pairs[i]
+    GuideToneMark::{
+      midi_third: pair.third.value,
+      midi_seventh: pair.seventh.value,
+      start_ms,
+      end_ms,
+    }
+  })
+  .collect()
+}
+
+///|
+/// Draw guide tone marks as horizontal dashes in the piano roll
+fn draw_guide_tone_marks(
+  ctx : @canvas.CanvasRenderingContext2D,
+  height : Double,
+  guide_marks : Array[GuideToneMark],
+  current_pos : Double,
+  key_areas : Array[KeyArea],
+) -> Unit {
+  guide_marks
+  .iter()
+  .filter(fn(mark) {
+    let end_offset = mark.end_ms - current_pos
+    let start_offset = mark.start_ms - current_pos
+    end_offset >= 0.0 && start_offset <= NOTE_DISPLAY_WINDOW_MS
+  })
+  .each(fn(mark) {
+    let start_offset = mark.start_ms - current_pos
+    let end_offset = mark.end_ms - current_pos
+    let bottom_percent = 100.0 - start_offset / NOTE_DISPLAY_WINDOW_MS * 100.0
+    let top_percent = 100.0 - end_offset / NOTE_DISPLAY_WINDOW_MS * 100.0
+    let bottom_y = height * bottom_percent / 100.0
+    let top_y = height * top_percent / 100.0
+    let mid_y = (top_y + bottom_y) / 2.0
+
+    // Draw guide tone marks for 3rd and 7th
+    for midi in [mark.midi_third, mark.midi_seventh] {
+      let key_index = midi - KEYBOARD_MIN_KEY
+      if key_index >= 0 && key_index < key_areas.length() {
+        let area = key_areas[key_index]
+        ctx.fillStyle = "rgba(192, 132, 252, 0.5)"
+        let mark_height = 3.0
+        ctx.fillRect(
+          area.rect.left,
+          mid_y - mark_height / 2.0,
+          area.rect.width,
+          mark_height,
+        )
+      }
+    }
+  })
+}
+
+///|
 /// A time-segmented region showing which pitch classes are in the chord scale
 priv struct ScaleBand {
   start_ms : Double
@@ -326,6 +423,7 @@ fn draw_notes(
   note_positions : Array[NotePosition],
   backing_positions : Array[NotePosition],
   scale_bands : Array[ScaleBand],
+  guide_marks : Array[GuideToneMark],
   current_pos : Double,
   bpm : Int,
   beats_per_measure : Double,
@@ -336,6 +434,7 @@ fn draw_notes(
   let rect = { left: 0.0, top: 0.0, width, height }
   let key_areas = calc_key_areas(rect, KEYBOARD_MIN_KEY, KEYBOARD_MAX_KEY)
   draw_scale_bands(ctx, height, scale_bands, current_pos, key_areas)
+  draw_guide_tone_marks(ctx, height, guide_marks, current_pos, key_areas)
   draw_falling_notes(
     ctx,
     height,
