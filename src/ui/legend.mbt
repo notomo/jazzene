@@ -34,34 +34,41 @@ pub fn legend_panel(visible : @signals.Signal[Bool]) -> @luna_dom.DomNode {
       [@luna_dom.text("Legend")],
     ),
     @luna_dom.show(fn() { visible.get() }, fn() {
-      @luna_dom.div(
-        class="absolute bottom-full right-0 mb-1 bg-slate-800 border border-slate-600 rounded-lg p-2 lg:p-3 text-xs whitespace-nowrap z-10 shadow-xl",
-        [
-          @luna_dom.div(class="font-semibold text-slate-300 mb-1.5", [
-            @luna_dom.text("Improvisation Techniques"),
-          ]),
-          @luna_dom.div(
-            class="flex flex-col gap-1",
-            legend_entries.map(fn(entry) {
-              let (dot, color, label) = entry
-              @luna_dom.div(class="flex items-center gap-1.5", [
-                @luna_dom.span(
-                  class="text-base leading-none",
-                  attrs=[
-                    ("style", @luna_dom.Attr::AttrString("color: " + color)),
-                  ],
-                  [@luna_dom.text(dot)],
-                ),
-                @luna_dom.span(class="text-slate-200", [@luna_dom.text(label)]),
-              ])
-            }),
-          ),
-          @luna_dom.div(
-            class="mt-2 pt-1.5 border-t border-slate-600 text-slate-400",
-            [@luna_dom.text("━ Guide tones (3rd/7th) in piano roll")],
-          ),
-        ],
-      )
+      @luna_dom.fragment([
+        @luna_dom.div(
+          class="fixed inset-0 z-[9]",
+          on=@luna_dom.events().click(fn(_) { visible.set(false) }),
+          [],
+        ),
+        @luna_dom.div(
+          class="absolute bottom-full right-0 mb-1 bg-slate-800 border border-slate-600 rounded-lg p-2 lg:p-3 text-xs whitespace-nowrap z-10 shadow-xl",
+          [
+            @luna_dom.div(class="font-semibold text-slate-300 mb-1.5", [
+              @luna_dom.text("Improvisation Techniques"),
+            ]),
+            @luna_dom.div(
+              class="flex flex-col gap-1",
+              legend_entries.map(fn(entry) {
+                let (dot, color, label) = entry
+                @luna_dom.div(class="flex items-center gap-1.5", [
+                  @luna_dom.span(
+                    class="text-base leading-none",
+                    attrs=[
+                      ("style", @luna_dom.Attr::AttrString("color: " + color)),
+                    ],
+                    [@luna_dom.text(dot)],
+                  ),
+                  @luna_dom.span(class="text-slate-200", [@luna_dom.text(label)]),
+                ])
+              }),
+            ),
+            @luna_dom.div(
+              class="mt-2 pt-1.5 border-t border-slate-600 text-slate-400",
+              [@luna_dom.text("━ Guide tones (3rd/7th) in piano roll")],
+            ),
+          ],
+        ),
+      ])
     }),
   ])
 }
