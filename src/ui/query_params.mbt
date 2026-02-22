@@ -166,40 +166,56 @@ fn swing_from_string(s : String) -> @music.SwingConfig {
 }
 
 ///|
-/// Serialize Techniques to an 8-character bit string.
-/// Order: tension | scale | approach | enclosure | syncopation | triplets | motif_reuse | bebop
+/// Serialize Techniques to a comma-separated list of enabled technique names.
 fn techniques_to_string(t : @generator.Techniques) -> String {
-  let b = fn(flag : Bool) -> String { if flag { "1" } else { "0" } }
-  b(t.tension_tones) +
-  b(t.scale_tones) +
-  b(t.approach_tones) +
-  b(t.enclosure_tones) +
-  b(t.syncopation) +
-  b(t.triplets) +
-  b(t.motif_reuse) +
-  b(t.bebop_scales)
+  let names : Array[String] = []
+  if t.tension_tones {
+    names.push("tension")
+  }
+  if t.scale_tones {
+    names.push("scale")
+  }
+  if t.approach_tones {
+    names.push("approach")
+  }
+  if t.enclosure_tones {
+    names.push("enclosure")
+  }
+  if t.syncopation {
+    names.push("syncopation")
+  }
+  if t.triplets {
+    names.push("triplets")
+  }
+  if t.motif_reuse {
+    names.push("motif")
+  }
+  if t.bebop_scales {
+    names.push("bebop")
+  }
+  names.join(",")
 }
 
 ///|
-/// Deserialize Techniques from an 8-character bit string.
+/// Deserialize Techniques from a comma-separated list of technique names.
 fn techniques_from_string(s : String) -> @generator.Techniques {
-  let chars = s.to_array()
-  let at = fn(i : Int) -> Bool { i < chars.length() && chars[i] == '1' }
+  let parts = s.split(",").to_array()
+  let has = fn(name : String) -> Bool { parts.contains(name) }
   @generator.Techniques::{
-    tension_tones: at(0),
-    scale_tones: at(1),
-    approach_tones: at(2),
-    enclosure_tones: at(3),
-    syncopation: at(4),
-    triplets: at(5),
-    motif_reuse: at(6),
-    bebop_scales: at(7),
+    tension_tones: has("tension"),
+    scale_tones: has("scale"),
+    approach_tones: has("approach"),
+    enclosure_tones: has("enclosure"),
+    syncopation: has("syncopation"),
+    triplets: has("triplets"),
+    motif_reuse: has("motif"),
+    bebop_scales: has("bebop"),
   }
 }
 
 ///|
-/// Default techniques bit string (all on except bebop).
-let default_techniques_str : String = "11111110"
+/// Default techniques string (all enabled except bebop).
+let default_techniques_str : String = "tension,scale,approach,enclosure,syncopation,triplets,motif"
 
 ///|
 /// Serialize CompingStyle (with enabled flag) to a token.
