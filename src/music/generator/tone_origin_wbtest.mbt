@@ -178,7 +178,7 @@ test "Tension origin carries valid jazz degree" {
 ///|
 /// Verify that MeasureNote carries tone_origin set during generation
 test "generated MeasureNote carries tone_origin" {
-  let settings = Settings::default(0)
+  let settings = ImprovisationConfig::default(0)
   let chord = @music.Chord::{
     root: @music.C,
     quality: @music.Major7,

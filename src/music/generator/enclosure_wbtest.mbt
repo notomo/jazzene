@@ -1,7 +1,7 @@
 ///|
-/// Verify Settings has enclosure_weight_ratio field with default 15
-test "Settings::default has enclosure_weight_ratio" {
-  let s = Settings::default(0)
+/// Verify ImprovisationConfig has enclosure_weight_ratio field with default 15
+test "ImprovisationConfig::default has enclosure_weight_ratio" {
+  let s = ImprovisationConfig::default(0)
   assert_true(s.enclosure_weight_ratio > 0)
   assert_eq(s.enclosure_weight_ratio, 15)
 }
@@ -14,9 +14,9 @@ test "Techniques::default has enclosure_tones enabled" {
 }
 
 ///|
-/// Verify Settings::with_techniques zeros enclosure when disabled
-test "Settings::with_techniques zeros enclosure when disabled" {
-  let s = Settings::default(0)
+/// Verify ImprovisationConfig::with_techniques zeros enclosure when disabled
+test "ImprovisationConfig::with_techniques zeros enclosure when disabled" {
+  let s = ImprovisationConfig::default(0)
   let t = Techniques::{ ..Techniques::default(), enclosure_tones: false }
   let result = s.with_techniques(t)
   assert_eq(result.enclosure_weight_ratio, 0)
@@ -25,7 +25,7 @@ test "Settings::with_techniques zeros enclosure when disabled" {
 ///|
 /// Verify generated notes can have Enclosure origin
 test "generated notes can include Enclosure origin" {
-  let settings = Settings::default(7)
+  let settings = ImprovisationConfig::default(7)
   let chord = @music.Chord::{
     root: @music.C,
     quality: @music.Major7,

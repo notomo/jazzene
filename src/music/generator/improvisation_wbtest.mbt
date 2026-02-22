@@ -181,7 +181,7 @@ test "improvisation removes dangling tie at last measure" {
   let measure_defs = [
     [@music.Chord::{ root: @music.C, quality: @music.Major7, bass: None }],
   ]
-  let settings = Settings::default(0)
+  let settings = ImprovisationConfig::default(0)
   let measures = improvisation(
     generator,
     measure_defs,
@@ -294,7 +294,7 @@ test "improvisation preserves tie when not at last measure" {
   let measure_defs = [
     [@music.Chord::{ root: @music.C, quality: @music.Major7, bass: None }],
   ]
-  let settings = Settings::default(0)
+  let settings = ImprovisationConfig::default(0)
   let measures = improvisation(
     generator,
     measure_defs,

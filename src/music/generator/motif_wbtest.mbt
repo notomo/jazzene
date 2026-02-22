@@ -134,8 +134,8 @@ test "maybe_start_motif_replay starts replay when probability met" {
   let motif = Motif::{ intervals: [2, -3, 5] }
   let mem = MotifMemory::{ stored: [motif], recording: [], replaying: None }
   // random_int always returns 0, so probability check (0 < 30) passes
-  let settings = Settings::{
-    ..Settings::default(0),
+  let settings = ImprovisationConfig::{
+    ..ImprovisationConfig::default(0),
     motif_reuse_probability: 30,
   }
   let result = maybe_start_motif_replay(mem, settings, fn(_n) { 0 })
@@ -145,7 +145,7 @@ test "maybe_start_motif_replay starts replay when probability met" {
 ///|
 test "maybe_start_motif_replay skips when no stored motifs" {
   let mem = MotifMemory::empty()
-  let settings = Settings::default(0)
+  let settings = ImprovisationConfig::default(0)
   let result = maybe_start_motif_replay(mem, settings, fn(_n) { 0 })
   assert_true(result.replaying is None)
 }
@@ -154,8 +154,8 @@ test "maybe_start_motif_replay skips when no stored motifs" {
 test "maybe_start_motif_replay skips when probability not met" {
   let motif = Motif::{ intervals: [2, -3, 5] }
   let mem = MotifMemory::{ stored: [motif], recording: [], replaying: None }
-  let settings = Settings::{
-    ..Settings::default(0),
+  let settings = ImprovisationConfig::{
+    ..ImprovisationConfig::default(0),
     motif_reuse_probability: 30,
   }
   // random_int returns 99, so probability check (99 < 30) fails

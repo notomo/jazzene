@@ -83,7 +83,7 @@ pub fn improvisation(
   bpm : Int,
   measure_count : Int,
   key : @music.KeySignature,
-  settings : Settings,
+  settings : ImprovisationConfig,
   time_signature~ : @music.TimeSignature,
   beats_per_measure~ : Double,
   start_offset? : Int = 0,

@@ -87,8 +87,8 @@ pub struct MeasureResult {
 pub type MeasureGenerator = (MeasureContext) -> MeasureResult
 
 ///|
-/// Settings for the measure generator
-pub(all) struct Settings {
+/// ImprovisationConfig for the measure generator
+pub(all) struct ImprovisationConfig {
   seed : Int
   rest_probability : Int // 0-100
   note_duration_weights : DurationWeights
@@ -113,8 +113,8 @@ pub(all) struct Settings {
 
 ///|
 /// Create default settings with given seed
-pub fn Settings::default(seed : Int) -> Settings {
-  Settings::{
+pub fn ImprovisationConfig::default(seed : Int) -> ImprovisationConfig {
+  ImprovisationConfig::{
     seed,
     rest_probability: 25,
     note_duration_weights: DurationWeights::note_default(),
@@ -141,7 +141,9 @@ pub fn Settings::default(seed : Int) -> Settings {
 ///|
 /// Create a measure generator from settings
 /// Returns a function that generates notes for one measure
-pub fn create_measure_generator(settings : Settings) -> MeasureGenerator {
+pub fn create_measure_generator(
+  settings : ImprovisationConfig,
+) -> MeasureGenerator {
   let random_int = create_random_int(settings.seed)
   fn(ctx : MeasureContext) -> MeasureResult {
     generate_measure_notes(ctx, settings, random_int)
@@ -237,7 +239,7 @@ fn note_selection_weight(stamina : Int, cost : Int) -> Int {
 /// Generate notes for one measure
 fn generate_measure_notes(
   ctx : MeasureContext,
-  settings : Settings,
+  settings : ImprovisationConfig,
   random_int : (Int) -> Int,
 ) -> MeasureResult {
   // Transpose everything to key of C so the RNG sequence is key-independent.
@@ -400,7 +402,10 @@ fn process_incoming_tie(
 
 ///|
 /// Roll a new phrase length from settings
-fn roll_phrase_length(settings : Settings, random_int : (Int) -> Int) -> Int {
+fn roll_phrase_length(
+  settings : ImprovisationConfig,
+  random_int : (Int) -> Int,
+) -> Int {
   let range = settings.phrase_length_max - settings.phrase_length_min + 1
   settings.phrase_length_min + random_int(range)
 }
@@ -451,7 +456,7 @@ fn select_motif_guided_note(
 fn select_note_with_motif(
   state : MeasureState,
   chord : @music.Chord,
-  settings : Settings,
+  settings : ImprovisationConfig,
   random_int : (Int) -> Int,
 ) -> (@music.MidiNumber?, @music.ToneOrigin?, MotifMemory) {
   // First note of phrase: always use normal selection
@@ -568,7 +573,7 @@ fn record_motif_interval(
 /// Returns updated motif memory with replay started, or unchanged if no replay.
 fn maybe_start_motif_replay(
   motif_memory : MotifMemory,
-  settings : Settings,
+  settings : ImprovisationConfig,
   random_int : (Int) -> Int,
 ) -> MotifMemory {
   guard not(motif_memory.stored.is_empty()) &&
@@ -594,7 +599,7 @@ priv enum StepResult {
 fn handle_resting(
   state : MeasureState,
   remaining : Double,
-  settings : Settings,
+  settings : ImprovisationConfig,
   random_int : (Int) -> Int,
 ) -> StepResult {
   let motif_memory = state.motif_memory.finish_recording()
@@ -656,7 +661,7 @@ fn handle_playing(
   chord : @music.Chord,
   ctx : MeasureContext,
   remaining : Double,
-  settings : Settings,
+  settings : ImprovisationConfig,
   update_accidental : (@music.MidiNumber) -> @music.Accidental?,
   random_int : (Int) -> Int,
 ) -> StepResult {
@@ -755,7 +760,7 @@ fn handle_playing(
 fn fill_remaining_measure(
   state : MeasureState,
   ctx : MeasureContext,
-  settings : Settings,
+  settings : ImprovisationConfig,
   update_accidental : (@music.MidiNumber) -> @music.Accidental?,
   random_int : (Int) -> Int,
 ) -> MeasureState {

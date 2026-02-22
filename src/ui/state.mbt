@@ -134,7 +134,7 @@ fn make_app_measures(
   @signals.memo(fn() {
     let ts = time_signature.get()
     let beats_per_measure = ts.beats_per_measure()
-    let settings = @generator.Settings::default(seed.get())
+    let settings = @generator.ImprovisationConfig::default(seed.get())
     let music_measures = settings
       |> @generator.create_measure_generator
       |> @generator.improvisation(

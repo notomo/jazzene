@@ -23,7 +23,7 @@ fn generate_triplet_group(
   state : MeasureState,
   _chord : @music.Chord,
   ctx : MeasureContext,
-  settings : Settings,
+  settings : ImprovisationConfig,
   update_accidental : (@music.MidiNumber) -> @music.Accidental?,
   random_int : (Int) -> Int,
   notes_left : Int,

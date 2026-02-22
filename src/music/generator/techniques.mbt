@@ -1,7 +1,7 @@
 ///|
 /// Toggle flags for jazz improvisation techniques.
 /// Each flag controls whether the corresponding technique is enabled.
-/// When disabled, the technique's weight/probability in Settings is zeroed out.
+/// When disabled, the technique's weight/probability in ImprovisationConfig is zeroed out.
 pub(all) struct Techniques {
   tension_tones : Bool // Tension notes (9th, 11th, 13th)
   scale_tones : Bool // Scale tones (diatonic non-chord tones)
@@ -32,11 +32,11 @@ pub fn Techniques::default() -> Techniques {
 /// Return a copy of settings with disabled techniques zeroed out.
 /// When a technique flag is false, the corresponding weight/probability
 /// in settings is set to 0, effectively disabling it.
-pub fn Settings::with_techniques(
-  self : Settings,
+pub fn ImprovisationConfig::with_techniques(
+  self : ImprovisationConfig,
   techniques : Techniques,
-) -> Settings {
-  Settings::{
+) -> ImprovisationConfig {
+  ImprovisationConfig::{
     ..self,
     tension_weight_ratio: if techniques.tension_tones {
       self.tension_weight_ratio
