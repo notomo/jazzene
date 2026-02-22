@@ -18,6 +18,14 @@ pub fn pseudo_rand(x : Int) -> Double {
 }
 
 ///|
+/// Voicing style for comping chords.
+/// Controls which chord tones are included in each comping hit.
+pub(all) enum CompingStyle {
+  GuideTones // Guide tones only: 3rd and 7th (shell voicing)
+  FullVoicing // All chord tones: root, 3rd, 5th, 7th
+} derive(Eq, Show)
+
+///|
 /// Rhythm pattern for jazz comping, cycled per measure.
 /// Each pattern defines where the chord hits land within a measure.
 pub(all) enum CompingPattern {
@@ -117,6 +125,7 @@ pub fn generate_comping_sounds(
   bpm : Int,
   melody_sounds : Array[ScheduledSound],
   seed? : Int = 0,
+  voicing_style? : CompingStyle = GuideTones,
 ) -> Array[ScheduledSound] {
   let beat_duration_ms = ms_per_beat(bpm)
   let sounds : Array[ScheduledSound] = []
@@ -139,8 +148,11 @@ pub fn generate_comping_sounds(
         } else {
           chord_start_ms - beat_duration_ms * 0.5
         }
-        // Use smooth voice leading via shell_voicing instead of fixed interval offsets
-        let voicing = shell_voicing(chord, prev_voicing)
+        // Use smooth voice leading based on voicing style
+        let voicing = match voicing_style {
+          GuideTones => shell_voicing(chord, prev_voicing)
+          FullVoicing => full_voicing(chord, prev_voicing)
+        }
         prev_voicing = Some(voicing)
         let is_last_chord = i == n - 1
         let hits = comping_rhythm(

@@ -333,6 +333,28 @@ test "generate_comping_sounds: 3/4 Standard includes beat 3" {
 }
 
 ///|
+test "generate_comping_sounds: FullVoicing includes all chord tones" {
+  // full_voicing(Cmaj7, None): root=C4(60), 3rd=E4(64), 5th=G4(67), 7th=B3(59)
+  // Standard(mi=0): 3 hits × 4 tones = 12 sounds (all survive at seed=0)
+  let measures = [
+    make_4beat_measure([Chord::{ root: C, quality: Major7, bass: None }], 0.0),
+  ]
+  let sounds = generate_comping_sounds(
+    measures,
+    60,
+    [],
+    voicing_style=FullVoicing,
+  )
+  assert_eq(sounds.length(), 12)
+  // First hit: all 4 chord tones of Cmaj7 (root, 3rd, 5th, 7th)
+  let first_hit_midis = comping_midis(sounds[0:4].iter().collect())
+  assert_true(first_hit_midis.iter().any(fn(m) { m == 60 || m == 48 })) // C root
+  assert_true(first_hit_midis.iter().any(fn(m) { m == 64 })) // E 3rd
+  assert_true(first_hit_midis.iter().any(fn(m) { m == 67 || m == 55 })) // G 5th
+  assert_true(first_hit_midis.iter().any(fn(m) { m == 59 })) // B 7th
+}
+
+///|
 test "generate_comping_sounds: 3/4 TwoFour beat-2 duration fits before beat-3" {
   // BPM=60; 3/4 TwoFour: beat-2 at 1000ms with duration 0.75 beats (not 1.5).
   // Max jitter=1.2 → beat-2 ends at 1000+750*1.2=1900ms < 2000ms (beat-3 start).

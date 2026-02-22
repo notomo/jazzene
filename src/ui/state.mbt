@@ -10,7 +10,7 @@ pub struct AppState {
   volume : @signals.Signal[Int]
   loop_a_measure : @signals.Signal[Int]
   loop_b_measure : @signals.Signal[Int]
-  swing : @signals.Signal[@music.SwingConfig]
+  jazz_style : @signals.Signal[JazzStyle]
   view_mode : @signals.Signal[ViewMode]
   is_playing : @signals.Signal[Bool]
   measures : () -> Array[@music.Measure]
@@ -38,7 +38,7 @@ pub fn AppState::new() -> AppState {
   let loop_b_measure = @signals.signal(
     get_initial_loop_b_measure(measure_count.get()),
   )
-  let swing = @signals.signal(@music.SwingConfig::triplet())
+  let jazz_style = @signals.signal(JazzStyle::default())
   let view_mode = @signals.signal(get_initial_view_mode())
   let is_playing = @signals.signal(false)
 
@@ -62,33 +62,50 @@ pub fn AppState::new() -> AppState {
   })
 
   let measures = make_app_measures(
-    measure_chords, seed, measure_count, bpm, key, time_signature,
+    measure_chords, seed, measure_count, bpm, key, time_signature, jazz_style,
   )
   let sounds : () -> Array[@music.ScheduledSound] = @signals.memo(fn() {
-    @music.convert_measures_to_sounds(measures(), bpm.get(), swing=swing.get())
+    @music.convert_measures_to_sounds(
+      measures(),
+      bpm.get(),
+      swing=jazz_style.get().swing,
+    )
   })
   let drum_sounds : () -> Array[@music.ScheduledSound] = @signals.memo(fn() {
-    @music.generate_drum_sounds(
-      bpm.get(),
-      measure_count.get(),
-      time_signature=time_signature.get(),
-      swing=swing.get(),
-    )
+    let js = jazz_style.get()
+    if not(js.drums_enabled) {
+      []
+    } else {
+      @music.generate_drum_sounds(
+        bpm.get(),
+        measure_count.get(),
+        time_signature=time_signature.get(),
+        swing=js.swing,
+        pattern_style=js.drum_pattern,
+      )
+    }
   })
   let backing_sounds : () -> Array[@music.ScheduledSound] = @signals.memo(fn() {
-    @music.generate_comping_sounds(
-      measures(),
-      bpm.get(),
-      sounds(),
-      seed=seed.get(),
-    )
+    let js = jazz_style.get()
+    if not(js.comping_enabled) {
+      []
+    } else {
+      @music.generate_comping_sounds(
+        measures(),
+        bpm.get(),
+        sounds(),
+        seed=seed.get(),
+        voicing_style=js.comping_style,
+      )
+    }
   })
   let bass_sounds : () -> Array[@music.ScheduledSound] = @signals.memo(fn() {
-    @music.generate_walking_bass_sounds(
-      measures(),
-      bpm.get(),
-      @music.WalkingBass,
-    )
+    let js = jazz_style.get()
+    if not(js.bass_enabled) {
+      []
+    } else {
+      @music.generate_walking_bass_sounds(measures(), bpm.get(), js.bass_style)
+    }
   })
   let total_duration = @signals.memo(fn() {
     @music.calculate_total_duration(
@@ -109,7 +126,7 @@ pub fn AppState::new() -> AppState {
     volume,
     loop_a_measure,
     loop_b_measure,
-    swing,
+    jazz_style,
     view_mode,
     is_playing,
     measures,
@@ -130,11 +147,15 @@ fn make_app_measures(
   bpm : @signals.Signal[Int],
   key : @signals.Signal[@music.KeySignature],
   time_signature : @signals.Signal[@music.TimeSignature],
+  jazz_style : @signals.Signal[JazzStyle],
 ) -> () -> Array[@music.Measure] {
   @signals.memo(fn() {
     let ts = time_signature.get()
     let beats_per_measure = ts.beats_per_measure()
     let settings = @generator.ImprovisationConfig::default(seed.get())
+      |> @generator.ImprovisationConfig::with_techniques(
+        jazz_style.get().techniques,
+      )
     let music_measures = settings
       |> @generator.create_measure_generator
       |> @generator.improvisation(
