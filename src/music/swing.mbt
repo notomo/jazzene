@@ -19,6 +19,24 @@ pub fn SwingConfig::triplet() -> SwingConfig {
 }
 
 ///|
+/// Create a light swing feel
+pub fn SwingConfig::light_swing() -> SwingConfig {
+  SwingConfig::{ ratio: 0.55 }
+}
+
+///|
+/// Create a medium swing feel
+pub fn SwingConfig::medium_swing() -> SwingConfig {
+  SwingConfig::{ ratio: 0.6 }
+}
+
+///|
+/// Create a hard swing feel
+pub fn SwingConfig::hard_swing() -> SwingConfig {
+  SwingConfig::{ ratio: 0.75 }
+}
+
+///|
 /// Calculate the swing delay for a given beat position
 /// Only applies to off-beat eighth notes (positions like 0.5, 1.5, 2.5, etc.)
 /// Returns the delay in milliseconds to add to the note's start time
