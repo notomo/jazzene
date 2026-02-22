@@ -258,7 +258,7 @@ fn draw_approach_arrows(
     let bottom_y = height * bottom_percent / 100.0
     let top_y = height * top_percent / 100.0
     let mid_y = (top_y + bottom_y) / 2.0
-    let arrow_size = 5.0
+    let arrow_size = 10.0
     let arrow_x = area.rect.left + area.rect.width + 1.0
 
     // Draw a small triangle pointing up or down
