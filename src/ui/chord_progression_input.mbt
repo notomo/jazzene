@@ -45,46 +45,58 @@ fn chord_progression_input(
     }
   }
 
-  @luna_dom.div(class="flex gap-1 lg:gap-2 min-w-0 flex-1 items-center", [
-    @luna_dom.create_element(
-      "select",
-      [
-        (
-          "class",
-          @luna_dom.AttrValue::Static(
-            "shrink-0 px-1 lg:px-2 py-1 lg:py-2 bg-slate-900 text-white text-xs lg:text-sm rounded-lg border border-slate-600 focus:border-blue-500 focus:outline-none",
+  @luna_dom.div(class="flex flex-col min-w-0 flex-1 gap-0.5", [
+    @luna_dom.div(class="flex gap-1 lg:gap-2 min-w-0 flex-1 items-center", [
+      @luna_dom.create_element(
+        "select",
+        [
+          (
+            "class",
+            @luna_dom.AttrValue::Static(
+              "shrink-0 px-1 lg:px-2 py-1 lg:py-2 bg-slate-900 text-white text-xs lg:text-sm rounded-lg border border-slate-600 focus:border-blue-500 focus:outline-none",
+            ),
           ),
+          (
+            "aria-label",
+            @luna_dom.AttrValue::Static("chord progression preset"),
+          ),
+          (
+            "change",
+            @luna_dom.AttrValue::Handler(fn(e) {
+              on_preset_change(get_event_target_value(e))
+            }),
+          ),
+        ],
+        preset_options.map(fn(name) {
+          @luna_dom.create_element(
+            "option",
+            [("value", @luna_dom.AttrValue::Static(name))],
+            [@luna_dom.text(name)],
+          )
+        }),
+      ),
+      @luna_dom.input(
+        type_="text",
+        dyn_class=fn() {
+          cn([
+            "min-w-0 flex-1 px-2 lg:px-4 py-1 lg:py-2 bg-slate-900 text-white rounded-lg border focus:outline-none text-sm lg:text-lg font-mono",
+            match parse_error() {
+              Some(_) => "border-red-500"
+              None => "border-slate-600 focus:border-blue-500"
+            },
+          ])
+        },
+        on=@luna_dom.events().input(on_input),
+        dyn_value=fn() { raw_chord_progression.get() },
+        placeholder="Enter chord progression (e.g., IIm7 V7 | Imaj7 | IVmaj7)",
+      ),
+    ]),
+    @luna_dom.show(fn() { parse_error() is Some(_) }, fn() {
+      @luna_dom.div(class="flex items-center gap-1 text-red-400 text-xs", [
+        @luna_dom.text(
+          "⚠ Invalid chord: use Roman numerals (e.g., IIm7 V7 | Imaj7). Qualities: maj7, m7, 7, m7b5, dim7, sus4",
         ),
-        ("aria-label", @luna_dom.AttrValue::Static("chord progression preset")),
-        (
-          "change",
-          @luna_dom.AttrValue::Handler(fn(e) {
-            on_preset_change(get_event_target_value(e))
-          }),
-        ),
-      ],
-      preset_options.map(fn(name) {
-        @luna_dom.create_element(
-          "option",
-          [("value", @luna_dom.AttrValue::Static(name))],
-          [@luna_dom.text(name)],
-        )
-      }),
-    ),
-    @luna_dom.input(
-      type_="text",
-      dyn_class=fn() {
-        cn([
-          "min-w-0 flex-1 px-2 lg:px-4 py-1 lg:py-2 bg-slate-900 text-white rounded-lg border focus:outline-none text-sm lg:text-lg font-mono",
-          match parse_error() {
-            Some(_) => "border-red-500"
-            None => "border-slate-600 focus:border-blue-500"
-          },
-        ])
-      },
-      on=@luna_dom.events().input(on_input),
-      dyn_value=fn() { raw_chord_progression.get() },
-      placeholder="Enter chord progression (e.g., IIm7 V7 | Imaj7 | IVmaj7)",
-    ),
+      ])
+    }),
   ])
 }
