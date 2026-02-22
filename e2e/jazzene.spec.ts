@@ -54,6 +54,18 @@ test.describe("Jazzene - Jazz Improvisation Web App", () => {
     await expect(paramJazzene.getLoopBInput()).toHaveText("6");
   });
 
+  test("should open settings panel with jazz controls", async () => {
+    await jazzene.openSettingsPanel();
+    const panel = jazzene.getSettingsPanel();
+
+    await expect(panel).toBeVisible();
+    // Verify all sections are present in the panel text
+    await expect(panel).toContainText("Melody Techniques");
+    await expect(panel).toContainText("Comping");
+    await expect(panel).toContainText("Bass");
+    await expect(panel).toContainText("Drums");
+  });
+
   test("should change playback position when clicking a measure", async () => {
     await jazzene.play();
     await jazzene.clickMeasure(5);

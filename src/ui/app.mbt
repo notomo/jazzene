@@ -52,6 +52,7 @@ pub fn render(state : AppState) -> Unit {
     volume,
     loop_a_measure,
     loop_b_measure,
+    jazz_style,
     view_mode,
     is_playing,
     measures,
@@ -158,6 +159,7 @@ pub fn render(state : AppState) -> Unit {
                 measure_count.get()
               }),
               legend_panel(legend_visible),
+              settings_panel(jazz_style),
               view_mode_select(view_mode),
             ],
           ),
