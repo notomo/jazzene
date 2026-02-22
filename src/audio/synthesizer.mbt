@@ -107,6 +107,68 @@ fn schedule_note(
 }
 
 ///|
+/// Convert MIDI number to frequency in Hz
+extern "js" fn midi_to_frequency(midi : Int) -> Double =
+  #| (midi) => 440.0 * Math.pow(2, (midi - 69) / 12)
+
+///|
+/// Schedule a single bass note using oscillator synthesis (string-like sound)
+fn schedule_bass_note(
+  synth : Synthesizer,
+  midi : @music.MidiNumber,
+  start_time : @music.Duration,
+  duration : @music.Duration,
+  volume : Double,
+) -> Unit {
+  let start_time_sec = start_time.to_seconds()
+  let duration_sec = duration.to_seconds()
+  let freq = midi_to_frequency(midi.value)
+
+  // Gain envelope: quick pluck attack, exponential decay (pizzicato upright bass feel)
+  let gain = synth.ctx.create_gain()
+  let gain_param = gain.gain()
+  let attack_end = start_time_sec + 0.01
+  gain_param.set_value_at_time(0.001, start_time_sec)
+  gain_param.linear_ramp_to_value_at_time(volume, attack_end)
+  let decay_end = attack_end + 0.15
+  gain_param.exponential_ramp_to_value_at_time(volume * 0.35, decay_end)
+  gain_param.exponential_ramp_to_value_at_time(
+    0.001,
+    start_time_sec + duration_sec,
+  )
+  gain.connect(synth.master_gain.as_audio_node())
+
+  // Low-pass filter for warm, woody string tone
+  let filter = synth.ctx.create_biquad_filter()
+  filter.set_type("lowpass")
+  filter.frequency().value = 700.0
+  filter.q().value = 1.2
+  filter.connect(gain.as_audio_node())
+
+  // Sawtooth oscillator (rich harmonics like a bowed/plucked string)
+  let osc = synth.ctx.create_oscillator()
+  osc.set_type("sawtooth")
+  osc.frequency().value = freq
+  osc.connect(filter.as_audio_node())
+  osc.start(start_time_sec)
+  osc.stop(start_time_sec + duration_sec)
+}
+
+///|
+/// Schedule bass sounds for playback using string synthesis
+pub fn Synthesizer::schedule_bass_notes(
+  self : Synthesizer,
+  sounds : Array[@music.AudioSound],
+  volume : Double,
+) -> Unit {
+  let current_time = @music.Duration::from_seconds(self.ctx.current_time())
+  for sound in sounds {
+    let start_time = sound.start_time(current_time)
+    schedule_bass_note(self, sound.midi, start_time, sound.duration, volume)
+  }
+}
+
+///|
 /// Schedule audio sounds for playback
 pub fn Synthesizer::schedule_notes(
   self : Synthesizer,

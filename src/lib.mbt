@@ -110,9 +110,9 @@ fn make_tick(
       final_position,
       lookahead,
     )
-    synth.schedule_notes(
+    synth.schedule_bass_notes(
       bass_audio_sounds,
-      state.volume.get().to_double() / 100.0,
+      state.volume.get().to_double() / 100.0 * 0.7,
     )
 
     state.playback_position.set(final_position)

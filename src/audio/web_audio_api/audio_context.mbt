@@ -300,3 +300,56 @@ pub fn AudioBufferSourceNode::start(self : Self, time : Double) -> Unit {
 pub fn AudioBufferSourceNode::stop(self : Self, time : Double) -> Unit {
   self.as_any()._call("stop", [@js.any(time)]) |> ignore
 }
+
+// BiquadFilterNode wrapper
+
+///|
+/// [BiquadFilterNode](https://developer.mozilla.org/en-US/docs/Web/API/BiquadFilterNode)
+#external
+pub type BiquadFilterNode
+
+///|
+pub fn BiquadFilterNode::as_any(self : BiquadFilterNode) -> @js.Any = "%identity"
+
+///|
+pub fn BiquadFilterNode::as_audio_node(self : BiquadFilterNode) -> AudioNode = "%identity"
+
+///|
+/// [createBiquadFilter()](https://developer.mozilla.org/en-US/docs/Web/API/BaseAudioContext/createBiquadFilter)
+///
+/// Create biquad filter node
+pub fn AudioContext::create_biquad_filter(self : Self) -> BiquadFilterNode {
+  self.as_any()._call("createBiquadFilter", []).cast()
+}
+
+///|
+/// [type](https://developer.mozilla.org/en-US/docs/Web/API/BiquadFilterNode/type)
+///
+/// Set the filter type ("lowpass", "highpass", "bandpass", etc.)
+pub fn BiquadFilterNode::set_type(self : Self, type_ : String) -> Unit {
+  self.as_any()._set("type", @js.any(type_))
+}
+
+///|
+/// [frequency](https://developer.mozilla.org/en-US/docs/Web/API/BiquadFilterNode/frequency)
+///
+/// Get frequency AudioParam
+pub fn BiquadFilterNode::frequency(self : Self) -> AudioParam {
+  self.as_any()._get("frequency").cast()
+}
+
+///|
+/// [Q](https://developer.mozilla.org/en-US/docs/Web/API/BiquadFilterNode/Q)
+///
+/// Get Q AudioParam
+pub fn BiquadFilterNode::q(self : Self) -> AudioParam {
+  self.as_any()._get("Q").cast()
+}
+
+///|
+/// [connect()](https://developer.mozilla.org/en-US/docs/Web/API/AudioNode/connect)
+///
+/// Connect biquad filter to a target node
+pub fn BiquadFilterNode::connect(self : Self, target : AudioNode) -> Unit {
+  self.as_any()._call("connect", [@js.any(target)]) |> ignore
+}
