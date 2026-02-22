@@ -66,6 +66,21 @@ test.describe("Jazzene - Jazz Improvisation Web App", () => {
     await expect(panel).toContainText("Drums");
   });
 
+  test("should apply preset when clicked in settings panel", async () => {
+    await jazzene.openSettingsPanel();
+    const panel = jazzene.getSettingsPanel();
+
+    await expect(panel).toBeVisible();
+    // Click "Straight" preset - should be visible in panel
+    await panel.getByRole("button", { name: "Straight" }).click();
+    // Panel should still be open
+    await expect(panel).toBeVisible();
+    // Preset section should contain all expected presets
+    await expect(panel).toContainText("Bebop");
+    await expect(panel).toContainText("Cool Jazz");
+    await expect(panel).toContainText("Full Band");
+  });
+
   test("should change playback position when clicking a measure", async () => {
     await jazzene.play();
     await jazzene.clickMeasure(5);

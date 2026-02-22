@@ -165,6 +165,22 @@ pub fn settings_panel(
           ("aria-label", @luna_dom.Attr::AttrString("jazz settings panel")),
         ],
         [
+          // Presets
+          settings_section("Preset", [
+            @luna_dom.div(
+              class="flex flex-wrap gap-1",
+              presets.map(fn(pair) {
+                let (label, make_preset) = pair
+                @luna_dom.button(
+                  class="px-2 py-0.5 text-xs rounded border bg-slate-900 border-slate-600 text-slate-300 hover:bg-slate-700 hover:border-slate-400 transition-colors",
+                  on=@luna_dom.events().click(fn(_) {
+                    jazz_style.set(make_preset())
+                  }),
+                  [@luna_dom.text(label)],
+                )
+              }),
+            ),
+          ]),
           // Swing
           settings_section("Swing", [
             segmented_buttons(swing_options, fn() { jazz_style.get().swing }, fn(
