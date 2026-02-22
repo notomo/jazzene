@@ -75,7 +75,7 @@ pub fn AppState::new() -> AppState {
     )
   })
   let backing_sounds : () -> Array[@music.NoteValueSound] = @signals.memo(fn() {
-    @music.convert_measures_to_backing_sounds(
+    @music.generate_comping_sounds(
       measures(),
       bpm.get(),
       sounds(),
