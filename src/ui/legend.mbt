@@ -4,11 +4,11 @@
 ///|
 /// Technique color legend entry: (label, color, description)
 let legend_entries : Array[(String, String, String)] = [
-  ("●", "#60a5fa", "Chord Tone (1, 3, 5, 7)"),
-  ("●", "#4ade80", "Tension (9, 11, 13)"),
-  ("●", "#fb923c", "Approach / Enclosure"),
-  ("●", "#fbbf24", "Scale Tone"),
-  ("●", "#c084fc", "Guide Tone (3rd/7th)"),
+  ("●", @theme.COLOR_CHORD_TONE, "Chord Tone (1, 3, 5, 7)"),
+  ("●", @theme.COLOR_TENSION, "Tension (9, 11, 13)"),
+  ("●", @theme.COLOR_APPROACH, "Approach / Enclosure"),
+  ("●", @theme.COLOR_SCALE_TONE, "Scale Tone"),
+  ("●", @theme.COLOR_GUIDE_TONE, "Guide Tone (3rd/7th)"),
 ]
 
 ///|
