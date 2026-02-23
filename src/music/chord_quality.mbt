@@ -79,8 +79,8 @@ pub fn ChordQuality::tensions(self : ChordQuality) -> Array[Int] {
     Major7 => [2, 6, 9]
     // 9(2), 11(5), 13(9) — all natural tensions work
     Minor7 => [2, 5, 9]
-    // 9(2), #11(6), 13(9) — standard "inside" dominant tensions
-    Dominant7 => [2, 6, 9]
+    // b9(1), 9(2), #9(3), #11(6), b13(8), 13(9) — inside and altered dominant tensions
+    Dominant7 => [1, 2, 3, 6, 8, 9]
     // 9(2), 11(5), b13(8)
     HalfDiminished => [2, 5, 8]
     // Symmetrical chord — no standard tensions

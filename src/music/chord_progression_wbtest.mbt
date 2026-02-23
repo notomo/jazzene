@@ -194,8 +194,11 @@ test "Chord tension tones - Minor7" {
 ///|
 test "Chord tension tones - Dominant7" {
   let g7 = Chord::{ root: G, quality: Dominant7, bass: None }
-  // 9th(A=69), #11th(C#=73), 13th(E=76)
-  inspect(g7.tension_tones(), content="[{value: 69}, {value: 73}, {value: 76}]")
+  // b9(Ab=68), 9(A=69), #9(Bb=70), #11(C#=73), b13(Eb=75), 13(E=76)
+  inspect(
+    g7.tension_tones(),
+    content="[{value: 68}, {value: 69}, {value: 70}, {value: 73}, {value: 75}, {value: 76}]",
+  )
 }
 
 ///|
