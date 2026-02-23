@@ -225,21 +225,42 @@ fn draw_approach_arrows(
     let top_percent = 100.0 - end_offset / NOTE_DISPLAY_WINDOW_MS * 100.0
     let bottom_y = height * bottom_percent / 100.0
     let top_y = height * top_percent / 100.0
-    let mid_y = (top_y + bottom_y) / 2.0
-    let arrow_size = 10.0
-    let arrow_x = area.rect.left + area.rect.width + 1.0
+    let note_width = area.rect.width
+    let note_height = bottom_y - top_y
 
-    // Draw a small triangle pointing up or down
-    ctx.fillStyle = "#fb923c"
-    ctx.beginPath()
-    if direction_up {
-      ctx.moveTo(arrow_x, mid_y + arrow_size)
-      ctx.lineTo(arrow_x + arrow_size, mid_y + arrow_size)
-      ctx.lineTo(arrow_x + arrow_size / 2.0, mid_y)
+    // Scale arrow to fit inside note dimensions
+    let max_by_width = note_width * 0.8
+    let max_by_height = note_height * 0.4
+    let max_size = if max_by_width < max_by_height {
+      max_by_width
     } else {
-      ctx.moveTo(arrow_x, mid_y - arrow_size)
-      ctx.lineTo(arrow_x + arrow_size, mid_y - arrow_size)
-      ctx.lineTo(arrow_x + arrow_size / 2.0, mid_y)
+      max_by_height
+    }
+    let arrow_size = if max_size < 10.0 { max_size } else { 10.0 }
+    if arrow_size < 2.0 {
+      continue
+    }
+    let center_x = area.rect.left + note_width / 2.0
+    let arrow_padding = 2.0
+
+    // Draw a horizontal triangle at the top edge of the note, inside it
+    ctx.fillStyle = "#ffffff"
+    ctx.beginPath()
+    let arrow_mid_y = top_y + arrow_padding + arrow_size / 2.0
+    if direction_up {
+      // ▶ pointing right (toward higher pitch)
+      let base_x = center_x - arrow_size / 2.0
+      let tip_x = center_x + arrow_size / 2.0
+      ctx.moveTo(base_x, arrow_mid_y - arrow_size / 2.0)
+      ctx.lineTo(base_x, arrow_mid_y + arrow_size / 2.0)
+      ctx.lineTo(tip_x, arrow_mid_y)
+    } else {
+      // ◀ pointing left (toward lower pitch)
+      let base_x = center_x + arrow_size / 2.0
+      let tip_x = center_x - arrow_size / 2.0
+      ctx.moveTo(base_x, arrow_mid_y - arrow_size / 2.0)
+      ctx.lineTo(base_x, arrow_mid_y + arrow_size / 2.0)
+      ctx.lineTo(tip_x, arrow_mid_y)
     }
     ctx.closePath()
     ctx.fill()
