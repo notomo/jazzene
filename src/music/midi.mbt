@@ -55,3 +55,9 @@ pub fn MidiNumber::accidental(self : MidiNumber) -> Accidental {
 pub fn MidiNumber::distance(self : MidiNumber, other : MidiNumber) -> Int {
   (self.value - other.value).abs()
 }
+
+///|
+/// Convert MIDI number to frequency in Hz (A4 = MIDI 69 = 440 Hz)
+pub fn MidiNumber::frequency(self : MidiNumber) -> Double {
+  440.0 * @math.pow(2.0, (self.value - 69).to_double() / 12.0)
+}

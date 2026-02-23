@@ -17,11 +17,6 @@ fn Bass::new(
 }
 
 ///|
-/// Convert MIDI number to frequency in Hz
-extern "js" fn midi_to_frequency(midi : Int) -> Double =
-  #| (midi) => 440.0 * Math.pow(2, (midi - 69) / 12)
-
-///|
 /// Schedule a single bass note using oscillator synthesis (string-like sound)
 fn Bass::schedule_note(
   self : Bass,
@@ -32,7 +27,7 @@ fn Bass::schedule_note(
 ) -> Unit {
   let start_time_sec = start_time.to_seconds()
   let duration_sec = duration.to_seconds()
-  let freq = midi_to_frequency(midi.value)
+  let freq = midi.frequency()
 
   // Gain envelope: quick pluck attack, exponential decay (pizzicato upright bass feel)
   let gain = self.ctx.create_gain()
