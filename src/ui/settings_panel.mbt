@@ -326,17 +326,29 @@ pub fn settings_panel(
                   })
                 },
               ),
-              @luna_dom.show(fn() { jazz_style.get().comping_enabled }, fn() {
-                segmented_buttons(
-                  comping_style_options,
-                  fn() { jazz_style.get().comping_style },
-                  fn(v) {
-                    jazz_style.update(fn(js) {
-                      JazzStyle::{ ..js, comping_style: v }
-                    })
-                  },
-                )
-              }),
+              @luna_dom.div(
+                dyn_class=fn() {
+                  cn([
+                    "transition-opacity",
+                    if jazz_style.get().comping_enabled {
+                      ""
+                    } else {
+                      "opacity-40 pointer-events-none"
+                    },
+                  ])
+                },
+                [
+                  segmented_buttons(
+                    comping_style_options,
+                    fn() { jazz_style.get().comping_style },
+                    fn(v) {
+                      jazz_style.update(fn(js) {
+                        JazzStyle::{ ..js, comping_style: v }
+                      })
+                    },
+                  ),
+                ],
+              ),
             ]),
             // Bass
             settings_section("Bass", [
@@ -349,17 +361,29 @@ pub fn settings_panel(
                   })
                 },
               ),
-              @luna_dom.show(fn() { jazz_style.get().bass_enabled }, fn() {
-                segmented_buttons(
-                  bass_style_options,
-                  fn() { jazz_style.get().bass_style },
-                  fn(v) {
-                    jazz_style.update(fn(js) {
-                      JazzStyle::{ ..js, bass_style: v }
-                    })
-                  },
-                )
-              }),
+              @luna_dom.div(
+                dyn_class=fn() {
+                  cn([
+                    "transition-opacity",
+                    if jazz_style.get().bass_enabled {
+                      ""
+                    } else {
+                      "opacity-40 pointer-events-none"
+                    },
+                  ])
+                },
+                [
+                  segmented_buttons(
+                    bass_style_options,
+                    fn() { jazz_style.get().bass_style },
+                    fn(v) {
+                      jazz_style.update(fn(js) {
+                        JazzStyle::{ ..js, bass_style: v }
+                      })
+                    },
+                  ),
+                ],
+              ),
             ]),
             // Drums
             settings_section("Drums", [
@@ -372,17 +396,29 @@ pub fn settings_panel(
                   })
                 },
               ),
-              @luna_dom.show(fn() { jazz_style.get().drums_enabled }, fn() {
-                segmented_buttons(
-                  drum_pattern_options,
-                  fn() { jazz_style.get().drum_pattern },
-                  fn(v) {
-                    jazz_style.update(fn(js) {
-                      JazzStyle::{ ..js, drum_pattern: v }
-                    })
-                  },
-                )
-              }),
+              @luna_dom.div(
+                dyn_class=fn() {
+                  cn([
+                    "transition-opacity",
+                    if jazz_style.get().drums_enabled {
+                      ""
+                    } else {
+                      "opacity-40 pointer-events-none"
+                    },
+                  ])
+                },
+                [
+                  segmented_buttons(
+                    drum_pattern_options,
+                    fn() { jazz_style.get().drum_pattern },
+                    fn(v) {
+                      jazz_style.update(fn(js) {
+                        JazzStyle::{ ..js, drum_pattern: v }
+                      })
+                    },
+                  ),
+                ],
+              ),
             ]),
           ],
         ),
