@@ -45,6 +45,34 @@ fn tone_origin_color(origin : @music.ToneOrigin) -> String {
 }
 
 ///|
+/// Slightly darker variants used when a note is actively playing
+const PLAYING_COLOR_CHORD_TONE = "#3b82f6"
+
+///|
+const PLAYING_COLOR_TENSION = "#22c55e"
+
+///|
+const PLAYING_COLOR_APPROACH = "#f97316"
+
+///|
+const PLAYING_COLOR_SCALE_TONE = "#eab308"
+
+///|
+const PLAYING_COLOR_GUIDE_TONE = "#a855f7"
+
+///|
+/// Map ToneOrigin to slightly darker color used when note is actively playing
+fn tone_origin_playing_color(origin : @music.ToneOrigin) -> String {
+  match origin {
+    ChordTone => PLAYING_COLOR_CHORD_TONE
+    Tension(_) => PLAYING_COLOR_TENSION
+    ApproachTone | Enclosure | PassingTone => PLAYING_COLOR_APPROACH
+    ScaleTone => PLAYING_COLOR_SCALE_TONE
+    GuideTone => PLAYING_COLOR_GUIDE_TONE
+  }
+}
+
+///|
 /// Gap in pixels between consecutive notes to visually separate them
 const NOTE_GAP_PX = 2.0
 
@@ -361,14 +389,11 @@ fn draw_falling_notes(
     // Determine color: use technique color when available, fall back to defaults
     let is_playing = current_pos >= note.start_ms &&
       current_pos < note.start_ms + note.duration_ms
-    ctx.fillStyle = match note.tone_origin {
-      Some(origin) =>
-        if is_playing {
-          playing_color
-        } else {
-          tone_origin_color(origin)
-        }
-      None => if is_playing { playing_color } else { default_color }
+    ctx.fillStyle = match (note.tone_origin, is_playing) {
+      (Some(origin), true) => tone_origin_playing_color(origin)
+      (Some(origin), false) => tone_origin_color(origin)
+      (None, true) => playing_color
+      (None, false) => default_color
     }
     // Add gap at bottom to separate consecutive same-pitch notes
     let note_height = bottom_y - top_y

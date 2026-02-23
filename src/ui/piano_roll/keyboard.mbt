@@ -5,12 +5,6 @@ const WHITE_KEY_COLOR = "#ffffff"
 const BLACK_KEY_COLOR = "#1f2937"
 
 ///|
-const WHITE_KEY_PLAYING_COLOR = "#60a5fa"
-
-///|
-const BLACK_KEY_PLAYING_COLOR = "#3b82f6"
-
-///|
 const WHITE_KEY_BACKING_COLOR = "#9ca3af"
 
 ///|
@@ -32,12 +26,23 @@ pub fn keyboard(
   let { canvas, ctx } = create_canvas_context()
   let resize_trigger = create_resize_trigger(canvas)
 
-  // Calculate currently playing notes as a boolean lookup array (O(1) key lookup)
+  // Calculate currently playing notes with technique-based colors (MIDI index → color)
   let playing_notes = @signals.memo(fn() {
-    let set = Array::make(128, false)
-    @music.calculate_playing_notes(sounds(), playback_position.get())
-    .filter_map(fn(s) { s.midi() })
-    .each(fn(m) { set[m.value] = true })
+    let set : Array[String?] = Array::make(128, None)
+    @music.calculate_playing_notes(sounds(), playback_position.get()).each(fn(
+      s,
+    ) {
+      match s.midi() {
+        Some(m) =>
+          set[m.value] = Some(
+            match s.tone_origin {
+              Some(origin) => tone_origin_playing_color(origin)
+              None => NOTE_PLAYING_COLOR
+            },
+          )
+        None => ()
+      }
+    })
     set
   })
 
@@ -69,7 +74,7 @@ fn draw_keyboard(
   ctx : @canvas.CanvasRenderingContext2D,
   width : Double,
   height : Double,
-  playing_notes : Array[Bool],
+  playing_notes : Array[String?],
   backing_playing_notes : Array[Bool],
 ) -> Unit {
   ctx.clearRect(0.0, 0.0, width, height)
@@ -84,14 +89,11 @@ fn draw_keyboard(
   .iter()
   .filter(fn(a) { not(a.is_black) })
   .each(fn(area) {
-    let is_playing = playing_notes[area.midi]
-    let is_backing = backing_playing_notes[area.midi]
-    ctx.fillStyle = if is_playing {
-      WHITE_KEY_PLAYING_COLOR
-    } else if is_backing {
-      WHITE_KEY_BACKING_COLOR
-    } else {
-      WHITE_KEY_COLOR
+    ctx.fillStyle = match
+      (playing_notes[area.midi], backing_playing_notes[area.midi]) {
+      (Some(color), _) => color
+      (None, true) => WHITE_KEY_BACKING_COLOR
+      (None, false) => WHITE_KEY_COLOR
     }
     ctx.fillRect(
       area.rect.left,
@@ -113,14 +115,11 @@ fn draw_keyboard(
   .iter()
   .filter(fn(a) { a.is_black })
   .each(fn(area) {
-    let is_playing = playing_notes[area.midi]
-    let is_backing = backing_playing_notes[area.midi]
-    ctx.fillStyle = if is_playing {
-      BLACK_KEY_PLAYING_COLOR
-    } else if is_backing {
-      BLACK_KEY_BACKING_COLOR
-    } else {
-      BLACK_KEY_COLOR
+    ctx.fillStyle = match
+      (playing_notes[area.midi], backing_playing_notes[area.midi]) {
+      (Some(color), _) => color
+      (None, true) => BLACK_KEY_BACKING_COLOR
+      (None, false) => BLACK_KEY_COLOR
     }
     ctx.fillRect(
       area.rect.left,
