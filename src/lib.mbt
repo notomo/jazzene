@@ -27,17 +27,6 @@ fn main {
 }
 
 ///|
-fn measure_to_duration(
-  measure_number : Int,
-  bpm : Int,
-  beats_per_measure : Double,
-) -> @music.Duration {
-  let ms = (measure_number - 1).to_double() *
-    @music.ms_per_measure(bpm, beats_per_measure~)
-  @music.Duration::from_milliseconds(ms)
-}
-
-///|
 fn make_tick(
   state : @ui.AppState,
   synth : @audio.Synthesizer,
@@ -47,36 +36,17 @@ fn make_tick(
 
   return fn(elapsed_ms : Double) -> Bool {
     let total = (state.total_duration)()
-    let new_position = @cmp.minimum(
-      state.playback_position.get() +
-      @music.Duration::from_milliseconds(elapsed_ms),
+    let beats = state.time_signature.get().beats_per_measure()
+    let current_bpm = state.bpm.get()
+    let final_position = @music.advance_playback_position(
+      state.playback_position.get(),
+      elapsed_ms,
       total,
+      current_bpm,
+      beats,
+      state.loop_a_measure.get(),
+      state.loop_b_measure.get(),
     )
-
-    // Check loop boundaries
-    let final_position = {
-      let beats = state.time_signature.get().beats_per_measure()
-      let current_bpm = state.bpm.get()
-      // B: end of the B measure (so B+1 start)
-      let b_time = measure_to_duration(
-        state.loop_b_measure.get() + 1,
-        current_bpm,
-        beats,
-      )
-      // A: start of the A measure
-      let a_time = measure_to_duration(
-        state.loop_a_measure.get(),
-        current_bpm,
-        beats,
-      )
-      if new_position < a_time {
-        a_time
-      } else if new_position >= b_time {
-        a_time
-      } else {
-        new_position
-      }
-    }
 
     let audio_sounds = @music.AudioSound::from(
       (state.sounds)(),
