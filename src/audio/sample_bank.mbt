@@ -6,7 +6,7 @@
 ///|
 /// Opaque JS Map<string, AudioBuffer> holding decoded samples
 #external
-type SampleBank
+priv type SampleBank
 
 ///|
 /// Look up a decoded sample by note name (e.g. "A0", "C1", "Ds1", "Fs1")
