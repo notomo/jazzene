@@ -11,9 +11,9 @@ let hihat_duration : Double = 0.08
 
 ///|
 /// Drum synthesizer using noise buffer + oscillator hybrid synthesis
-pub struct DrumSynth {
+struct Drum {
   ctx : @web_audio.AudioContext
-  master_gain : @web_audio.GainNode
+  gain : @web_audio.GainNode
   /// Pre-generated white noise buffer (reused for every hit)
   noise_buffer : @web_audio.AudioBuffer
   /// Volume scale relative to piano (0.0–1.0)
@@ -21,17 +21,16 @@ pub struct DrumSynth {
 }
 
 ///|
-/// Create a new DrumSynth sharing an existing AudioContext
-pub fn DrumSynth::new(
+/// Create a new Drum connected to master_gain
+fn Drum::new(
   ctx : @web_audio.AudioContext,
-  destination : @web_audio.AudioNode,
-  volume_scale? : Double = 0.2,
-) -> DrumSynth {
-  let master_gain = ctx.create_gain()
-  master_gain.connect(destination)
+  master_gain : @web_audio.GainNode,
+) -> Drum {
+  let gain = ctx.create_gain()
+  gain.connect(master_gain.as_audio_node())
   // Pre-generate 0.3s of white noise (long enough for any single hit)
   let noise_buffer = create_noise_buffer(ctx, 0.3)
-  DrumSynth::{ ctx, master_gain, noise_buffer, volume_scale }
+  { ctx, gain, noise_buffer, volume_scale: 0.2 }
 }
 
 ///|
@@ -67,21 +66,9 @@ extern "js" fn ffi_create_noise_buffer(
   #| }
 
 ///|
-/// Mute drum output
-pub fn DrumSynth::mute(self : DrumSynth) -> Unit {
-  set_gain_immediate(self.master_gain, 0.0)
-}
-
-///|
-/// Unmute drum output
-pub fn DrumSynth::unmute(self : DrumSynth) -> Unit {
-  set_gain_immediate(self.master_gain, 1.0)
-}
-
-///|
 /// Play a noise burst through a gain envelope
-fn DrumSynth::play_noise(
-  self : DrumSynth,
+fn Drum::play_noise(
+  self : Drum,
   start_time : Double,
   duration : Double,
   volume : Double,
@@ -93,7 +80,7 @@ fn DrumSynth::play_noise(
   gain_param.set_value_at_time(volume, start_time)
   gain_param.exponential_ramp_to_value_at_time(0.001, start_time + duration)
   source.connect(gain.as_audio_node())
-  gain.connect(self.master_gain.as_audio_node())
+  gain.connect(self.gain.as_audio_node())
   source.start(start_time)
   source.stop(start_time + duration)
   gain
@@ -102,8 +89,8 @@ fn DrumSynth::play_noise(
 ///|
 /// Schedule a kick drum hit
 /// Sine oscillator with pitch sweep (150Hz→40Hz) for a punchy low-end thump
-fn DrumSynth::schedule_kick(
-  self : DrumSynth,
+fn Drum::schedule_kick(
+  self : Drum,
   start_time : Double,
   velocity : Double,
 ) -> Unit {
@@ -120,7 +107,7 @@ fn DrumSynth::schedule_kick(
   gain_param.set_value_at_time(velocity * 1.2, start_time)
   gain_param.exponential_ramp_to_value_at_time(0.001, start_time + duration)
   osc.connect(gain.as_audio_node())
-  gain.connect(self.master_gain.as_audio_node())
+  gain.connect(self.gain.as_audio_node())
   osc.start(start_time)
   osc.stop(start_time + duration)
 
@@ -131,8 +118,8 @@ fn DrumSynth::schedule_kick(
 ///|
 /// Schedule a snare drum hit
 /// Noise burst for the snare rattle + triangle oscillator for the body tone
-fn DrumSynth::schedule_snare(
-  self : DrumSynth,
+fn Drum::schedule_snare(
+  self : Drum,
   start_time : Double,
   velocity : Double,
 ) -> Unit {
@@ -155,7 +142,7 @@ fn DrumSynth::schedule_snare(
     start_time + duration * 0.6,
   )
   body.connect(body_gain.as_audio_node())
-  body_gain.connect(self.master_gain.as_audio_node())
+  body_gain.connect(self.gain.as_audio_node())
   body.start(start_time)
   body.stop(start_time + duration)
 }
@@ -163,8 +150,8 @@ fn DrumSynth::schedule_snare(
 ///|
 /// Schedule a hi-hat hit
 /// Filtered noise burst for metallic shimmer
-fn DrumSynth::schedule_hihat(
-  self : DrumSynth,
+fn Drum::schedule_hihat(
+  self : Drum,
   start_time : Double,
   velocity : Double,
 ) -> Unit {
@@ -183,7 +170,7 @@ fn DrumSynth::schedule_hihat(
     gain_param.set_value_at_time(velocity * 0.06, start_time)
     gain_param.exponential_ramp_to_value_at_time(0.001, start_time + duration)
     osc.connect(gain.as_audio_node())
-    gain.connect(self.master_gain.as_audio_node())
+    gain.connect(self.gain.as_audio_node())
     osc.start(start_time)
     osc.stop(start_time + duration)
   })
@@ -192,8 +179,8 @@ fn DrumSynth::schedule_hihat(
 ///|
 /// Schedule drum sounds from AudioSound array
 /// Identifies drum voice from MIDI number and dispatches to appropriate synthesis
-pub fn DrumSynth::schedule_notes(
-  self : DrumSynth,
+fn Drum::schedule_notes(
+  self : Drum,
   sounds : Array[@music.AudioSound],
   volume : Double,
 ) -> Unit {

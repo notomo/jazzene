@@ -2,23 +2,14 @@
 /// Jazzene - Jazz Improvisation Web App (Tick-based Architecture)
 fn main {
   let state = @ui.AppState::new()
-
-  let synth = @audio.Synthesizer::new()
-  synth.load_samples()
-  let drum_synth = @audio.DrumSynth::new(
-    synth.audio_context(),
-    synth.destination(),
-  )
-
-  let tick = make_tick(state, synth, drum_synth)
+  let synthesizer = @audio.Synthesizer::new()
+  let tick = make_tick(state, synthesizer)
 
   let _ = @signals.effect(fn() {
     if state.is_playing.get() {
-      synth.unmute()
-      drum_synth.unmute()
+      synthesizer.unmute()
     } else {
-      synth.mute()
-      drum_synth.mute()
+      synthesizer.mute()
     }
   })
 
@@ -29,8 +20,7 @@ fn main {
 ///|
 fn make_tick(
   state : @ui.AppState,
-  synth : @audio.Synthesizer,
-  drum_synth : @audio.DrumSynth,
+  synthesizer : @audio.Synthesizer,
 ) -> (Double) -> Bool {
   let lookahead = @music.Duration::from_milliseconds(100)
 
@@ -53,36 +43,26 @@ fn make_tick(
       final_position,
       lookahead,
     )
-    synth.schedule_notes(audio_sounds, state.volume.get().to_double() / 100.0)
-
-    let drum_audio_sounds = @music.AudioSound::from(
-      (state.drum_sounds)(),
-      final_position,
-      lookahead,
-    )
-    drum_synth.schedule_notes(
-      drum_audio_sounds,
-      state.volume.get().to_double() / 100.0,
-    )
-
     let backing_audio_sounds = @music.AudioSound::from(
       (state.backing_sounds)(),
       final_position,
       lookahead,
     )
-    synth.schedule_notes(
-      backing_audio_sounds,
-      state.volume.get().to_double() / 100.0,
-    )
-
     let bass_audio_sounds = @music.AudioSound::from(
       (state.bass_sounds)(),
       final_position,
       lookahead,
     )
-    synth.schedule_bass_notes(
-      bass_audio_sounds,
-      state.volume.get().to_double() / 100.0 * 0.7,
+    let drum_audio_sounds = @music.AudioSound::from(
+      (state.drum_sounds)(),
+      final_position,
+      lookahead,
+    )
+    synthesizer.schedule_sounds(
+      piano_sounds=audio_sounds + backing_audio_sounds,
+      bass_sounds=bass_audio_sounds,
+      drum_sounds=drum_audio_sounds,
+      volume=state.volume.get().to_double() / 100.0,
     )
 
     state.playback_position.set(final_position)
