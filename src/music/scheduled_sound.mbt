@@ -47,7 +47,7 @@ pub fn convert_measures_to_sounds(
   let beat_duration_ms = ms_per_beat(bpm)
 
   // Flatten all notes with their absolute start times
-  let flat_notes : Array[(Double, MeasureNote)] = measures
+  let flat_notes : Array[(Double, Double, MeasureNote)] = measures
     .iter()
     .flat_map(fn(measure) {
       let measure_start_ms = measure.start_time.to_milliseconds()
@@ -60,7 +60,7 @@ pub fn convert_measures_to_sounds(
         let note_start_ms = measure_start_ms +
           start_beat * beat_duration_ms +
           swing_delay
-        (note_start_ms, note)
+        (note_start_ms, swing_delay, note)
       })
     })
     .collect()
@@ -69,7 +69,7 @@ pub fn convert_measures_to_sounds(
 
   let sounds : Array[ScheduledSound] = []
   for i = 0; i < flat_notes.length(); i = i + 1 {
-    let (start_ms, note) = flat_notes[i]
+    let (start_ms, swing_delay, note) = flat_notes[i]
 
     // Skip TieEnd and TieBoth - they were already counted by TieStart
     match note.tie {
@@ -78,13 +78,15 @@ pub fn convert_measures_to_sounds(
     }
 
     // Calculate total duration (including any tied continuations)
+    // Subtract swing_delay so the note ends at the original absolute time,
+    // preventing overlap with the next beat's note
 
     let base_beats = note.duration.to_beats()
     let total_beats = match note.tie {
       Some(TieStart) => accumulate_tied_beats(flat_notes, i + 1, base_beats)
       _ => base_beats
     }
-    let duration_ms = total_beats * beat_duration_ms
+    let duration_ms = total_beats * beat_duration_ms - swing_delay
 
     let sound_event : SoundEvent = match note.midi {
       Some(midi) =>
@@ -109,14 +111,14 @@ pub fn convert_measures_to_sounds(
 ///|
 /// Accumulate beats from tied notes (TieEnd/TieBoth) following a TieStart
 fn accumulate_tied_beats(
-  flat_notes : Array[(Double, MeasureNote)],
+  flat_notes : Array[(Double, Double, MeasureNote)],
   start_index : Int,
   initial_beats : Double,
 ) -> Double {
   let mut total = initial_beats
 
   for j = start_index; j < flat_notes.length(); j = j + 1 {
-    let (_, next_note) = flat_notes[j]
+    let (_, _, next_note) = flat_notes[j]
     match next_note.tie {
       Some(TieBoth) => total = total + next_note.duration.to_beats()
       Some(TieEnd) => {
