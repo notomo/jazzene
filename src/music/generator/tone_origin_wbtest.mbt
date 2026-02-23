@@ -194,7 +194,6 @@ test "generated MeasureNote carries tone_origin" {
     incoming_stamina: 50,
     incoming_last_midi: None,
     incoming_phrase: None,
-    incoming_motif_memory: MotifMemory::empty(),
   }
   let result = generator(ctx)
   // All non-rest notes must have a tone_origin; rests must have None

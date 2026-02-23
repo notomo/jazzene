@@ -9,7 +9,6 @@ pub(all) struct Techniques {
   enclosure_tones : Bool // Enclosure tones (2 semitones from chord tones)
   syncopation : Bool // Syncopation (off-beat phrase starts)
   triplets : Bool // Eighth-note triplets
-  motif_reuse : Bool // Motif replay
   bebop_scales : Bool // Bebop passing tones (major 7th for dom7, #5 for maj7)
 } derive(Eq, Show)
 
@@ -23,7 +22,6 @@ pub fn Techniques::default() -> Techniques {
     enclosure_tones: true,
     syncopation: true,
     triplets: true,
-    motif_reuse: true,
     bebop_scales: false, // disabled by default; opt-in feature
   }
 }
@@ -65,11 +63,6 @@ pub fn ImprovisationConfig::with_techniques(
     },
     triplet_probability: if techniques.triplets {
       self.triplet_probability
-    } else {
-      0
-    },
-    motif_reuse_probability: if techniques.motif_reuse {
-      self.motif_reuse_probability
     } else {
       0
     },

@@ -41,7 +41,6 @@ test "generated notes can include Enclosure origin" {
     incoming_stamina: 50,
     incoming_last_midi: None,
     incoming_phrase: None,
-    incoming_motif_memory: MotifMemory::empty(),
   }
   // Generate many measures and check that origins are always valid
   for seed = 0; seed < 5; seed = seed + 1 {

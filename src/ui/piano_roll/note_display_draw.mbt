@@ -33,9 +33,6 @@ const COLOR_SCALE_TONE = "#fbbf24"
 const COLOR_GUIDE_TONE = "#c084fc"
 
 ///|
-const COLOR_MOTIF_REPLAY = "#f472b6"
-
-///|
 /// Map ToneOrigin to display color
 fn tone_origin_color(origin : @music.ToneOrigin) -> String {
   match origin {
@@ -44,7 +41,6 @@ fn tone_origin_color(origin : @music.ToneOrigin) -> String {
     ApproachTone | Enclosure | PassingTone => COLOR_APPROACH
     ScaleTone => COLOR_SCALE_TONE
     GuideTone => COLOR_GUIDE_TONE
-    MotifReplay => COLOR_MOTIF_REPLAY
   }
 }
 

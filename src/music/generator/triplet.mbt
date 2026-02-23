@@ -36,8 +36,20 @@ fn generate_triplet_group(
 
   for i = 0; i < 3; i = i + 1 {
     let current_chord = ctx.chord_at(current_state.measure_pos)
-    let (midi_opt, tone_origin, new_motif_memory) = select_note_with_motif(
-      current_state, current_chord, settings, random_int,
+    let (midi_opt, tone_origin) = decide_midi_number(
+      current_chord,
+      current_state.last_midi,
+      current_state.stamina,
+      settings.stamina_max,
+      current_state.last_was_rest,
+      0,
+      settings.scale_tone_weight_ratio,
+      settings.tension_weight_ratio,
+      settings.approach_weight_ratio,
+      settings.enclosure_weight_ratio,
+      settings.bebop_weight_ratio,
+      settings.max_interval,
+      random_int,
     )
 
     match midi_opt {
@@ -52,12 +64,6 @@ fn generate_triplet_group(
             current_state.stamina - cost + settings.stamina_passive_recovery,
             settings.stamina_max,
           ),
-        )
-        let new_motif_memory = record_motif_interval(
-          new_motif_memory,
-          current_state.last_midi,
-          midi,
-          current_state.motif_first_note,
         )
         let beat_index = current_state.measure_pos.to_int()
         current_state.beat_notes[beat_index].push(@music.MeasureNote::{
@@ -86,8 +92,6 @@ fn generate_triplet_group(
           last_midi: Some(midi),
           last_was_rest: false,
           phrase: next_phrase,
-          motif_memory: new_motif_memory,
-          motif_first_note: false,
         }
       }
       None => break

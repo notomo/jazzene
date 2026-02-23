@@ -24,7 +24,6 @@ pub struct MeasureContext {
   incoming_stamina : Int // Stamina from previous measure
   incoming_last_midi : @music.MidiNumber? // Last note from previous measure
   incoming_phrase : Int? // Phrase state from previous measure (Some(n) = playing, None = resting)
-  incoming_motif_memory : MotifMemory // Motif memory from previous measure
 }
 
 ///|
@@ -79,7 +78,6 @@ pub struct MeasureResult {
   outgoing_stamina : Int // Stamina to pass to next measure
   outgoing_last_midi : @music.MidiNumber? // Last note to pass to next measure
   outgoing_phrase : Int? // Phrase state to pass to next measure (Some(n) = playing, None = resting)
-  outgoing_motif_memory : MotifMemory // Motif memory to pass to next measure
 }
 
 ///|
@@ -106,7 +104,6 @@ pub(all) struct ImprovisationConfig {
   phrase_early_end_stamina : Int // Below this stamina, phrase may end early (default: 15)
   max_interval : Int // Maximum interval jump in semitones (default: 7 = perfect fifth)
   syncopation_probability : Int // 0-100, chance of forcing off-beat phrase start on downbeats (default: 40)
-  motif_reuse_probability : Int // 0-100, chance of replaying a stored motif when starting a new phrase (default: 30)
   triplet_probability : Int // 0-100, chance of generating eighth-note triplet group when playing (default: 15)
   bebop_weight_ratio : Int // 0-100, bebop passing tone weight as % of chord tone weight (default: 0 = disabled)
 } derive(Eq, Show)
@@ -132,7 +129,6 @@ pub fn ImprovisationConfig::default(seed : Int) -> ImprovisationConfig {
     phrase_early_end_stamina: 15,
     max_interval: 7,
     syncopation_probability: 40,
-    motif_reuse_probability: 30,
     triplet_probability: 8,
     bebop_weight_ratio: 0,
   }
@@ -159,8 +155,6 @@ priv struct MeasureState {
   last_midi : @music.MidiNumber?
   last_was_rest : Bool
   phrase : PhraseState
-  motif_memory : MotifMemory
-  motif_first_note : Bool // true if next note is the first in the current phrase
 }
 
 ///|
@@ -169,7 +163,6 @@ fn MeasureState::new(
   stamina : Int,
   last_midi : @music.MidiNumber?,
   phrase : PhraseState,
-  motif_memory : MotifMemory,
 ) -> MeasureState {
   MeasureState::{
     measure_pos: 0.0,
@@ -178,11 +171,6 @@ fn MeasureState::new(
     last_midi,
     last_was_rest: false,
     phrase,
-    motif_memory,
-    motif_first_note: match phrase {
-      Playing(_) => false // continuing phrase from previous measure
-      Resting => true // will be set properly when entering Playing
-    },
   }
 }
 
@@ -201,8 +189,6 @@ fn MeasureState::add_note(
     last_midi: self.last_midi,
     last_was_rest: note.midi is None, // rest if no MIDI
     phrase,
-    motif_memory: self.motif_memory,
-    motif_first_note: self.motif_first_note,
   }
 }
 
@@ -273,7 +259,6 @@ fn generate_measure_notes(
     incoming_stamina: ctx.incoming_stamina,
     incoming_last_midi: c_incoming_last_midi,
     incoming_phrase: ctx.incoming_phrase,
-    incoming_motif_memory: ctx.incoming_motif_memory,
   }
 
   // Convert Int? to PhraseState
@@ -287,7 +272,6 @@ fn generate_measure_notes(
     c_ctx.incoming_stamina,
     c_ctx.incoming_last_midi,
     incoming_phrase,
-    c_ctx.incoming_motif_memory,
   )
 
   // Handle incoming tie first
@@ -353,7 +337,6 @@ fn generate_measure_notes(
     outgoing_stamina: final_state.stamina,
     outgoing_last_midi: real_outgoing_last_midi,
     outgoing_phrase,
-    outgoing_motif_memory: final_state.motif_memory,
   }
 }
 
@@ -411,183 +394,6 @@ fn roll_phrase_length(
 }
 
 ///|
-/// Find the closest available chord/scale tone to a target MIDI number.
-/// Used for motif-guided note selection where the target comes from replaying
-/// a stored interval pattern.
-fn select_motif_guided_note(
-  target_value : Int,
-  chord : @music.Chord,
-  last_midi : @music.MidiNumber,
-  max_interval : Int,
-) -> @music.MidiNumber? {
-  let target = match @music.MidiNumber::new(target_value) {
-    Some(t) => t
-    None => return None // target out of valid MIDI range
-  }
-
-  let chord_tones = filter_by_interval(
-    extend_across_octaves(chord.tones()),
-    last_midi,
-    max_interval,
-  )
-  let scale_tones = filter_by_interval(
-    extend_across_octaves(chord.scale_tones()),
-    last_midi,
-    max_interval,
-  )
-  let all_tones = chord_tones + scale_tones
-  guard not(all_tones.is_empty()) else { return None }
-
-  let mut best = all_tones[0]
-  let mut best_dist = target.distance(best)
-  for tone in all_tones {
-    let d = target.distance(tone)
-    if d < best_dist {
-      best = tone
-      best_dist = d
-    }
-  }
-  Some(best)
-}
-
-///|
-/// Select a note, using motif-guided selection if replaying, otherwise normal selection.
-/// Returns (midi_option, tone_origin_option, updated_motif_memory).
-fn select_note_with_motif(
-  state : MeasureState,
-  chord : @music.Chord,
-  settings : ImprovisationConfig,
-  random_int : (Int) -> Int,
-) -> (@music.MidiNumber?, @music.ToneOrigin?, MotifMemory) {
-  // First note of phrase: always use normal selection
-  guard not(state.motif_first_note) else {
-    let (midi, origin) = decide_midi_number(
-      chord,
-      state.last_midi,
-      state.stamina,
-      settings.stamina_max,
-      state.last_was_rest,
-      0,
-      settings.scale_tone_weight_ratio,
-      settings.tension_weight_ratio,
-      settings.approach_weight_ratio,
-      settings.enclosure_weight_ratio,
-      settings.bebop_weight_ratio,
-      settings.max_interval,
-      random_int,
-    )
-    return (midi, origin, state.motif_memory)
-  }
-
-  // Try motif-guided selection if replaying
-  match state.motif_memory.next_replay_interval() {
-    Some((interval, updated_memory)) =>
-      match state.last_midi {
-        Some(prev) => {
-          let target = prev.value + interval
-          match
-            select_motif_guided_note(target, chord, prev, settings.max_interval) {
-            Some(midi) => (Some(midi), Some(@music.MotifReplay), updated_memory)
-            None => {
-              // Motif interval didn't work, fall back to normal selection
-              let (midi, origin) = decide_midi_number(
-                chord,
-                state.last_midi,
-                state.stamina,
-                settings.stamina_max,
-                state.last_was_rest,
-                0,
-                settings.scale_tone_weight_ratio,
-                settings.tension_weight_ratio,
-                settings.approach_weight_ratio,
-                settings.enclosure_weight_ratio,
-                settings.bebop_weight_ratio,
-                settings.max_interval,
-                random_int,
-              )
-              (midi, origin, MotifMemory::{ ..updated_memory, replaying: None })
-            }
-          }
-        }
-        None => {
-          let (midi, origin) = decide_midi_number(
-            chord,
-            state.last_midi,
-            state.stamina,
-            settings.stamina_max,
-            state.last_was_rest,
-            0,
-            settings.scale_tone_weight_ratio,
-            settings.tension_weight_ratio,
-            settings.approach_weight_ratio,
-            settings.enclosure_weight_ratio,
-            settings.bebop_weight_ratio,
-            settings.max_interval,
-            random_int,
-          )
-          (midi, origin, state.motif_memory)
-        }
-      }
-    None => {
-      // Not replaying or replay finished, use normal selection
-      let (midi, origin) = decide_midi_number(
-        chord,
-        state.last_midi,
-        state.stamina,
-        settings.stamina_max,
-        state.last_was_rest,
-        0,
-        settings.scale_tone_weight_ratio,
-        settings.tension_weight_ratio,
-        settings.approach_weight_ratio,
-        settings.enclosure_weight_ratio,
-        settings.bebop_weight_ratio,
-        settings.max_interval,
-        random_int,
-      )
-      (midi, origin, state.motif_memory)
-    }
-  }
-}
-
-///|
-/// Record the interval between the current note and previous note into motif memory,
-/// but only when recording (not replaying) and not on the first note of a phrase.
-fn record_motif_interval(
-  motif_memory : MotifMemory,
-  prev_midi : @music.MidiNumber?,
-  current_midi : @music.MidiNumber,
-  first_note : Bool,
-) -> MotifMemory {
-  guard not(first_note) && motif_memory.replaying is None else {
-    return motif_memory
-  }
-  match prev_midi {
-    Some(prev) => motif_memory.record_interval(current_midi.value - prev.value)
-    None => motif_memory
-  }
-}
-
-///|
-/// Choose a motif to replay (with optional inversion) when starting a new phrase.
-/// Returns updated motif memory with replay started, or unchanged if no replay.
-fn maybe_start_motif_replay(
-  motif_memory : MotifMemory,
-  settings : ImprovisationConfig,
-  random_int : (Int) -> Int,
-) -> MotifMemory {
-  guard not(motif_memory.stored.is_empty()) &&
-    random_int(100) < settings.motif_reuse_probability else {
-    return motif_memory
-  }
-  let index = random_int(motif_memory.stored.length())
-  let motif = motif_memory.stored[index]
-  // 40% chance to invert the motif for variation
-  let motif = if random_int(100) < 40 { motif.invert() } else { motif }
-  motif_memory.start_replay(motif)
-}
-
-///|
 /// Result of a single step in fill_remaining_measure
 priv enum StepResult {
   Continue(MeasureState)
@@ -602,7 +408,6 @@ fn handle_resting(
   settings : ImprovisationConfig,
   random_int : (Int) -> Int,
 ) -> StepResult {
-  let motif_memory = state.motif_memory.finish_recording()
   let duration = match
     syncopation_rest(
       state.measure_pos,
@@ -635,9 +440,6 @@ fn handle_resting(
         tone_origin: None,
       })
       let new_phrase_len = roll_phrase_length(settings, random_int)
-      let new_motif_memory = maybe_start_motif_replay(
-        motif_memory, settings, random_int,
-      )
       Continue(MeasureState::{
         measure_pos: state.measure_pos + duration.to_beats(),
         beat_notes: state.beat_notes,
@@ -645,11 +447,9 @@ fn handle_resting(
         last_midi: state.last_midi,
         last_was_rest: true,
         phrase: Playing(new_phrase_len),
-        motif_memory: new_motif_memory,
-        motif_first_note: true,
       })
     }
-    None => Break(MeasureState::{ ..state, motif_memory, })
+    None => Break(state)
   }
 }
 
@@ -696,9 +496,21 @@ fn handle_playing(
       ),
     )
   }
-  // Select note using motif-guided or normal selection
-  let (midi_opt, tone_origin, new_motif_memory) = select_note_with_motif(
-    state, chord, settings, random_int,
+  // Select note using normal selection
+  let (midi_opt, tone_origin) = decide_midi_number(
+    chord,
+    state.last_midi,
+    state.stamina,
+    settings.stamina_max,
+    state.last_was_rest,
+    0,
+    settings.scale_tone_weight_ratio,
+    settings.tension_weight_ratio,
+    settings.approach_weight_ratio,
+    settings.enclosure_weight_ratio,
+    settings.bebop_weight_ratio,
+    settings.max_interval,
+    random_int,
   )
   match midi_opt {
     Some(midi) =>
@@ -720,12 +532,6 @@ fn handle_playing(
               settings.stamina_max,
             ),
           )
-          let new_motif_memory = record_motif_interval(
-            new_motif_memory,
-            state.last_midi,
-            midi,
-            state.motif_first_note,
-          )
           let beat_index = state.measure_pos.to_int()
           state.beat_notes[beat_index].push(@music.MeasureNote::{
             midi: Some(midi.value),
@@ -745,8 +551,6 @@ fn handle_playing(
             last_midi: Some(midi),
             last_was_rest: false,
             phrase: next_phrase,
-            motif_memory: new_motif_memory,
-            motif_first_note: false,
           })
         }
         None => Break(state)

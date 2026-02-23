@@ -38,7 +38,6 @@ pub fn JazzStyle::straight() -> JazzStyle {
     enclosure_tones: false,
     syncopation: false,
     triplets: false,
-    motif_reuse: false,
     bebop_scales: false,
   }
   JazzStyle::{
@@ -65,7 +64,6 @@ pub fn JazzStyle::light_jazz() -> JazzStyle {
       enclosure_tones: false,
       syncopation: false,
       triplets: false,
-      motif_reuse: false,
       bebop_scales: false,
     },
     comping_enabled: true,
@@ -108,7 +106,6 @@ pub fn JazzStyle::cool_jazz() -> JazzStyle {
       enclosure_tones: false,
       syncopation: true,
       triplets: false,
-      motif_reuse: true,
       bebop_scales: false,
     },
     comping_enabled: true,
@@ -132,7 +129,6 @@ pub fn JazzStyle::modal() -> JazzStyle {
       enclosure_tones: false,
       syncopation: true,
       triplets: true,
-      motif_reuse: true,
       bebop_scales: false,
     },
     comping_enabled: true,

@@ -9,7 +9,6 @@ let legend_entries : Array[(String, String, String)] = [
   ("●", "#fb923c", "Approach / Enclosure"),
   ("●", "#fbbf24", "Scale Tone"),
   ("●", "#c084fc", "Guide Tone (3rd/7th)"),
-  ("●", "#f472b6", "Motif Replay"),
 ]
 
 ///|

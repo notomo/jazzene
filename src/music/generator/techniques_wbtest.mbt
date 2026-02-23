@@ -7,7 +7,6 @@ test "Techniques::default enables standard techniques, bebop disabled by default
   assert_true(t.enclosure_tones)
   assert_true(t.syncopation)
   assert_true(t.triplets)
-  assert_true(t.motif_reuse)
   // bebop_scales is opt-in; disabled by default
   assert_false(t.bebop_scales)
 }
@@ -23,7 +22,6 @@ test "ImprovisationConfig::with_techniques preserves values when all enabled" {
   assert_eq(result.enclosure_weight_ratio, s.enclosure_weight_ratio)
   assert_eq(result.syncopation_probability, s.syncopation_probability)
   assert_eq(result.triplet_probability, s.triplet_probability)
-  assert_eq(result.motif_reuse_probability, s.motif_reuse_probability)
   assert_eq(result.bebop_weight_ratio, 0) // bebop disabled by default
 }
 
@@ -93,14 +91,6 @@ test "ImprovisationConfig::with_techniques zeros triplets when disabled" {
 }
 
 ///|
-test "ImprovisationConfig::with_techniques zeros motif reuse when disabled" {
-  let s = ImprovisationConfig::default(42)
-  let t = Techniques::{ ..Techniques::default(), motif_reuse: false }
-  let result = s.with_techniques(t)
-  assert_eq(result.motif_reuse_probability, 0)
-}
-
-///|
 test "ImprovisationConfig::with_techniques zeros multiple techniques" {
   let s = ImprovisationConfig::default(42)
   let t = Techniques::{
@@ -110,7 +100,6 @@ test "ImprovisationConfig::with_techniques zeros multiple techniques" {
     enclosure_tones: false,
     syncopation: true,
     triplets: true,
-    motif_reuse: false,
     bebop_scales: false,
   }
   let result = s.with_techniques(t)
@@ -120,5 +109,4 @@ test "ImprovisationConfig::with_techniques zeros multiple techniques" {
   assert_eq(result.enclosure_weight_ratio, 0)
   assert_eq(result.syncopation_probability, s.syncopation_probability)
   assert_eq(result.triplet_probability, s.triplet_probability)
-  assert_eq(result.motif_reuse_probability, 0)
 }

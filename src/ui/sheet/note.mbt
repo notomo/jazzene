@@ -147,7 +147,6 @@ fn tone_origin_color(origin : @music.ToneOrigin) -> String {
     ApproachTone | Enclosure | PassingTone => "#fb923c"
     ScaleTone => "#fbbf24"
     GuideTone => "#c084fc"
-    MotifReplay => "#f472b6"
   }
 }
 

@@ -296,22 +296,6 @@ pub fn settings_panel(
                 },
               ),
               technique_toggle(
-                "Motif Reuse",
-                value=fn() { jazz_style.get().techniques.motif_reuse },
-                on_toggle=fn() {
-                  jazz_style.update(fn(js) {
-                    let t = js.techniques
-                    JazzStyle::{
-                      ..js,
-                      techniques: @generator.Techniques::{
-                        ..t,
-                        motif_reuse: not(t.motif_reuse),
-                      },
-                    }
-                  })
-                },
-              ),
-              technique_toggle(
                 "Bebop Scales",
                 value=fn() { jazz_style.get().techniques.bebop_scales },
                 on_toggle=fn() {

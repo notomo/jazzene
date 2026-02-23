@@ -187,9 +187,6 @@ fn techniques_to_string(t : @generator.Techniques) -> String {
   if t.triplets {
     names.push("triplets")
   }
-  if t.motif_reuse {
-    names.push("motif")
-  }
   if t.bebop_scales {
     names.push("bebop")
   }
@@ -208,14 +205,13 @@ fn techniques_from_string(s : String) -> @generator.Techniques {
     enclosure_tones: has("enclosure"),
     syncopation: has("syncopation"),
     triplets: has("triplets"),
-    motif_reuse: has("motif"),
     bebop_scales: has("bebop"),
   }
 }
 
 ///|
 /// Default techniques string (all enabled except bebop).
-let default_techniques_str : String = "tension,scale,approach,enclosure,syncopation,triplets,motif"
+let default_techniques_str : String = "tension,scale,approach,enclosure,syncopation,triplets"
 
 ///|
 /// Serialize CompingStyle (with enabled flag) to a token.
