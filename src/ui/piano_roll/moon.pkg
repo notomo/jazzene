@@ -4,6 +4,7 @@ import {
   "mizchi/luna/dom" @luna_dom,
   "internal/jazzene/music" @music,
   "mizchi/js/browser/canvas" @canvas,
+  "internal/jazzene/ui/theme" @theme,
   "mizchi/js/browser/dom" @js_dom,
 }
 

@@ -17,62 +17,6 @@ const BACKING_PLAYING_COLOR = "#6b7280"
 const BACKING_DEFAULT_COLOR = "#9ca3af"
 
 ///|
-/// Technique highlight colors (default/upcoming state)
-const COLOR_CHORD_TONE = "#60a5fa"
-
-///|
-const COLOR_TENSION = "#4ade80"
-
-///|
-const COLOR_APPROACH = "#fb923c"
-
-///|
-const COLOR_SCALE_TONE = "#fbbf24"
-
-///|
-const COLOR_GUIDE_TONE = "#c084fc"
-
-///|
-/// Map ToneOrigin to display color
-fn tone_origin_color(origin : @music.ToneOrigin) -> String {
-  match origin {
-    ChordTone => COLOR_CHORD_TONE
-    Tension(_) => COLOR_TENSION
-    ApproachTone | Enclosure | PassingTone => COLOR_APPROACH
-    ScaleTone => COLOR_SCALE_TONE
-    GuideTone => COLOR_GUIDE_TONE
-  }
-}
-
-///|
-/// Slightly darker variants used when a note is actively playing
-const PLAYING_COLOR_CHORD_TONE = "#3b82f6"
-
-///|
-const PLAYING_COLOR_TENSION = "#22c55e"
-
-///|
-const PLAYING_COLOR_APPROACH = "#f97316"
-
-///|
-const PLAYING_COLOR_SCALE_TONE = "#eab308"
-
-///|
-const PLAYING_COLOR_GUIDE_TONE = "#a855f7"
-
-///|
-/// Map ToneOrigin to slightly darker color used when note is actively playing
-fn tone_origin_playing_color(origin : @music.ToneOrigin) -> String {
-  match origin {
-    ChordTone => PLAYING_COLOR_CHORD_TONE
-    Tension(_) => PLAYING_COLOR_TENSION
-    ApproachTone | Enclosure | PassingTone => PLAYING_COLOR_APPROACH
-    ScaleTone => PLAYING_COLOR_SCALE_TONE
-    GuideTone => PLAYING_COLOR_GUIDE_TONE
-  }
-}
-
-///|
 /// Gap in pixels between consecutive notes to visually separate them
 const NOTE_GAP_PX = 2.0
 
@@ -390,8 +334,8 @@ fn draw_falling_notes(
     let is_playing = current_pos >= note.start_ms &&
       current_pos < note.start_ms + note.duration_ms
     ctx.fillStyle = match (note.tone_origin, is_playing) {
-      (Some(origin), true) => tone_origin_playing_color(origin)
-      (Some(origin), false) => tone_origin_color(origin)
+      (Some(origin), true) => @theme.tone_origin_playing_color(origin)
+      (Some(origin), false) => @theme.tone_origin_color(origin)
       (None, true) => playing_color
       (None, false) => default_color
     }

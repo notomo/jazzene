@@ -36,7 +36,7 @@ pub fn keyboard(
         Some(m) =>
           set[m.value] = Some(
             match s.tone_origin {
-              Some(origin) => tone_origin_playing_color(origin)
+              Some(origin) => @theme.tone_origin_playing_color(origin)
               None => NOTE_PLAYING_COLOR
             },
           )

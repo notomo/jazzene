@@ -1,0 +1,7 @@
+import {
+  "internal/jazzene/music" @music,
+}
+
+options(
+  "supported-targets": [ "js" ],
+)

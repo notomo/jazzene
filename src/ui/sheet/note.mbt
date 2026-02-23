@@ -139,18 +139,6 @@ fn render_stem_and_flag(
 }
 
 ///|
-/// Map ToneOrigin to a highlight color for sheet music
-fn tone_origin_color(origin : @music.ToneOrigin) -> String {
-  match origin {
-    ChordTone => "#60a5fa"
-    Tension(_) => "#4ade80"
-    ApproachTone | Enclosure | PassingTone => "#fb923c"
-    ScaleTone => "#fbbf24"
-    GuideTone => "#c084fc"
-  }
-}
-
-///|
 /// Render a tension degree label (e.g. "9", "11", "13") above a note
 fn render_tension_label(
   degree : Int,
@@ -190,7 +178,7 @@ fn render_note_from_sheet(
   let note_head = render_note_head(note.duration, note_x, note_y)
   let colored_head = match note.tone_origin {
     Some(origin) => {
-      let color = tone_origin_color(origin)
+      let color = @theme.tone_origin_color(origin)
       @luna_dom.svg_g(
         attrs=[
           ("fill", @luna_dom.Attr::AttrString(color)),
