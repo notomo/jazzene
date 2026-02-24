@@ -19,7 +19,6 @@ pub(all) enum ToneOrigin {
   ApproachTone // Chromatic approach tone (half-step above/below chord tone)
   Enclosure // Enclosure pattern (surrounding a chord tone from above and below)
   PassingTone // Passing tone (connecting scale tone)
-  GuideTone // Guide tone (3rd/7th smooth voice leading)
 } derive(Eq, Show)
 
 ///|

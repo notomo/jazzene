@@ -11,9 +11,6 @@ pub const COLOR_APPROACH = "#fb923c"
 pub const COLOR_SCALE_TONE = "#f472b6"
 
 ///|
-pub const COLOR_GUIDE_TONE = "#c084fc"
-
-///|
 pub const PLAYING_COLOR_CHORD_TONE = "#3b82f6"
 
 ///|
@@ -26,16 +23,12 @@ pub const PLAYING_COLOR_APPROACH = "#f97316"
 pub const PLAYING_COLOR_SCALE_TONE = "#ec4899"
 
 ///|
-pub const PLAYING_COLOR_GUIDE_TONE = "#a855f7"
-
-///|
 pub fn tone_origin_color(origin : @music.ToneOrigin) -> String {
   match origin {
     ChordTone => COLOR_CHORD_TONE
     Tension(_) => COLOR_TENSION
     ApproachTone | Enclosure | PassingTone => COLOR_APPROACH
     ScaleTone => COLOR_SCALE_TONE
-    GuideTone => COLOR_GUIDE_TONE
   }
 }
 
@@ -46,6 +39,5 @@ pub fn tone_origin_playing_color(origin : @music.ToneOrigin) -> String {
     Tension(_) => PLAYING_COLOR_TENSION
     ApproachTone | Enclosure | PassingTone => PLAYING_COLOR_APPROACH
     ScaleTone => PLAYING_COLOR_SCALE_TONE
-    GuideTone => PLAYING_COLOR_GUIDE_TONE
   }
 }
