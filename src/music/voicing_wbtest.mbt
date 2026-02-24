@@ -80,6 +80,88 @@ test "full_voicing - smooth voice leading Dm7 to G7" {
 }
 
 ///|
+/// tension_voicing returns guide tones (3rd, 7th) plus a valid tension
+test "tension_voicing - Cmaj7 has guide tones plus one tension" {
+  let chord = Chord::{ root: C, quality: Major7, bass: None }
+  let v = tension_voicing(chord, None, 0)
+  // Guide tones same as shell_voicing: 3rd=E(4), 7th=B(11)
+  assert_eq(v.notes.length(), 3)
+  assert_eq(v.notes[0].pitch_class(), 4) // E (3rd)
+  assert_eq(v.notes[1].pitch_class(), 11) // B (7th)
+  // Tension must be one of Cmaj7 tensions: 9(2)=D, #11(6)=F#, 13(9)=A
+  let tension_pc = v.notes[2].pitch_class()
+  assert_true([2, 6, 9].iter().any(fn(pc) { pc == tension_pc }))
+}
+
+///|
+/// tension_voicing falls back to 2 notes when chord has no tensions (Diminished7)
+test "tension_voicing - Diminished7 has no tensions: returns 2 notes" {
+  let chord = Chord::{ root: C, quality: Diminished7, bass: None }
+  let v = tension_voicing(chord, None, 0)
+  // Diminished7 tensions() = [] → no 3rd note appended
+  assert_eq(v.notes.length(), 2)
+  // Guide tones: intervals [0,3,6,9], gi1=3(Eb), gi2=9(A)
+  assert_eq(v.notes[0].pitch_class(), 3) // Eb (3rd)
+  assert_eq(v.notes[1].pitch_class(), 9) // A (7th)
+}
+
+///|
+/// tension_voicing uses smooth voice leading for the first two notes
+test "tension_voicing - smooth voice leading G7 to Cmaj7" {
+  let g7 = Chord::{ root: G, quality: Dominant7, bass: None }
+  let cmaj7 = Chord::{ root: C, quality: Major7, bass: None }
+  let v_g7 = tension_voicing(g7, None, 0)
+  let v_cmaj7 = tension_voicing(cmaj7, Some(v_g7), 0)
+  // Pitch classes of guide tones are correct
+  assert_eq(v_cmaj7.notes[0].pitch_class(), 4) // E (3rd)
+  assert_eq(v_cmaj7.notes[1].pitch_class(), 11) // B (7th)
+  // Guide tone movement stays within a tritone
+  let dist0 = v_g7.notes[0].distance(v_cmaj7.notes[0])
+  let dist1 = v_g7.notes[1].distance(v_cmaj7.notes[1])
+  assert_true(dist0 <= 6)
+  assert_true(dist1 <= 6)
+}
+
+///|
+/// tension_voicing notes stay in comfortable range (C3-E5)
+test "tension_voicing - notes stay in voicing range" {
+  let chords = [
+    Chord::{ root: C, quality: Major7, bass: None },
+    Chord::{ root: F, quality: Dominant7, bass: None },
+    Chord::{ root: ASharp, quality: Minor7, bass: None },
+    Chord::{ root: DSharp, quality: HalfDiminished, bass: None },
+  ]
+  let mut prev : Voicing? = None
+  for chord in chords {
+    let v = tension_voicing(chord, prev, 42)
+    prev = Some(v)
+    for note in v.notes {
+      assert_true(note.value >= 48) // >= C3
+      assert_true(note.value <= 76) // <= E5
+    }
+  }
+}
+
+///|
+/// tension_voicing with different seeds selects different tensions
+test "tension_voicing - different seeds produce different tensions for Dominant7" {
+  // Dominant7 has 6 tensions [1,2,3,6,8,9] — enough variety for seed variation
+  let chord = Chord::{ root: C, quality: Dominant7, bass: None }
+  let tensions_seen : Array[Int] = []
+  for seed in [0, 1, 7, 99, 1000] {
+    let v = tension_voicing(chord, None, seed)
+    assert_eq(v.notes.length(), 3)
+    let pc = v.notes[2].pitch_class()
+    assert_true([1, 2, 3, 6, 8, 9].iter().any(fn(t) { t == pc }))
+    if not(tensions_seen.iter().any(fn(t) { t == pc })) {
+      tensions_seen.push(pc)
+    }
+  }
+  // At least 2 distinct tensions selected across 5 seeds
+  assert_true(tensions_seen.length() >= 2)
+}
+
+///|
 /// All voicing notes stay in comfortable range
 test "shell_voicing - notes stay in voicing range" {
   let chords = [

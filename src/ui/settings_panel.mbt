@@ -107,6 +107,7 @@ let swing_options : Array[(String, @music.SwingConfig)] = [
 let comping_style_options : Array[(String, @music.CompingStyle)] = [
   ("Guide Tones", @music.GuideTones),
   ("Full", @music.FullVoicing),
+  ("Tensions", @music.WithTensions),
 ]
 
 ///|

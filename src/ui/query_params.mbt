@@ -223,6 +223,7 @@ fn comping_to_string(enabled : Bool, style : @music.CompingStyle) -> String {
     match style {
       @music.GuideTones => "guide"
       @music.FullVoicing => "full"
+      @music.WithTensions => "tensions"
     }
   }
 }
@@ -233,6 +234,7 @@ fn comping_from_string(s : String) -> (Bool, @music.CompingStyle) {
   match s {
     "off" => (false, @music.GuideTones)
     "full" => (true, @music.FullVoicing)
+    "tensions" => (true, @music.WithTensions)
     _ => (true, @music.GuideTones)
   }
 }

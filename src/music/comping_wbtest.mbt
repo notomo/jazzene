@@ -355,6 +355,71 @@ test "generate_comping_sounds: FullVoicing includes all chord tones" {
 }
 
 ///|
+test "generate_comping_sounds: WithTensions includes 3 notes per hit for Cmaj7" {
+  // tension_voicing(Cmaj7, None, seed): 3rd=E, 7th=B, tension=one of [D,F#,A]
+  // Standard(mi=0): 3 hits × 3 tones = 9 sounds
+  let measures = [
+    make_4beat_measure([Chord::{ root: C, quality: Major7, bass: None }], 0.0),
+  ]
+  let sounds = generate_comping_sounds(
+    measures,
+    60,
+    [],
+    voicing_style=WithTensions,
+  )
+  assert_eq(sounds.length(), 9)
+  // First hit: guide tones E and B must be present
+  let first_hit_pcs = comping_midis(sounds[0:3].iter().collect()).map(fn(m) {
+    m % 12
+  })
+  assert_true(first_hit_pcs.iter().any(fn(pc) { pc == 4 })) // E (3rd)
+  assert_true(first_hit_pcs.iter().any(fn(pc) { pc == 11 })) // B (7th)
+  // Tension is one of Cmaj7 tensions: D(2), F#(6), A(9)
+  assert_true(
+    first_hit_pcs.iter().any(fn(pc) { [2, 6, 9].iter().any(fn(t) { t == pc }) }),
+  )
+}
+
+///|
+test "generate_comping_sounds: WithTensions chord with no tensions produces 2 notes" {
+  // Diminished7 tensions() = [] → WithTensions falls back to 2 guide tones per hit
+  // Standard(mi=0): 3 hits × 2 tones = 6 sounds
+  let measures = [
+    make_4beat_measure(
+      [Chord::{ root: C, quality: Diminished7, bass: None }],
+      0.0,
+    ),
+  ]
+  let sounds = generate_comping_sounds(
+    measures,
+    60,
+    [],
+    voicing_style=WithTensions,
+  )
+  assert_eq(sounds.length(), 6)
+}
+
+///|
+test "generate_comping_sounds: WithTensions same chord tension is stable across hits" {
+  // All hits in the same chord use the same seed formula, so the same tension is picked
+  let measures = [
+    make_4beat_measure([Chord::{ root: C, quality: Major7, bass: None }], 0.0),
+  ]
+  let sounds = generate_comping_sounds(
+    measures,
+    60,
+    [],
+    voicing_style=WithTensions,
+  )
+  // 3 hits × 3 tones = 9 sounds; the tension note (3rd sound of each hit) should be the same
+  let tension0 = sounds[2].midi().map(fn(m) { m.value % 12 })
+  let tension1 = sounds[5].midi().map(fn(m) { m.value % 12 })
+  let tension2 = sounds[8].midi().map(fn(m) { m.value % 12 })
+  assert_eq(tension0, tension1)
+  assert_eq(tension1, tension2)
+}
+
+///|
 test "generate_comping_sounds: 3/4 TwoFour beat-2 duration fits before beat-3" {
   // BPM=60; 3/4 TwoFour: beat-2 at 1000ms with duration 0.75 beats (not 1.5).
   // Max jitter=1.2 → beat-2 ends at 1000+750*1.2=1900ms < 2000ms (beat-3 start).

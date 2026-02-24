@@ -114,3 +114,39 @@ pub fn full_voicing(chord : Chord, prev : Voicing?) -> Voicing {
     .filter_map(fn(v) { MidiNumber::new(v) })
   Voicing::{ notes, }
 }
+
+///|
+/// Tension voicing: guide tones (3rd + 7th) plus one pseudo-randomly selected tension.
+///
+/// Uses smooth voice leading by minimizing distance from the previous voicing.
+/// notes[0] = 3rd, notes[1] = 7th/5th, notes[2] = selected tension (if any).
+pub fn tension_voicing(chord : Chord, prev : Voicing?, seed : Int) -> Voicing {
+  let intervals = chord.quality.intervals()
+  let root_midi = chord.root.midi()
+  let tensions = chord.quality.tensions()
+  let (gi1, gi2) = if intervals.length() >= 4 {
+    (intervals[1], intervals[3])
+  } else if intervals.length() >= 3 {
+    (intervals[1], intervals[2])
+  } else {
+    (intervals[0], intervals[1])
+  }
+  let pc1 = (root_midi + gi1) % 12
+  let pc2 = (root_midi + gi2) % 12
+  let (ref1, ref2, ref3) = match prev {
+    Some(v) if v.notes.length() >= 3 =>
+      (v.notes[0].value, v.notes[1].value, v.notes[2].value)
+    Some(v) if v.notes.length() >= 2 =>
+      (v.notes[0].value, v.notes[1].value, voicing_default_ref + 3)
+    _ => (voicing_default_ref, voicing_default_ref, voicing_default_ref + 3)
+  }
+  let notes = [closest_voicing_midi(pc1, ref1), closest_voicing_midi(pc2, ref2)]
+  if tensions.length() > 0 {
+    let tension_interval = tensions[(pseudo_rand(seed) *
+      tensions.length().to_double()).to_int() %
+      tensions.length()]
+    let pc3 = (root_midi + tension_interval) % 12
+    notes.push(closest_voicing_midi(pc3, ref3))
+  }
+  Voicing::{ notes: notes.filter_map(fn(v) { MidiNumber::new(v) }) }
+}
