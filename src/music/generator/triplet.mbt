@@ -34,7 +34,7 @@ fn generate_triplet_group(
   let start_pos = state.measure_pos
   let mut current_state = state
 
-  for i = 0; i < 3; i = i + 1 {
+  for i in 0..<3 {
     let current_chord = ctx.chord_at(current_state.measure_pos)
     let (midi_opt, tone_origin) = decide_midi_number(
       current_chord,

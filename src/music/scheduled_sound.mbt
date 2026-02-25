@@ -68,7 +68,7 @@ pub fn convert_measures_to_sounds(
   // Convert to sounds, combining tied notes
 
   let sounds : Array[ScheduledSound] = []
-  for i = 0; i < flat_notes.length(); i = i + 1 {
+  for i in 0..<flat_notes.length() {
     let (start_ms, swing_delay, note) = flat_notes[i]
 
     // Skip TieEnd and TieBoth - they were already counted by TieStart
@@ -122,7 +122,7 @@ fn find_next_swing_delay(
   flat_notes : Array[(Double, Double, MeasureNote)],
   start_index : Int,
 ) -> Double {
-  for j = start_index; j < flat_notes.length(); j = j + 1 {
+  for j in start_index..<flat_notes.length() {
     let (_, delay, note) = flat_notes[j]
     match note.tie {
       Some(TieEnd | TieBoth) => continue
@@ -141,7 +141,7 @@ fn accumulate_tied_beats(
 ) -> Double {
   let mut total = initial_beats
 
-  for j = start_index; j < flat_notes.length(); j = j + 1 {
+  for j in start_index..<flat_notes.length() {
     let (_, _, next_note) = flat_notes[j]
     match next_note.tie {
       Some(TieBoth) => total = total + next_note.duration.to_beats()

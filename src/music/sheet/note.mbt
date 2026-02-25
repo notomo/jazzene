@@ -139,7 +139,7 @@ fn compute_note_positions(
   let note_area_width = measure_width - NOTE_AREA_PADDING
   let cumulative_weights : Array[Double] = Array::make(n, 0.0)
   let mut total_weight = 0.0
-  for i = 0; i < n; i = i + 1 {
+  for i in 0..<n {
     cumulative_weights[i] = total_weight
     total_weight = total_weight +
       duration_visual_weight(positioned[i].1.duration)

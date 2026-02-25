@@ -102,7 +102,7 @@ test "decide_midi_number origin is always a valid ToneOrigin variant" {
     bass: None,
   }
   // Run many trials with different seeds and verify all origins are valid
-  for seed = 0; seed < 20; seed = seed + 1 {
+  for seed in 0..<20 {
     let rng = create_random_int(seed)
     let (midi, origin) = decide_midi_number(
       chord,
@@ -147,7 +147,7 @@ test "Tension origin carries valid jazz degree" {
     bass: None,
   }
   // Run many trials and collect all Tension origins to verify degrees
-  for seed = 0; seed < 50; seed = seed + 1 {
+  for seed in 0..<50 {
     let rng = create_random_int(seed)
     let (_, origin) = decide_midi_number(
       chord,

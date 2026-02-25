@@ -43,7 +43,7 @@ test "generated notes can include Enclosure origin" {
     incoming_phrase: None,
   }
   // Generate many measures and check that origins are always valid
-  for seed = 0; seed < 5; seed = seed + 1 {
+  for seed in 0..<5 {
     let result = generator(ctx)
     for beat in result.beats {
       for note in beat.notes {

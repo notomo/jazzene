@@ -78,7 +78,7 @@ pub fn generate_walking_bass_sounds(
   let beat_duration_ms = ms_per_beat(bpm)
   let sounds : Array[ScheduledSound] = []
   let mut prev_bass_midi = bass_default_ref
-  for mi = 0; mi < measures.length(); mi = mi + 1 {
+  for mi in 0..<measures.length() {
     let measure = measures[mi]
     let beats_in_measure = measure.beats.length()
     let n_chords = measure.chords.length()
@@ -97,7 +97,7 @@ pub fn generate_walking_bass_sounds(
     match style {
       RootOnly =>
         // One note per chord slot: root on beat 1 only
-        for ci = 0; ci < n_chords; ci = ci + 1 {
+        for ci in 0..<n_chords {
           let chord = measure.chords[ci]
           let chord_beat = (ci.to_double() * beats_per_chord).to_int()
           let start_ms = measure_start_ms +
@@ -123,7 +123,7 @@ pub fn generate_walking_bass_sounds(
         }
       RootFifth =>
         // Root on first beat of chord, 5th on halfway through chord slot
-        for ci = 0; ci < n_chords; ci = ci + 1 {
+        for ci in 0..<n_chords {
           let chord = measure.chords[ci]
           let intervals = chord.quality.intervals()
           let chord_beat = (ci.to_double() * beats_per_chord).to_int()
@@ -178,7 +178,7 @@ pub fn generate_walking_bass_sounds(
         }
       WalkingBass =>
         // One note per beat: chord tones on even beats, 5th on odd, approach on last
-        for beat_idx = 0; beat_idx < beats_in_measure; beat_idx = beat_idx + 1 {
+        for beat_idx in 0..<beats_in_measure {
           let beat_start_ms = measure_start_ms +
             beat_idx.to_double() * beat_duration_ms
           let is_last_beat = beat_idx == beats_in_measure - 1
