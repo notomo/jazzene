@@ -78,15 +78,22 @@ pub fn convert_measures_to_sounds(
     }
 
     // Calculate total duration (including any tied continuations)
-    // Subtract swing_delay so the note ends at the original absolute time,
-    // preventing overlap with the next beat's note
+    // - On-beat notes: extend by the next off-beat note's swing_delay to fill
+    //   the swing gap (e.g., eighth → 2/3 beat instead of 1/2 beat)
+    // - Off-beat notes: subtract swing_delay so the note ends at the next beat,
+    //   preventing overlap
 
     let base_beats = note.duration.to_beats()
     let total_beats = match note.tie {
       Some(TieStart) => accumulate_tied_beats(flat_notes, i + 1, base_beats)
       _ => base_beats
     }
-    let duration_ms = total_beats * beat_duration_ms - swing_delay
+    let duration_adjustment = if swing_delay == 0.0 {
+      find_next_swing_delay(flat_notes, i + 1)
+    } else {
+      -swing_delay
+    }
+    let duration_ms = total_beats * beat_duration_ms + duration_adjustment
 
     let sound_event : SoundEvent = match note.midi {
       Some(midi) =>
@@ -106,6 +113,23 @@ pub fn convert_measures_to_sounds(
     })
   }
   sounds
+}
+
+///|
+/// Find the swing_delay of the next sounding note (skipping TieEnd/TieBoth)
+/// Returns 0.0 if no such note exists or if the next note is on-beat
+fn find_next_swing_delay(
+  flat_notes : Array[(Double, Double, MeasureNote)],
+  start_index : Int,
+) -> Double {
+  for j = start_index; j < flat_notes.length(); j = j + 1 {
+    let (_, delay, note) = flat_notes[j]
+    match note.tie {
+      Some(TieEnd | TieBoth) => continue
+      _ => return delay
+    }
+  }
+  0.0
 }
 
 ///|
