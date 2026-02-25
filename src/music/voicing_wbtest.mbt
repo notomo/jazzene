@@ -80,46 +80,125 @@ test "full_voicing - smooth voice leading Dm7 to G7" {
 }
 
 ///|
-/// tension_voicing returns guide tones (3rd, 7th) plus a valid tension
-test "tension_voicing - Cmaj7 has guide tones plus one tension" {
+/// tension_voicing: Cmaj7 with no key → A form (root C) with 9th: [3, 5, 7, 9]
+test "tension_voicing - Cmaj7 A form with 9th" {
   let chord = Chord::{ root: C, quality: Major7, bass: None }
-  let v = tension_voicing(chord, None, 0)
-  // Guide tones same as shell_voicing: 3rd=E(4), 7th=B(11)
-  assert_eq(v.notes.length(), 3)
+  let v = tension_voicing(chord, None, KeySignature::from_root(C))
+  // C root → A form; Major7, no key → use_ninth=true, use_thirteenth=false
+  // A form 3579: [E(4), G(7), B(11), D(2)]
+  assert_eq(v.notes.length(), 4)
   assert_eq(v.notes[0].pitch_class(), 4) // E (3rd)
-  assert_eq(v.notes[1].pitch_class(), 11) // B (7th)
-  // Tension must be one of Cmaj7 tensions: 9(2)=D, #11(6)=F#, 13(9)=A
-  let tension_pc = v.notes[2].pitch_class()
-  assert_true([2, 6, 9].iter().any(fn(pc) { pc == tension_pc }))
+  assert_eq(v.notes[1].pitch_class(), 7) // G (5th)
+  assert_eq(v.notes[2].pitch_class(), 11) // B (7th)
+  assert_eq(v.notes[3].pitch_class(), 2) // D (9th)
 }
 
 ///|
-/// tension_voicing falls back to 2 notes when chord has no tensions (Diminished7)
-test "tension_voicing - Diminished7 has no tensions: returns 2 notes" {
+/// tension_voicing: G7 with no key → B form with 9th+13th: [7, 9, 3, 13]
+test "tension_voicing - G7 B form with 9th and 13th" {
+  let chord = Chord::{ root: G, quality: Dominant7, bass: None }
+  let v = tension_voicing(chord, None, KeySignature::from_root(C))
+  // G root → B form; Dominant7, no key → use_ninth=true, use_thirteenth=true
+  // B form 7 9 3 13: [F(5), A(9), B(11), E(4)]
+  assert_eq(v.notes.length(), 4)
+  assert_eq(v.notes[0].pitch_class(), 5) // F (7th)
+  assert_eq(v.notes[1].pitch_class(), 9) // A (9th)
+  assert_eq(v.notes[2].pitch_class(), 11) // B (3rd)
+  assert_eq(v.notes[3].pitch_class(), 4) // E (13th)
+}
+
+///|
+/// tension_voicing: Diminished7 with no key → A form, no tensions: [3, 5, 7, 1]
+test "tension_voicing - Diminished7 in key C uses 9th" {
   let chord = Chord::{ root: C, quality: Diminished7, bass: None }
-  let v = tension_voicing(chord, None, 0)
-  // Diminished7 tensions() = [] → no 3rd note appended
-  assert_eq(v.notes.length(), 2)
-  // Guide tones: intervals [0,3,6,9], gi1=3(Eb), gi2=9(A)
+  let v = tension_voicing(chord, None, KeySignature::from_root(C))
+  // C root → A form; semitones=0 in key C → (true, false) → 9th only
+  // A form 3579: [Eb(3), Gb(6), A(9), D(2)]
+  assert_eq(v.notes.length(), 4)
   assert_eq(v.notes[0].pitch_class(), 3) // Eb (3rd)
-  assert_eq(v.notes[1].pitch_class(), 9) // A (7th)
+  assert_eq(v.notes[1].pitch_class(), 6) // Gb (5th)
+  assert_eq(v.notes[2].pitch_class(), 9) // A (7th)
+  assert_eq(v.notes[3].pitch_class(), 2) // D (9th)
 }
 
 ///|
-/// tension_voicing uses smooth voice leading for the first two notes
+/// tension_voicing: Em7 in key C (IIIm7) → B form, no tensions: [7, 1, 3, 5]
+test "tension_voicing - Em7 in key C is IIIm7: no tensions" {
+  let chord = Chord::{ root: E, quality: Minor7, bass: None }
+  let key = KeySignature::from_root(C)
+  let v = tension_voicing(chord, None, key)
+  // E root → B form; IIIm7 in key C (4 semitones) → (false, false)
+  // B form 7135: [D(2), E(4), G(7), B(11)]
+  assert_eq(v.notes.length(), 4)
+  assert_eq(v.notes[0].pitch_class(), 2) // D (7th of Em7)
+  assert_eq(v.notes[1].pitch_class(), 4) // E (root)
+  assert_eq(v.notes[2].pitch_class(), 7) // G (3rd)
+  assert_eq(v.notes[3].pitch_class(), 11) // B (5th)
+}
+
+///|
+/// tension_voicing: Bm7b5 in key C (VIIm7♭5) → B form, no tensions
+test "tension_voicing - Bm7b5 in key C is VIIm7b5: no tensions" {
+  let chord = Chord::{ root: B, quality: HalfDiminished, bass: None }
+  let key = KeySignature::from_root(C)
+  let v = tension_voicing(chord, None, key)
+  // B root → B form; VIIm7♭5 in key C (11 semitones) → (false, false)
+  // HalfDiminished intervals [0,3,6,10]; B form 7135: [A(9), B(11), D(2), F(5)]
+  assert_eq(v.notes.length(), 4)
+  assert_eq(v.notes[0].pitch_class(), 9) // A (7th of Bm7b5)
+  assert_eq(v.notes[1].pitch_class(), 11) // B (root)
+  assert_eq(v.notes[2].pitch_class(), 2) // D (3rd)
+  assert_eq(v.notes[3].pitch_class(), 5) // F (5th)
+}
+
+///|
+/// tension_voicing: G7 in key C (V7) → B form, 9th and 13th
+test "tension_voicing - G7 in key C is V7: 9th and 13th" {
+  let chord = Chord::{ root: G, quality: Dominant7, bass: None }
+  let key = KeySignature::from_root(C)
+  let v = tension_voicing(chord, None, key)
+  // G root → B form; V7 in key C (7 semitones) → (true, true)
+  // B form 7 9 3 13: [F(5), A(9), B(11), E(4)]
+  assert_eq(v.notes.length(), 4)
+  assert_eq(v.notes[0].pitch_class(), 5) // F (7th)
+  assert_eq(v.notes[1].pitch_class(), 9) // A (9th)
+  assert_eq(v.notes[2].pitch_class(), 11) // B (3rd)
+  assert_eq(v.notes[3].pitch_class(), 4) // E (13th)
+}
+
+///|
+/// tension_voicing: Dm7 in key C (IIm7) → A form, 9th only
+test "tension_voicing - Dm7 in key C is IIm7: 9th only" {
+  let chord = Chord::{ root: D, quality: Minor7, bass: None }
+  let key = KeySignature::from_root(C)
+  let v = tension_voicing(chord, None, key)
+  // D root → A form; IIm7 in key C (2 semitones) → (true, false)
+  // Minor7 intervals [0,3,7,10]; A form 3579: [F(5), A(9), C(0), E(4)]
+  assert_eq(v.notes.length(), 4)
+  assert_eq(v.notes[0].pitch_class(), 5) // F (3rd)
+  assert_eq(v.notes[1].pitch_class(), 9) // A (5th)
+  assert_eq(v.notes[2].pitch_class(), 0) // C (7th)
+  assert_eq(v.notes[3].pitch_class(), 4) // E (9th)
+}
+
+///|
+/// tension_voicing uses smooth voice leading across chord changes
 test "tension_voicing - smooth voice leading G7 to Cmaj7" {
   let g7 = Chord::{ root: G, quality: Dominant7, bass: None }
   let cmaj7 = Chord::{ root: C, quality: Major7, bass: None }
-  let v_g7 = tension_voicing(g7, None, 0)
-  let v_cmaj7 = tension_voicing(cmaj7, Some(v_g7), 0)
-  // Pitch classes of guide tones are correct
+  let v_g7 = tension_voicing(g7, None, KeySignature::from_root(C))
+  let v_cmaj7 = tension_voicing(cmaj7, Some(v_g7), KeySignature::from_root(C))
+  // G7 B form [F,A,B,E]; Cmaj7 A form [E,G,B,D]
+  assert_eq(v_cmaj7.notes.length(), 4)
   assert_eq(v_cmaj7.notes[0].pitch_class(), 4) // E (3rd)
-  assert_eq(v_cmaj7.notes[1].pitch_class(), 11) // B (7th)
-  // Guide tone movement stays within a tritone
-  let dist0 = v_g7.notes[0].distance(v_cmaj7.notes[0])
-  let dist1 = v_g7.notes[1].distance(v_cmaj7.notes[1])
-  assert_true(dist0 <= 6)
-  assert_true(dist1 <= 6)
+  assert_eq(v_cmaj7.notes[1].pitch_class(), 7) // G (5th)
+  assert_eq(v_cmaj7.notes[2].pitch_class(), 11) // B (7th)
+  assert_eq(v_cmaj7.notes[3].pitch_class(), 2) // D (9th)
+  // Verify voice movement stays within a tritone
+  for i in 0..<4 {
+    let dist = v_g7.notes[i].distance(v_cmaj7.notes[i])
+    assert_true(dist <= 6)
+  }
 }
 
 ///|
@@ -131,9 +210,10 @@ test "tension_voicing - notes stay in voicing range" {
     Chord::{ root: ASharp, quality: Minor7, bass: None },
     Chord::{ root: DSharp, quality: HalfDiminished, bass: None },
   ]
+  let key = KeySignature::from_root(C)
   let mut prev : Voicing? = None
   for chord in chords {
-    let v = tension_voicing(chord, prev, 42)
+    let v = tension_voicing(chord, prev, key)
     prev = Some(v)
     for note in v.notes {
       assert_true(note.value >= 48) // >= C3
@@ -143,22 +223,14 @@ test "tension_voicing - notes stay in voicing range" {
 }
 
 ///|
-/// tension_voicing with different seeds selects different tensions
-test "tension_voicing - different seeds produce different tensions for Dominant7" {
-  // Dominant7 has 6 tensions [1,2,3,6,8,9] — enough variety for seed variation
-  let chord = Chord::{ root: C, quality: Dominant7, bass: None }
-  let tensions_seen : Array[Int] = []
-  for seed in [0, 1, 7, 99, 1000] {
-    let v = tension_voicing(chord, None, seed)
-    assert_eq(v.notes.length(), 3)
-    let pc = v.notes[2].pitch_class()
-    assert_true([1, 2, 3, 6, 8, 9].iter().any(fn(t) { t == pc }))
-    if not(tensions_seen.iter().any(fn(t) { t == pc })) {
-      tensions_seen.push(pc)
-    }
-  }
-  // At least 2 distinct tensions selected across 5 seeds
-  assert_true(tensions_seen.length() >= 2)
+/// tension_voicing falls back to shell_voicing for triads
+test "tension_voicing - triad falls back to shell voicing" {
+  let chord = Chord::{ root: C, quality: Major, bass: None }
+  let v = tension_voicing(chord, None, KeySignature::from_root(C))
+  // Major triad has only 3 intervals → shell_voicing fallback: 3rd and 5th
+  assert_eq(v.notes.length(), 2)
+  assert_eq(v.notes[0].pitch_class(), 4) // E (3rd)
+  assert_eq(v.notes[1].pitch_class(), 7) // G (5th)
 }
 
 ///|

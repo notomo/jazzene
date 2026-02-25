@@ -61,7 +61,12 @@ test "generate_comping_sounds: shell voicing for Cmaj7" {
   let measures = [
     make_4beat_measure([Chord::{ root: C, quality: Major7, bass: None }], 0.0),
   ]
-  let sounds = generate_comping_sounds(measures, 60, [])
+  let sounds = generate_comping_sounds(
+    measures,
+    60,
+    [],
+    KeySignature::from_root(C),
+  )
   // Standard (mi=0): all 3 hits present (beat1 never omitted; and-of-2, beat4 survive at seed=0)
   // 2 tones × 3 hits = 6 sounds
   inspect(comping_midis(sounds), content="[64, 59, 64, 59, 64, 59]")
@@ -81,7 +86,12 @@ test "generate_comping_sounds: shell voicing for G7" {
       0.0,
     ),
   ]
-  let sounds = generate_comping_sounds(measures, 60, [])
+  let sounds = generate_comping_sounds(
+    measures,
+    60,
+    [],
+    KeySignature::from_root(C),
+  )
   inspect(comping_midis(sounds), content="[59, 65, 59, 65, 59, 65]")
 }
 
@@ -92,7 +102,12 @@ test "generate_comping_sounds: shell voicing for Fmaj7" {
   let measures = [
     make_4beat_measure([Chord::{ root: F, quality: Major7, bass: None }], 0.0),
   ]
-  let sounds = generate_comping_sounds(measures, 60, [])
+  let sounds = generate_comping_sounds(
+    measures,
+    60,
+    [],
+    KeySignature::from_root(C),
+  )
   inspect(comping_midis(sounds), content="[57, 64, 57, 64, 57, 64]")
 }
 
@@ -103,7 +118,12 @@ test "generate_comping_sounds: shell voicing for Am7" {
   let measures = [
     make_4beat_measure([Chord::{ root: A, quality: Minor7, bass: None }], 0.0),
   ]
-  let sounds = generate_comping_sounds(measures, 60, [])
+  let sounds = generate_comping_sounds(
+    measures,
+    60,
+    [],
+    KeySignature::from_root(C),
+  )
   inspect(comping_midis(sounds), content="[60, 55, 60, 55, 60, 55]")
 }
 
@@ -114,7 +134,12 @@ test "generate_comping_sounds: triad uses 3rd and 5th" {
   let measures = [
     make_4beat_measure([Chord::{ root: C, quality: Major, bass: None }], 0.0),
   ]
-  let sounds = generate_comping_sounds(measures, 60, [])
+  let sounds = generate_comping_sounds(
+    measures,
+    60,
+    [],
+    KeySignature::from_root(C),
+  )
   inspect(comping_midis(sounds), content="[64, 55, 64, 55, 64, 55]")
 }
 
@@ -127,7 +152,12 @@ test "generate_comping_sounds: melody avoidance lowers overlapping guide tone" {
     make_4beat_measure([Chord::{ root: D, quality: Minor7, bass: None }], 0.0),
   ]
   let melody = [make_melody_note(60, 0.0, 4000.0)]
-  let sounds = generate_comping_sounds(measures, 60, melody)
+  let sounds = generate_comping_sounds(
+    measures,
+    60,
+    melody,
+    KeySignature::from_root(C),
+  )
   inspect(comping_midis(sounds), content="[53, 48, 53, 48, 53, 48]")
 }
 
@@ -140,7 +170,12 @@ test "generate_comping_sounds: melody near guide tone triggers octave shift" {
     make_4beat_measure([Chord::{ root: D, quality: Minor7, bass: None }], 0.0),
   ]
   let melody = [make_melody_note(67, 0.0, 4000.0)]
-  let sounds = generate_comping_sounds(measures, 60, melody)
+  let sounds = generate_comping_sounds(
+    measures,
+    60,
+    melody,
+    KeySignature::from_root(C),
+  )
   inspect(comping_midis(sounds), content="[53, 60, 53, 60, 53, 60]")
 }
 
@@ -152,7 +187,12 @@ test "generate_comping_sounds: melody within 4 semitones triggers octave shift" 
     make_4beat_measure([Chord::{ root: D, quality: Minor7, bass: None }], 0.0),
   ]
   let melody = [make_melody_note(64, 0.0, 4000.0)]
-  let sounds = generate_comping_sounds(measures, 60, melody)
+  let sounds = generate_comping_sounds(
+    measures,
+    60,
+    melody,
+    KeySignature::from_root(C),
+  )
   inspect(comping_midis(sounds), content="[53, 48, 53, 48, 53, 48]")
 }
 
@@ -164,7 +204,12 @@ test "generate_comping_sounds: melody outside chord time range does not affect" 
     make_4beat_measure([Chord::{ root: D, quality: Minor7, bass: None }], 0.0),
   ]
   let melody = [make_melody_note(60, 4000.0, 4000.0)]
-  let sounds = generate_comping_sounds(measures, 60, melody)
+  let sounds = generate_comping_sounds(
+    measures,
+    60,
+    melody,
+    KeySignature::from_root(C),
+  )
   // No melody overlap → shell voicing values used: F4(65), C4(60)
   inspect(comping_midis(sounds), content="[65, 60, 65, 60, 65, 60]")
 }
@@ -181,7 +226,12 @@ test "generate_comping_sounds: two chords split timing evenly" {
       0.0,
     ),
   ]
-  let sounds = generate_comping_sounds(measures, 60, [])
+  let sounds = generate_comping_sounds(
+    measures,
+    60,
+    [],
+    KeySignature::from_root(C),
+  )
   // Cmaj7 (i=0): 1 hit at beat 1 → 2 sounds
   // G7 (i=1, last): anticipated hit always present; and-of-2 may be omitted (seed=0 omits it)
   // total = 4 (2 per chord × 2 chords, and-of-2 omitted at seed=0)
@@ -202,14 +252,24 @@ test "generate_comping_sounds: measure start time is reflected in output" {
       8000.0,
     ),
   ]
-  let sounds = generate_comping_sounds(measures, 60, [])
+  let sounds = generate_comping_sounds(
+    measures,
+    60,
+    [],
+    KeySignature::from_root(C),
+  )
   assert_eq(sounds[0].start_time, Duration::from_milliseconds(8000.0))
 }
 
 ///|
 test "generate_comping_sounds: no chords produces no sounds" {
   let measures = [make_4beat_measure([], 0.0)]
-  let sounds = generate_comping_sounds(measures, 60, [])
+  let sounds = generate_comping_sounds(
+    measures,
+    60,
+    [],
+    KeySignature::from_root(C),
+  )
   assert_eq(sounds.length(), 0)
 }
 
@@ -225,7 +285,12 @@ test "generate_comping_sounds: Dense pattern (measure index 1)" {
       4000.0,
     ),
   ]
-  let sounds = generate_comping_sounds(measures, 60, [])
+  let sounds = generate_comping_sounds(
+    measures,
+    60,
+    [],
+    KeySignature::from_root(C),
+  )
   // Standard(6) + Dense(some hits omitted at seed=0) = 10
   assert_eq(sounds.length(), 10)
   // Dense beat1 (hi=0, never omitted) is at 4000ms
@@ -247,7 +312,12 @@ test "generate_comping_sounds: TwoFour pattern (measure index 2)" {
       8000.0,
     ),
   ]
-  let sounds = generate_comping_sounds(measures, 60, [])
+  let sounds = generate_comping_sounds(
+    measures,
+    60,
+    [],
+    KeySignature::from_root(C),
+  )
   // Standard(6) + Dense(4) + TwoFour(beat2 present, beat4 omitted at seed=0) = 12
   assert_eq(sounds.length(), 12)
   // TwoFour beat2 (hi=0, never omitted) is at chord_start + 1 beat = 9000ms
@@ -275,7 +345,12 @@ test "generate_comping_sounds: Sparse pattern (measure index 3)" {
       12000.0,
     ),
   ]
-  let sounds = generate_comping_sounds(measures, 60, [])
+  let sounds = generate_comping_sounds(
+    measures,
+    60,
+    [],
+    KeySignature::from_root(C),
+  )
   // Standard(6) + Dense(4) + TwoFour(2) + Sparse(2) = 14
   assert_eq(sounds.length(), 14)
   // Sparse beat1 (hi=0, never omitted) at 12000ms
@@ -305,7 +380,12 @@ test "generate_comping_sounds: pattern cycles back at index 4" {
       16000.0,
     ),
   ]
-  let sounds = generate_comping_sounds(measures, 60, [])
+  let sounds = generate_comping_sounds(
+    measures,
+    60,
+    [],
+    KeySignature::from_root(C),
+  )
   // Standard(6) + Dense(4) + TwoFour(2) + Sparse(2) + Standard(6) = 20
   assert_eq(sounds.length(), 20)
   // mi=4 Standard: all 3 hits present at seed=0 (different rand_keys from mi=0)
@@ -323,7 +403,12 @@ test "generate_comping_sounds: 3/4 Standard includes beat 3" {
   let measures = [
     make_3beat_measure([Chord::{ root: C, quality: Major7, bass: None }], 0.0),
   ]
-  let sounds = generate_comping_sounds(measures, 60, [])
+  let sounds = generate_comping_sounds(
+    measures,
+    60,
+    [],
+    KeySignature::from_root(C),
+  )
   assert_eq(sounds.length(), 6)
   assert_eq(sounds[0].start_time, Duration::from_milliseconds(0.0))
   assert_eq(sounds[2].start_time, Duration::from_milliseconds(1500.0))
@@ -343,6 +428,7 @@ test "generate_comping_sounds: FullVoicing includes all chord tones" {
     measures,
     60,
     [],
+    KeySignature::from_root(C),
     voicing_style=FullVoicing,
   )
   assert_eq(sounds.length(), 12)
@@ -355,9 +441,10 @@ test "generate_comping_sounds: FullVoicing includes all chord tones" {
 }
 
 ///|
-test "generate_comping_sounds: WithTensions includes 3 notes per hit for Cmaj7" {
-  // tension_voicing(Cmaj7, None, seed): 3rd=E, 7th=B, tension=one of [D,F#,A]
-  // Standard(mi=0): 3 hits × 3 tones = 9 sounds
+test "generate_comping_sounds: WithTensions includes 4 notes per hit for Cmaj7" {
+  // Cmaj7: C root → A form; no key → use_ninth=true, use_thirteenth=false
+  // A form 3579: [E(4), G(7), B(11), D(2)]
+  // Standard(mi=0): 3 hits × 4 tones = 12 sounds
   let measures = [
     make_4beat_measure([Chord::{ root: C, quality: Major7, bass: None }], 0.0),
   ]
@@ -365,25 +452,24 @@ test "generate_comping_sounds: WithTensions includes 3 notes per hit for Cmaj7" 
     measures,
     60,
     [],
+    KeySignature::from_root(C),
     voicing_style=WithTensions,
   )
-  assert_eq(sounds.length(), 9)
-  // First hit: guide tones E and B must be present
-  let first_hit_pcs = comping_midis(sounds[0:3].iter().collect()).map(fn(m) {
+  assert_eq(sounds.length(), 12)
+  // First hit: 4 voices should include E(3rd), G(5th), B(7th), D(9th)
+  let first_hit_pcs = comping_midis(sounds[0:4].iter().collect()).map(fn(m) {
     m % 12
   })
   assert_true(first_hit_pcs.iter().any(fn(pc) { pc == 4 })) // E (3rd)
+  assert_true(first_hit_pcs.iter().any(fn(pc) { pc == 7 })) // G (5th)
   assert_true(first_hit_pcs.iter().any(fn(pc) { pc == 11 })) // B (7th)
-  // Tension is one of Cmaj7 tensions: D(2), F#(6), A(9)
-  assert_true(
-    first_hit_pcs.iter().any(fn(pc) { [2, 6, 9].iter().any(fn(t) { t == pc }) }),
-  )
+  assert_true(first_hit_pcs.iter().any(fn(pc) { pc == 2 })) // D (9th)
 }
 
 ///|
-test "generate_comping_sounds: WithTensions chord with no tensions produces 2 notes" {
-  // Diminished7 tensions() = [] → WithTensions falls back to 2 guide tones per hit
-  // Standard(mi=0): 3 hits × 2 tones = 6 sounds
+test "generate_comping_sounds: WithTensions Diminished7 uses 4 voices" {
+  // C Diminished7 in key C: semitones=0 → (true, false); A form 3579: [Eb, Gb, A, D]
+  // Standard(mi=0): 3 hits × 4 tones = 12 sounds
   let measures = [
     make_4beat_measure(
       [Chord::{ root: C, quality: Diminished7, bass: None }],
@@ -394,14 +480,16 @@ test "generate_comping_sounds: WithTensions chord with no tensions produces 2 no
     measures,
     60,
     [],
+    KeySignature::from_root(C),
     voicing_style=WithTensions,
   )
-  assert_eq(sounds.length(), 6)
+  assert_eq(sounds.length(), 12)
 }
 
 ///|
-test "generate_comping_sounds: WithTensions same chord tension is stable across hits" {
-  // All hits in the same chord use the same seed formula, so the same tension is picked
+test "generate_comping_sounds: WithTensions voicing is deterministic across hits" {
+  // Tension voicing is now key-aware and deterministic (no randomness)
+  // All hits for the same chord use the same 4 voices
   let measures = [
     make_4beat_measure([Chord::{ root: C, quality: Major7, bass: None }], 0.0),
   ]
@@ -409,14 +497,16 @@ test "generate_comping_sounds: WithTensions same chord tension is stable across 
     measures,
     60,
     [],
+    KeySignature::from_root(C),
     voicing_style=WithTensions,
   )
-  // 3 hits × 3 tones = 9 sounds; the tension note (3rd sound of each hit) should be the same
-  let tension0 = sounds[2].midi().map(fn(m) { m.value % 12 })
-  let tension1 = sounds[5].midi().map(fn(m) { m.value % 12 })
-  let tension2 = sounds[8].midi().map(fn(m) { m.value % 12 })
-  assert_eq(tension0, tension1)
-  assert_eq(tension1, tension2)
+  // 3 hits × 4 tones = 12 sounds; 4th voice of each hit is the 9th (D)
+  let ninth0 = sounds[3].midi().map(fn(m) { m.value % 12 })
+  let ninth1 = sounds[7].midi().map(fn(m) { m.value % 12 })
+  let ninth2 = sounds[11].midi().map(fn(m) { m.value % 12 })
+  assert_eq(ninth0, Some(2)) // D (9th)
+  assert_eq(ninth0, ninth1)
+  assert_eq(ninth1, ninth2)
 }
 
 ///|
@@ -435,7 +525,12 @@ test "generate_comping_sounds: 3/4 TwoFour beat-2 duration fits before beat-3" {
       6000.0,
     ),
   ]
-  let sounds = generate_comping_sounds(measures, 60, [])
+  let sounds = generate_comping_sounds(
+    measures,
+    60,
+    [],
+    KeySignature::from_root(C),
+  )
   // TwoFour beat-2 (hi=0) is always present; beat-3 (hi=1) omitted at seed=0
   let twofour_start = sounds
     .iter()

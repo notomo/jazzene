@@ -94,6 +94,7 @@ pub fn AppState::new() -> AppState {
         measures(),
         bpm.get(),
         sounds(),
+        key.get(),
         seed=seed.get(),
         voicing_style=js.comping_style,
       )

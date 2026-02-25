@@ -28,11 +28,6 @@ fn make_4beat_bass_measure(chords : Array[Chord], start_ms : Double) -> Measure 
 }
 
 ///|
-fn bass_midis(sounds : Array[ScheduledSound]) -> Array[Int] {
-  sounds.filter_map(fn(s) { s.midi() }).map(fn(m) { m.value })
-}
-
-///|
 /// RootOnly produces exactly one note per chord, on beat 1
 test "generate_walking_bass_sounds: RootOnly - one note per chord" {
   let measures = [

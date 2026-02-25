@@ -125,6 +125,7 @@ pub fn generate_comping_sounds(
   measures : Array[Measure],
   bpm : Int,
   melody_sounds : Array[ScheduledSound],
+  key : KeySignature,
   seed? : Int = 0,
   voicing_style? : CompingStyle = GuideTones,
 ) -> Array[ScheduledSound] {
@@ -153,12 +154,7 @@ pub fn generate_comping_sounds(
         let voicing = match voicing_style {
           GuideTones => shell_voicing(chord, prev_voicing)
           FullVoicing => full_voicing(chord, prev_voicing)
-          WithTensions =>
-            tension_voicing(
-              chord,
-              prev_voicing,
-              seed * 49999 + mi * 1009 + i * 97,
-            )
+          WithTensions => tension_voicing(chord, prev_voicing, key)
         }
         prev_voicing = Some(voicing)
         let is_last_chord = i == n - 1
