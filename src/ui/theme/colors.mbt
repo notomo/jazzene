@@ -23,6 +23,12 @@ pub const PLAYING_COLOR_APPROACH = "#f97316"
 pub const PLAYING_COLOR_SCALE_TONE = "#ec4899"
 
 ///|
+pub const COLOR_COMPING = "#9ca3af"
+
+///|
+pub const PLAYING_COLOR_COMPING = "#6b7280"
+
+///|
 pub fn tone_origin_color(origin : @music.ToneOrigin) -> String {
   match origin {
     ChordTone => COLOR_CHORD_TONE

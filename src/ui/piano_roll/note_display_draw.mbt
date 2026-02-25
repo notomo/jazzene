@@ -11,12 +11,6 @@ const NOTE_PLAYING_COLOR = "#3b82f6"
 const NOTE_DEFAULT_COLOR = "#60a5fa"
 
 ///|
-const BACKING_PLAYING_COLOR = "#6b7280"
-
-///|
-const BACKING_DEFAULT_COLOR = "#9ca3af"
-
-///|
 /// Gap in pixels between consecutive notes to visually separate them
 const NOTE_GAP_PX = 2.0
 
@@ -386,8 +380,8 @@ fn draw_notes(
     backing_positions,
     current_pos,
     key_areas,
-    BACKING_PLAYING_COLOR,
-    BACKING_DEFAULT_COLOR,
+    @theme.PLAYING_COLOR_COMPING,
+    @theme.COLOR_COMPING,
   )
   draw_falling_notes(
     ctx,
