@@ -62,7 +62,6 @@ pub fn render(state : AppState) -> Unit {
     chord_parse_error,
     ..,
   } = state
-  let legend_visible = @signals.signal(false)
   let app = @luna_dom.div(
     class="flex flex-col h-dvh overflow-hidden w-dvw bg-gradient-to-br from-slate-950 to-slate-900 text-white touch-manipulation",
     [
@@ -158,7 +157,6 @@ pub fn render(state : AppState) -> Unit {
               ab_loop(loop_a_measure, loop_b_measure, fn() {
                 measure_count.get()
               }),
-              legend_panel(legend_visible),
               settings_panel(jazz_style),
               view_mode_select(view_mode),
             ],

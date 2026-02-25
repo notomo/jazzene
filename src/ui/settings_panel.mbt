@@ -1,6 +1,15 @@
 ///|
 /// Settings panel for jazz style configuration.
-/// Contains controls for swing, melody techniques, comping, bass, and drums.
+/// Contains controls for legend, swing, melody techniques, comping, bass, and drums.
+
+///|
+/// Technique color legend entry: (label, color, description)
+let legend_entries : Array[(String, String, String)] = [
+  ("●", @theme.COLOR_CHORD_TONE, "Chord Tone (1, 3, 5, 7)"),
+  ("●", @theme.COLOR_TENSION, "Tension (9, 11, 13)"),
+  ("●", @theme.COLOR_APPROACH, "Approach / Enclosure"),
+  ("●", @theme.COLOR_SCALE_TONE, "Scale Tone"),
+]
 
 ///|
 /// Segmented button control: renders a row of option buttons where one is active.
@@ -153,11 +162,11 @@ pub fn settings_panel(
           },
         ])
       },
-      attrs=[("title", @luna_dom.Attr::AttrString("Jazz Settings"))],
+      attrs=[("title", @luna_dom.Attr::AttrString("Settings"))],
       on=@luna_dom.events().click(fn(_) {
         panel_visible.update(fn(v) { not(v) })
       }),
-      [@luna_dom.text("Jazz")],
+      [@luna_dom.text("Setting")],
     ),
     @luna_dom.show(fn() { panel_visible.get() }, fn() {
       @luna_dom.fragment([
@@ -172,6 +181,27 @@ pub fn settings_panel(
             ("aria-label", @luna_dom.Attr::AttrString("jazz settings panel")),
           ],
           [
+            // Legend
+            settings_section("Legend", [
+              @luna_dom.div(
+                class="flex flex-col gap-1",
+                legend_entries.map(fn(entry) {
+                  let (dot, color, label) = entry
+                  @luna_dom.div(class="flex items-center gap-1.5", [
+                    @luna_dom.span(
+                      class="text-xs leading-none",
+                      attrs=[
+                        ("style", @luna_dom.Attr::AttrString("color: " + color)),
+                      ],
+                      [@luna_dom.text(dot)],
+                    ),
+                    @luna_dom.span(class="text-xs text-slate-200", [
+                      @luna_dom.text(label),
+                    ]),
+                  ])
+                }),
+              ),
+            ]),
             // Presets
             settings_section("Preset", [
               @luna_dom.div(

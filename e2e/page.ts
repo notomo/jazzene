@@ -54,7 +54,7 @@ export async function openJazzenePage({
       await measure.click();
     },
 
-    getSettingsButton: () => page.getByRole("button", { name: "Jazz" }),
+    getSettingsButton: () => page.getByRole("button", { name: "Setting" }),
     getSettingsPanel: () => page.getByLabel("jazz settings panel"),
     openSettingsPanel: async () => {
       await jazzenePage.getSettingsButton().click();
