@@ -38,11 +38,13 @@ pub fn Synthesizer::unmute(self : Synthesizer) -> Unit {
 pub fn Synthesizer::schedule_sounds(
   self : Synthesizer,
   piano_sounds? : Array[@music.AudioSound] = [],
+  comping_sounds? : Array[@music.AudioSound] = [],
   bass_sounds? : Array[@music.AudioSound] = [],
   drum_sounds? : Array[@music.AudioSound] = [],
   volume~ : Double,
 ) -> Unit {
   self.piano.schedule_notes(piano_sounds, volume)
+  self.piano.schedule_notes(comping_sounds, volume * 0.5)
   self.bass.schedule_notes(bass_sounds, volume)
   self.drum.schedule_notes(drum_sounds, volume)
 }

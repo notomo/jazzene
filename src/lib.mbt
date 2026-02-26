@@ -59,7 +59,8 @@ fn make_tick(
       lookahead,
     )
     synthesizer.schedule_sounds(
-      piano_sounds=audio_sounds + backing_audio_sounds,
+      piano_sounds=audio_sounds,
+      comping_sounds=backing_audio_sounds,
       bass_sounds=bass_audio_sounds,
       drum_sounds=drum_audio_sounds,
       volume=state.volume.get().to_double() / 100.0,
