@@ -23,6 +23,12 @@ pub const PLAYING_COLOR_APPROACH = "#f97316"
 pub const PLAYING_COLOR_SCALE_TONE = "#ec4899"
 
 ///|
+pub const COLOR_NEIGHBOR = "#c084fc"
+
+///|
+pub const PLAYING_COLOR_NEIGHBOR = "#a855f7"
+
+///|
 pub const COLOR_COMPING = "#9ca3af"
 
 ///|
@@ -35,6 +41,7 @@ pub fn tone_origin_color(origin : @music.ToneOrigin) -> String {
     Tension(_) => COLOR_TENSION
     ApproachTone | Enclosure | PassingTone => COLOR_APPROACH
     ScaleTone => COLOR_SCALE_TONE
+    NeighborTone => COLOR_NEIGHBOR
   }
 }
 
@@ -45,5 +52,6 @@ pub fn tone_origin_playing_color(origin : @music.ToneOrigin) -> String {
     Tension(_) => PLAYING_COLOR_TENSION
     ApproachTone | Enclosure | PassingTone => PLAYING_COLOR_APPROACH
     ScaleTone => PLAYING_COLOR_SCALE_TONE
+    NeighborTone => PLAYING_COLOR_NEIGHBOR
   }
 }

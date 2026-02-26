@@ -9,6 +9,7 @@ let legend_entries : Array[(String, String, String)] = [
   ("●", @theme.COLOR_TENSION, "Tension (9, 11, 13)"),
   ("●", @theme.COLOR_APPROACH, "Approach / Enclosure"),
   ("●", @theme.COLOR_SCALE_TONE, "Scale Tone"),
+  ("●", @theme.COLOR_NEIGHBOR, "Neighbor Tone"),
   ("●", @theme.COLOR_COMPING, "Comping"),
 ]
 
@@ -338,6 +339,22 @@ pub fn settings_panel(
                       techniques: @generator.Techniques::{
                         ..t,
                         bebop_scales: not(t.bebop_scales),
+                      },
+                    }
+                  })
+                },
+              ),
+              technique_toggle(
+                "Neighbor Tones",
+                value=fn() { jazz_style.get().techniques.neighbor_tones },
+                on_toggle=fn() {
+                  jazz_style.update(fn(js) {
+                    let t = js.techniques
+                    JazzStyle::{
+                      ..js,
+                      techniques: @generator.Techniques::{
+                        ..t,
+                        neighbor_tones: not(t.neighbor_tones),
                       },
                     }
                   })

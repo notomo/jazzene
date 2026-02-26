@@ -106,6 +106,7 @@ pub(all) struct ImprovisationConfig {
   syncopation_probability : Int // 0-100, chance of forcing off-beat phrase start on downbeats (default: 40)
   triplet_probability : Int // 0-100, chance of generating eighth-note triplet group when playing (default: 15)
   bebop_weight_ratio : Int // 0-100, bebop passing tone weight as % of chord tone weight (default: 0 = disabled)
+  neighbor_ornament_probability : Int // 0-100, chance of generating CT→N→CT neighbor ornament (default: 20)
 } derive(Eq, Show)
 
 ///|
@@ -131,6 +132,7 @@ pub fn ImprovisationConfig::default(seed : Int) -> ImprovisationConfig {
     syncopation_probability: 40,
     triplet_probability: 8,
     bebop_weight_ratio: 0,
+    neighbor_ornament_probability: 20,
   }
 }
 
@@ -513,7 +515,24 @@ fn handle_playing(
     random_int,
   )
   match midi_opt {
-    Some(midi) =>
+    Some(midi) => {
+      // Try to generate a neighbor ornament (CT→N→CT) when we have a chord tone
+      guard not(
+        tone_origin is Some(@music.ChordTone) &&
+        should_generate_neighbor_ornament(
+          notes_left,
+          remaining,
+          settings.neighbor_ornament_probability,
+          random_int,
+        ),
+      ) else {
+        return Continue(
+          generate_neighbor_ornament(
+            state, midi, chord, remaining, settings, update_accidental, random_int,
+            notes_left,
+          ),
+        )
+      }
       match
         random_duration_within(
           remaining,
@@ -555,6 +574,7 @@ fn handle_playing(
         }
         None => Break(state)
       }
+    }
     None => Break(state)
   }
 }

@@ -9,6 +9,8 @@ test "Techniques::default enables standard techniques, bebop disabled by default
   assert_true(t.triplets)
   // bebop_scales is opt-in; disabled by default
   assert_false(t.bebop_scales)
+  // neighbor_tones enabled by default
+  assert_true(t.neighbor_tones)
 }
 
 ///|
@@ -46,6 +48,25 @@ test "ImprovisationConfig::with_techniques zeros bebop when flag is false" {
   let t = Techniques::{ ..Techniques::default(), bebop_scales: false }
   let result = s.with_techniques(t)
   assert_eq(result.bebop_weight_ratio, 0)
+}
+
+///|
+test "ImprovisationConfig::with_techniques preserves neighbor_ornament_probability when enabled" {
+  let s = ImprovisationConfig::default(42)
+  let t = Techniques::{ ..Techniques::default(), neighbor_tones: true }
+  let result = s.with_techniques(t)
+  assert_eq(
+    result.neighbor_ornament_probability,
+    s.neighbor_ornament_probability,
+  )
+}
+
+///|
+test "ImprovisationConfig::with_techniques zeros neighbor_ornament_probability when disabled" {
+  let s = ImprovisationConfig::default(42)
+  let t = Techniques::{ ..Techniques::default(), neighbor_tones: false }
+  let result = s.with_techniques(t)
+  assert_eq(result.neighbor_ornament_probability, 0)
 }
 
 ///|
@@ -101,6 +122,7 @@ test "ImprovisationConfig::with_techniques zeros multiple techniques" {
     syncopation: true,
     triplets: true,
     bebop_scales: false,
+    neighbor_tones: true,
   }
   let result = s.with_techniques(t)
   assert_eq(result.tension_weight_ratio, 0)

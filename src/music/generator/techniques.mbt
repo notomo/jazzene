@@ -10,6 +10,7 @@ pub(all) struct Techniques {
   syncopation : Bool // Syncopation (off-beat phrase starts)
   triplets : Bool // Eighth-note triplets
   bebop_scales : Bool // Bebop passing tones (major 7th for dom7, #5 for maj7)
+  neighbor_tones : Bool // Neighbor tone ornaments (CT→N→CT pattern)
 } derive(Eq, Show)
 
 ///|
@@ -23,6 +24,7 @@ pub fn Techniques::default() -> Techniques {
     syncopation: true,
     triplets: true,
     bebop_scales: false, // disabled by default; opt-in feature
+    neighbor_tones: true,
   }
 }
 
@@ -68,6 +70,11 @@ pub fn ImprovisationConfig::with_techniques(
     },
     bebop_weight_ratio: if techniques.bebop_scales {
       self.bebop_weight_ratio
+    } else {
+      0
+    },
+    neighbor_ornament_probability: if techniques.neighbor_tones {
+      self.neighbor_ornament_probability
     } else {
       0
     },

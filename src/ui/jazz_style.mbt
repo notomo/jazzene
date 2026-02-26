@@ -39,6 +39,7 @@ pub fn JazzStyle::straight() -> JazzStyle {
     syncopation: false,
     triplets: false,
     bebop_scales: false,
+    neighbor_tones: false,
   }
   JazzStyle::{
     swing: @music.SwingConfig::straight(),
@@ -65,6 +66,7 @@ pub fn JazzStyle::light_jazz() -> JazzStyle {
       syncopation: false,
       triplets: false,
       bebop_scales: false,
+      neighbor_tones: true,
     },
     comping_enabled: true,
     drums_enabled: true,
@@ -107,6 +109,7 @@ pub fn JazzStyle::cool_jazz() -> JazzStyle {
       syncopation: true,
       triplets: false,
       bebop_scales: false,
+      neighbor_tones: true,
     },
     comping_enabled: true,
     drums_enabled: true,
@@ -130,6 +133,7 @@ pub fn JazzStyle::modal() -> JazzStyle {
       syncopation: true,
       triplets: true,
       bebop_scales: false,
+      neighbor_tones: true,
     },
     comping_enabled: true,
     drums_enabled: true,
