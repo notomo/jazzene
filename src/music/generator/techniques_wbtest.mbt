@@ -21,7 +21,10 @@ test "ImprovisationConfig::with_techniques preserves values when all enabled" {
   assert_eq(result.tension_weight_ratio, s.tension_weight_ratio)
   assert_eq(result.scale_tone_weight_ratio, s.scale_tone_weight_ratio)
   assert_eq(result.approach_weight_ratio, s.approach_weight_ratio)
-  assert_eq(result.enclosure_weight_ratio, s.enclosure_weight_ratio)
+  assert_eq(
+    result.enclosure_ornament_probability,
+    s.enclosure_ornament_probability,
+  )
   assert_eq(result.syncopation_probability, s.syncopation_probability)
   assert_eq(result.triplet_probability, s.triplet_probability)
   assert_eq(result.bebop_weight_ratio, 0) // bebop disabled by default
@@ -128,7 +131,7 @@ test "ImprovisationConfig::with_techniques zeros multiple techniques" {
   assert_eq(result.tension_weight_ratio, 0)
   assert_eq(result.scale_tone_weight_ratio, 0)
   assert_eq(result.approach_weight_ratio, 0)
-  assert_eq(result.enclosure_weight_ratio, 0)
+  assert_eq(result.enclosure_ornament_probability, 0)
   assert_eq(result.syncopation_probability, s.syncopation_probability)
   assert_eq(result.triplet_probability, s.triplet_probability)
 }

@@ -53,8 +53,8 @@ pub fn ImprovisationConfig::with_techniques(
     } else {
       0
     },
-    enclosure_weight_ratio: if techniques.enclosure_tones {
-      self.enclosure_weight_ratio
+    enclosure_ornament_probability: if techniques.enclosure_tones {
+      self.enclosure_ornament_probability
     } else {
       0
     },

@@ -98,7 +98,7 @@ pub(all) struct ImprovisationConfig {
   scale_tone_weight_ratio : Int // 0-100, scale tone weight as % of chord tone weight
   tension_weight_ratio : Int // 0-100, tension tone weight as % of chord tone weight
   approach_weight_ratio : Int // 0-100, approach tone weight as % of chord tone weight
-  enclosure_weight_ratio : Int // 0-100, enclosure tone weight as % of chord tone weight
+  enclosure_ornament_probability : Int // 0-100, chance of generating EN→EN→CT enclosure ornament
   phrase_length_min : Int // Minimum notes in a phrase (default: 2)
   phrase_length_max : Int // Maximum notes in a phrase (default: 8)
   phrase_early_end_stamina : Int // Below this stamina, phrase may end early (default: 15)
@@ -124,7 +124,7 @@ pub fn ImprovisationConfig::default(seed : Int) -> ImprovisationConfig {
     scale_tone_weight_ratio: 30,
     tension_weight_ratio: 50,
     approach_weight_ratio: 20,
-    enclosure_weight_ratio: 15,
+    enclosure_ornament_probability: 20,
     phrase_length_min: 2,
     phrase_length_max: 8,
     phrase_early_end_stamina: 15,
@@ -509,7 +509,6 @@ fn handle_playing(
     settings.scale_tone_weight_ratio,
     settings.tension_weight_ratio,
     settings.approach_weight_ratio,
-    settings.enclosure_weight_ratio,
     settings.bebop_weight_ratio,
     settings.max_interval,
     random_int,
@@ -528,6 +527,24 @@ fn handle_playing(
       ) else {
         return Continue(
           generate_neighbor_ornament(
+            state, midi, chord, remaining, settings, update_accidental, random_int,
+            notes_left,
+          ),
+        )
+      }
+      // Try to generate an enclosure ornament (EN→EN→CT) when we have a chord tone
+      // Only fires if neighbor ornament did not fire
+      guard not(
+        tone_origin is Some(@music.ChordTone) &&
+        should_generate_enclosure_ornament(
+          notes_left,
+          remaining,
+          settings.enclosure_ornament_probability,
+          random_int,
+        ),
+      ) else {
+        return Continue(
+          generate_enclosure_ornament(
             state, midi, chord, remaining, settings, update_accidental, random_int,
             notes_left,
           ),
@@ -693,7 +710,6 @@ fn decide_midi_number(
   scale_tone_weight_ratio : Int,
   tension_weight_ratio : Int,
   approach_weight_ratio : Int,
-  enclosure_weight_ratio : Int,
   bebop_weight_ratio : Int,
   max_interval : Int,
   random_int : (Int) -> Int,
@@ -707,7 +723,6 @@ fn decide_midi_number(
   let tension_tones = extend_across_octaves(chord.tension_tones())
   let scale_tones = extend_across_octaves(chord.scale_tones())
   let approach_tones = extend_across_octaves(chord.approach_tones())
-  let enclosure_tones = extend_across_octaves(chord.enclosure_tones())
   let bebop_tones = extend_across_octaves(chord.bebop_passing_tones())
   let root_midi = chord.root.midi()
   match last_midi {
@@ -743,14 +758,6 @@ fn decide_midi_number(
           max_interval,
           approach_weight_ratio,
           @music.ApproachTone,
-        ) +
-        weighted_tone_candidates_tagged(
-          enclosure_tones,
-          prev,
-          stamina,
-          max_interval,
-          enclosure_weight_ratio,
-          @music.Enclosure,
         ) +
         weighted_tone_candidates_tagged(
           bebop_tones,

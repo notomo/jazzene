@@ -1,9 +1,9 @@
 ///|
-/// Verify ImprovisationConfig has enclosure_weight_ratio field with default 15
-test "ImprovisationConfig::default has enclosure_weight_ratio" {
+/// Verify ImprovisationConfig has enclosure_ornament_probability field with default 20
+test "ImprovisationConfig::default has enclosure_ornament_probability" {
   let s = ImprovisationConfig::default(0)
-  assert_true(s.enclosure_weight_ratio > 0)
-  assert_eq(s.enclosure_weight_ratio, 15)
+  assert_true(s.enclosure_ornament_probability > 0)
+  assert_eq(s.enclosure_ornament_probability, 20)
 }
 
 ///|
@@ -19,11 +19,11 @@ test "ImprovisationConfig::with_techniques zeros enclosure when disabled" {
   let s = ImprovisationConfig::default(0)
   let t = Techniques::{ ..Techniques::default(), enclosure_tones: false }
   let result = s.with_techniques(t)
-  assert_eq(result.enclosure_weight_ratio, 0)
+  assert_eq(result.enclosure_ornament_probability, 0)
 }
 
 ///|
-/// Verify generated notes can have Enclosure origin
+/// Verify generated notes can have Enclosure origin from the ornament
 test "generated notes can include Enclosure origin" {
   let settings = ImprovisationConfig::default(7)
   let chord = @music.Chord::{

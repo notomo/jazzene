@@ -7,7 +7,8 @@
 let legend_entries : Array[(String, String, String)] = [
   ("●", @theme.COLOR_CHORD_TONE, "Chord Tone (1, 3, 5, 7)"),
   ("●", @theme.COLOR_TENSION, "Tension (9, 11, 13)"),
-  ("●", @theme.COLOR_APPROACH, "Approach / Enclosure"),
+  ("●", @theme.COLOR_APPROACH, "Approach Tone"),
+  ("●", @theme.COLOR_ENCLOSURE, "Enclosure"),
   ("●", @theme.COLOR_SCALE_TONE, "Scale Tone"),
   ("●", @theme.COLOR_NEIGHBOR, "Neighbor Tone"),
   ("●", @theme.COLOR_COMPING, "Comping"),
@@ -281,7 +282,7 @@ pub fn settings_panel(
                 },
               ),
               technique_toggle(
-                "Enclosure Tones",
+                "Enclosures",
                 value=fn() { jazz_style.get().techniques.enclosure_tones },
                 on_toggle=fn() {
                   jazz_style.update(fn(js) {
