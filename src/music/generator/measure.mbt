@@ -97,7 +97,7 @@ pub(all) struct ImprovisationConfig {
   stamina_passive_recovery : Int // Passive recovery after playing note (e.g., 5)
   scale_tone_weight_ratio : Int // 0-100, scale tone weight as % of chord tone weight
   tension_weight_ratio : Int // 0-100, tension tone weight as % of chord tone weight
-  approach_weight_ratio : Int // 0-100, approach tone weight as % of chord tone weight
+  chromatic_approach_ornament_probability : Int // 0-100, chance of generating AT→CT chromatic approach ornament
   enclosure_ornament_probability : Int // 0-100, chance of generating EN→EN→CT enclosure ornament
   phrase_length_min : Int // Minimum notes in a phrase (default: 2)
   phrase_length_max : Int // Maximum notes in a phrase (default: 8)
@@ -123,7 +123,7 @@ pub fn ImprovisationConfig::default(seed : Int) -> ImprovisationConfig {
     stamina_passive_recovery: 5,
     scale_tone_weight_ratio: 30,
     tension_weight_ratio: 50,
-    approach_weight_ratio: 20,
+    chromatic_approach_ornament_probability: 20,
     enclosure_ornament_probability: 20,
     phrase_length_min: 2,
     phrase_length_max: 8,
@@ -508,7 +508,6 @@ fn handle_playing(
     0,
     settings.scale_tone_weight_ratio,
     settings.tension_weight_ratio,
-    settings.approach_weight_ratio,
     settings.bebop_weight_ratio,
     settings.max_interval,
     random_int,
@@ -545,6 +544,24 @@ fn handle_playing(
       ) else {
         return Continue(
           generate_enclosure_ornament(
+            state, midi, chord, remaining, settings, update_accidental, random_int,
+            notes_left,
+          ),
+        )
+      }
+      // Try to generate a chromatic approach ornament (AT→CT) when we have a chord tone
+      // Only fires if neither neighbor nor enclosure ornament fired
+      guard not(
+        tone_origin is Some(@music.ChordTone) &&
+        should_generate_chromatic_approach_ornament(
+          notes_left,
+          remaining,
+          settings.chromatic_approach_ornament_probability,
+          random_int,
+        ),
+      ) else {
+        return Continue(
+          generate_chromatic_approach_ornament(
             state, midi, chord, remaining, settings, update_accidental, random_int,
             notes_left,
           ),
@@ -709,7 +726,6 @@ fn decide_midi_number(
   rest_probability : Int,
   scale_tone_weight_ratio : Int,
   tension_weight_ratio : Int,
-  approach_weight_ratio : Int,
   bebop_weight_ratio : Int,
   max_interval : Int,
   random_int : (Int) -> Int,
@@ -722,7 +738,6 @@ fn decide_midi_number(
   let chord_tones = extend_across_octaves(chord.tones())
   let tension_tones = extend_across_octaves(chord.tension_tones())
   let scale_tones = extend_across_octaves(chord.scale_tones())
-  let approach_tones = extend_across_octaves(chord.approach_tones())
   let bebop_tones = extend_across_octaves(chord.bebop_passing_tones())
   let root_midi = chord.root.midi()
   match last_midi {
@@ -750,14 +765,6 @@ fn decide_midi_number(
           max_interval,
           scale_tone_weight_ratio,
           @music.ScaleTone,
-        ) +
-        weighted_tone_candidates_tagged(
-          approach_tones,
-          prev,
-          stamina,
-          max_interval,
-          approach_weight_ratio,
-          @music.ApproachTone,
         ) +
         weighted_tone_candidates_tagged(
           bebop_tones,

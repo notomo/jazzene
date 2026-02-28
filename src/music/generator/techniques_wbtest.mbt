@@ -20,7 +20,10 @@ test "ImprovisationConfig::with_techniques preserves values when all enabled" {
   let result = s.with_techniques(t)
   assert_eq(result.tension_weight_ratio, s.tension_weight_ratio)
   assert_eq(result.scale_tone_weight_ratio, s.scale_tone_weight_ratio)
-  assert_eq(result.approach_weight_ratio, s.approach_weight_ratio)
+  assert_eq(
+    result.chromatic_approach_ornament_probability,
+    s.chromatic_approach_ornament_probability,
+  )
   assert_eq(
     result.enclosure_ornament_probability,
     s.enclosure_ornament_probability,
@@ -95,7 +98,7 @@ test "ImprovisationConfig::with_techniques zeros approach tones when disabled" {
   let s = ImprovisationConfig::default(42)
   let t = Techniques::{ ..Techniques::default(), approach_tones: false }
   let result = s.with_techniques(t)
-  assert_eq(result.approach_weight_ratio, 0)
+  assert_eq(result.chromatic_approach_ornament_probability, 0)
 }
 
 ///|
@@ -130,7 +133,7 @@ test "ImprovisationConfig::with_techniques zeros multiple techniques" {
   let result = s.with_techniques(t)
   assert_eq(result.tension_weight_ratio, 0)
   assert_eq(result.scale_tone_weight_ratio, 0)
-  assert_eq(result.approach_weight_ratio, 0)
+  assert_eq(result.chromatic_approach_ornament_probability, 0)
   assert_eq(result.enclosure_ornament_probability, 0)
   assert_eq(result.syncopation_probability, s.syncopation_probability)
   assert_eq(result.triplet_probability, s.triplet_probability)

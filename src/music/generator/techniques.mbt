@@ -48,8 +48,8 @@ pub fn ImprovisationConfig::with_techniques(
     } else {
       0
     },
-    approach_weight_ratio: if techniques.approach_tones {
-      self.approach_weight_ratio
+    chromatic_approach_ornament_probability: if techniques.approach_tones {
+      self.chromatic_approach_ornament_probability
     } else {
       0
     },

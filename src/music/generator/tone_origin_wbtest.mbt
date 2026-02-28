@@ -16,7 +16,6 @@ test "decide_midi_number first note always returns ChordTone" {
     0,
     30,
     50,
-    20,
     0,
     7,
     rng,
@@ -44,7 +43,6 @@ test "decide_midi_number rest returns None for both midi and origin" {
     100,
     30,
     50,
-    20,
     0,
     7,
     always_rest,
@@ -61,7 +59,7 @@ test "decide_midi_number chord tone returns ChordTone origin" {
     quality: @music.Major7,
     bass: None,
   }
-  // Use weight ratios that only enable chord tones (scale/tension/approach all 0)
+  // Use weight ratios that only enable chord tones (scale/tension all 0)
   let rng = create_random_int(42)
   let (midi, origin) = decide_midi_number(
     chord,
@@ -69,7 +67,6 @@ test "decide_midi_number chord tone returns ChordTone origin" {
     50,
     50,
     false,
-    0,
     0,
     0,
     0,
@@ -110,7 +107,6 @@ test "decide_midi_number origin is always a valid ToneOrigin variant" {
       0,
       30,
       50,
-      20,
       0,
       7,
       rng,
@@ -120,7 +116,7 @@ test "decide_midi_number origin is always a valid ToneOrigin variant" {
       (Some(_), Some(o)) => {
         // Origin must be a recognized tone category
         let is_valid = match o {
-          @music.ChordTone | @music.ScaleTone | @music.ApproachTone => true
+          @music.ChordTone | @music.ScaleTone => true
           @music.Tension(degree) => degree >= 9 && degree <= 13
           _ => false
         }
@@ -151,7 +147,6 @@ test "Tension origin carries valid jazz degree" {
       0,
       0,
       100,
-      0,
       0,
       12,
       rng, // high max_interval to reach tensions

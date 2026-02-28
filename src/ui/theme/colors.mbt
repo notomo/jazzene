@@ -45,7 +45,7 @@ pub fn tone_origin_color(origin : @music.ToneOrigin) -> String {
   match origin {
     ChordTone => COLOR_CHORD_TONE
     Tension(_) => COLOR_TENSION
-    ApproachTone | PassingTone => COLOR_APPROACH
+    ChromaticApproach | PassingTone => COLOR_APPROACH
     Enclosure => COLOR_ENCLOSURE
     ScaleTone => COLOR_SCALE_TONE
     NeighborTone => COLOR_NEIGHBOR
@@ -57,7 +57,7 @@ pub fn tone_origin_playing_color(origin : @music.ToneOrigin) -> String {
   match origin {
     ChordTone => PLAYING_COLOR_CHORD_TONE
     Tension(_) => PLAYING_COLOR_TENSION
-    ApproachTone | PassingTone => PLAYING_COLOR_APPROACH
+    ChromaticApproach | PassingTone => PLAYING_COLOR_APPROACH
     Enclosure => PLAYING_COLOR_ENCLOSURE
     ScaleTone => PLAYING_COLOR_SCALE_TONE
     NeighborTone => PLAYING_COLOR_NEIGHBOR

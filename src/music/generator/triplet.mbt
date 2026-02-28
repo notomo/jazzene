@@ -45,7 +45,6 @@ fn generate_triplet_group(
       0,
       settings.scale_tone_weight_ratio,
       settings.tension_weight_ratio,
-      settings.approach_weight_ratio,
       settings.bebop_weight_ratio,
       settings.max_interval,
       random_int,

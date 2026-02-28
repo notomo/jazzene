@@ -99,7 +99,7 @@ fn draw_approach_arrows(
   for i = 0; i < n - 1; i = i + 1 {
     let note = note_positions[i]
     let is_approach = match note.tone_origin {
-      Some(ApproachTone | Enclosure) => true
+      Some(ChromaticApproach | Enclosure) => true
       _ => false
     }
     if not(is_approach) {
