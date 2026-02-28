@@ -120,7 +120,7 @@ pub fn ImprovisationConfig::default(seed : Int) -> ImprovisationConfig {
     stamina_max: 50,
     stamina_recovery_per_beat: 20,
     stamina_passive_recovery: 5,
-    tension_weight_ratio: 50,
+    tension_weight_ratio: 25,
     chromatic_approach_ornament_probability: 20,
     enclosure_ornament_probability: 20,
     phrase_length_min: 2,
