@@ -43,7 +43,6 @@ fn generate_triplet_group(
       settings.stamina_max,
       current_state.last_was_rest,
       0,
-      settings.scale_tone_weight_ratio,
       settings.tension_weight_ratio,
       settings.bebop_weight_ratio,
       settings.max_interval,

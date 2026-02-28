@@ -317,7 +317,6 @@ test "with_techniques disabling non-chord-tone techniques: generated notes use o
   // Disable all techniques that produce non-chord tones
   let techniques = Techniques::{
     tension_tones: false,
-    scale_tones: false,
     approach_tones: false,
     enclosure_tones: false,
     syncopation: true,

@@ -14,7 +14,6 @@ test "decide_midi_number first note always returns ChordTone" {
     50,
     false,
     0,
-    30,
     50,
     0,
     7,
@@ -41,7 +40,6 @@ test "decide_midi_number rest returns None for both midi and origin" {
     50,
     false,
     100,
-    30,
     50,
     0,
     7,
@@ -67,7 +65,6 @@ test "decide_midi_number chord tone returns ChordTone origin" {
     50,
     50,
     false,
-    0,
     0,
     0,
     0,
@@ -105,7 +102,6 @@ test "decide_midi_number origin is always a valid ToneOrigin variant" {
       50,
       false,
       0,
-      30,
       50,
       0,
       7,
@@ -116,7 +112,7 @@ test "decide_midi_number origin is always a valid ToneOrigin variant" {
       (Some(_), Some(o)) => {
         // Origin must be a recognized tone category
         let is_valid = match o {
-          @music.ChordTone | @music.ScaleTone => true
+          @music.ChordTone => true
           @music.Tension(degree) => degree >= 9 && degree <= 13
           _ => false
         }
@@ -144,7 +140,6 @@ test "Tension origin carries valid jazz degree" {
       50,
       50,
       false,
-      0,
       0,
       100,
       0,

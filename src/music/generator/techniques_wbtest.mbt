@@ -2,7 +2,6 @@
 test "Techniques::default enables standard techniques, bebop disabled by default" {
   let t = Techniques::default()
   assert_true(t.tension_tones)
-  assert_true(t.scale_tones)
   assert_true(t.approach_tones)
   assert_true(t.enclosure_tones)
   assert_true(t.syncopation)
@@ -19,7 +18,6 @@ test "ImprovisationConfig::with_techniques preserves values when all enabled" {
   let t = Techniques::default()
   let result = s.with_techniques(t)
   assert_eq(result.tension_weight_ratio, s.tension_weight_ratio)
-  assert_eq(result.scale_tone_weight_ratio, s.scale_tone_weight_ratio)
   assert_eq(
     result.chromatic_approach_ornament_probability,
     s.chromatic_approach_ornament_probability,
@@ -81,16 +79,6 @@ test "ImprovisationConfig::with_techniques zeros tension when disabled" {
   let t = Techniques::{ ..Techniques::default(), tension_tones: false }
   let result = s.with_techniques(t)
   assert_eq(result.tension_weight_ratio, 0)
-  assert_eq(result.scale_tone_weight_ratio, s.scale_tone_weight_ratio)
-}
-
-///|
-test "ImprovisationConfig::with_techniques zeros scale tones when disabled" {
-  let s = ImprovisationConfig::default(42)
-  let t = Techniques::{ ..Techniques::default(), scale_tones: false }
-  let result = s.with_techniques(t)
-  assert_eq(result.scale_tone_weight_ratio, 0)
-  assert_eq(result.tension_weight_ratio, s.tension_weight_ratio)
 }
 
 ///|
@@ -122,7 +110,6 @@ test "ImprovisationConfig::with_techniques zeros multiple techniques" {
   let s = ImprovisationConfig::default(42)
   let t = Techniques::{
     tension_tones: false,
-    scale_tones: false,
     approach_tones: false,
     enclosure_tones: false,
     syncopation: true,
@@ -132,7 +119,6 @@ test "ImprovisationConfig::with_techniques zeros multiple techniques" {
   }
   let result = s.with_techniques(t)
   assert_eq(result.tension_weight_ratio, 0)
-  assert_eq(result.scale_tone_weight_ratio, 0)
   assert_eq(result.chromatic_approach_ornament_probability, 0)
   assert_eq(result.enclosure_ornament_probability, 0)
   assert_eq(result.syncopation_probability, s.syncopation_probability)

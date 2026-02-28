@@ -280,22 +280,6 @@ pub fn settings_panel(
                 },
               ),
               technique_toggle(
-                "Scale Tones",
-                value=fn() { jazz_style.get().techniques.scale_tones },
-                on_toggle=fn() {
-                  jazz_style.update(fn(js) {
-                    let t = js.techniques
-                    JazzStyle::{
-                      ..js,
-                      techniques: @generator.Techniques::{
-                        ..t,
-                        scale_tones: not(t.scale_tones),
-                      },
-                    }
-                  })
-                },
-              ),
-              technique_toggle(
                 "Chromatic Approach",
                 value=fn() { jazz_style.get().techniques.approach_tones },
                 on_toggle=fn() {

@@ -4,7 +4,6 @@
 /// When disabled, the technique's weight/probability in ImprovisationConfig is zeroed out.
 pub(all) struct Techniques {
   tension_tones : Bool // Tension notes (9th, 11th, 13th)
-  scale_tones : Bool // Scale tones (diatonic non-chord tones)
   approach_tones : Bool // Approach tones (chromatic half-steps)
   enclosure_tones : Bool // Enclosure tones (2 semitones from chord tones)
   syncopation : Bool // Syncopation (off-beat phrase starts)
@@ -18,7 +17,6 @@ pub(all) struct Techniques {
 pub fn Techniques::default() -> Techniques {
   Techniques::{
     tension_tones: true,
-    scale_tones: true,
     approach_tones: true,
     enclosure_tones: true,
     syncopation: true,
@@ -40,11 +38,6 @@ pub fn ImprovisationConfig::with_techniques(
     ..self,
     tension_weight_ratio: if techniques.tension_tones {
       self.tension_weight_ratio
-    } else {
-      0
-    },
-    scale_tone_weight_ratio: if techniques.scale_tones {
-      self.scale_tone_weight_ratio
     } else {
       0
     },

@@ -95,7 +95,6 @@ pub(all) struct ImprovisationConfig {
   stamina_max : Int // Maximum stamina (e.g., 100)
   stamina_recovery_per_beat : Int // Recovery per beat of rest (e.g., 20)
   stamina_passive_recovery : Int // Passive recovery after playing note (e.g., 5)
-  scale_tone_weight_ratio : Int // 0-100, scale tone weight as % of chord tone weight
   tension_weight_ratio : Int // 0-100, tension tone weight as % of chord tone weight
   chromatic_approach_ornament_probability : Int // 0-100, chance of generating AT→CT chromatic approach ornament
   enclosure_ornament_probability : Int // 0-100, chance of generating EN→EN→CT enclosure ornament
@@ -121,7 +120,6 @@ pub fn ImprovisationConfig::default(seed : Int) -> ImprovisationConfig {
     stamina_max: 50,
     stamina_recovery_per_beat: 20,
     stamina_passive_recovery: 5,
-    scale_tone_weight_ratio: 30,
     tension_weight_ratio: 50,
     chromatic_approach_ornament_probability: 20,
     enclosure_ornament_probability: 20,
@@ -506,7 +504,6 @@ fn handle_playing(
     settings.stamina_max,
     state.last_was_rest,
     0,
-    settings.scale_tone_weight_ratio,
     settings.tension_weight_ratio,
     settings.bebop_weight_ratio,
     settings.max_interval,
@@ -725,7 +722,6 @@ fn decide_midi_number(
   stamina_max : Int,
   last_was_rest : Bool,
   rest_probability : Int,
-  scale_tone_weight_ratio : Int,
   tension_weight_ratio : Int,
   bebop_weight_ratio : Int,
   max_interval : Int,
@@ -738,7 +734,6 @@ fn decide_midi_number(
 
   let chord_tones = extend_across_octaves(chord.tones())
   let tension_tones = extend_across_octaves(chord.tension_tones())
-  let scale_tones = extend_across_octaves(chord.scale_tones())
   let bebop_tones = extend_across_octaves(chord.bebop_passing_tones())
   let root_midi = chord.root.midi()
   match last_midi {
@@ -758,14 +753,6 @@ fn decide_midi_number(
           max_interval,
           tension_weight_ratio,
           @music.Tension(0), // placeholder; will be replaced per-tone below
-        ) +
-        weighted_tone_candidates_tagged(
-          scale_tones,
-          prev,
-          stamina,
-          max_interval,
-          scale_tone_weight_ratio,
-          @music.ScaleTone,
         ) +
         weighted_tone_candidates_tagged(
           bebop_tones,
