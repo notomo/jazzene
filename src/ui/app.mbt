@@ -157,8 +157,10 @@ pub fn render(state : AppState) -> Unit {
               ab_loop(loop_a_measure, loop_b_measure, fn() {
                 measure_count.get()
               }),
-              settings_panel(jazz_style),
-              view_mode_select(view_mode),
+              @luna_dom.div(class="flex items-center gap-2", [
+                view_mode_select(view_mode),
+                settings_panel(jazz_style),
+              ]),
             ],
           ),
         ],
