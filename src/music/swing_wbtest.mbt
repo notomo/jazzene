@@ -54,34 +54,8 @@ test "SwingConfig::triplet creates ratio ~0.667" {
 }
 
 ///|
-test "SwingConfig::light_swing creates ratio 0.55" {
-  assert_float_near(SwingConfig::light_swing().ratio, 0.55)
-}
-
-///|
-test "SwingConfig::medium_swing creates ratio 0.6" {
-  assert_float_near(SwingConfig::medium_swing().ratio, 0.6)
-}
-
-///|
 test "SwingConfig::hard_swing creates ratio 0.75" {
   assert_float_near(SwingConfig::hard_swing().ratio, 0.75)
-}
-
-///|
-test "swing_offset with light swing applies smaller delay than triplet" {
-  let beat_duration_ms = 500.0 // 120 BPM
-  let light_delay = swing_offset(
-    0.5,
-    beat_duration_ms,
-    SwingConfig::light_swing(),
-  )
-  let triplet_delay = swing_offset(
-    0.5,
-    beat_duration_ms,
-    SwingConfig::triplet(),
-  )
-  assert_true(light_delay < triplet_delay)
 }
 
 ///|

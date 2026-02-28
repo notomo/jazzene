@@ -19,18 +19,6 @@ pub fn SwingConfig::triplet() -> SwingConfig {
 }
 
 ///|
-/// Create a light swing feel
-pub fn SwingConfig::light_swing() -> SwingConfig {
-  SwingConfig::{ ratio: 0.55 }
-}
-
-///|
-/// Create a medium swing feel
-pub fn SwingConfig::medium_swing() -> SwingConfig {
-  SwingConfig::{ ratio: 0.6 }
-}
-
-///|
 /// Create a hard swing feel
 pub fn SwingConfig::hard_swing() -> SwingConfig {
   SwingConfig::{ ratio: 0.75 }
