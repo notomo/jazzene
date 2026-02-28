@@ -1,5 +1,5 @@
 ///|
-test "Chord::scale_tones returns non-chord diatonic tones for Cmaj7 in C" {
+test "Chord::scale_tones returns non-chord non-tension diatonic tones for Cmaj7 in C" {
   let chord = @music.Chord::{
     root: @music.C,
     quality: @music.Major7,
@@ -8,9 +8,10 @@ test "Chord::scale_tones returns non-chord diatonic tones for Cmaj7 in C" {
   let scale_tones = chord.scale_tones()
   // Cmaj7 chord tones: C(0), E(4), G(7), B(11)
   // Ionian scale from C: C(0), D(2), E(4), F(5), G(7), A(9), B(11)
-  // Scale tones (non-chord): D(62), F(65), A(69)
+  // Tensions Major7: D(9th), F#(#11), A(13th) excluded
+  // Scale tone: F(5) only — natural 11 (avoid note, not a tension)
   let pitch_classes = scale_tones.map(fn(m) { m.pitch_class() })
-  inspect(pitch_classes, content="[2, 5, 9]")
+  inspect(pitch_classes, content="[5]")
   // Verify none are chord tones
   let chord_pcs = chord.tones().map(fn(m) { m.pitch_class() })
   for pc in pitch_classes {
@@ -19,7 +20,7 @@ test "Chord::scale_tones returns non-chord diatonic tones for Cmaj7 in C" {
 }
 
 ///|
-test "Chord::scale_tones returns non-chord diatonic tones for Dm7 in C" {
+test "Chord::scale_tones returns empty for Dm7 — all scale tones are tensions" {
   let chord = @music.Chord::{
     root: @music.D,
     quality: @music.Minor7,
@@ -28,9 +29,9 @@ test "Chord::scale_tones returns non-chord diatonic tones for Dm7 in C" {
   let scale_tones = chord.scale_tones()
   // Dm7 chord tones: D(2), F(5), A(9), C(0)
   // Dorian scale from D: D E F G A B C
-  // Scale tones (non-chord): E(64), G(67), B(71)
+  // Tensions Minor7: E(9th), G(11th), B(13th) — all scale tones are tensions
   let pitch_classes = scale_tones.map(fn(m) { m.pitch_class() })
-  inspect(pitch_classes, content="[4, 7, 11]")
+  inspect(pitch_classes, content="[]")
 }
 
 ///|

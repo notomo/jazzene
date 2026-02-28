@@ -73,9 +73,10 @@ test "Chord::scale_tones - Cmaj7 in C (Ionian from C)" {
   let chord = Chord::{ root: C, quality: Major7, bass: None }
   let scale_tones = chord.scale_tones()
   // Ionian from C: [0,2,4,5,7,9,11]; chord tones Cmaj7: [0,4,7,11]
-  // Scale tones: D(2), F(5), A(9)
+  // Tensions Major7: [2,6,9] → D(2), F#(6), A(9) excluded
+  // Scale tone: F(5) only — natural 11 (avoid note, not a tension)
   let pitch_classes = scale_tones.map(fn(m) { m.pitch_class() })
-  inspect(pitch_classes, content="[2, 5, 9]")
+  inspect(pitch_classes, content="[5]")
 }
 
 ///|
@@ -84,8 +85,9 @@ test "Chord::scale_tones - Dm7 (Dorian from D = D E F G A B C)" {
   let scale_tones = chord.scale_tones()
   // Dorian from D (root=62): [0,2,3,5,7,9,10]
   // D(62)=chord, E(64)=scale, F(65)=chord, G(67)=scale, A(69)=chord, B(71)=scale, C(72)=chord
+  // Tensions Minor7: [2,5,9] → E(4), G(7), B(11) all excluded (all scale tones are tensions)
   let pitch_classes = scale_tones.map(fn(m) { m.pitch_class() })
-  inspect(pitch_classes, content="[4, 7, 11]")
+  inspect(pitch_classes, content="[]")
 }
 
 ///|
@@ -95,11 +97,12 @@ test "Chord::scale_tones - G7 (Mixolydian from G = G A B C D E F)" {
   // Mixolydian from G (root=67): [0,2,4,5,7,9,10]
   // G7 chord tones: G(7), B(11), D(2), F(5)
   // Non-chord: A(9), C(0), E(4)
+  // Tensions Dominant7: [1,2,3,6,8,9] → pitch classes [8,9,10,1,3,4]; A(9) and E(4) excluded
+  // Scale tone: C(0) only — natural 11 (avoid note)
   let pitch_classes = scale_tones.map(fn(m) { m.pitch_class() })
-  // A=9, C=0, E=4
-  assert_true(pitch_classes.contains(9)) // A
-  assert_true(pitch_classes.contains(0)) // C
-  assert_true(pitch_classes.contains(4)) // E
+  assert_false(pitch_classes.contains(9)) // A is tension (9th)
+  assert_true(pitch_classes.contains(0)) // C is pure scale tone (natural 11)
+  assert_false(pitch_classes.contains(4)) // E is tension (13th)
   assert_false(pitch_classes.contains(7)) // G is chord tone
   assert_false(pitch_classes.contains(11)) // B is chord tone
 }

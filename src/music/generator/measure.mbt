@@ -695,6 +695,7 @@ fn filter_by_interval(
   prev : @music.MidiNumber,
   max_interval : Int,
 ) -> Array[@music.MidiNumber] {
+  guard not(tones.is_empty()) else { return [] }
   let filtered : Array[@music.MidiNumber] = tones
     .iter()
     .filter(fn(tone) { prev.distance(tone) <= max_interval })

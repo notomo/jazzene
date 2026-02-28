@@ -115,7 +115,7 @@ pub fn Chord::enclosure_tones(self : Chord) -> Array[MidiNumber] {
 ///|
 /// Get scale tones for this chord using chord-scale theory.
 /// Uses the appropriate scale for the chord quality (e.g., Dorian for m7, Mixolydian for 7).
-/// Returns non-chord-tone scale degrees built from the chord root.
+/// Returns diatonic tones that are neither chord tones nor tension tones (9th/11th/13th).
 pub fn Chord::scale_tones(self : Chord) -> Array[MidiNumber] {
   let chord_scale = self.quality.chord_scale()
   let scale_intervals = chord_scale.intervals()
@@ -123,12 +123,16 @@ pub fn Chord::scale_tones(self : Chord) -> Array[MidiNumber] {
   let chord_pitch_classes : Array[Int] = self
     .tones()
     .map(fn(tone) { tone.pitch_class() })
+  let tension_pitch_classes : Array[Int] = self.quality
+    .tensions()
+    .map(fn(interval) { (root_midi + interval) % 12 })
   scale_intervals
   .iter()
   .filter_map(fn(interval) {
     let midi_value = root_midi + interval
     let pitch_class = midi_value % 12
     guard not(chord_pitch_classes.contains(pitch_class)) else { return None }
+    guard not(tension_pitch_classes.contains(pitch_class)) else { return None }
     MidiNumber::new(midi_value)
   })
   .collect()
