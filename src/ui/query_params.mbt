@@ -145,9 +145,6 @@ pub fn get_initial_loop_b_measure(measure_count : Int) -> Int {
 fn swing_to_string(swing : @music.SwingConfig) -> String {
   match swing {
     s if s == @music.SwingConfig::straight() => "straight"
-    s if s == @music.SwingConfig::light_swing() => "light"
-    s if s == @music.SwingConfig::medium_swing() => "medium"
-    s if s == @music.SwingConfig::triplet() => "triplet"
     s if s == @music.SwingConfig::hard_swing() => "hard"
     _ => "triplet"
   }
@@ -158,8 +155,6 @@ fn swing_to_string(swing : @music.SwingConfig) -> String {
 fn swing_from_string(s : String) -> @music.SwingConfig {
   match s {
     "straight" => @music.SwingConfig::straight()
-    "light" => @music.SwingConfig::light_swing()
-    "medium" => @music.SwingConfig::medium_swing()
     "hard" => @music.SwingConfig::hard_swing()
     _ => @music.SwingConfig::triplet()
   }

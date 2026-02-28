@@ -109,8 +109,6 @@ fn settings_section(
 ///|
 let swing_options : Array[(String, @music.SwingConfig)] = [
   ("Off", @music.SwingConfig::straight()),
-  ("Light", @music.SwingConfig::light_swing()),
-  ("Med", @music.SwingConfig::medium_swing()),
   ("Triplet", @music.SwingConfig::triplet()),
   ("Hard", @music.SwingConfig::hard_swing()),
 ]
