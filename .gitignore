@@ -6,5 +6,7 @@ _build
 .playwright-mcp/
 playwright-report/
 test-results/
-.claude/skills
+.claude/skills/*/
+!.claude/skills/commit/
+!.claude/skills/commit/*
 public/samples/
