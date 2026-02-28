@@ -21,7 +21,7 @@ pub fn Techniques::default() -> Techniques {
     enclosure_tones: true,
     syncopation: true,
     triplets: true,
-    bebop_scales: false, // disabled by default; opt-in feature
+    bebop_scales: true,
     neighbor_tones: true,
   }
 }

@@ -205,12 +205,6 @@ fn techniques_from_string(s : String) -> @generator.Techniques {
 }
 
 ///|
-/// Default techniques string — derived from Techniques::default() to stay in sync automatically
-let default_techniques_str : String = techniques_to_string(
-  @generator.Techniques::default(),
-)
-
-///|
 /// Serialize MelodyMode to a query-string token.
 fn melody_mode_to_string(mode : MelodyMode) -> String {
   match mode {
@@ -320,7 +314,7 @@ pub fn save_jazz_style(js : JazzStyle) -> Unit {
   set_query_param(
     "techniques",
     techniques_to_string(js.techniques),
-    default=default_techniques_str,
+    default=techniques_to_string(@generator.Techniques::default()),
   )
   set_query_param(
     "comping",
