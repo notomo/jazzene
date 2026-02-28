@@ -205,8 +205,10 @@ fn techniques_from_string(s : String) -> @generator.Techniques {
 }
 
 ///|
-/// Default techniques string
-let default_techniques_str : String = "tension,scale,approach,enclosure,syncopation,triplets,bebop,neighbor"
+/// Default techniques string — derived from Techniques::default() to stay in sync automatically
+let default_techniques_str : String = techniques_to_string(
+  @generator.Techniques::default(),
+)
 
 ///|
 /// Serialize MelodyMode to a query-string token.
