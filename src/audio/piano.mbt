@@ -42,26 +42,21 @@ fn Piano::schedule_note(
     None => return
   }
 
+  // Release tail after note end: 40% of duration, clamped [80ms, 300ms].
+  // Decay happens *after* the note duration, so short notes don't cut off abruptly.
+  let r = duration_sec * 0.4
+  let release_time = if r < 0.08 { 0.08 } else if r > 0.3 { 0.3 } else { r }
+  let note_end_sec = start_time_sec + duration_sec
+  let stop_time_sec = note_end_sec + release_time
+
   let gain = {
     let gain = self.ctx.create_gain()
-    // Release time scales with note length: 40% of duration, clamped [50ms, 300ms].
-    // Short notes get a full-length decay (staccato feel); long notes get a natural release.
-    let r = duration_sec * 0.4
-    let release_time = if r < 0.05 { 0.05 } else if r > 0.3 { 0.3 } else { r }
-    let hold_end_sec = if duration_sec > release_time {
-      start_time_sec + duration_sec - release_time
-    } else {
-      start_time_sec
-    }
     let gain_param = gain.gain()
     gain_param.set_value_at_time(volume, start_time_sec)
-    // Hold at full volume until release begins
-    gain_param.set_value_at_time(volume, hold_end_sec)
-    // Exponential decay to near-silence: avoids the click that linear-to-0 causes
-    gain_param.exponential_ramp_to_value_at_time(
-      0.001,
-      start_time_sec + duration_sec,
-    )
+    // Hold at full volume for the entire note duration
+    gain_param.set_value_at_time(volume, note_end_sec)
+    // Exponential decay to near-silence after note ends
+    gain_param.exponential_ramp_to_value_at_time(0.001, stop_time_sec)
     gain.connect(self.gain.as_audio_node())
     gain
   }
@@ -73,7 +68,7 @@ fn Piano::schedule_note(
   }
   source.connect(gain.as_audio_node())
   source.start(start_time_sec)
-  source.stop(start_time_sec + duration_sec)
+  source.stop(stop_time_sec)
 }
 
 ///|
