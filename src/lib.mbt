@@ -38,11 +38,11 @@ fn make_tick(
       state.loop_b_measure.get(),
     )
 
-    let audio_sounds = @music.AudioSound::from(
-      (state.sounds)(),
-      final_position,
-      lookahead,
-    )
+    let audio_sounds = match state.jazz_style.get().melody_mode {
+      @ui.Full =>
+        @music.AudioSound::from((state.sounds)(), final_position, lookahead)
+      @ui.Silent | @ui.Off => []
+    }
     let backing_audio_sounds = @music.AudioSound::from(
       (state.backing_sounds)(),
       final_position,

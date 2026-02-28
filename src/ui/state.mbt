@@ -61,15 +61,33 @@ pub fn AppState::new() -> AppState {
     }
   })
 
-  let measures = make_app_measures(
+  let full_measures = make_app_measures(
     measure_chords, seed, measure_count, bpm, key, time_signature, jazz_style,
   )
-  let sounds : () -> Array[@music.ScheduledSound] = @signals.memo(fn() {
+  let full_sounds : () -> Array[@music.ScheduledSound] = @signals.memo(fn() {
     @music.convert_measures_to_sounds(
-      measures(),
+      full_measures(),
       bpm.get(),
       swing=jazz_style.get().swing,
     )
+  })
+  let measures : () -> Array[@music.Measure] = @signals.memo(fn() {
+    match jazz_style.get().melody_mode {
+      Full | Silent => full_measures()
+      Off =>
+        full_measures().map(fn(m) {
+          @music.Measure::{
+            ..m,
+            beats: m.beats.map(fn(b) { @music.Beat::{ ..b, notes: [] } }),
+          }
+        })
+    }
+  })
+  let sounds : () -> Array[@music.ScheduledSound] = @signals.memo(fn() {
+    match jazz_style.get().melody_mode {
+      Full | Silent => full_sounds()
+      Off => []
+    }
   })
   let drum_sounds : () -> Array[@music.ScheduledSound] = @signals.memo(fn() {
     let js = jazz_style.get()
@@ -91,9 +109,9 @@ pub fn AppState::new() -> AppState {
       []
     } else {
       @music.generate_comping_sounds(
-        measures(),
+        full_measures(),
         bpm.get(),
-        sounds(),
+        full_sounds(),
         key.get(),
         seed=seed.get(),
         voicing_style=js.comping_style,
@@ -105,7 +123,11 @@ pub fn AppState::new() -> AppState {
     if not(js.bass_enabled) {
       []
     } else {
-      @music.generate_walking_bass_sounds(measures(), bpm.get(), js.bass_style)
+      @music.generate_walking_bass_sounds(
+        full_measures(),
+        bpm.get(),
+        js.bass_style,
+      )
     }
   })
   let total_duration = @signals.memo(fn() {

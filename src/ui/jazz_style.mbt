@@ -1,9 +1,18 @@
 ///|
+/// Controls whether melody is generated and played.
+pub(all) enum MelodyMode {
+  Full // Generate melody and play sound
+  Silent // Generate melody (visible in score) but no audio
+  Off // No melody generated or displayed
+} derive(Eq, Show)
+
+///|
 /// Unified jazz style configuration for a performance session.
 /// Controls swing feel, melody techniques, and accompaniment elements.
 pub(all) struct JazzStyle {
   swing : @music.SwingConfig
   techniques : @generator.Techniques
+  melody_mode : MelodyMode
   comping_enabled : Bool
   drums_enabled : Bool
   bass_enabled : Bool
@@ -21,6 +30,7 @@ pub fn JazzStyle::default() -> JazzStyle {
       ..@generator.Techniques::default(),
       bebop_scales: true,
     },
+    melody_mode: Full,
     comping_enabled: true,
     drums_enabled: true,
     bass_enabled: true,
@@ -47,6 +57,7 @@ pub fn JazzStyle::straight() -> JazzStyle {
   JazzStyle::{
     swing: @music.SwingConfig::straight(),
     techniques: all_off,
+    melody_mode: Full,
     comping_enabled: false,
     drums_enabled: false,
     bass_enabled: false,
@@ -73,6 +84,7 @@ pub fn JazzStyle::simple() -> JazzStyle {
   JazzStyle::{
     swing: @music.SwingConfig::triplet(),
     techniques,
+    melody_mode: Full,
     comping_enabled: true,
     drums_enabled: true,
     bass_enabled: true,

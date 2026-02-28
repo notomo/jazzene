@@ -107,6 +107,13 @@ fn settings_section(
 }
 
 ///|
+let melody_mode_options : Array[(String, MelodyMode)] = [
+  ("Off", Off),
+  ("Silent", Silent),
+  ("Full", Full),
+]
+
+///|
 let swing_options : Array[(String, @music.SwingConfig)] = [
   ("Off", @music.SwingConfig::straight()),
   ("Triplet", @music.SwingConfig::triplet()),
@@ -217,6 +224,18 @@ pub fn settings_panel(
                     [@luna_dom.text(label)],
                   )
                 }),
+              ),
+            ]),
+            // Melody
+            settings_section("Melody", [
+              segmented_buttons(
+                melody_mode_options,
+                fn() { jazz_style.get().melody_mode },
+                fn(v) {
+                  jazz_style.update(fn(js) {
+                    JazzStyle::{ ..js, melody_mode: v }
+                  })
+                },
               ),
             ]),
             // Swing

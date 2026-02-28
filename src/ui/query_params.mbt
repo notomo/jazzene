@@ -213,6 +213,26 @@ fn techniques_from_string(s : String) -> @generator.Techniques {
 let default_techniques_str : String = "tension,scale,approach,enclosure,syncopation,triplets,bebop,neighbor"
 
 ///|
+/// Serialize MelodyMode to a query-string token.
+fn melody_mode_to_string(mode : MelodyMode) -> String {
+  match mode {
+    Full => "full"
+    Silent => "silent"
+    Off => "off"
+  }
+}
+
+///|
+/// Deserialize MelodyMode from a query-string token.
+fn melody_mode_from_string(s : String) -> MelodyMode {
+  match s {
+    "silent" => Silent
+    "off" => Off
+    _ => Full
+  }
+}
+
+///|
 /// Serialize CompingStyle (with enabled flag) to a token.
 /// "off" means disabled; otherwise the voicing style name.
 fn comping_to_string(enabled : Bool, style : @music.CompingStyle) -> String {
@@ -322,6 +342,11 @@ pub fn save_jazz_style(js : JazzStyle) -> Unit {
     bass_to_string(js.bass_enabled, js.bass_style),
     default=bass_to_string(default_js.bass_enabled, default_js.bass_style),
   )
+  set_query_param(
+    "melody",
+    melody_mode_to_string(js.melody_mode),
+    default=melody_mode_to_string(default_js.melody_mode),
+  )
 }
 
 ///|
@@ -348,9 +373,14 @@ pub fn get_initial_jazz_style() -> JazzStyle {
     Some(s) => bass_from_string(s)
     None => (default_js.bass_enabled, default_js.bass_style)
   }
+  let melody_mode = match get_query_param("melody") {
+    Some(s) => melody_mode_from_string(s)
+    None => default_js.melody_mode
+  }
   JazzStyle::{
     swing,
     techniques,
+    melody_mode,
     comping_enabled,
     drums_enabled,
     bass_enabled,
