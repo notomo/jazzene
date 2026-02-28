@@ -76,9 +76,8 @@ test.describe("Jazzene - Jazz Improvisation Web App", () => {
     // Panel should still be open
     await expect(panel).toBeVisible();
     // Preset section should contain all expected presets
-    await expect(panel).toContainText("Bebop");
-    await expect(panel).toContainText("Cool Jazz");
-    await expect(panel).toContainText("Full Band");
+    await expect(panel).toContainText("Simple");
+    await expect(panel).toContainText("Default");
   });
 
   test("should persist jazz style to URL when changed", async ({ page }) => {

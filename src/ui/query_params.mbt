@@ -214,8 +214,8 @@ fn techniques_from_string(s : String) -> @generator.Techniques {
 }
 
 ///|
-/// Default techniques string (all enabled except bebop).
-let default_techniques_str : String = "tension,scale,approach,enclosure,syncopation,triplets,neighbor"
+/// Default techniques string
+let default_techniques_str : String = "tension,scale,approach,enclosure,syncopation,triplets,bebop,neighbor"
 
 ///|
 /// Serialize CompingStyle (with enabled flag) to a token.
