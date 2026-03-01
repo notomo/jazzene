@@ -6,8 +6,8 @@ test "Techniques::default enables standard techniques, bebop disabled by default
   assert_true(t.enclosure_tones)
   assert_true(t.syncopation)
   assert_true(t.triplets)
-  // bebop_scales is opt-in; disabled by default
-  assert_false(t.bebop_scales)
+  // bebop_scales is enabled by default
+  assert_true(t.bebop_scales)
   // neighbor_tones enabled by default
   assert_true(t.neighbor_tones)
 }
@@ -28,7 +28,7 @@ test "ImprovisationConfig::with_techniques preserves values when all enabled" {
   )
   assert_eq(result.syncopation_probability, s.syncopation_probability)
   assert_eq(result.triplet_probability, s.triplet_probability)
-  assert_eq(result.bebop_weight_ratio, 0) // bebop disabled by default
+  assert_eq(result.bebop_weight_ratio, 0) // bebop_weight_ratio is 0 in ImprovisationConfig::default
 }
 
 ///|
