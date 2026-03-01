@@ -167,10 +167,10 @@ fn techniques_to_string(t : @generator.Techniques) -> String {
   if t.tension_tones {
     names.push("tension")
   }
-  if t.approach_tones {
-    names.push("approach")
+  if t.chromatic_approach {
+    names.push("chromatic")
   }
-  if t.enclosure_tones {
+  if t.enclosure {
     names.push("enclosure")
   }
   if t.syncopation {
@@ -195,8 +195,8 @@ fn techniques_from_string(s : String) -> @generator.Techniques {
   let has = fn(name : String) -> Bool { parts.contains(name) }
   @generator.Techniques::{
     tension_tones: has("tension"),
-    approach_tones: has("approach"),
-    enclosure_tones: has("enclosure"),
+    chromatic_approach: has("chromatic"),
+    enclosure: has("enclosure"),
     syncopation: has("syncopation"),
     triplets: has("triplets"),
     bebop_scales: has("bebop"),

@@ -233,7 +233,7 @@ pub fn settings_panel(
         ),
         technique_toggle(
           "Chromatic Approach",
-          value=fn() { jazz_style.get().techniques.approach_tones },
+          value=fn() { jazz_style.get().techniques.chromatic_approach },
           on_toggle=fn() {
             jazz_style.update(fn(js) {
               let t = js.techniques
@@ -241,7 +241,7 @@ pub fn settings_panel(
                 ..js,
                 techniques: @generator.Techniques::{
                   ..t,
-                  approach_tones: not(t.approach_tones),
+                  chromatic_approach: not(t.chromatic_approach),
                 },
               }
             })
@@ -249,7 +249,7 @@ pub fn settings_panel(
         ),
         technique_toggle(
           "Enclosures",
-          value=fn() { jazz_style.get().techniques.enclosure_tones },
+          value=fn() { jazz_style.get().techniques.enclosure },
           on_toggle=fn() {
             jazz_style.update(fn(js) {
               let t = js.techniques
@@ -257,7 +257,7 @@ pub fn settings_panel(
                 ..js,
                 techniques: @generator.Techniques::{
                   ..t,
-                  enclosure_tones: not(t.enclosure_tones),
+                  enclosure: not(t.enclosure),
                 },
               }
             })

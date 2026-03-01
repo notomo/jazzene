@@ -2,8 +2,8 @@
 test "Techniques::default enables standard techniques, bebop disabled by default" {
   let t = Techniques::default()
   assert_true(t.tension_tones)
-  assert_true(t.approach_tones)
-  assert_true(t.enclosure_tones)
+  assert_true(t.chromatic_approach)
+  assert_true(t.enclosure)
   assert_true(t.syncopation)
   assert_true(t.triplets)
   // bebop_scales is enabled by default
@@ -84,7 +84,7 @@ test "ImprovisationConfig::with_techniques zeros tension when disabled" {
 ///|
 test "ImprovisationConfig::with_techniques zeros approach tones when disabled" {
   let s = ImprovisationConfig::default(42)
-  let t = Techniques::{ ..Techniques::default(), approach_tones: false }
+  let t = Techniques::{ ..Techniques::default(), chromatic_approach: false }
   let result = s.with_techniques(t)
   assert_eq(result.chromatic_approach_ornament_probability, 0)
 }
@@ -110,8 +110,8 @@ test "ImprovisationConfig::with_techniques zeros multiple techniques" {
   let s = ImprovisationConfig::default(42)
   let t = Techniques::{
     tension_tones: false,
-    approach_tones: false,
-    enclosure_tones: false,
+    chromatic_approach: false,
+    enclosure: false,
     syncopation: true,
     triplets: true,
     bebop_scales: false,

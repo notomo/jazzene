@@ -4,8 +4,8 @@
 /// When disabled, the technique's weight/probability in ImprovisationConfig is zeroed out.
 pub(all) struct Techniques {
   tension_tones : Bool // Tension notes (9th, 11th, 13th)
-  approach_tones : Bool // Approach tones (chromatic half-steps)
-  enclosure_tones : Bool // Enclosure tones (2 semitones from chord tones)
+  chromatic_approach : Bool // Approach tones (chromatic half-steps)
+  enclosure : Bool // Enclosure tones (2 semitones from chord tones)
   syncopation : Bool // Syncopation (off-beat phrase starts)
   triplets : Bool // Eighth-note triplets
   bebop_scales : Bool // Bebop passing tones (major 7th for dom7, #5 for maj7)
@@ -17,8 +17,8 @@ pub(all) struct Techniques {
 pub fn Techniques::default() -> Techniques {
   Techniques::{
     tension_tones: true,
-    approach_tones: true,
-    enclosure_tones: true,
+    chromatic_approach: true,
+    enclosure: true,
     syncopation: true,
     triplets: true,
     bebop_scales: true,
@@ -41,12 +41,12 @@ pub fn ImprovisationConfig::with_techniques(
     } else {
       0
     },
-    chromatic_approach_ornament_probability: if techniques.approach_tones {
+    chromatic_approach_ornament_probability: if techniques.chromatic_approach {
       self.chromatic_approach_ornament_probability
     } else {
       0
     },
-    enclosure_ornament_probability: if techniques.enclosure_tones {
+    enclosure_ornament_probability: if techniques.enclosure {
       self.enclosure_ornament_probability
     } else {
       0

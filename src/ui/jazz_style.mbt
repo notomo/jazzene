@@ -46,8 +46,8 @@ pub fn JazzStyle::default() -> JazzStyle {
 pub fn JazzStyle::straight() -> JazzStyle {
   let all_off = @generator.Techniques::{
     tension_tones: false,
-    approach_tones: false,
-    enclosure_tones: false,
+    chromatic_approach: false,
+    enclosure: false,
     syncopation: false,
     triplets: false,
     bebop_scales: false,
@@ -72,8 +72,8 @@ pub fn JazzStyle::straight() -> JazzStyle {
 pub fn JazzStyle::simple() -> JazzStyle {
   let techniques = @generator.Techniques::{
     tension_tones: false,
-    approach_tones: true,
-    enclosure_tones: false,
+    chromatic_approach: true,
+    enclosure: false,
     syncopation: true,
     triplets: true,
     bebop_scales: false,
