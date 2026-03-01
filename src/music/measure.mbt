@@ -2,27 +2,6 @@
 /// Measure representation for lead sheet visualization
 
 ///|
-/// Tie state for notes that span measure or beat boundaries
-pub(all) enum Tie {
-  TieStart // Ties to next note
-  TieEnd // Tied from previous note
-  TieBoth // Spans 3+ segments (both in and out)
-} derive(Eq, Show)
-
-///|
-/// Records which jazz improvisation technique produced a note.
-/// Used for educational highlighting and visualization.
-pub(all) enum ToneOrigin {
-  ChordTone // Chord tone (1st, 3rd, 5th, 7th)
-  Tension(Int) // Tension tone (9th, 11th, 13th etc.); Int is the jazz degree
-  ScaleTone // Diatonic scale tone (non-chord tone from chord scale)
-  NeighborTone // Note ±1-2 semitones from a chord tone, used in CT→N→CT ornament
-  ChromaticApproach // Chromatic approach tone (half-step above/below chord tone), used in AT→CT ornament
-  Enclosure // Enclosure pattern (surrounding a chord tone from above and below)
-  PassingTone // Passing tone (connecting scale tone)
-} derive(Eq, Show)
-
-///|
 /// A single beat within a measure
 pub(all) struct Beat {
   count : Int // 0-indexed beat number (0,1,2,3 for 4/4)
