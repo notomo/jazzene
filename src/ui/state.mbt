@@ -11,7 +11,7 @@ pub struct AppState {
   loop_a_measure : @signals.Signal[Int]
   loop_b_measure : @signals.Signal[Int]
   jazz_style : @signals.Signal[JazzStyle]
-  view_mode : @signals.Signal[ViewMode]
+  view_state : @signals.Signal[ViewState]
   is_playing : @signals.Signal[Bool]
   measures : () -> Array[@music.Measure]
   sounds : () -> Array[@music.ScheduledSound]
@@ -39,7 +39,7 @@ pub fn AppState::new() -> AppState {
     get_initial_loop_b_measure(measure_count.get()),
   )
   let jazz_style = @signals.signal(get_initial_jazz_style())
-  let view_mode = @signals.signal(get_initial_view_mode())
+  let view_state = @signals.signal(get_initial_view_state())
   let is_playing = @signals.signal(false)
 
   let parsed_progression = @signals.memo(fn() {
@@ -153,7 +153,7 @@ pub fn AppState::new() -> AppState {
     loop_a_measure,
     loop_b_measure,
     jazz_style,
-    view_mode,
+    view_state,
     is_playing,
     measures,
     sounds,

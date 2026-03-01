@@ -85,11 +85,10 @@ pub fn get_initial_volume() -> Int {
 }
 
 ///|
-pub fn get_initial_view_mode() -> ViewMode {
+pub fn get_initial_view_state() -> ViewState {
   match get_query_param("view") {
-    Some(value) =>
-      ViewMode::from_query_string(value).unwrap_or(ViewMode::Sheet_PianoRoll)
-    None => ViewMode::Sheet_PianoRoll
+    Some(value) => ViewState::from_query_string(value)
+    None => ViewState::default()
   }
 }
 

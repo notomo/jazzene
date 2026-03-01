@@ -53,7 +53,7 @@ pub fn render(state : AppState) -> Unit {
     loop_a_measure,
     loop_b_measure,
     jazz_style,
-    view_mode,
+    view_state,
     is_playing,
     measures,
     sounds,
@@ -62,7 +62,6 @@ pub fn render(state : AppState) -> Unit {
     chord_parse_error,
     ..,
   } = state
-  let show_settings = @signals.signal(false)
   let app = @luna_dom.div(
     class="flex flex-col h-dvh overflow-hidden w-dvw bg-gradient-to-br from-slate-950 to-slate-900 text-white touch-manipulation",
     [
@@ -91,10 +90,9 @@ pub fn render(state : AppState) -> Unit {
       ),
       @luna_dom.div(
         dyn_class=fn() {
-          let mode = view_mode.get()
-          match
-            (mode.show_sheet(), mode.show_piano_roll(), show_settings.get()) {
-            (false, true, false) => "flex justify-center h-full min-h-0"
+          match view_state.get() {
+            { show_sheet: false, show_piano_roll: true, show_settings: false } =>
+              "flex justify-center h-full min-h-0"
             _ => "flex h-full min-h-0"
           }
         },
@@ -102,18 +100,19 @@ pub fn render(state : AppState) -> Unit {
         [
           @luna_dom.div(
             dyn_class=fn() {
-              match view_mode.get() {
-                Sheet => "w-full min-h-0 overflow-auto"
-                Sheet_PianoRoll => "flex-1 min-h-0 overflow-auto"
-                PianoRoll => "hidden"
+              match view_state.get() {
+                { show_sheet: false, .. } => "hidden"
+                { show_piano_roll: true, .. } => "flex-1 min-h-0 overflow-auto"
+                _ => "w-full min-h-0 overflow-auto"
               }
             },
             attrs=[("id", @luna_dom.Attr::AttrString("lead-sheet-container"))],
             [
               @luna_dom.div(
                 dyn_class=fn() {
-                  match view_mode.get() {
-                    Sheet => "w-4/5 mx-auto"
+                  match view_state.get() {
+                    { show_sheet: true, show_piano_roll: false, .. } =>
+                      "w-4/5 mx-auto"
                     _ => ""
                   }
                 },
@@ -128,10 +127,9 @@ pub fn render(state : AppState) -> Unit {
           ),
           @luna_dom.div(
             dyn_class=fn() {
-              match view_mode.get() {
-                PianoRoll => "flex flex-col flex-1 min-h-0"
-                Sheet_PianoRoll => "flex flex-col flex-1 min-h-0"
-                Sheet => "hidden"
+              match view_state.get().show_piano_roll {
+                true => "flex flex-col flex-1 min-h-0"
+                false => "hidden"
               }
             },
             attrs=[("aria-label", @luna_dom.Attr::AttrString("visualization"))],
@@ -143,7 +141,7 @@ pub fn render(state : AppState) -> Unit {
               @piano_roll.keyboard(sounds, backing_sounds, playback_position),
             ],
           ),
-          @luna_dom.show(fn() { show_settings.get() }, fn() {
+          @luna_dom.show(fn() { view_state.get().show_settings }, fn() {
             settings_panel(jazz_style)
           }),
         ],
@@ -161,7 +159,7 @@ pub fn render(state : AppState) -> Unit {
               ab_loop(loop_a_measure, loop_b_measure, fn() {
                 measure_count.get()
               }),
-              view_mode_select(view_mode, show_settings),
+              view_mode_select(view_state),
             ],
           ),
         ],

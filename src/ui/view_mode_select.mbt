@@ -1,61 +1,59 @@
 ///|
-/// View mode for visualization panels
-pub(all) enum ViewMode {
-  Sheet_PianoRoll
-  Sheet
-  PianoRoll
+/// View state for visualization panels and settings
+pub(all) struct ViewState {
+  show_sheet : Bool
+  show_piano_roll : Bool
+  show_settings : Bool
 } derive(Eq)
 
 ///|
-fn ViewMode::to_query_string(self : ViewMode) -> String {
-  match self {
-    Sheet_PianoRoll => "both"
-    Sheet => "sheet"
-    PianoRoll => "pianoroll"
+fn ViewState::default() -> ViewState {
+  { show_sheet: true, show_piano_roll: true, show_settings: false }
+}
+
+///|
+fn ViewState::to_view_query_string(self : ViewState) -> String {
+  let parts : Array[String] = []
+  if self.show_sheet {
+    parts.push("sheet")
+  }
+  if self.show_piano_roll {
+    parts.push("pianoroll")
+  }
+  if self.show_settings {
+    parts.push("setting")
+  }
+  parts.join(",")
+}
+
+///|
+fn ViewState::from_query_string(s : String) -> ViewState {
+  let parts = s.split(",").to_array()
+  let show_sheet = parts.contains("sheet")
+  let show_piano_roll = parts.contains("pianoroll")
+  let show_settings = parts.contains("setting")
+  if not(show_sheet) && not(show_piano_roll) {
+    { ..ViewState::default(), show_settings, }
+  } else {
+    { show_sheet, show_piano_roll, show_settings }
   }
 }
 
 ///|
-fn ViewMode::from_query_string(s : String) -> ViewMode? {
-  match s {
-    "both" => Some(Sheet_PianoRoll)
-    "sheet" => Some(Sheet)
-    "pianoroll" => Some(PianoRoll)
-    _ => None
+fn toggle_sheet(current : ViewState) -> ViewState {
+  match (current.show_sheet, current.show_piano_roll) {
+    (true, true) => { ..current, show_sheet: false }
+    (false, _) => { ..current, show_sheet: true }
+    (true, false) => { ..current, show_sheet: false, show_piano_roll: true }
   }
 }
 
 ///|
-pub fn ViewMode::show_sheet(self : ViewMode) -> Bool {
-  match self {
-    Sheet_PianoRoll | Sheet => true
-    PianoRoll => false
-  }
-}
-
-///|
-pub fn ViewMode::show_piano_roll(self : ViewMode) -> Bool {
-  match self {
-    Sheet_PianoRoll | PianoRoll => true
-    Sheet => false
-  }
-}
-
-///|
-fn toggle_sheet(current : ViewMode) -> ViewMode {
-  match current {
-    Sheet_PianoRoll => PianoRoll
-    Sheet => PianoRoll
-    PianoRoll => Sheet_PianoRoll
-  }
-}
-
-///|
-fn toggle_piano(current : ViewMode) -> ViewMode {
-  match current {
-    Sheet_PianoRoll => Sheet
-    PianoRoll => Sheet
-    Sheet => Sheet_PianoRoll
+fn toggle_piano(current : ViewState) -> ViewState {
+  match (current.show_sheet, current.show_piano_roll) {
+    (true, true) => { ..current, show_piano_roll: false }
+    (_, false) => { ..current, show_piano_roll: true }
+    (false, true) => { ..current, show_sheet: true, show_piano_roll: false }
   }
 }
 
@@ -175,8 +173,7 @@ fn settings_icon(active : Bool) -> @luna_dom.DomNode {
 ///|
 /// Render view mode toggle buttons
 fn view_mode_select(
-  mode : @signals.Signal[ViewMode],
-  show_settings : @signals.Signal[Bool],
+  view_state : @signals.Signal[ViewState],
 ) -> @luna_dom.DomNode {
   let base = "px-2 lg:px-3 py-1 lg:py-2 font-medium cursor-pointer transition-colors flex items-center"
   let active_class = "bg-blue-900 text-blue-200"
@@ -186,7 +183,7 @@ fn view_mode_select(
       cn([
         base,
         "rounded-l-lg",
-        if mode.get().show_sheet() {
+        if view_state.get().show_sheet {
           active_class
         } else {
           inactive_class
@@ -194,18 +191,22 @@ fn view_mode_select(
       ])
     },
     on=@luna_dom.events().click(fn(_) {
-      let next = toggle_sheet(mode.get())
-      mode.set(next)
-      set_query_param("view", next.to_query_string(), default="both")
+      let next = toggle_sheet(view_state.get())
+      view_state.set(next)
+      set_query_param(
+        "view",
+        next.to_view_query_string(),
+        default="sheet,pianoroll",
+      )
     }),
-    [eighth_note_icon(mode.get().show_sheet())],
+    [eighth_note_icon(view_state.get().show_sheet)],
     attrs=[("title", @luna_dom.Attr::AttrString("Sheet"))],
   )
   let piano_button = @luna_dom.button(
     dyn_class=fn() {
       cn([
         base,
-        if mode.get().show_piano_roll() {
+        if view_state.get().show_piano_roll {
           active_class
         } else {
           inactive_class
@@ -213,11 +214,15 @@ fn view_mode_select(
       ])
     },
     on=@luna_dom.events().click(fn(_) {
-      let next = toggle_piano(mode.get())
-      mode.set(next)
-      set_query_param("view", next.to_query_string(), default="both")
+      let next = toggle_piano(view_state.get())
+      view_state.set(next)
+      set_query_param(
+        "view",
+        next.to_view_query_string(),
+        default="sheet,pianoroll",
+      )
     }),
-    [piano_icon(mode.get().show_piano_roll())],
+    [piano_icon(view_state.get().show_piano_roll)],
     attrs=[("title", @luna_dom.Attr::AttrString("Piano"))],
   )
   let settings_button = @luna_dom.button(
@@ -225,15 +230,26 @@ fn view_mode_select(
       cn([
         base,
         "rounded-r-lg",
-        if show_settings.get() {
+        if view_state.get().show_settings {
           active_class
         } else {
           inactive_class
         },
       ])
     },
-    on=@luna_dom.events().click(fn(_) { show_settings.update(fn(v) { not(v) }) }),
-    [settings_icon(show_settings.get())],
+    on=@luna_dom.events().click(fn(_) {
+      let next = {
+        ..view_state.get(),
+        show_settings: not(view_state.get().show_settings),
+      }
+      view_state.set(next)
+      set_query_param(
+        "view",
+        next.to_view_query_string(),
+        default="sheet,pianoroll",
+      )
+    }),
+    [settings_icon(view_state.get().show_settings)],
     attrs=[("title", @luna_dom.Attr::AttrString("Settings"))],
   )
   @luna_dom.div(
