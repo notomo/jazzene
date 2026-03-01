@@ -110,7 +110,7 @@ fn settings_section(
 let melody_mode_options : Array[(String, MelodyMode)] = [
   ("Off", Off),
   ("Silent", Silent),
-  ("Full", Full),
+  ("On", On),
 ]
 
 ///|

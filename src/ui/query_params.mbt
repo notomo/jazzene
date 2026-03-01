@@ -207,7 +207,7 @@ fn techniques_from_string(s : String) -> @generator.Techniques {
 /// Serialize MelodyMode to a query-string token.
 fn melody_mode_to_string(mode : MelodyMode) -> String {
   match mode {
-    Full => "full"
+    On => "on"
     Silent => "silent"
     Off => "off"
   }
@@ -219,7 +219,7 @@ fn melody_mode_from_string(s : String) -> MelodyMode {
   match s {
     "silent" => Silent
     "off" => Off
-    _ => Full
+    _ => On
   }
 }
 

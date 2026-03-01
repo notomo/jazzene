@@ -73,7 +73,7 @@ pub fn AppState::new() -> AppState {
   })
   let measures : () -> Array[@music.Measure] = @signals.memo(fn() {
     match jazz_style.get().melody_mode {
-      Full | Silent => full_measures()
+      On | Silent => full_measures()
       Off =>
         full_measures().map(fn(m) {
           @music.Measure::{
@@ -85,7 +85,7 @@ pub fn AppState::new() -> AppState {
   })
   let sounds : () -> Array[@music.ScheduledSound] = @signals.memo(fn() {
     match jazz_style.get().melody_mode {
-      Full | Silent => full_sounds()
+      On | Silent => full_sounds()
       Off => []
     }
   })
