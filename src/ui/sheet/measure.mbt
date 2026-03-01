@@ -111,7 +111,11 @@ fn render_measure_notes(
     OttavaBassa => render_8vb_marking(x, y, measure_width)
     OttavaNone => []
   }
-  [..note_nodes, ..beam_nodes, ..ottava_nodes]
+  let tension_label_nodes : Array[@luna_dom.DomNode] = sheet.notes
+    .iter()
+    .filter_map(fn(note) { render_note_tension_label(note) })
+    .collect()
+  [..note_nodes, ..beam_nodes, ..ottava_nodes, ..tension_label_nodes]
 }
 
 ///|
