@@ -34,16 +34,16 @@ test "DrumVoice::from_midi roundtrips with midi_number" {
 ///|
 test "generate_drum_sounds 4/4 produces correct number of hits" {
   let time_sig = TimeSignature::{ numerator: 4, denominator: 4 }
-  // jazz_4_4 pattern has 8 hits per measure (HiHat+Kick, HiHat+Snare, HiHat+Kick, HiHat+Snare)
+  // swing_ride_4_4 pattern has 12 hits per measure
   let sounds = generate_drum_sounds(120, 1, time_signature=time_sig)
-  assert_eq(sounds.length(), 8)
+  assert_eq(sounds.length(), 12)
 }
 
 ///|
 test "generate_drum_sounds 4/4 two measures doubles hits" {
   let time_sig = TimeSignature::{ numerator: 4, denominator: 4 }
   let sounds = generate_drum_sounds(120, 2, time_signature=time_sig)
-  assert_eq(sounds.length(), 16)
+  assert_eq(sounds.length(), 24)
 }
 
 ///|
@@ -83,7 +83,7 @@ test "generate_drum_sounds second measure starts after first" {
   let second_measure = sounds.filter(fn(s) {
     s.start_time.to_milliseconds() >= 2000.0
   })
-  assert_eq(second_measure.length(), 8)
+  assert_eq(second_measure.length(), 12)
 }
 
 ///|
@@ -109,7 +109,7 @@ test "generate_drum_sounds all notes are Eighth duration" {
 test "generate_drum_sounds uses drum MIDI numbers" {
   let time_sig = TimeSignature::{ numerator: 4, denominator: 4 }
   let sounds = generate_drum_sounds(120, 1, time_signature=time_sig)
-  let drum_midis = [36, 38, 42]
+  let drum_midis = [36, 38, 42, 51]
   for sound in sounds {
     match sound.sound_event {
       Note(midi~, ..) => assert_true(drum_midis.contains(midi.value))
@@ -163,22 +163,9 @@ test "Brushes pattern produces 9 hits per measure" {
 }
 
 ///|
-test "BossaNova pattern produces 13 hits per measure" {
-  let time_sig = TimeSignature::{ numerator: 4, denominator: 4 }
-  let sounds = generate_drum_sounds(
-    120,
-    1,
-    time_signature=time_sig,
-    pattern_style=BossaNova,
-  )
-  assert_eq(sounds.length(), 13)
-}
-
-///|
 test "3/4 time uses waltz pattern regardless of style" {
   let time_sig = TimeSignature::{ numerator: 3, denominator: 4 }
-  for
-    style in ([Basic, SwingRide, BossaNova, Brushes] : Array[DrumPatternStyle]) {
+  for style in ([SwingRide, Brushes] : Array[DrumPatternStyle]) {
     let sounds = generate_drum_sounds(
       120,
       1,

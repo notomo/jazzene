@@ -257,9 +257,7 @@ fn drums_to_string(enabled : Bool, style : @music.DrumPatternStyle) -> String {
     "off"
   } else {
     match style {
-      @music.Basic => "basic"
       @music.SwingRide => "sride"
-      @music.BossaNova => "bossa"
       @music.Brushes => "brush"
     }
   }
@@ -269,11 +267,9 @@ fn drums_to_string(enabled : Bool, style : @music.DrumPatternStyle) -> String {
 /// Deserialize DrumPatternStyle from a token. Returns (enabled, style).
 fn drums_from_string(s : String) -> (Bool, @music.DrumPatternStyle) {
   match s {
-    "off" => (false, @music.Basic)
-    "sride" => (true, @music.SwingRide)
-    "bossa" => (true, @music.BossaNova)
+    "off" => (false, @music.SwingRide)
     "brush" => (true, @music.Brushes)
-    _ => (true, @music.Basic)
+    _ => (true, @music.SwingRide)
   }
 }
 

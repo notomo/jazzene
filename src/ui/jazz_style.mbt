@@ -61,7 +61,7 @@ pub fn JazzStyle::straight() -> JazzStyle {
     drums_enabled: false,
     bass_enabled: false,
     comping_style: @music.GuideTones,
-    drum_pattern: @music.Basic,
+    drum_pattern: @music.SwingRide,
     bass_style: @music.RootOnly,
   }
 }
@@ -87,7 +87,7 @@ pub fn JazzStyle::simple() -> JazzStyle {
     drums_enabled: true,
     bass_enabled: true,
     comping_style: @music.GuideTones,
-    drum_pattern: @music.Basic,
+    drum_pattern: @music.SwingRide,
     bass_style: @music.RootOnly,
   }
 }

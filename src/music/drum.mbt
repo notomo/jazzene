@@ -38,9 +38,7 @@ pub fn DrumVoice::from_midi(midi : MidiNumber) -> DrumVoice? {
 ///|
 /// Drum pattern style
 pub(all) enum DrumPatternStyle {
-  Basic // Basic jazz pattern (hi-hat every beat, kick 1&3, snare 2&4)
   SwingRide // Swing ride pattern (ride spang-a-lang, hi-hat foot 2&4)
-  BossaNova // Bossa nova pattern
   Brushes // Brush pattern for ballads
 } derive(Eq, Show)
 
@@ -56,26 +54,6 @@ priv struct DrumHit {
 /// A drum pattern for one measure
 priv struct DrumPattern {
   hits : Array[DrumHit]
-}
-
-///|
-/// Basic jazz 4/4 drum pattern
-/// - HiHat: every beat
-/// - Kick: beats 1, 3
-/// - Snare: beats 2, 4
-fn DrumPattern::jazz_4_4() -> DrumPattern {
-  DrumPattern::{
-    hits: [
-      DrumHit::{ voice: HiHat, beat: 0.0 },
-      DrumHit::{ voice: Kick, beat: 0.0 },
-      DrumHit::{ voice: HiHat, beat: 1.0 },
-      DrumHit::{ voice: Snare, beat: 1.0 },
-      DrumHit::{ voice: HiHat, beat: 2.0 },
-      DrumHit::{ voice: Kick, beat: 2.0 },
-      DrumHit::{ voice: HiHat, beat: 3.0 },
-      DrumHit::{ voice: Snare, beat: 3.0 },
-    ],
-  }
 }
 
 ///|
@@ -140,31 +118,6 @@ fn DrumPattern::brushes_4_4() -> DrumPattern {
 }
 
 ///|
-/// Bossa nova 4/4 pattern
-/// - HiHat: every eighth note
-/// - Kick: beats 1, 1.5 (syncopated)
-/// - Snare: beats 2, 3 (rimshot feel)
-fn DrumPattern::bossa_nova_4_4() -> DrumPattern {
-  DrumPattern::{
-    hits: [
-      DrumHit::{ voice: Kick, beat: 0.0 },
-      DrumHit::{ voice: HiHat, beat: 0.0 },
-      DrumHit::{ voice: HiHat, beat: 0.5 },
-      DrumHit::{ voice: Kick, beat: 1.0 },
-      DrumHit::{ voice: Snare, beat: 1.0 },
-      DrumHit::{ voice: HiHat, beat: 1.0 },
-      DrumHit::{ voice: HiHat, beat: 1.5 },
-      DrumHit::{ voice: HiHat, beat: 2.0 },
-      DrumHit::{ voice: Kick, beat: 2.5 },
-      DrumHit::{ voice: HiHat, beat: 2.5 },
-      DrumHit::{ voice: Snare, beat: 3.0 },
-      DrumHit::{ voice: HiHat, beat: 3.0 },
-      DrumHit::{ voice: HiHat, beat: 3.5 },
-    ],
-  }
-}
-
-///|
 fn DrumPattern::for_time_signature(
   time_signature : TimeSignature,
   style : DrumPatternStyle,
@@ -173,8 +126,6 @@ fn DrumPattern::for_time_signature(
     (3, 4, _) => DrumPattern::jazz_waltz()
     (_, _, SwingRide) => DrumPattern::swing_ride_4_4()
     (_, _, Brushes) => DrumPattern::brushes_4_4()
-    (_, _, BossaNova) => DrumPattern::bossa_nova_4_4()
-    _ => DrumPattern::jazz_4_4()
   }
 }
 
@@ -186,7 +137,7 @@ pub fn generate_drum_sounds(
   measure_count : Int,
   time_signature~ : TimeSignature,
   swing? : SwingConfig = SwingConfig::straight(),
-  pattern_style? : DrumPatternStyle = Basic,
+  pattern_style? : DrumPatternStyle = SwingRide,
 ) -> Array[ScheduledSound] {
   let beats_per_measure = time_signature.beats_per_measure()
   let beat_duration_ms = ms_per_beat(bpm)
