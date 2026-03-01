@@ -130,9 +130,9 @@ let comping_style_options : Array[(String, @music.CompingStyle)] = [
 ///|
 let drum_pattern_options : Array[(String, @music.DrumPatternStyle)] = [
   ("Basic", @music.Basic),
-  ("Swing Ride", @music.SwingRide),
-  ("Bossa Nova", @music.BossaNova),
-  ("Brushes", @music.Brushes),
+  ("Ride", @music.SwingRide),
+  ("Bossa", @music.BossaNova),
+  ("Brush", @music.Brushes),
 ]
 
 ///|
