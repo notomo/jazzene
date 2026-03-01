@@ -11,27 +11,30 @@ const CHORD_SYMBOL_X_OFFSET = 10.0
 const CHORD_SYMBOL_FONT_SIZE = "26"
 
 ///|
-/// Format array of chords for display, joining with " " separator
-fn format_chords(chords : Array[@music.Chord]) -> String {
-  chords.iter().map(@music.format_chord).collect().join(" ")
-}
-
-///|
-/// Render chord symbol as static text
+/// Render chord symbols positioned proportionally within the measure width
 fn render_chord_symbol(
   measure : @music.Measure,
   x : Double,
   y : Double,
+  measure_width~ : Double,
 ) -> Array[@luna_dom.DomNode] {
-  [
+  let num_chords = measure.chords.length()
+  guard num_chords > 0 else { return [] }
+  measure.chords
+  .iter()
+  .mapi(fn(i, chord) {
+    let chord_x = x +
+      i.to_double() / num_chords.to_double() * measure_width +
+      CHORD_SYMBOL_X_OFFSET
     @luna_dom.svg_text(
-      x=(x + CHORD_SYMBOL_X_OFFSET).to_string(),
+      x=chord_x.to_string(),
       y=(y + CHORD_SYMBOL_Y_OFFSET).to_string(),
       text_anchor="start",
       font_size=CHORD_SYMBOL_FONT_SIZE,
       font_family="serif",
       attrs=[("stroke", @luna_dom.Attr::AttrString("none"))],
-      [@luna_dom.text(format_chords(measure.chords))],
-    ),
-  ]
+      [@luna_dom.text(@music.format_chord(chord))],
+    )
+  })
+  .collect()
 }

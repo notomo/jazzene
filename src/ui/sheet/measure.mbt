@@ -144,7 +144,7 @@ fn render_measure(
       ..render_measure_clef(x, y, is_first_in_row, key),
       ..render_measure_key_signature(key, x, y, is_first_in_row),
       ..render_measure_time_signature(time_signature, x, y, is_first_measure),
-      ..render_chord_symbol(measure, x, y),
+      ..render_chord_symbol(measure, x, y, measure_width~),
       ..render_measure_notes(
         measure,
         x,
