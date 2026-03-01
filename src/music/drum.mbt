@@ -5,6 +5,7 @@ pub(all) enum DrumVoice {
   Snare
   HiHat
   Ride
+  Brush
 } derive(Eq, Show)
 
 ///|
@@ -15,6 +16,7 @@ pub fn DrumVoice::midi_number(self : DrumVoice) -> MidiNumber {
     Snare => 38
     HiHat => 42
     Ride => 51
+    Brush => 40
   }
   // GM drum MIDI numbers are always valid
   MidiNumber::{ value, }
@@ -26,6 +28,7 @@ pub fn DrumVoice::from_midi(midi : MidiNumber) -> DrumVoice? {
   match midi.value {
     36 => Some(Kick)
     38 => Some(Snare)
+    40 => Some(Brush)
     42 => Some(HiHat)
     51 => Some(Ride)
     _ => None
@@ -115,17 +118,23 @@ fn DrumPattern::swing_ride_4_4() -> DrumPattern {
 }
 
 ///|
-/// Brush pattern for ballads (4/4)
-/// - Snare brush: every beat
+/// Brush pattern for jazz ballads (4/4) - spang-a-lang feel with brushes
+/// - Brush: every swing 8th note (0, and-1, 2, and-2, 3, and-3, 4, and-4)
 /// - Kick: beat 1
+/// The "and" positions (0.5, 1.5, 2.5, 3.5) are shifted by swing offset,
+/// producing the triplet groove automatically
 fn DrumPattern::brushes_4_4() -> DrumPattern {
   DrumPattern::{
     hits: [
       DrumHit::{ voice: Kick, beat: 0.0 },
-      DrumHit::{ voice: Snare, beat: 0.0 },
-      DrumHit::{ voice: Snare, beat: 1.0 },
-      DrumHit::{ voice: Snare, beat: 2.0 },
-      DrumHit::{ voice: Snare, beat: 3.0 },
+      DrumHit::{ voice: Brush, beat: 0.0 },
+      DrumHit::{ voice: Brush, beat: 0.5 },
+      DrumHit::{ voice: Brush, beat: 1.0 },
+      DrumHit::{ voice: Brush, beat: 1.5 },
+      DrumHit::{ voice: Brush, beat: 2.0 },
+      DrumHit::{ voice: Brush, beat: 2.5 },
+      DrumHit::{ voice: Brush, beat: 3.0 },
+      DrumHit::{ voice: Brush, beat: 3.5 },
     ],
   }
 }

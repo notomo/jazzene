@@ -2,6 +2,7 @@
 test "DrumVoice::midi_number returns GM standard numbers" {
   assert_eq(DrumVoice::Kick.midi_number(), MidiNumber::{ value: 36 })
   assert_eq(DrumVoice::Snare.midi_number(), MidiNumber::{ value: 38 })
+  assert_eq(DrumVoice::Brush.midi_number(), MidiNumber::{ value: 40 })
   assert_eq(DrumVoice::HiHat.midi_number(), MidiNumber::{ value: 42 })
   assert_eq(DrumVoice::Ride.midi_number(), MidiNumber::{ value: 51 })
 }
@@ -10,6 +11,7 @@ test "DrumVoice::midi_number returns GM standard numbers" {
 test "DrumVoice::from_midi returns correct voice for valid numbers" {
   assert_eq(DrumVoice::from_midi(MidiNumber::{ value: 36 }), Some(Kick))
   assert_eq(DrumVoice::from_midi(MidiNumber::{ value: 38 }), Some(Snare))
+  assert_eq(DrumVoice::from_midi(MidiNumber::{ value: 40 }), Some(Brush))
   assert_eq(DrumVoice::from_midi(MidiNumber::{ value: 42 }), Some(HiHat))
   assert_eq(DrumVoice::from_midi(MidiNumber::{ value: 51 }), Some(Ride))
 }
@@ -23,7 +25,7 @@ test "DrumVoice::from_midi returns None for non-drum numbers" {
 
 ///|
 test "DrumVoice::from_midi roundtrips with midi_number" {
-  let voices : Array[DrumVoice] = [Kick, Snare, HiHat, Ride]
+  let voices : Array[DrumVoice] = [Kick, Snare, Brush, HiHat, Ride]
   for voice in voices {
     assert_eq(DrumVoice::from_midi(voice.midi_number()), Some(voice))
   }
@@ -149,7 +151,7 @@ test "SwingRide pattern includes Ride cymbal" {
 }
 
 ///|
-test "Brushes pattern produces 5 hits per measure" {
+test "Brushes pattern produces 9 hits per measure" {
   let time_sig = TimeSignature::{ numerator: 4, denominator: 4 }
   let sounds = generate_drum_sounds(
     120,
@@ -157,7 +159,7 @@ test "Brushes pattern produces 5 hits per measure" {
     time_signature=time_sig,
     pattern_style=Brushes,
   )
-  assert_eq(sounds.length(), 5)
+  assert_eq(sounds.length(), 9)
 }
 
 ///|

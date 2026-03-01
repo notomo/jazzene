@@ -148,6 +148,37 @@ fn Drum::schedule_snare(
 }
 
 ///|
+/// Schedule a brush stroke on the snare
+/// Noise through a high-frequency lowpass filter for a clear "swish" character
+fn Drum::schedule_brush(
+  self : Drum,
+  start_time : Double,
+  velocity : Double,
+) -> Unit {
+  let duration = 0.22
+
+  // Noise through a mid-range lowpass — soft swish without metallic harshness
+  let source = self.ctx.create_buffer_source()
+  source.set_buffer(self.noise_buffer)
+  let filter = self.ctx.create_biquad_filter()
+  filter.set_type("lowpass")
+  filter.frequency().set_value_at_time(4000.0, start_time)
+  filter
+  .frequency()
+  .exponential_ramp_to_value_at_time(2000.0, start_time + duration)
+  let gain = self.ctx.create_gain()
+  let gain_param = gain.gain()
+  gain_param.set_value_at_time(0.001, start_time)
+  gain_param.linear_ramp_to_value_at_time(velocity * 0.5, start_time + 0.008)
+  gain_param.exponential_ramp_to_value_at_time(0.001, start_time + duration)
+  source.connect(filter.as_audio_node())
+  filter.connect(gain.as_audio_node())
+  gain.connect(self.gain.as_audio_node())
+  source.start(start_time)
+  source.stop(start_time + duration)
+}
+
+///|
 /// Schedule a hi-hat hit
 /// Filtered noise burst for metallic shimmer
 fn Drum::schedule_hihat(
@@ -192,6 +223,7 @@ fn Drum::schedule_notes(
     match @music.DrumVoice::from_midi(sound.midi) {
       Some(Kick) => self.schedule_kick(start_time, scaled_volume)
       Some(Snare) => self.schedule_snare(start_time, scaled_volume)
+      Some(Brush) => self.schedule_brush(start_time, scaled_volume)
       Some(HiHat) => self.schedule_hihat(start_time, scaled_volume)
       Some(Ride) => self.schedule_hihat(start_time, scaled_volume * 0.7)
       None => ()
