@@ -156,337 +156,281 @@ fn technique_toggle(
 pub fn settings_panel(
   jazz_style : @signals.Signal[JazzStyle],
 ) -> @luna_dom.DomNode {
-  let panel_visible = @signals.signal(false)
-
-  @luna_dom.div(class="relative", [
-    @luna_dom.button(
-      dyn_class=fn() {
-        cn([
-          "px-2 py-1 text-xs rounded border transition-colors",
-          if panel_visible.get() {
-            "bg-blue-900 border-blue-500 text-white"
-          } else {
-            "bg-slate-800 border-slate-600 text-slate-300 hover:border-slate-400"
+  @luna_dom.div(
+    class="bg-slate-800 border-l border-slate-600 p-3 overflow-y-auto flex flex-col gap-3 w-64 shrink-0",
+    attrs=[("aria-label", @luna_dom.Attr::AttrString("jazz settings panel"))],
+    [
+      // Legend
+      settings_section("Legend", [
+        @luna_dom.div(
+          class="flex flex-col gap-1",
+          legend_entries.map(fn(entry) {
+            let (dot, color, label) = entry
+            @luna_dom.div(class="flex items-center gap-1.5", [
+              @luna_dom.span(
+                class="text-xs leading-none",
+                attrs=[("style", @luna_dom.Attr::AttrString("color: " + color))],
+                [@luna_dom.text(dot)],
+              ),
+              @luna_dom.span(class="text-xs text-slate-200", [
+                @luna_dom.text(label),
+              ]),
+            ])
+          }),
+        ),
+      ]),
+      // Presets
+      settings_section("Preset", [
+        @luna_dom.div(
+          class="flex flex-wrap gap-1",
+          presets.map(fn(pair) {
+            let (label, make_preset) = pair
+            @luna_dom.button(
+              class="px-2 py-0.5 text-xs rounded border bg-slate-900 border-slate-600 text-slate-300 hover:bg-slate-700 hover:border-slate-400 transition-colors",
+              on=@luna_dom.events().click(fn(_) {
+                jazz_style.set(make_preset())
+              }),
+              [@luna_dom.text(label)],
+            )
+          }),
+        ),
+      ]),
+      // Melody
+      settings_section("Melody", [
+        segmented_buttons(
+          melody_mode_options,
+          fn() { jazz_style.get().melody_mode },
+          fn(v) {
+            jazz_style.update(fn(js) { JazzStyle::{ ..js, melody_mode: v } })
           },
-        ])
-      },
-      attrs=[("title", @luna_dom.Attr::AttrString("Settings"))],
-      on=@luna_dom.events().click(fn(_) {
-        panel_visible.update(fn(v) { not(v) })
-      }),
-      [
-        @luna_dom.svg(
-          width="16",
-          height="16",
-          viewBox="0 0 24 24",
-          fill="currentColor",
-          attrs=[("aria-hidden", @luna_dom.Attr::AttrString("true"))],
+        ),
+      ]),
+      // Swing
+      settings_section("Swing", [
+        segmented_buttons(swing_options, fn() { jazz_style.get().swing }, fn(
+          v,
+        ) {
+          jazz_style.update(fn(js) { JazzStyle::{ ..js, swing: v } })
+        }),
+      ]),
+      // Melody Techniques
+      settings_section("Melody Techniques", [
+        technique_toggle(
+          "Tension Tones",
+          value=fn() { jazz_style.get().techniques.tension_tones },
+          on_toggle=fn() {
+            jazz_style.update(fn(js) {
+              let t = js.techniques
+              JazzStyle::{
+                ..js,
+                techniques: @generator.Techniques::{
+                  ..t,
+                  tension_tones: not(t.tension_tones),
+                },
+              }
+            })
+          },
+        ),
+        technique_toggle(
+          "Chromatic Approach",
+          value=fn() { jazz_style.get().techniques.approach_tones },
+          on_toggle=fn() {
+            jazz_style.update(fn(js) {
+              let t = js.techniques
+              JazzStyle::{
+                ..js,
+                techniques: @generator.Techniques::{
+                  ..t,
+                  approach_tones: not(t.approach_tones),
+                },
+              }
+            })
+          },
+        ),
+        technique_toggle(
+          "Enclosures",
+          value=fn() { jazz_style.get().techniques.enclosure_tones },
+          on_toggle=fn() {
+            jazz_style.update(fn(js) {
+              let t = js.techniques
+              JazzStyle::{
+                ..js,
+                techniques: @generator.Techniques::{
+                  ..t,
+                  enclosure_tones: not(t.enclosure_tones),
+                },
+              }
+            })
+          },
+        ),
+        technique_toggle(
+          "Syncopation",
+          value=fn() { jazz_style.get().techniques.syncopation },
+          on_toggle=fn() {
+            jazz_style.update(fn(js) {
+              let t = js.techniques
+              JazzStyle::{
+                ..js,
+                techniques: @generator.Techniques::{
+                  ..t,
+                  syncopation: not(t.syncopation),
+                },
+              }
+            })
+          },
+        ),
+        technique_toggle(
+          "Triplets",
+          value=fn() { jazz_style.get().techniques.triplets },
+          on_toggle=fn() {
+            jazz_style.update(fn(js) {
+              let t = js.techniques
+              JazzStyle::{
+                ..js,
+                techniques: @generator.Techniques::{
+                  ..t,
+                  triplets: not(t.triplets),
+                },
+              }
+            })
+          },
+        ),
+        technique_toggle(
+          "Bebop Scales",
+          value=fn() { jazz_style.get().techniques.bebop_scales },
+          on_toggle=fn() {
+            jazz_style.update(fn(js) {
+              let t = js.techniques
+              JazzStyle::{
+                ..js,
+                techniques: @generator.Techniques::{
+                  ..t,
+                  bebop_scales: not(t.bebop_scales),
+                },
+              }
+            })
+          },
+        ),
+        technique_toggle(
+          "Neighbor Tones",
+          value=fn() { jazz_style.get().techniques.neighbor_tones },
+          on_toggle=fn() {
+            jazz_style.update(fn(js) {
+              let t = js.techniques
+              JazzStyle::{
+                ..js,
+                techniques: @generator.Techniques::{
+                  ..t,
+                  neighbor_tones: not(t.neighbor_tones),
+                },
+              }
+            })
+          },
+        ),
+      ]),
+      // Comping
+      settings_section("Comping", [
+        toggle_switch(
+          label="Enabled",
+          value=fn() { jazz_style.get().comping_enabled },
+          on_toggle=fn() {
+            jazz_style.update(fn(js) {
+              JazzStyle::{ ..js, comping_enabled: not(js.comping_enabled) }
+            })
+          },
+        ),
+        @luna_dom.div(
+          dyn_class=fn() {
+            cn([
+              "transition-opacity",
+              if jazz_style.get().comping_enabled {
+                ""
+              } else {
+                "opacity-40 pointer-events-none"
+              },
+            ])
+          },
           [
-            @luna_dom.svg_path(
-              d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.13-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z",
+            segmented_buttons(
+              comping_style_options,
+              fn() { jazz_style.get().comping_style },
+              fn(v) {
+                jazz_style.update(fn(js) {
+                  JazzStyle::{ ..js, comping_style: v }
+                })
+              },
             ),
           ],
         ),
-      ],
-    ),
-    @luna_dom.show(fn() { panel_visible.get() }, fn() {
-      @luna_dom.fragment([
-        @luna_dom.div(
-          class="fixed inset-0 z-[9]",
-          on=@luna_dom.events().click(fn(_) { panel_visible.set(false) }),
-          [],
+      ]),
+      // Bass
+      settings_section("Bass", [
+        toggle_switch(
+          label="Enabled",
+          value=fn() { jazz_style.get().bass_enabled },
+          on_toggle=fn() {
+            jazz_style.update(fn(js) {
+              JazzStyle::{ ..js, bass_enabled: not(js.bass_enabled) }
+            })
+          },
         ),
         @luna_dom.div(
-          class="absolute bottom-full right-0 mb-1 bg-slate-800 border border-slate-600 rounded-lg p-3 z-10 shadow-xl w-64 max-h-[calc(100dvh-4rem)] overflow-y-auto flex flex-col gap-3",
-          attrs=[
-            ("aria-label", @luna_dom.Attr::AttrString("jazz settings panel")),
-          ],
+          dyn_class=fn() {
+            cn([
+              "transition-opacity",
+              if jazz_style.get().bass_enabled {
+                ""
+              } else {
+                "opacity-40 pointer-events-none"
+              },
+            ])
+          },
           [
-            // Legend
-            settings_section("Legend", [
-              @luna_dom.div(
-                class="flex flex-col gap-1",
-                legend_entries.map(fn(entry) {
-                  let (dot, color, label) = entry
-                  @luna_dom.div(class="flex items-center gap-1.5", [
-                    @luna_dom.span(
-                      class="text-xs leading-none",
-                      attrs=[
-                        ("style", @luna_dom.Attr::AttrString("color: " + color)),
-                      ],
-                      [@luna_dom.text(dot)],
-                    ),
-                    @luna_dom.span(class="text-xs text-slate-200", [
-                      @luna_dom.text(label),
-                    ]),
-                  ])
-                }),
-              ),
-            ]),
-            // Presets
-            settings_section("Preset", [
-              @luna_dom.div(
-                class="flex flex-wrap gap-1",
-                presets.map(fn(pair) {
-                  let (label, make_preset) = pair
-                  @luna_dom.button(
-                    class="px-2 py-0.5 text-xs rounded border bg-slate-900 border-slate-600 text-slate-300 hover:bg-slate-700 hover:border-slate-400 transition-colors",
-                    on=@luna_dom.events().click(fn(_) {
-                      jazz_style.set(make_preset())
-                    }),
-                    [@luna_dom.text(label)],
-                  )
-                }),
-              ),
-            ]),
-            // Melody
-            settings_section("Melody", [
-              segmented_buttons(
-                melody_mode_options,
-                fn() { jazz_style.get().melody_mode },
-                fn(v) {
-                  jazz_style.update(fn(js) {
-                    JazzStyle::{ ..js, melody_mode: v }
-                  })
-                },
-              ),
-            ]),
-            // Swing
-            settings_section("Swing", [
-              segmented_buttons(
-                swing_options,
-                fn() { jazz_style.get().swing },
-                fn(v) {
-                  jazz_style.update(fn(js) { JazzStyle::{ ..js, swing: v } })
-                },
-              ),
-            ]),
-            // Melody Techniques
-            settings_section("Melody Techniques", [
-              technique_toggle(
-                "Tension Tones",
-                value=fn() { jazz_style.get().techniques.tension_tones },
-                on_toggle=fn() {
-                  jazz_style.update(fn(js) {
-                    let t = js.techniques
-                    JazzStyle::{
-                      ..js,
-                      techniques: @generator.Techniques::{
-                        ..t,
-                        tension_tones: not(t.tension_tones),
-                      },
-                    }
-                  })
-                },
-              ),
-              technique_toggle(
-                "Chromatic Approach",
-                value=fn() { jazz_style.get().techniques.approach_tones },
-                on_toggle=fn() {
-                  jazz_style.update(fn(js) {
-                    let t = js.techniques
-                    JazzStyle::{
-                      ..js,
-                      techniques: @generator.Techniques::{
-                        ..t,
-                        approach_tones: not(t.approach_tones),
-                      },
-                    }
-                  })
-                },
-              ),
-              technique_toggle(
-                "Enclosures",
-                value=fn() { jazz_style.get().techniques.enclosure_tones },
-                on_toggle=fn() {
-                  jazz_style.update(fn(js) {
-                    let t = js.techniques
-                    JazzStyle::{
-                      ..js,
-                      techniques: @generator.Techniques::{
-                        ..t,
-                        enclosure_tones: not(t.enclosure_tones),
-                      },
-                    }
-                  })
-                },
-              ),
-              technique_toggle(
-                "Syncopation",
-                value=fn() { jazz_style.get().techniques.syncopation },
-                on_toggle=fn() {
-                  jazz_style.update(fn(js) {
-                    let t = js.techniques
-                    JazzStyle::{
-                      ..js,
-                      techniques: @generator.Techniques::{
-                        ..t,
-                        syncopation: not(t.syncopation),
-                      },
-                    }
-                  })
-                },
-              ),
-              technique_toggle(
-                "Triplets",
-                value=fn() { jazz_style.get().techniques.triplets },
-                on_toggle=fn() {
-                  jazz_style.update(fn(js) {
-                    let t = js.techniques
-                    JazzStyle::{
-                      ..js,
-                      techniques: @generator.Techniques::{
-                        ..t,
-                        triplets: not(t.triplets),
-                      },
-                    }
-                  })
-                },
-              ),
-              technique_toggle(
-                "Bebop Scales",
-                value=fn() { jazz_style.get().techniques.bebop_scales },
-                on_toggle=fn() {
-                  jazz_style.update(fn(js) {
-                    let t = js.techniques
-                    JazzStyle::{
-                      ..js,
-                      techniques: @generator.Techniques::{
-                        ..t,
-                        bebop_scales: not(t.bebop_scales),
-                      },
-                    }
-                  })
-                },
-              ),
-              technique_toggle(
-                "Neighbor Tones",
-                value=fn() { jazz_style.get().techniques.neighbor_tones },
-                on_toggle=fn() {
-                  jazz_style.update(fn(js) {
-                    let t = js.techniques
-                    JazzStyle::{
-                      ..js,
-                      techniques: @generator.Techniques::{
-                        ..t,
-                        neighbor_tones: not(t.neighbor_tones),
-                      },
-                    }
-                  })
-                },
-              ),
-            ]),
-            // Comping
-            settings_section("Comping", [
-              toggle_switch(
-                label="Enabled",
-                value=fn() { jazz_style.get().comping_enabled },
-                on_toggle=fn() {
-                  jazz_style.update(fn(js) {
-                    JazzStyle::{
-                      ..js,
-                      comping_enabled: not(js.comping_enabled),
-                    }
-                  })
-                },
-              ),
-              @luna_dom.div(
-                dyn_class=fn() {
-                  cn([
-                    "transition-opacity",
-                    if jazz_style.get().comping_enabled {
-                      ""
-                    } else {
-                      "opacity-40 pointer-events-none"
-                    },
-                  ])
-                },
-                [
-                  segmented_buttons(
-                    comping_style_options,
-                    fn() { jazz_style.get().comping_style },
-                    fn(v) {
-                      jazz_style.update(fn(js) {
-                        JazzStyle::{ ..js, comping_style: v }
-                      })
-                    },
-                  ),
-                ],
-              ),
-            ]),
-            // Bass
-            settings_section("Bass", [
-              toggle_switch(
-                label="Enabled",
-                value=fn() { jazz_style.get().bass_enabled },
-                on_toggle=fn() {
-                  jazz_style.update(fn(js) {
-                    JazzStyle::{ ..js, bass_enabled: not(js.bass_enabled) }
-                  })
-                },
-              ),
-              @luna_dom.div(
-                dyn_class=fn() {
-                  cn([
-                    "transition-opacity",
-                    if jazz_style.get().bass_enabled {
-                      ""
-                    } else {
-                      "opacity-40 pointer-events-none"
-                    },
-                  ])
-                },
-                [
-                  segmented_buttons(
-                    bass_style_options,
-                    fn() { jazz_style.get().bass_style },
-                    fn(v) {
-                      jazz_style.update(fn(js) {
-                        JazzStyle::{ ..js, bass_style: v }
-                      })
-                    },
-                  ),
-                ],
-              ),
-            ]),
-            // Drums
-            settings_section("Drums", [
-              toggle_switch(
-                label="Enabled",
-                value=fn() { jazz_style.get().drums_enabled },
-                on_toggle=fn() {
-                  jazz_style.update(fn(js) {
-                    JazzStyle::{ ..js, drums_enabled: not(js.drums_enabled) }
-                  })
-                },
-              ),
-              @luna_dom.div(
-                dyn_class=fn() {
-                  cn([
-                    "transition-opacity",
-                    if jazz_style.get().drums_enabled {
-                      ""
-                    } else {
-                      "opacity-40 pointer-events-none"
-                    },
-                  ])
-                },
-                [
-                  segmented_buttons(
-                    drum_pattern_options,
-                    fn() { jazz_style.get().drum_pattern },
-                    fn(v) {
-                      jazz_style.update(fn(js) {
-                        JazzStyle::{ ..js, drum_pattern: v }
-                      })
-                    },
-                  ),
-                ],
-              ),
-            ]),
+            segmented_buttons(
+              bass_style_options,
+              fn() { jazz_style.get().bass_style },
+              fn(v) {
+                jazz_style.update(fn(js) { JazzStyle::{ ..js, bass_style: v } })
+              },
+            ),
           ],
         ),
-      ])
-    }),
-  ])
+      ]),
+      // Drums
+      settings_section("Drums", [
+        toggle_switch(
+          label="Enabled",
+          value=fn() { jazz_style.get().drums_enabled },
+          on_toggle=fn() {
+            jazz_style.update(fn(js) {
+              JazzStyle::{ ..js, drums_enabled: not(js.drums_enabled) }
+            })
+          },
+        ),
+        @luna_dom.div(
+          dyn_class=fn() {
+            cn([
+              "transition-opacity",
+              if jazz_style.get().drums_enabled {
+                ""
+              } else {
+                "opacity-40 pointer-events-none"
+              },
+            ])
+          },
+          [
+            segmented_buttons(
+              drum_pattern_options,
+              fn() { jazz_style.get().drum_pattern },
+              fn(v) {
+                jazz_style.update(fn(js) {
+                  JazzStyle::{ ..js, drum_pattern: v }
+                })
+              },
+            ),
+          ],
+        ),
+      ]),
+    ],
+  )
 }

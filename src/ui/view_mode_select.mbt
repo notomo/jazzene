@@ -153,8 +153,31 @@ fn piano_icon(active : Bool) -> @luna_dom.DomNode {
 }
 
 ///|
+/// Gear/settings icon
+fn settings_icon(active : Bool) -> @luna_dom.DomNode {
+  let color = if active { "#93c5fd" } else { "#94a3b8" }
+  @luna_dom.svg(
+    [
+      @luna_dom.svg_path(
+        d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.13-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z",
+        fill=color,
+      ),
+    ],
+    attrs=[
+      ("viewBox", @luna_dom.Attr::AttrString("0 0 24 24")),
+      ("width", @luna_dom.Attr::AttrString("16")),
+      ("height", @luna_dom.Attr::AttrString("16")),
+      ("aria-hidden", @luna_dom.Attr::AttrString("true")),
+    ],
+  )
+}
+
+///|
 /// Render view mode toggle buttons
-fn view_mode_select(mode : @signals.Signal[ViewMode]) -> @luna_dom.DomNode {
+fn view_mode_select(
+  mode : @signals.Signal[ViewMode],
+  show_settings : @signals.Signal[Bool],
+) -> @luna_dom.DomNode {
   let base = "px-2 lg:px-3 py-1 lg:py-2 font-medium cursor-pointer transition-colors flex items-center"
   let active_class = "bg-blue-900 text-blue-200"
   let inactive_class = "bg-slate-800 text-slate-400 hover:bg-slate-700"
@@ -182,7 +205,6 @@ fn view_mode_select(mode : @signals.Signal[ViewMode]) -> @luna_dom.DomNode {
     dyn_class=fn() {
       cn([
         base,
-        "rounded-r-lg",
         if mode.get().show_piano_roll() {
           active_class
         } else {
@@ -198,8 +220,24 @@ fn view_mode_select(mode : @signals.Signal[ViewMode]) -> @luna_dom.DomNode {
     [piano_icon(mode.get().show_piano_roll())],
     attrs=[("title", @luna_dom.Attr::AttrString("Piano"))],
   )
+  let settings_button = @luna_dom.button(
+    dyn_class=fn() {
+      cn([
+        base,
+        "rounded-r-lg",
+        if show_settings.get() {
+          active_class
+        } else {
+          inactive_class
+        },
+      ])
+    },
+    on=@luna_dom.events().click(fn(_) { show_settings.update(fn(v) { not(v) }) }),
+    [settings_icon(show_settings.get())],
+    attrs=[("title", @luna_dom.Attr::AttrString("Settings"))],
+  )
   @luna_dom.div(
-    [sheet_button, piano_button],
+    [sheet_button, piano_button, settings_button],
     class="flex items-center rounded-lg border border-slate-600",
     attrs=[("aria-label", @luna_dom.Attr::AttrString("view mode"))],
   )

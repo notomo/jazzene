@@ -62,6 +62,7 @@ pub fn render(state : AppState) -> Unit {
     chord_parse_error,
     ..,
   } = state
+  let show_settings = @signals.signal(false)
   let app = @luna_dom.div(
     class="flex flex-col h-dvh overflow-hidden w-dvw bg-gradient-to-br from-slate-950 to-slate-900 text-white touch-manipulation",
     [
@@ -91,9 +92,9 @@ pub fn render(state : AppState) -> Unit {
       @luna_dom.div(
         dyn_class=fn() {
           let mode = view_mode.get()
-          match (mode.show_sheet(), mode.show_piano_roll()) {
-            (true, false) => "flex h-full min-h-0"
-            (false, true) => "flex justify-center h-full min-h-0"
+          match
+            (mode.show_sheet(), mode.show_piano_roll(), show_settings.get()) {
+            (false, true, false) => "flex justify-center h-full min-h-0"
             _ => "flex h-full min-h-0"
           }
         },
@@ -142,6 +143,9 @@ pub fn render(state : AppState) -> Unit {
               @piano_roll.keyboard(sounds, backing_sounds, playback_position),
             ],
           ),
+          @luna_dom.show(fn() { show_settings.get() }, fn() {
+            settings_panel(jazz_style)
+          }),
         ],
       ),
       @luna_dom.div(
@@ -157,10 +161,7 @@ pub fn render(state : AppState) -> Unit {
               ab_loop(loop_a_measure, loop_b_measure, fn() {
                 measure_count.get()
               }),
-              @luna_dom.div(class="flex items-center gap-2", [
-                view_mode_select(view_mode),
-                settings_panel(jazz_style),
-              ]),
+              view_mode_select(view_mode, show_settings),
             ],
           ),
         ],
