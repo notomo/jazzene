@@ -9,15 +9,13 @@ Run these commands only, in this order:
 
 1. `git status` and `git diff HEAD` (in parallel)
 2. `git add <specific files>` — stage relevant files individually
-3. `git commit -m "..."` — use conventional commit format
+3. `git commit -m "type(scope): description" -m "Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>"` — use two `-m` flags (no heredoc, no `$()`)
 
 ## Commit message format
 
-```
-type(scope): short description
-
-Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
-```
+Use two separate `-m` flags:
+- First `-m`: `type(scope): short description`
+- Second `-m`: `Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>`
 
 Types: `feat`, `fix`, `refactor`, `docs`, `style`, `test`, `chore`
 
