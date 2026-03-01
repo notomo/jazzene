@@ -161,7 +161,9 @@ fn render_tension_label(
     font_family="sans-serif",
     dominant_baseline="central",
     attrs=[
-      ("stroke", @luna_dom.Attr::AttrString("none")),
+      ("stroke", @luna_dom.Attr::AttrString("#0f172a")),
+      ("stroke-width", @luna_dom.Attr::AttrString("3")),
+      ("paint-order", @luna_dom.Attr::AttrString("stroke fill")),
       ("fill", @luna_dom.Attr::AttrString("#4ade80")),
     ],
     [@luna_dom.text(degree.to_string())],
