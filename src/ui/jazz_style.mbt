@@ -7,13 +7,21 @@ pub(all) enum MelodyMode {
 } derive(Eq, Show)
 
 ///|
+/// Controls whether comping is generated and played.
+pub(all) enum CompingMode {
+  On // Generate comping and play sound
+  Silent // Generate comping (visible in piano roll) but no audio
+  Off // No comping generated or displayed
+} derive(Eq, Show)
+
+///|
 /// Unified jazz style configuration for a performance session.
 /// Controls swing feel, melody techniques, and accompaniment elements.
 pub(all) struct JazzStyle {
   swing : @music.SwingConfig
   techniques : @generator.Techniques
   melody_mode : MelodyMode
-  comping_enabled : Bool
+  comping_mode : CompingMode
   drums_enabled : Bool
   bass_enabled : Bool
   comping_style : @music.CompingStyle
@@ -31,7 +39,7 @@ pub fn JazzStyle::default() -> JazzStyle {
       bebop_scales: true,
     },
     melody_mode: Full,
-    comping_enabled: true,
+    comping_mode: On,
     drums_enabled: true,
     bass_enabled: true,
     comping_style: @music.WithTensions,
@@ -57,7 +65,7 @@ pub fn JazzStyle::straight() -> JazzStyle {
     swing: @music.SwingConfig::straight(),
     techniques: all_off,
     melody_mode: Full,
-    comping_enabled: false,
+    comping_mode: Off,
     drums_enabled: false,
     bass_enabled: false,
     comping_style: @music.GuideTones,
@@ -83,7 +91,7 @@ pub fn JazzStyle::simple() -> JazzStyle {
     swing: @music.SwingConfig::triplet(),
     techniques,
     melody_mode: Full,
-    comping_enabled: true,
+    comping_mode: On,
     drums_enabled: true,
     bass_enabled: true,
     comping_style: @music.GuideTones,

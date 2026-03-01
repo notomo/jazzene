@@ -105,17 +105,17 @@ pub fn AppState::new() -> AppState {
   })
   let backing_sounds : () -> Array[@music.ScheduledSound] = @signals.memo(fn() {
     let js = jazz_style.get()
-    if not(js.comping_enabled) {
-      []
-    } else {
-      @music.generate_comping_sounds(
-        full_measures(),
-        bpm.get(),
-        full_sounds(),
-        key.get(),
-        seed=seed.get(),
-        voicing_style=js.comping_style,
-      )
+    match js.comping_mode {
+      Off => []
+      Silent | On =>
+        @music.generate_comping_sounds(
+          full_measures(),
+          bpm.get(),
+          full_sounds(),
+          key.get(),
+          seed=seed.get(),
+          voicing_style=js.comping_style,
+        )
     }
   })
   let bass_sounds : () -> Array[@music.ScheduledSound] = @signals.memo(fn() {

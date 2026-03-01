@@ -224,28 +224,38 @@ fn melody_mode_from_string(s : String) -> MelodyMode {
 }
 
 ///|
-/// Serialize CompingStyle (with enabled flag) to a token.
-/// "off" means disabled; otherwise the voicing style name.
-fn comping_to_string(enabled : Bool, style : @music.CompingStyle) -> String {
-  if not(enabled) {
-    "off"
-  } else {
-    match style {
-      @music.GuideTones => "guide"
-      @music.FullVoicing => "full"
-      @music.WithTensions => "tensions"
-    }
+fn comping_mode_to_string(mode : CompingMode) -> String {
+  match mode {
+    Off => "off"
+    Silent => "silent"
+    On => "on"
   }
 }
 
 ///|
-/// Deserialize CompingStyle from a token. Returns (enabled, style).
-fn comping_from_string(s : String) -> (Bool, @music.CompingStyle) {
+fn comping_mode_from_string(s : String) -> CompingMode {
   match s {
-    "off" => (false, @music.GuideTones)
-    "full" => (true, @music.FullVoicing)
-    "tensions" => (true, @music.WithTensions)
-    _ => (true, @music.GuideTones)
+    "off" => Off
+    "silent" => Silent
+    _ => On
+  }
+}
+
+///|
+fn comping_style_to_string(style : @music.CompingStyle) -> String {
+  match style {
+    @music.GuideTones => "guide"
+    @music.FullVoicing => "full"
+    @music.WithTensions => "tensions"
+  }
+}
+
+///|
+fn comping_style_from_string(s : String) -> @music.CompingStyle {
+  match s {
+    "full" => @music.FullVoicing
+    "tensions" => @music.WithTensions
+    _ => @music.GuideTones
   }
 }
 
@@ -313,11 +323,13 @@ pub fn save_jazz_style(js : JazzStyle) -> Unit {
   )
   set_query_param(
     "comping",
-    comping_to_string(js.comping_enabled, js.comping_style),
-    default=comping_to_string(
-      default_js.comping_enabled,
-      default_js.comping_style,
-    ),
+    comping_mode_to_string(js.comping_mode),
+    default=comping_mode_to_string(default_js.comping_mode),
+  )
+  set_query_param(
+    "comping_style",
+    comping_style_to_string(js.comping_style),
+    default=comping_style_to_string(default_js.comping_style),
   )
   set_query_param(
     "drums",
@@ -348,9 +360,13 @@ pub fn get_initial_jazz_style() -> JazzStyle {
     Some(s) => techniques_from_string(s)
     None => default_js.techniques
   }
-  let (comping_enabled, comping_style) = match get_query_param("comping") {
-    Some(s) => comping_from_string(s)
-    None => (default_js.comping_enabled, default_js.comping_style)
+  let comping_mode = match get_query_param("comping") {
+    Some(s) => comping_mode_from_string(s)
+    None => default_js.comping_mode
+  }
+  let comping_style = match get_query_param("comping_style") {
+    Some(s) => comping_style_from_string(s)
+    None => default_js.comping_style
   }
   let (drums_enabled, drum_pattern) = match get_query_param("drums") {
     Some(s) => drums_from_string(s)
@@ -368,7 +384,7 @@ pub fn get_initial_jazz_style() -> JazzStyle {
     swing,
     techniques,
     melody_mode,
-    comping_enabled,
+    comping_mode,
     drums_enabled,
     bass_enabled,
     comping_style,

@@ -121,6 +121,13 @@ let swing_options : Array[(String, @music.SwingConfig)] = [
 ]
 
 ///|
+let comping_mode_options : Array[(String, CompingMode)] = [
+  ("Off", Off),
+  ("Silent", Silent),
+  ("On", On),
+]
+
+///|
 let comping_style_options : Array[(String, @music.CompingStyle)] = [
   ("Guide Tones", @music.GuideTones),
   ("Full", @music.FullVoicing),
@@ -328,23 +335,20 @@ pub fn settings_panel(
       ]),
       // Comping
       settings_section("Comping", [
-        toggle_switch(
-          label="Enabled",
-          value=fn() { jazz_style.get().comping_enabled },
-          on_toggle=fn() {
-            jazz_style.update(fn(js) {
-              JazzStyle::{ ..js, comping_enabled: not(js.comping_enabled) }
-            })
+        segmented_buttons(
+          comping_mode_options,
+          fn() { jazz_style.get().comping_mode },
+          fn(v) {
+            jazz_style.update(fn(js) { JazzStyle::{ ..js, comping_mode: v } })
           },
         ),
         @luna_dom.div(
           dyn_class=fn() {
             cn([
               "transition-opacity",
-              if jazz_style.get().comping_enabled {
-                ""
-              } else {
-                "opacity-40 pointer-events-none"
+              match jazz_style.get().comping_mode {
+                Off => "opacity-40 pointer-events-none"
+                _ => ""
               },
             ])
           },

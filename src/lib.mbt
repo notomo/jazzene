@@ -43,11 +43,15 @@ fn make_tick(
         @music.AudioSound::from((state.sounds)(), final_position, lookahead)
       @ui.Silent | @ui.Off => []
     }
-    let backing_audio_sounds = @music.AudioSound::from(
-      (state.backing_sounds)(),
-      final_position,
-      lookahead,
-    )
+    let backing_audio_sounds = match state.jazz_style.get().comping_mode {
+      @ui.Silent => []
+      _ =>
+        @music.AudioSound::from(
+          (state.backing_sounds)(),
+          final_position,
+          lookahead,
+        )
+    }
     let bass_audio_sounds = @music.AudioSound::from(
       (state.bass_sounds)(),
       final_position,
