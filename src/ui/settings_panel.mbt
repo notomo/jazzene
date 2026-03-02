@@ -9,7 +9,6 @@ let legend_entries : Array[(String, String, String)] = [
   ("●", @theme.COLOR_TENSION, "Tension (9, 11, 13)"),
   ("●", @theme.COLOR_APPROACH, "Chromatic Approach"),
   ("●", @theme.COLOR_ENCLOSURE, "Enclosure"),
-  ("●", @theme.COLOR_SCALE_TONE, "Scale Tone"),
   ("●", @theme.COLOR_NEIGHBOR, "Neighbor Tone"),
   ("●", @theme.COLOR_COMPING, "Comping"),
 ]

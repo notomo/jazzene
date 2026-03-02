@@ -90,10 +90,10 @@ test "weighted_tone_candidates_tagged includes correct MIDI numbers and origin" 
     50,
     7,
     100,
-    @music.ScaleTone,
+    @music.PassingTone,
   )
   assert_eq(result[0].1, c)
   assert_eq(result[1].1, e)
-  assert_eq(result[0].2, @music.ScaleTone)
-  assert_eq(result[1].2, @music.ScaleTone)
+  assert_eq(result[0].2, @music.PassingTone)
+  assert_eq(result[1].2, @music.PassingTone)
 }
