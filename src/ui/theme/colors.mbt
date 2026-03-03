@@ -23,6 +23,12 @@ pub const COLOR_ENCLOSURE = "#fbbf24"
 pub const PLAYING_COLOR_ENCLOSURE = "#f59e0b"
 
 ///|
+pub const COLOR_PASSING_TONE = "#fb7185"
+
+///|
+pub const PLAYING_COLOR_PASSING_TONE = "#f43f5e"
+
+///|
 pub const COLOR_NEIGHBOR = "#c084fc"
 
 ///|
@@ -39,7 +45,8 @@ pub fn tone_origin_color(origin : @music.ToneOrigin) -> String {
   match origin {
     ChordTone => COLOR_CHORD_TONE
     Tension(_) => COLOR_TENSION
-    ChromaticApproach | PassingTone => COLOR_APPROACH
+    ChromaticApproach => COLOR_APPROACH
+    PassingTone => COLOR_PASSING_TONE
     Enclosure => COLOR_ENCLOSURE
     NeighborTone => COLOR_NEIGHBOR
   }
@@ -50,7 +57,8 @@ pub fn tone_origin_playing_color(origin : @music.ToneOrigin) -> String {
   match origin {
     ChordTone => PLAYING_COLOR_CHORD_TONE
     Tension(_) => PLAYING_COLOR_TENSION
-    ChromaticApproach | PassingTone => PLAYING_COLOR_APPROACH
+    ChromaticApproach => PLAYING_COLOR_APPROACH
+    PassingTone => PLAYING_COLOR_PASSING_TONE
     Enclosure => PLAYING_COLOR_ENCLOSURE
     NeighborTone => PLAYING_COLOR_NEIGHBOR
   }

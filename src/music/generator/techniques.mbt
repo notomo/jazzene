@@ -61,8 +61,8 @@ pub fn ImprovisationConfig::with_techniques(
     } else {
       0
     },
-    bebop_weight_ratio: if techniques.bebop_scales {
-      self.bebop_weight_ratio
+    bebop_ornament_probability: if techniques.bebop_scales {
+      self.bebop_ornament_probability
     } else {
       0
     },

@@ -104,7 +104,7 @@ pub(all) struct ImprovisationConfig {
   max_interval : Int // Maximum interval jump in semitones (default: 7 = perfect fifth)
   syncopation_probability : Int // 0-100, chance of forcing off-beat phrase start on downbeats (default: 40)
   triplet_probability : Int // 0-100, chance of generating eighth-note triplet group when playing (default: 15)
-  bebop_weight_ratio : Int // 0-100, bebop passing tone weight as % of chord tone weight (default: 0 = disabled)
+  bebop_ornament_probability : Int // 0-100, chance of generating PT→CT bebop passing tone ornament (default: 30)
   neighbor_ornament_probability : Int // 0-100, chance of generating CT→N→CT neighbor ornament (default: 20)
 } derive(Eq, Show)
 
@@ -129,7 +129,7 @@ pub fn ImprovisationConfig::default(seed : Int) -> ImprovisationConfig {
     max_interval: 7,
     syncopation_probability: 40,
     triplet_probability: 8,
-    bebop_weight_ratio: 0,
+    bebop_ornament_probability: 30,
     neighbor_ornament_probability: 20,
   }
 }
@@ -505,7 +505,6 @@ fn handle_playing(
     state.last_was_rest,
     0,
     settings.tension_weight_ratio,
-    settings.bebop_weight_ratio,
     settings.max_interval,
     random_int,
   )
@@ -546,8 +545,27 @@ fn handle_playing(
           ),
         )
       }
+      // Try to generate a bebop passing tone ornament (PT→CT)
+      // Only fires if chord has a bebop passing tone adjacent to the selected note
+      guard not(
+        tone_origin is Some(@music.ChordTone) &&
+        select_bebop_approach_midi(midi, chord) is Some(_) &&
+        should_generate_bebop_ornament(
+          notes_left,
+          remaining,
+          settings.bebop_ornament_probability,
+          random_int,
+        ),
+      ) else {
+        return Continue(
+          generate_bebop_ornament(
+            state, midi, chord, remaining, settings, update_accidental, random_int,
+            notes_left,
+          ),
+        )
+      }
       // Try to generate a chromatic approach ornament (AT→CT) when we have a chord tone
-      // Only fires if neither neighbor nor enclosure ornament fired
+      // Only fires if neither neighbor, enclosure nor bebop ornament fired
       guard not(
         tone_origin is Some(@music.ChordTone) &&
         should_generate_chromatic_approach_ornament(
@@ -723,7 +741,6 @@ fn decide_midi_number(
   last_was_rest : Bool,
   rest_probability : Int,
   tension_weight_ratio : Int,
-  bebop_weight_ratio : Int,
   max_interval : Int,
   random_int : (Int) -> Int,
 ) -> (@music.MidiNumber?, @music.ToneOrigin?) {
@@ -734,7 +751,6 @@ fn decide_midi_number(
 
   let chord_tones = extend_across_octaves(chord.tones())
   let tension_tones = extend_across_octaves(chord.tension_tones())
-  let bebop_tones = extend_across_octaves(chord.bebop_passing_tones())
   let root_midi = chord.root.midi()
   match last_midi {
     Some(prev) => {
@@ -753,14 +769,6 @@ fn decide_midi_number(
           max_interval,
           tension_weight_ratio,
           @music.Tension(0), // placeholder; will be replaced per-tone below
-        ) +
-        weighted_tone_candidates_tagged(
-          bebop_tones,
-          prev,
-          stamina,
-          max_interval,
-          bebop_weight_ratio,
-          @music.PassingTone,
         )
       // Fix tension degrees now that we have the candidates
       let fixed_tones = weighted_tones.map(fn(tuple) {

@@ -44,7 +44,6 @@ fn generate_triplet_group(
       current_state.last_was_rest,
       0,
       settings.tension_weight_ratio,
-      settings.bebop_weight_ratio,
       settings.max_interval,
       random_int,
     )

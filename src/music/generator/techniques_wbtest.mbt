@@ -28,30 +28,30 @@ test "ImprovisationConfig::with_techniques preserves values when all enabled" {
   )
   assert_eq(result.syncopation_probability, s.syncopation_probability)
   assert_eq(result.triplet_probability, s.triplet_probability)
-  assert_eq(result.bebop_weight_ratio, 0) // bebop_weight_ratio is 0 in ImprovisationConfig::default
+  assert_eq(result.bebop_ornament_probability, 30)
 }
 
 ///|
 test "ImprovisationConfig::with_techniques enables bebop when flag is true" {
-  // Set a non-zero bebop_weight_ratio and enable the flag
+  // Set a non-zero bebop_ornament_probability and enable the flag
   let s = ImprovisationConfig::{
     ..ImprovisationConfig::default(42),
-    bebop_weight_ratio: 40,
+    bebop_ornament_probability: 40,
   }
   let t = Techniques::{ ..Techniques::default(), bebop_scales: true }
   let result = s.with_techniques(t)
-  assert_eq(result.bebop_weight_ratio, 40)
+  assert_eq(result.bebop_ornament_probability, 40)
 }
 
 ///|
 test "ImprovisationConfig::with_techniques zeros bebop when flag is false" {
   let s = ImprovisationConfig::{
     ..ImprovisationConfig::default(42),
-    bebop_weight_ratio: 40,
+    bebop_ornament_probability: 40,
   }
   let t = Techniques::{ ..Techniques::default(), bebop_scales: false }
   let result = s.with_techniques(t)
-  assert_eq(result.bebop_weight_ratio, 0)
+  assert_eq(result.bebop_ornament_probability, 0)
 }
 
 ///|

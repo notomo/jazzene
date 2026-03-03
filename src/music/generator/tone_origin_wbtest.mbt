@@ -15,7 +15,6 @@ test "decide_midi_number first note always returns ChordTone" {
     false,
     0,
     50,
-    0,
     7,
     rng,
   )
@@ -41,7 +40,6 @@ test "decide_midi_number rest returns None for both midi and origin" {
     false,
     100,
     50,
-    0,
     7,
     always_rest,
   )
@@ -65,7 +63,6 @@ test "decide_midi_number chord tone returns ChordTone origin" {
     50,
     50,
     false,
-    0,
     0,
     0,
     7,
@@ -103,7 +100,6 @@ test "decide_midi_number origin is always a valid ToneOrigin variant" {
       false,
       0,
       50,
-      0,
       7,
       rng,
     )
@@ -142,7 +138,6 @@ test "Tension origin carries valid jazz degree" {
       false,
       0,
       100,
-      0,
       12,
       rng, // high max_interval to reach tensions
     )

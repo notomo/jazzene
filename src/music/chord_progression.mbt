@@ -148,6 +148,8 @@ pub fn Chord::bebop_passing_tones(self : Chord) -> Array[MidiNumber] {
   let passing_intervals = match self.quality {
     Dominant7 => [11] // Major 7th passing tone (between b7=10 and octave root)
     Major7 => [8] // #5 passing tone (between 5th=7 and 6th=9)
+    Minor7 => [4] // Major 3rd passing tone / Bebop Dorian (between b3=3 and 4=5)
+    HalfDiminished => [7] // Natural 5th passing tone / Bebop Locrian (between b5=6 and b6=8)
     _ => []
   }
   passing_intervals.filter_map(fn(interval) {

@@ -8,6 +8,7 @@ let legend_entries : Array[(String, String, String)] = [
   ("●", @theme.COLOR_CHORD_TONE, "Chord Tone (1, 3, 5, 7)"),
   ("●", @theme.COLOR_TENSION, "Tension (9, 11, 13)"),
   ("●", @theme.COLOR_APPROACH, "Chromatic Approach"),
+  ("●", @theme.COLOR_PASSING_TONE, "Bebop Passing Tone"),
   ("●", @theme.COLOR_ENCLOSURE, "Enclosure"),
   ("●", @theme.COLOR_NEIGHBOR, "Neighbor Tone"),
   ("●", @theme.COLOR_COMPING, "Comping"),

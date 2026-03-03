@@ -374,11 +374,23 @@ test "Chord::bebop_passing_tones - Major7 returns sharp-5 passing tone" {
 }
 
 ///|
-/// Minor7 and other chords have no standard bebop passing tone
-test "Chord::bebop_passing_tones - Minor7 returns empty" {
+/// Minor7 bebop passing tone: major 3rd (Bebop Dorian, between b3 and 4)
+test "Chord::bebop_passing_tones - Minor7 returns major 3rd passing tone" {
   let chord = Chord::{ root: D, quality: Minor7, bass: None }
   let tones = chord.bebop_passing_tones()
-  assert_eq(tones.length(), 0)
+  // Dm7: root=D, major 3rd = F# = interval 4
+  let pitch_classes = tones.map(fn(m) { m.pitch_class() })
+  inspect(pitch_classes, content="[6]") // F# (major 3rd from D)
+}
+
+///|
+/// HalfDiminished bebop passing tone: natural 5th (Bebop Locrian, between b5 and b6)
+test "Chord::bebop_passing_tones - HalfDiminished returns natural 5th passing tone" {
+  let chord = Chord::{ root: B, quality: HalfDiminished, bass: None }
+  let tones = chord.bebop_passing_tones()
+  // Bm7b5: root=B, natural 5th = F# = interval 7
+  let pitch_classes = tones.map(fn(m) { m.pitch_class() })
+  inspect(pitch_classes, content="[6]") // F# (natural 5th from B)
 }
 
 ///|
