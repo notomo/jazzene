@@ -37,10 +37,15 @@ fn render_tension_label(
 /// Render tension label for a note, if it has one (rendered separately to appear above beams)
 fn render_note_tension_label(
   note : @sheet_layout.SheetNote,
+  show_legend : () -> Bool,
 ) -> @luna_dom.DomNode? {
   match note.tone_origin {
     Some(Tension(degree)) =>
-      Some(render_tension_label(degree, note.x, note.y, note.on_line))
+      Some(
+        @luna_dom.show(show_legend, fn() {
+          render_tension_label(degree, note.x, note.y, note.on_line)
+        }),
+      )
     _ => None
   }
 }

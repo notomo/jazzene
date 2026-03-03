@@ -53,6 +53,7 @@ pub fn render(state : AppState) -> Unit {
     loop_a_measure,
     loop_b_measure,
     jazz_style,
+    show_legend,
     view_state,
     is_playing,
     measures,
@@ -118,8 +119,14 @@ pub fn render(state : AppState) -> Unit {
                 },
                 [
                   @sheet.lead_sheet(
-                    measures, playback_position, bpm, key, time_signature, loop_a_measure,
+                    measures,
+                    playback_position,
+                    bpm,
+                    key,
+                    time_signature,
+                    loop_a_measure,
                     loop_b_measure,
+                    fn() { show_legend.get() },
                   ),
                 ],
               ),
@@ -135,14 +142,24 @@ pub fn render(state : AppState) -> Unit {
             attrs=[("aria-label", @luna_dom.Attr::AttrString("visualization"))],
             [
               @piano_roll.note_display(
-                sounds, backing_sounds, measures, playback_position, bpm, total_duration,
-                time_signature, loop_a_measure, loop_b_measure,
+                sounds,
+                backing_sounds,
+                measures,
+                playback_position,
+                bpm,
+                total_duration,
+                time_signature,
+                loop_a_measure,
+                loop_b_measure,
+                fn() { show_legend.get() },
               ),
-              @piano_roll.keyboard(sounds, backing_sounds, playback_position),
+              @piano_roll.keyboard(sounds, backing_sounds, playback_position, fn() {
+                show_legend.get()
+              }),
             ],
           ),
           @luna_dom.show(fn() { view_state.get().show_settings }, fn() {
-            settings_panel(jazz_style)
+            settings_panel(jazz_style, show_legend)
           }),
         ],
       ),

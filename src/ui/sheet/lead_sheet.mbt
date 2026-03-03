@@ -108,6 +108,7 @@ pub fn lead_sheet(
   time_signature : @signals.Signal[@music.TimeSignature],
   loop_a_measure : @signals.Signal[Int],
   loop_b_measure : @signals.Signal[Int],
+  show_legend : () -> Bool,
 ) -> @luna_dom.DomNode {
   setup_auto_scroll(measures, playback_position, bpm, time_signature)
 
@@ -156,11 +157,20 @@ pub fn lead_sheet(
           let ts = time_signature.get()
           let k = key.get()
           let mw = measure_width()
-          render_measure(m, idx, playback_position, k, ts, measure_width=mw, fn() {
-            let measure_number = idx + 1
-            measure_number < loop_a_measure.get() ||
-            measure_number > loop_b_measure.get()
-          })
+          render_measure(
+            m,
+            idx,
+            playback_position,
+            k,
+            ts,
+            measure_width=mw,
+            fn() {
+              let measure_number = idx + 1
+              measure_number < loop_a_measure.get() ||
+              measure_number > loop_b_measure.get()
+            },
+            show_legend,
+          )
         }),
         render_playback_indicator(
           playback_position,

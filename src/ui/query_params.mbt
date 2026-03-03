@@ -349,6 +349,19 @@ pub fn save_jazz_style(js : JazzStyle) -> Unit {
 }
 
 ///|
+pub fn get_initial_show_legend() -> Bool {
+  match get_query_param("legend") {
+    Some("off") => false
+    _ => true
+  }
+}
+
+///|
+pub fn save_show_legend(show : Bool) -> Unit {
+  set_query_param("legend", if show { "" } else { "off" }, default="")
+}
+
+///|
 /// Load JazzStyle from URL query parameters, falling back to defaults.
 pub fn get_initial_jazz_style() -> JazzStyle {
   let default_js = JazzStyle::default()

@@ -225,6 +225,7 @@ fn draw_falling_notes(
   key_areas : Array[KeyArea],
   playing_color : String,
   default_color : String,
+  show_legend : Bool,
 ) -> Unit {
   note_positions
   .iter()
@@ -248,14 +249,16 @@ fn draw_falling_notes(
     let bottom_y = height * bottom_percent / 100.0
     let top_y = height * top_percent / 100.0
 
-    // Determine color: use technique color when available, fall back to defaults
+    // Determine color: use technique color when legend is on, chord tone when off
     let is_playing = current_pos >= note.start_ms &&
       current_pos < note.start_ms + note.duration_ms
-    ctx.fillStyle = match (note.tone_origin, is_playing) {
-      (Some(origin), true) => @theme.tone_origin_playing_color(origin)
-      (Some(origin), false) => @theme.tone_origin_color(origin)
-      (None, true) => playing_color
-      (None, false) => default_color
+    ctx.fillStyle = match (note.tone_origin, is_playing, show_legend) {
+      (Some(origin), true, true) => @theme.tone_origin_playing_color(origin)
+      (Some(origin), false, true) => @theme.tone_origin_color(origin)
+      (Some(_), true, false) => @theme.PLAYING_COLOR_CHORD_TONE
+      (Some(_), false, false) => @theme.COLOR_CHORD_TONE
+      (None, true, _) => playing_color
+      (None, false, _) => default_color
     }
     // Add gap at bottom to separate consecutive same-pitch notes
     let note_height = bottom_y - top_y
@@ -369,6 +372,7 @@ fn draw_notes(
   beats_per_measure : Double,
   loop_a_measure : Int,
   loop_b_measure : Int,
+  show_legend : Bool,
 ) -> Unit {
   draw_notes_background(ctx, width, height)
   let rect = { left: 0.0, top: 0.0, width, height }
@@ -382,6 +386,7 @@ fn draw_notes(
     key_areas,
     @theme.PLAYING_COLOR_COMPING,
     @theme.COLOR_COMPING,
+    true,
   )
   draw_falling_notes(
     ctx,
@@ -391,6 +396,7 @@ fn draw_notes(
     key_areas,
     NOTE_PLAYING_COLOR,
     NOTE_DEFAULT_COLOR,
+    show_legend,
   )
   draw_approach_arrows(ctx, height, note_positions, current_pos, key_areas)
   draw_key_grid_lines(ctx, height, key_areas)

@@ -159,6 +159,7 @@ fn technique_toggle(
 /// Render the settings panel with jazz style controls.
 pub fn settings_panel(
   jazz_style : @signals.Signal[JazzStyle],
+  show_legend : @signals.Signal[Bool],
 ) -> @luna_dom.DomNode {
   @luna_dom.div(
     class="bg-slate-800 border-l border-slate-600 p-3 overflow-y-auto flex flex-col gap-3 w-64 shrink-0",
@@ -166,14 +167,30 @@ pub fn settings_panel(
     [
       // Legend
       settings_section("Legend", [
+        toggle_switch(label="Show Colors", value=fn() { show_legend.get() }, on_toggle=fn() {
+          show_legend.update(not)
+        }),
         @luna_dom.div(
           class="flex flex-col gap-1",
           legend_entries.map(fn(entry) {
             let (dot, color, label) = entry
             @luna_dom.div(class="flex items-center gap-1.5", [
               @luna_dom.span(
-                class="text-xs leading-none",
-                attrs=[("style", @luna_dom.Attr::AttrString("color: " + color))],
+                dyn_class=fn() { "text-xs leading-none" },
+                dyn_attrs=[
+                  (
+                    "style",
+                    @luna_dom.AttrValue::Dynamic(fn() {
+                      let c = if show_legend.get() ||
+                        color == @theme.COLOR_COMPING {
+                        color
+                      } else {
+                        @theme.COLOR_CHORD_TONE
+                      }
+                      "color: " + c
+                    }),
+                  ),
+                ],
                 [@luna_dom.text(dot)],
               ),
               @luna_dom.span(class="text-xs text-slate-200", [

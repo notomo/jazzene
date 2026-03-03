@@ -22,6 +22,7 @@ pub fn keyboard(
   sounds : () -> Array[@music.ScheduledSound],
   backing_sounds : () -> Array[@music.ScheduledSound],
   playback_position : @signals.Signal[@music.Duration],
+  show_legend : () -> Bool,
 ) -> @luna_dom.DomNode {
   let { canvas, ctx } = create_canvas_context()
   let resize_trigger = create_resize_trigger(canvas)
@@ -36,7 +37,12 @@ pub fn keyboard(
         Some(m) =>
           set[m.value] = Some(
             match s.tone_origin {
-              Some(origin) => @theme.tone_origin_playing_color(origin)
+              Some(origin) =>
+                if show_legend() {
+                  @theme.tone_origin_playing_color(origin)
+                } else {
+                  @theme.PLAYING_COLOR_CHORD_TONE
+                }
               None => NOTE_PLAYING_COLOR
             },
           )
