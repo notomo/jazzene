@@ -25,12 +25,12 @@ fn[T : Eq] segmented_buttons(
   let active = "bg-blue-800 border-blue-500 text-white"
   let inactive = "bg-slate-900 border-slate-600 text-slate-300 hover:bg-slate-700"
   @luna_dom.div(
-    class="flex",
+    class="flex w-full",
     options.map(fn(pair) {
       let (label, value) = pair
       @luna_dom.button(
         dyn_class=fn() {
-          cn([base, if current() == value { active } else { inactive }])
+          cn([base, "flex-1 text-center", if current() == value { active } else { inactive }])
         },
         on=@luna_dom.events().click(fn(_) { on_select(value) }),
         [@luna_dom.text(label)],
@@ -204,11 +204,11 @@ pub fn settings_panel(
       // Presets
       settings_section("Preset", [
         @luna_dom.div(
-          class="flex flex-wrap gap-1",
+          class="flex flex-wrap gap-1 w-full",
           presets.map(fn(pair) {
             let (label, make_preset) = pair
             @luna_dom.button(
-              class="px-2 py-0.5 text-xs rounded border bg-slate-900 border-slate-600 text-slate-300 hover:bg-slate-700 hover:border-slate-400 transition-colors",
+              class="flex-1 text-center px-2 py-0.5 text-xs rounded border bg-slate-900 border-slate-600 text-slate-300 hover:bg-slate-700 hover:border-slate-400 transition-colors",
               on=@luna_dom.events().click(fn(_) {
                 jazz_style.set(make_preset())
               }),
