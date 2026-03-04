@@ -153,9 +153,14 @@ pub fn render(state : AppState) -> Unit {
                 loop_b_measure,
                 fn() { show_legend.get() },
               ),
-              @piano_roll.keyboard(sounds, backing_sounds, playback_position, fn() {
-                show_legend.get()
-              }),
+              @piano_roll.keyboard(
+                sounds,
+                backing_sounds,
+                measures,
+                bpm,
+                playback_position,
+                fn() { show_legend.get() },
+              ),
             ],
           ),
           @luna_dom.show(fn() { view_state.get().show_settings }, fn() {

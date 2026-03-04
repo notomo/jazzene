@@ -52,6 +52,11 @@ pub fn note_display(
     compute_scale_bands(measures(), bpm.get())
   })
 
+  // Pre-calculate chord labels for left-edge display
+  let chord_labels = @signals.memo(fn() {
+    compute_chord_labels(measures(), bpm.get())
+  })
+
   // Set up seek interactions
   setup_wheel_seek(canvas, playback_position, total_duration)
   setup_drag_seek(canvas, playback_position, total_duration)
@@ -67,6 +72,7 @@ pub fn note_display(
       note_positions(),
       backing_positions(),
       scale_bands(),
+      chord_labels(),
       playback_position.get().to_milliseconds(),
       bpm.get(),
       time_signature.get().beats_per_measure(),

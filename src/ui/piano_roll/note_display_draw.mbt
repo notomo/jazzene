@@ -5,6 +5,9 @@ const NOTE_DISPLAY_WINDOW_MS = 3000.0
 const NOTE_DISPLAY_BG_COLOR = "#0f172a"
 
 ///|
+const CHORD_LABEL_BG_COLOR = "rgba(30, 58, 138, 0.9)"
+
+///|
 const NOTE_PLAYING_COLOR = "#3b82f6"
 
 ///|
@@ -29,6 +32,94 @@ priv struct NotePosition {
   start_ms : Double
   duration_ms : Double
   tone_origin : @music.ToneOrigin?
+}
+
+///|
+/// A time-segmented region for displaying a chord label on the left edge
+priv struct ChordLabel {
+  start_ms : Double
+  end_ms : Double
+  chord : @music.Chord
+}
+
+///|
+/// Compute chord labels from measures (one per chord slot)
+fn compute_chord_labels(
+  measures : Array[@music.Measure],
+  bpm : Int,
+) -> Array[ChordLabel] {
+  let beat_duration_ms = @music.ms_per_beat(bpm)
+  measures
+  .iter()
+  .flat_map(fn(measure) {
+    let measure_start_ms = measure.start_time.to_milliseconds()
+    let n_chords = measure.chords.length()
+    if n_chords == 0 {
+      return [].iter()
+    }
+    let total_beats = measure.beats.length().to_double()
+    let beats_per_chord = total_beats / n_chords.to_double()
+    measure.chords
+    .iter()
+    .mapi(fn(i, chord) {
+      let chord_start_ms = measure_start_ms +
+        i.to_double() * beats_per_chord * beat_duration_ms
+      let chord_end_ms = measure_start_ms +
+        (i + 1).to_double() * beats_per_chord * beat_duration_ms
+      ChordLabel::{ start_ms: chord_start_ms, end_ms: chord_end_ms, chord }
+    })
+  })
+  .collect()
+}
+
+///|
+/// Draw chord name labels on the left edge, rotated 90° CCW (reads bottom to top)
+fn draw_chord_labels(
+  ctx : @canvas.CanvasRenderingContext2D,
+  height : Double,
+  chord_labels : Array[ChordLabel],
+  current_pos : Double,
+  label_width : Double,
+) -> Unit {
+  chord_labels
+  .iter()
+  .filter(fn(label) {
+    let end_offset = label.end_ms - current_pos
+    let start_offset = label.start_ms - current_pos
+    end_offset >= 0.0 && start_offset <= NOTE_DISPLAY_WINDOW_MS
+  })
+  .each(fn(label) {
+    let start_offset = label.start_ms - current_pos
+    let end_offset = label.end_ms - current_pos
+    let bottom_percent = 100.0 - start_offset / NOTE_DISPLAY_WINDOW_MS * 100.0
+    let top_percent = 100.0 - end_offset / NOTE_DISPLAY_WINDOW_MS * 100.0
+    let bottom_y = height * bottom_percent / 100.0
+    let top_y = height * top_percent / 100.0
+    let band_height = bottom_y - top_y
+    if band_height < 2.0 {
+      return
+    }
+    ctx.fillStyle = CHORD_LABEL_BG_COLOR
+    ctx.fillRect(0.0, top_y, label_width, band_height)
+    if band_height >= 20.0 {
+      ctx.save()
+      // Translate to bottom of band, centered horizontally in label column
+      ctx.translate(label_width / 2.0, bottom_y - 4.0)
+      // Rotate 90° CCW: text reads from bottom to top
+      ctx.rotate(-1.5707963267948966)
+      ctx.font = "bold 16px sans-serif"
+      ctx.fillStyle = "#ffffff"
+      ctx.textAlign = "left"
+      ctx.textBaseline = "middle"
+      ctx.fillText(
+        @music.format_chord(label.chord),
+        0.0,
+        0.0,
+        max_width=band_height - 8.0,
+      )
+      ctx.restore()
+    }
+  })
 }
 
 ///|
@@ -367,6 +458,7 @@ fn draw_notes(
   note_positions : Array[NotePosition],
   backing_positions : Array[NotePosition],
   scale_bands : Array[ScaleBand],
+  chord_labels : Array[ChordLabel],
   current_pos : Double,
   bpm : Int,
   beats_per_measure : Double,
@@ -375,8 +467,13 @@ fn draw_notes(
   show_legend : Bool,
 ) -> Unit {
   draw_notes_background(ctx, width, height)
-  let rect = { left: 0.0, top: 0.0, width, height }
-  let key_areas = calc_key_areas(rect, KEYBOARD_MIN_KEY, KEYBOARD_MAX_KEY)
+  let label_width = calc_label_width(width)
+  // Notes area starts after the chord label column so notes never overlap labels
+  let key_areas = calc_key_areas(
+    { left: label_width, top: 0.0, width: width - label_width, height },
+    KEYBOARD_MIN_KEY,
+    KEYBOARD_MAX_KEY,
+  )
   draw_scale_bands(ctx, height, scale_bands, current_pos, key_areas)
   draw_falling_notes(
     ctx,
@@ -401,6 +498,7 @@ fn draw_notes(
   draw_approach_arrows(ctx, height, note_positions, current_pos, key_areas)
   draw_key_grid_lines(ctx, height, key_areas)
   draw_measure_lines(ctx, width, height, current_pos, bpm, beats_per_measure)
+  draw_chord_labels(ctx, height, chord_labels, current_pos, label_width)
   draw_loop_overlay(
     ctx, width, height, current_pos, bpm, beats_per_measure, loop_a_measure, loop_b_measure,
   )

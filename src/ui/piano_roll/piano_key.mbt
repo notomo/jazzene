@@ -80,6 +80,21 @@ fn calc_key_areas(
 }
 
 ///|
+/// Compute the chord label column width = right edge of 2nd white key (B0) from left
+fn calc_label_width(total_width : Double) -> Double {
+  let key_areas = calc_key_areas(
+    { left: 0.0, top: 0.0, width: total_width, height: 1.0 },
+    KEYBOARD_MIN_KEY,
+    KEYBOARD_MAX_KEY,
+  )
+  if key_areas.length() >= 3 {
+    key_areas[2].rect.left + key_areas[2].rect.width
+  } else {
+    40.0
+  }
+}
+
+///|
 /// Check if a note is a black key (chromatic scale position)
 fn is_black_key(note_in_octave : Int) -> Bool {
   match note_in_octave {
