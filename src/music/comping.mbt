@@ -178,9 +178,30 @@ pub fn generate_comping_sounds(
           } else {
             raw_duration_ms
           }
+          // Cap duration to avoid overlapping with the next hit or next chord's anticipated start.
+          // This prevents cross-chord overlap in 3/4 where short beats_per_chord causes
+          // the anticipated start of chord i+1 to fall before chord i's last hit ends.
+          let max_end_ms = if hi < hits.length() - 1 {
+            hits[hi + 1].0
+          } else if i < n - 1 {
+            // Next chord's anticipated start (beat 1 of next chord minus 0.5-beat anticipation)
+            measure_start_ms +
+            (i + 1).to_double() * chord_duration_ms -
+            beat_duration_ms * 0.5
+          } else {
+            // End of measure
+            measure_start_ms +
+            measure.beats.length().to_double() * beat_duration_ms
+          }
+          let available_ms = max_end_ms - hit_start_ms
+          let final_duration_ms = if jittered_duration_ms < available_ms {
+            jittered_duration_ms
+          } else {
+            available_ms
+          }
           // Per-hit: find the lowest melody note that overlaps this hit's exact time range.
           // This catches crossing regardless of when within the chord the hit falls.
-          let hit_end_ms = hit_start_ms + jittered_duration_ms
+          let hit_end_ms = hit_start_ms + final_duration_ms
           let mut min_melody_midi : Int? = None
           for s in melody_sounds {
             let s_start = s.start_time.to_milliseconds()
@@ -218,7 +239,7 @@ pub fn generate_comping_sounds(
                     midi=m,
                     duration=NoteDuration::from_beats(beats_per_chord),
                   ),
-                  duration: Duration::from_milliseconds(jittered_duration_ms),
+                  duration: Duration::from_milliseconds(final_duration_ms),
                   start_time: Duration::from_milliseconds(hit_start_ms),
                   tone_origin: None,
                 })
