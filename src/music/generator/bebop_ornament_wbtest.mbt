@@ -40,7 +40,11 @@ test "should_generate_bebop_ornament accepts exactly 1.0 beat remaining" {
 
 test "select_bebop_approach_midi - Dominant7 root returns major 7th (1 below)" {
   // G7: bebop PT = F# (interval 11). G root (MIDI 67): F# (66) is 1 below
-  let chord = @music.Chord::{ root: @music.G, quality: @music.Dominant7, bass: None }
+  let chord = @music.Chord::{
+    root: @music.G,
+    quality: @music.Dominant7,
+    bass: None,
+  }
   let anchor = @music.MidiNumber::new(67).unwrap() // G4
   let result = select_bebop_approach_midi(anchor, chord)
   inspect(result, content="Some({value: 66})") // F#4
@@ -49,7 +53,11 @@ test "select_bebop_approach_midi - Dominant7 root returns major 7th (1 below)" {
 ///|
 test "select_bebop_approach_midi - Dominant7 b7 returns major 7th (1 above)" {
   // G7: bebop PT = F# (interval 11). F b7 (MIDI 65): F# (66) is 1 above
-  let chord = @music.Chord::{ root: @music.G, quality: @music.Dominant7, bass: None }
+  let chord = @music.Chord::{
+    root: @music.G,
+    quality: @music.Dominant7,
+    bass: None,
+  }
   let anchor = @music.MidiNumber::new(65).unwrap() // F4
   let result = select_bebop_approach_midi(anchor, chord)
   inspect(result, content="Some({value: 66})") // F#4
@@ -58,7 +66,11 @@ test "select_bebop_approach_midi - Dominant7 b7 returns major 7th (1 above)" {
 ///|
 test "select_bebop_approach_midi - Dominant7 3rd returns None (not adjacent)" {
   // G7: bebop PT = F#. B 3rd (MIDI 71): F# is not ±1 → None
-  let chord = @music.Chord::{ root: @music.G, quality: @music.Dominant7, bass: None }
+  let chord = @music.Chord::{
+    root: @music.G,
+    quality: @music.Dominant7,
+    bass: None,
+  }
   let anchor = @music.MidiNumber::new(71).unwrap() // B4
   let result = select_bebop_approach_midi(anchor, chord)
   inspect(result, content="None")
@@ -69,7 +81,11 @@ test "select_bebop_approach_midi - Dominant7 3rd returns None (not adjacent)" {
 
 test "select_bebop_approach_midi - Major7 5th returns sharp-5 (1 above)" {
   // Cmaj7: bebop PT = G# (interval 8). G 5th (MIDI 67): G# (68) is 1 above
-  let chord = @music.Chord::{ root: @music.C, quality: @music.Major7, bass: None }
+  let chord = @music.Chord::{
+    root: @music.C,
+    quality: @music.Major7,
+    bass: None,
+  }
   let anchor = @music.MidiNumber::new(67).unwrap() // G4
   let result = select_bebop_approach_midi(anchor, chord)
   inspect(result, content="Some({value: 68})") // G#4
@@ -78,7 +94,11 @@ test "select_bebop_approach_midi - Major7 5th returns sharp-5 (1 above)" {
 ///|
 test "select_bebop_approach_midi - Major7 6th returns sharp-5 (1 below)" {
   // Cmaj7: bebop PT = G#. A 6th (MIDI 69): G# (68) is 1 below
-  let chord = @music.Chord::{ root: @music.C, quality: @music.Major7, bass: None }
+  let chord = @music.Chord::{
+    root: @music.C,
+    quality: @music.Major7,
+    bass: None,
+  }
   let anchor = @music.MidiNumber::new(69).unwrap() // A4
   let result = select_bebop_approach_midi(anchor, chord)
   inspect(result, content="Some({value: 68})") // G#4
@@ -89,7 +109,11 @@ test "select_bebop_approach_midi - Major7 6th returns sharp-5 (1 below)" {
 
 test "select_bebop_approach_midi - Minor7 b3 returns major 3rd (1 above)" {
   // Dm7: bebop PT = F# (interval 4). F b3 (MIDI 65): F# (66) is 1 above
-  let chord = @music.Chord::{ root: @music.D, quality: @music.Minor7, bass: None }
+  let chord = @music.Chord::{
+    root: @music.D,
+    quality: @music.Minor7,
+    bass: None,
+  }
   let anchor = @music.MidiNumber::new(65).unwrap() // F4
   let result = select_bebop_approach_midi(anchor, chord)
   inspect(result, content="Some({value: 66})") // F#4
@@ -98,7 +122,11 @@ test "select_bebop_approach_midi - Minor7 b3 returns major 3rd (1 above)" {
 ///|
 test "select_bebop_approach_midi - Minor7 4th returns major 3rd (1 below)" {
   // Dm7: bebop PT = F#. G 4th (MIDI 67): F# (66) is 1 below
-  let chord = @music.Chord::{ root: @music.D, quality: @music.Minor7, bass: None }
+  let chord = @music.Chord::{
+    root: @music.D,
+    quality: @music.Minor7,
+    bass: None,
+  }
   let anchor = @music.MidiNumber::new(67).unwrap() // G4
   let result = select_bebop_approach_midi(anchor, chord)
   inspect(result, content="Some({value: 66})") // F#4
