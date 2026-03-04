@@ -63,9 +63,11 @@ fn fifth_or_third_interval(intervals : Array[Int]) -> Int {
 /// For WalkingBass: places one quarter note per beat.
 /// - Even beats within a chord (0, 2, ...): chord root
 /// - Odd beats within a chord (1, 3, ...): chord 5th (or 3rd if no 5th)
-/// - Last beat of measure: chromatic approach (half-step below) to next root
+/// - Last beat of measure (when chord root already played): chromatic approach to next root
+/// - Last beat of measure (when it's the first beat of a new chord): chord root instead
 ///
-/// For RootFifth: root on first beat of each chord slot, 5th on second half.
+/// For RootFifth: one note per beat — root on even beats within chord slot, 5th on odd beats.
+/// Works for any time signature without fractional beat placement issues.
 ///
 /// For RootOnly: single note on beat 1 of each chord slot.
 ///
@@ -122,58 +124,40 @@ pub fn generate_walking_bass_sounds(
           }
         }
       RootFifth =>
-        // Root on first beat of chord, 5th on halfway through chord slot
-        for ci in 0..<n_chords {
-          let chord = measure.chords[ci]
+        // One note per beat: root on even beats within chord slot, 5th on odd beats.
+        // This handles any time signature correctly without fractional beat placement.
+        for beat_idx in 0..<beats_in_measure {
+          let beat_start_ms = measure_start_ms +
+            beat_idx.to_double() * beat_duration_ms
+          let chord_idx = @cmp.minimum(
+            (beat_idx.to_double() / beats_per_chord).to_int(),
+            n_chords - 1,
+          )
+          let chord = measure.chords[chord_idx]
           let intervals = chord.quality.intervals()
-          let chord_beat = (ci.to_double() * beats_per_chord).to_int()
+          // Ceiling division: first integer beat that falls within this chord's slot.
+          // e.g. in 3/4 with 2 chords, chord 1 starts at beat 1.5 → first beat is 2.
+          let chord_start_beat = (chord_idx * beats_in_measure + n_chords - 1) /
+            n_chords
+          let beat_in_chord = beat_idx - chord_start_beat
           let root_pc = chord.root.midi() % 12
-          let fifth_pc = (
-              chord.root.midi() + fifth_or_third_interval(intervals)
-            ) %
-            12
-          // Root on first beat of chord slot
-          let root_ms = measure_start_ms +
-            chord_beat.to_double() * beat_duration_ms
-          let root_midi = bass_note_in_range(root_pc, prev_bass_midi)
-          prev_bass_midi = root_midi
-          match MidiNumber::new(root_midi) {
+          let bass_pc = if beat_in_chord % 2 == 0 {
+            root_pc
+          } else {
+            let fifth_interval = fifth_or_third_interval(intervals)
+            (chord.root.midi() + fifth_interval) % 12
+          }
+          let bass_midi = bass_note_in_range(bass_pc, prev_bass_midi)
+          prev_bass_midi = bass_midi
+          match MidiNumber::new(bass_midi) {
             Some(m) =>
               sounds.push(ScheduledSound::{
-                sound_event: Note(
-                  midi=m,
-                  duration=NoteDuration::from_beats(beats_per_chord / 2.0),
-                ),
-                duration: Duration::from_milliseconds(
-                  beat_duration_ms * (beats_per_chord / 2.0) * 0.9,
-                ),
-                start_time: Duration::from_milliseconds(root_ms),
+                sound_event: Note(midi=m, duration=Quarter),
+                duration: Duration::from_milliseconds(beat_duration_ms * 0.85),
+                start_time: Duration::from_milliseconds(beat_start_ms),
                 tone_origin: None,
               })
             None => ()
-          }
-          // 5th on second half of chord slot (only when chord lasts >= 2 beats)
-          if beats_per_chord >= 2.0 {
-            let fifth_beat = chord_beat + (beats_per_chord / 2.0).to_int()
-            let fifth_ms = measure_start_ms +
-              fifth_beat.to_double() * beat_duration_ms
-            let fifth_midi = bass_note_in_range(fifth_pc, prev_bass_midi)
-            prev_bass_midi = fifth_midi
-            match MidiNumber::new(fifth_midi) {
-              Some(m) =>
-                sounds.push(ScheduledSound::{
-                  sound_event: Note(
-                    midi=m,
-                    duration=NoteDuration::from_beats(beats_per_chord / 2.0),
-                  ),
-                  duration: Duration::from_milliseconds(
-                    beat_duration_ms * (beats_per_chord / 2.0) * 0.9,
-                  ),
-                  start_time: Duration::from_milliseconds(fifth_ms),
-                  tone_origin: None,
-                })
-              None => ()
-            }
           }
         }
       WalkingBass =>
@@ -191,11 +175,19 @@ pub fn generate_walking_bass_sounds(
           let intervals = chord.quality.intervals()
           let root_pc = chord.root.midi() % 12
           // Beat position within this chord slot
-          let chord_start_beat = (chord_idx.to_double() * beats_per_chord).to_int()
+          // Ceiling division: first integer beat that falls within this chord's slot.
+          // e.g. in 3/4 with 2 chords, chord 1 starts at beat 1.5 → first beat is 2.
+          let chord_start_beat = (chord_idx * beats_in_measure + n_chords - 1) /
+            n_chords
           let beat_in_chord = beat_idx - chord_start_beat
           // Select pitch class for this beat
-          let bass_pc = if is_last_beat {
-            // Approach to next root by half-step below (leading tone)
+          let bass_pc = if is_last_beat && beat_in_chord > 0 {
+            // Approach to next root by half-step below (leading tone).
+            // Only when the current chord's root has already been played
+            // (beat_in_chord > 0). If this beat is the first beat of a new
+            // chord (beat_in_chord == 0), play the root instead so the chord
+            // change is established — this matters in 3/4 with 2 chords where
+            // the second chord starts at beat 1.5 and only beat 2 falls within it.
             match next_root_pc {
               Some(target_pc) => (target_pc - 1 + 12) % 12
               None => root_pc
