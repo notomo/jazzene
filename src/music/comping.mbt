@@ -132,6 +132,13 @@ pub fn generate_comping_sounds(
   let beat_duration_ms = ms_per_beat(bpm)
   let sounds : Array[ScheduledSound] = []
   let mut prev_voicing : Voicing? = None
+  // Pre-seed with the first melody note so the initial comping register
+  // is consistent even when the piece starts with a rest.
+  let mut prev_min_melody_midi : Int? = melody_sounds
+    .iter()
+    .filter_map(fn(s) { s.midi() })
+    .map(fn(m) { m.value })
+    .next()
   for mi = 0; mi < measures.length(); mi = mi + 1 {
     let measure = measures[mi]
     let pattern = CompingPattern::from_measure_index(mi)
@@ -220,12 +227,21 @@ pub fn generate_comping_sounds(
               }
             }
           }
+          // During melody rests, fall back to the previous melody reference to keep
+          // the comping in a consistent register instead of jumping to a different octave.
+          let ref_melody_midi = match min_melody_midi {
+            Some(_) => {
+              prev_min_melody_midi = min_melody_midi
+              min_melody_midi
+            }
+            None => prev_min_melody_midi
+          }
           for note in voicing.notes {
             // Lower the note by octaves until at least a perfect fourth (5 semitones)
             // below the lowest melody note, preventing near-crossing that makes
             // simultaneous play uncomfortable.
             let mut midi_val = note.value
-            match min_melody_midi {
+            match ref_melody_midi {
               Some(min_mel) =>
                 while midi_val > min_mel - 5 {
                   midi_val = midi_val - 12

@@ -197,9 +197,11 @@ test "generate_comping_sounds: melody within 4 semitones triggers octave shift" 
 }
 
 ///|
-test "generate_comping_sounds: melody outside chord time range does not affect" {
+test "generate_comping_sounds: melody after chord uses first note as register anchor" {
   // Dm7 at 0-4000ms; melody C4(60) starts at 4000ms (no overlap)
   // shell_voicing(Dm7, None): 3rd=F4(65), 7th=C4(60)
+  // Pre-seeding with first melody note C4(60) anchors the register,
+  // so voicing shifts down an octave: F3(53), C3(48)
   let measures = [
     make_4beat_measure([Chord::{ root: D, quality: Minor7, bass: None }], 0.0),
   ]
@@ -210,8 +212,8 @@ test "generate_comping_sounds: melody outside chord time range does not affect" 
     melody,
     KeySignature::from_root(C),
   )
-  // No melody overlap → shell voicing values used: F4(65), C4(60)
-  inspect(comping_midis(sounds), content="[65, 60, 65, 60, 65, 60]")
+  // First melody note C4(60) used as register anchor → F3(53), C3(48)
+  inspect(comping_midis(sounds), content="[53, 48, 53, 48, 53, 48]")
 }
 
 ///|
