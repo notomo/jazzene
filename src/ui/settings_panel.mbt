@@ -30,7 +30,15 @@ fn[T : Eq] segmented_buttons(
       let (label, value) = pair
       @luna_dom.button(
         dyn_class=fn() {
-          cn([base, "flex-1 text-center", if current() == value { active } else { inactive }])
+          cn([
+            base,
+            "flex-1 text-center",
+            if current() == value {
+              active
+            } else {
+              inactive
+            },
+          ])
         },
         on=@luna_dom.events().click(fn(_) { on_select(value) }),
         [@luna_dom.text(label)],
@@ -102,7 +110,7 @@ fn settings_section(
       class="text-xs font-semibold text-slate-400 uppercase tracking-wide",
       [@luna_dom.text(title)],
     ),
-    @luna_dom.div(class="flex flex-col gap-1", children),
+    @luna_dom.div(class="flex flex-col gap-2", children),
   ])
 }
 
@@ -164,7 +172,10 @@ pub fn settings_panel(
 ) -> @luna_dom.DomNode {
   @luna_dom.div(
     class="bg-slate-800 border-l border-slate-600 p-3 overflow-y-auto flex flex-col gap-3 w-64 shrink-0",
-    attrs=[("aria-label", @luna_dom.Attr::AttrString("jazz settings panel"))],
+    attrs=[
+      ("id", @luna_dom.Attr::AttrString("settings-panel")),
+      ("aria-label", @luna_dom.Attr::AttrString("jazz settings panel")),
+    ],
     [
       // Legend
       settings_section("Legend", [

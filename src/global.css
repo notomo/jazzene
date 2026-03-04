@@ -1,5 +1,6 @@
 @import "tailwindcss";
 
-#lead-sheet-container {
+#lead-sheet-container,
+#settings-panel {
   scrollbar-color: #4b5563 #1f2937;
 }
