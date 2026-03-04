@@ -49,9 +49,9 @@ test "generate_drum_sounds 4/4 two measures doubles hits" {
 ///|
 test "generate_drum_sounds 3/4 produces correct number of hits" {
   let time_sig = TimeSignature::{ numerator: 3, denominator: 4 }
-  // jazz_waltz pattern has 3 hits per measure (Kick, HiHat, HiHat)
+  // swing_ride_3_4 pattern has 11 hits per measure
   let sounds = generate_drum_sounds(120, 1, time_signature=time_sig)
-  assert_eq(sounds.length(), 3)
+  assert_eq(sounds.length(), 11)
 }
 
 ///|
@@ -163,15 +163,22 @@ test "Brushes pattern produces 9 hits per measure" {
 }
 
 ///|
-test "3/4 time uses waltz pattern regardless of style" {
+test "3/4 time respects pattern style" {
   let time_sig = TimeSignature::{ numerator: 3, denominator: 4 }
-  for style in ([SwingRide, Brushes] : Array[DrumPatternStyle]) {
-    let sounds = generate_drum_sounds(
-      120,
-      1,
-      time_signature=time_sig,
-      pattern_style=style,
-    )
-    assert_eq(sounds.length(), 3)
-  }
+  // swing_ride_3_4 has 11 hits per measure
+  let ride_sounds = generate_drum_sounds(
+    120,
+    1,
+    time_signature=time_sig,
+    pattern_style=SwingRide,
+  )
+  assert_eq(ride_sounds.length(), 11)
+  // brushes_3_4 has 7 hits per measure
+  let brush_sounds = generate_drum_sounds(
+    120,
+    1,
+    time_signature=time_sig,
+    pattern_style=Brushes,
+  )
+  assert_eq(brush_sounds.length(), 7)
 }

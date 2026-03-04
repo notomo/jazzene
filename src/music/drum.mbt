@@ -57,15 +57,43 @@ priv struct DrumPattern {
 }
 
 ///|
-/// Jazz waltz 3/4 drum pattern
+/// Swing ride 3/4 pattern (jazz waltz with ride cymbal spang-a-lang)
+/// - Ride: every swing 8th note (0, and-1, 2, and-2, 3, and-3)
+/// - HiHat foot: beats 2, 3
 /// - Kick: beat 1
-/// - HiHat: beats 2, 3
-fn DrumPattern::jazz_waltz() -> DrumPattern {
+/// - Snare: beats 2, 3
+fn DrumPattern::swing_ride_3_4() -> DrumPattern {
   DrumPattern::{
     hits: [
       DrumHit::{ voice: Kick, beat: 0.0 },
+      DrumHit::{ voice: Ride, beat: 0.0 },
+      DrumHit::{ voice: Ride, beat: 0.5 },
+      DrumHit::{ voice: Snare, beat: 1.0 },
       DrumHit::{ voice: HiHat, beat: 1.0 },
+      DrumHit::{ voice: Ride, beat: 1.0 },
+      DrumHit::{ voice: Ride, beat: 1.5 },
+      DrumHit::{ voice: Snare, beat: 2.0 },
       DrumHit::{ voice: HiHat, beat: 2.0 },
+      DrumHit::{ voice: Ride, beat: 2.0 },
+      DrumHit::{ voice: Ride, beat: 2.5 },
+    ],
+  }
+}
+
+///|
+/// Brush pattern for jazz waltz (3/4) - spang-a-lang feel with brushes
+/// - Brush: every swing 8th note (0, and-1, 2, and-2, 3, and-3)
+/// - Kick: beat 1
+fn DrumPattern::brushes_3_4() -> DrumPattern {
+  DrumPattern::{
+    hits: [
+      DrumHit::{ voice: Kick, beat: 0.0 },
+      DrumHit::{ voice: Brush, beat: 0.0 },
+      DrumHit::{ voice: Brush, beat: 0.5 },
+      DrumHit::{ voice: Brush, beat: 1.0 },
+      DrumHit::{ voice: Brush, beat: 1.5 },
+      DrumHit::{ voice: Brush, beat: 2.0 },
+      DrumHit::{ voice: Brush, beat: 2.5 },
     ],
   }
 }
@@ -123,7 +151,8 @@ fn DrumPattern::for_time_signature(
   style : DrumPatternStyle,
 ) -> DrumPattern {
   match (time_signature.numerator, time_signature.denominator, style) {
-    (3, 4, _) => DrumPattern::jazz_waltz()
+    (3, 4, SwingRide) => DrumPattern::swing_ride_3_4()
+    (3, 4, Brushes) => DrumPattern::brushes_3_4()
     (_, _, SwingRide) => DrumPattern::swing_ride_4_4()
     (_, _, Brushes) => DrumPattern::brushes_4_4()
   }
