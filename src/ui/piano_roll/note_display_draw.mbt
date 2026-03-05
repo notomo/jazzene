@@ -27,6 +27,9 @@ const KEY_LINE_COLOR = "rgba(255, 255, 255, 0.15)"
 const MEASURE_LINE_COLOR = "rgba(255, 255, 255, 0.3)"
 
 ///|
+const MEASURE_LINE_LABEL_COLOR = "rgba(255, 255, 255, 0.5)"
+
+///|
 priv struct NotePosition {
   midi : Int
   start_ms : Double
@@ -391,6 +394,7 @@ fn draw_measure_lines(
   current_pos : Double,
   bpm : Int,
   beats_per_measure : Double,
+  label_width : Double,
 ) -> Unit {
   let measure_ms = @music.ms_per_measure(bpm, beats_per_measure~)
   let first_measure = (current_pos / measure_ms).to_int()
@@ -403,8 +407,12 @@ fn draw_measure_lines(
     if offset >= 0.0 && offset <= NOTE_DISPLAY_WINDOW_MS {
       let percent = 100.0 - offset / NOTE_DISPLAY_WINDOW_MS * 100.0
       let y = height * percent / 100.0
+      // Draw a thicker, more opaque line in the chord label column
+      ctx.fillStyle = MEASURE_LINE_LABEL_COLOR
+      ctx.fillRect(0.0, y, label_width, 1.0)
+      // Draw a thinner, more subtle line in the notes area
       ctx.fillStyle = MEASURE_LINE_COLOR
-      ctx.fillRect(0.0, y, width, 1.0)
+      ctx.fillRect(label_width, y, width - label_width, 1.0)
     }
   }
 }
@@ -497,8 +505,10 @@ fn draw_notes(
   )
   draw_approach_arrows(ctx, height, note_positions, current_pos, key_areas)
   draw_key_grid_lines(ctx, height, key_areas)
-  draw_measure_lines(ctx, width, height, current_pos, bpm, beats_per_measure)
   draw_chord_labels(ctx, height, chord_labels, current_pos, label_width)
+  draw_measure_lines(
+    ctx, width, height, current_pos, bpm, beats_per_measure, label_width,
+  )
   draw_loop_overlay(
     ctx, width, height, current_pos, bpm, beats_per_measure, loop_a_measure, loop_b_measure,
   )
