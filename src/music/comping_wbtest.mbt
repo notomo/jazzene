@@ -512,6 +512,36 @@ test "generate_comping_sounds: WithTensions voicing is deterministic across hits
 }
 
 ///|
+test "generate_comping_sounds: WithTensions voicing span stays within one octave" {
+  // Regression test: voice leading drift over many measures caused notes to spread
+  // beyond an octave; the compaction step now ensures all notes stay within 12 semitones.
+  // melody at A4=69 (threshold=64); voicing notes like [48, 64, 60, 64] were produced
+  // without compaction; now the low outlier is raised.
+  let measures = [
+    make_4beat_measure([Chord::{ root: C, quality: Major7, bass: None }], 0.0),
+  ]
+  let melody = [make_melody_note(69, 0.0, 4000.0)]
+  let sounds = generate_comping_sounds(
+    measures,
+    60,
+    melody,
+    KeySignature::from_root(C),
+    voicing_style=WithTensions,
+  )
+  let midis = comping_midis(sounds[0:4].iter().collect())
+  let max_midi = midis.fold(init=0, fn(acc, v) { if v > acc { v } else { acc } })
+  let min_midi = midis.fold(init=127, fn(acc, v) {
+    if v < acc {
+      v
+    } else {
+      acc
+    }
+  })
+  // All 4 voices must fit within an octave (12 semitones)
+  assert_true(max_midi - min_midi <= 12)
+}
+
+///|
 test "generate_comping_sounds: 3/4 TwoFour beat-2 duration fits before beat-3" {
   // BPM=60; 3/4 TwoFour: beat-2 at 1000ms with duration 0.75 beats (not 1.5).
   // Max jitter=1.2 → beat-2 ends at 1000+750*1.2=1900ms < 2000ms (beat-3 start).

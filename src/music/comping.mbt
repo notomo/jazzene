@@ -236,10 +236,9 @@ pub fn generate_comping_sounds(
             }
             None => prev_min_melody_midi
           }
-          for note in voicing.notes {
-            // Lower the note by octaves until at least a perfect fourth (5 semitones)
-            // below the lowest melody note, preventing near-crossing that makes
-            // simultaneous play uncomfortable.
+          // Lower each note by octaves until at least a perfect fourth (5 semitones)
+          // below the lowest melody note, preventing near-crossing.
+          let adj_midis = voicing.notes.map(fn(note) {
             let mut midi_val = note.value
             match ref_melody_midi {
               Some(min_mel) =>
@@ -248,6 +247,27 @@ pub fn generate_comping_sounds(
                 }
               None => ()
             }
+            midi_val
+          })
+          // Compact: raise any note that is more than an octave below the highest note
+          // to keep the voicing within a playable hand span.
+          // The raised note stays ≤ max_midi ≤ melody threshold, so the melody
+          // constraint is preserved.
+          let max_midi = adj_midis.fold(init=0, fn(acc, v) {
+            if v > acc {
+              v
+            } else {
+              acc
+            }
+          })
+          for i = 0; i < adj_midis.length(); i = i + 1 {
+            let mut v = adj_midis[i]
+            while max_midi - v > 12 {
+              v = v + 12
+            }
+            adj_midis[i] = v
+          }
+          for midi_val in adj_midis {
             match MidiNumber::new(midi_val) {
               Some(m) =>
                 sounds.push(ScheduledSound::{
