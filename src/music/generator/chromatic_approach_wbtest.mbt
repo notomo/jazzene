@@ -1,44 +1,60 @@
 ///|
 test "should_generate_chromatic_approach_ornament returns false when probability is 0" {
-  let result = should_generate_chromatic_approach_ornament(5, 2.0, 0, fn(_) { 0 })
+  let result = should_generate_chromatic_approach_ornament(5, 2.0, 0, fn(_) {
+    0
+  })
   assert_false(result)
 }
 
 ///|
 test "should_generate_chromatic_approach_ornament returns false when notes_left < 2" {
-  let result = should_generate_chromatic_approach_ornament(1, 2.0, 100, fn(_) { 0 })
+  let result = should_generate_chromatic_approach_ornament(1, 2.0, 100, fn(_) {
+    0
+  })
   assert_false(result)
 }
 
 ///|
 test "should_generate_chromatic_approach_ornament returns false when remaining < 1.0 beat" {
-  let result = should_generate_chromatic_approach_ornament(5, 0.5, 100, fn(_) { 0 })
+  let result = should_generate_chromatic_approach_ornament(5, 0.5, 100, fn(_) {
+    0
+  })
   assert_false(result)
 }
 
 ///|
 test "should_generate_chromatic_approach_ornament returns true when all conditions met" {
-  let result = should_generate_chromatic_approach_ornament(5, 2.0, 100, fn(_) { 0 })
+  let result = should_generate_chromatic_approach_ornament(5, 2.0, 100, fn(_) {
+    0
+  })
   assert_true(result)
 }
 
 ///|
 test "should_generate_chromatic_approach_ornament returns false when probability check fails" {
   // random_int returns 80, probability is 50 → 80 >= 50 → false
-  let result = should_generate_chromatic_approach_ornament(5, 2.0, 50, fn(_) { 80 })
+  let result = should_generate_chromatic_approach_ornament(5, 2.0, 50, fn(_) {
+    80
+  })
   assert_false(result)
 }
 
 ///|
 test "should_generate_chromatic_approach_ornament accepts exactly 1.0 beat remaining" {
-  let result = should_generate_chromatic_approach_ornament(5, 1.0, 100, fn(_) { 0 })
+  let result = should_generate_chromatic_approach_ornament(5, 1.0, 100, fn(_) {
+    0
+  })
   assert_true(result)
 }
 
 ///|
 test "select_chromatic_approach_midi returns non-chord tone when available" {
   // C major7 chord: C(0), E(4), G(7), B(11)
-  let chord = @music.Chord::{ root: @music.C, quality: @music.Major7, bass: None }
+  let chord = @music.Chord::{
+    root: @music.C,
+    quality: @music.Major7,
+    bass: None,
+  }
   let anchor_midi = @music.MidiNumber::new(60).unwrap() // C4
   // +1 = Db(1) not chord tone, -1 = B(11) IS chord tone → must pick Db
   for seed in 0..<20 {
@@ -52,7 +68,11 @@ test "select_chromatic_approach_midi returns non-chord tone when available" {
 
 ///|
 test "select_chromatic_approach_midi result is ±1 semitone from anchor" {
-  let chord = @music.Chord::{ root: @music.C, quality: @music.Major7, bass: None }
+  let chord = @music.Chord::{
+    root: @music.C,
+    quality: @music.Major7,
+    bass: None,
+  }
   for anchor_val in [60, 64, 67, 71] {
     let anchor_midi = @music.MidiNumber::new(anchor_val).unwrap()
     for seed in 0..<10 {
@@ -67,7 +87,11 @@ test "select_chromatic_approach_midi result is ±1 semitone from anchor" {
 ///|
 test "generate_chromatic_approach_ornament produces exactly 2 notes with correct tone origins" {
   let settings = ImprovisationConfig::default(42)
-  let chord = @music.Chord::{ root: @music.C, quality: @music.Major7, bass: None }
+  let chord = @music.Chord::{
+    root: @music.C,
+    quality: @music.Major7,
+    bass: None,
+  }
   let anchor_midi = @music.MidiNumber::new(60).unwrap() // C4
   let state = MeasureState::new(4, 50, Some(anchor_midi), Playing(5))
   let update_accidental = @music.create_accidental_calculator(
@@ -92,7 +116,11 @@ test "generate_chromatic_approach_ornament produces exactly 2 notes with correct
 ///|
 test "generate_chromatic_approach_ornament AT is Eighth duration" {
   let settings = ImprovisationConfig::default(0)
-  let chord = @music.Chord::{ root: @music.C, quality: @music.Major7, bass: None }
+  let chord = @music.Chord::{
+    root: @music.C,
+    quality: @music.Major7,
+    bass: None,
+  }
   let anchor_midi = @music.MidiNumber::new(60).unwrap()
   let state = MeasureState::new(4, 50, Some(anchor_midi), Playing(5))
   let update_accidental = @music.create_accidental_calculator(
@@ -112,7 +140,11 @@ test "generate_chromatic_approach_ornament AT is Eighth duration" {
 ///|
 test "generate_chromatic_approach_ornament decrements notes_left by 2" {
   let settings = ImprovisationConfig::default(0)
-  let chord = @music.Chord::{ root: @music.C, quality: @music.Major7, bass: None }
+  let chord = @music.Chord::{
+    root: @music.C,
+    quality: @music.Major7,
+    bass: None,
+  }
   let anchor_midi = @music.MidiNumber::new(60).unwrap()
   let state = MeasureState::new(4, 50, Some(anchor_midi), Playing(5))
   let update_accidental = @music.create_accidental_calculator(
@@ -131,7 +163,11 @@ test "generate_chromatic_approach_ornament decrements notes_left by 2" {
 ///|
 test "generate_chromatic_approach_ornament transitions to Resting when notes_left becomes <= 0" {
   let settings = ImprovisationConfig::default(0)
-  let chord = @music.Chord::{ root: @music.C, quality: @music.Major7, bass: None }
+  let chord = @music.Chord::{
+    root: @music.C,
+    quality: @music.Major7,
+    bass: None,
+  }
   let anchor_midi = @music.MidiNumber::new(60).unwrap()
   let state = MeasureState::new(4, 50, Some(anchor_midi), Playing(2))
   let update_accidental = @music.create_accidental_calculator(

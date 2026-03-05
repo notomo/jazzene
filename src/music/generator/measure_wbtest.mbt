@@ -6,7 +6,11 @@ test "create_chord_segments returns empty for empty input" {
 
 ///|
 test "create_chord_segments creates one segment for one chord" {
-  let chord = @music.Chord::{ root: @music.C, quality: @music.Major7, bass: None }
+  let chord = @music.Chord::{
+    root: @music.C,
+    quality: @music.Major7,
+    bass: None,
+  }
   let result = create_chord_segments([chord], 4.0)
   assert_eq(result.length(), 1)
   assert_eq(result[0].start_beat, 0.0)
