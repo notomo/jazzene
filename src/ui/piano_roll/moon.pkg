@@ -2,9 +2,9 @@ import {
   "moonbitlang/core/cmp",
   "mizchi/signals",
   "mizchi/luna/dom" @luna_dom,
-  "internal/jazzene/music" @music,
-  "mizchi/js/browser/canvas" @canvas,
-  "internal/jazzene/ui/theme" @theme,
+  "internal/jazzene/music",
+  "mizchi/js/browser/canvas",
+  "internal/jazzene/ui/theme",
   "mizchi/js/browser/dom" @js_dom,
 }
 

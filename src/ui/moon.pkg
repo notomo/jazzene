@@ -4,12 +4,12 @@ import {
   "mizchi/luna/dom" @luna_dom,
   "mizchi/js/core" @js,
   "mizchi/js/builtins/global" @js_global,
-  "internal/jazzene/music" @music,
-  "internal/jazzene/music/generator" @generator,
+  "internal/jazzene/music",
+  "internal/jazzene/music/generator",
   "mizchi/js/browser/dom" @js_dom,
-  "internal/jazzene/ui/sheet" @sheet,
-  "internal/jazzene/ui/piano_roll" @piano_roll,
-  "internal/jazzene/ui/theme" @theme,
+  "internal/jazzene/ui/sheet",
+  "internal/jazzene/ui/piano_roll",
+  "internal/jazzene/ui/theme",
 }
 
 options(

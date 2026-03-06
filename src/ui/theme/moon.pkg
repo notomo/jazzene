@@ -1,5 +1,5 @@
 import {
-  "internal/jazzene/music" @music,
+  "internal/jazzene/music",
 }
 
 options(

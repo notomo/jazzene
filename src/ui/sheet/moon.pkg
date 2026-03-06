@@ -3,9 +3,9 @@ import {
   "mizchi/signals",
   "mizchi/luna/dom" @luna_dom,
   "mizchi/js/browser/dom" @js_dom,
-  "internal/jazzene/music" @music,
+  "internal/jazzene/music",
   "internal/jazzene/music/sheet" @sheet_layout,
-  "internal/jazzene/ui/theme" @theme,
+  "internal/jazzene/ui/theme",
 }
 
 options(

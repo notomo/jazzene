@@ -1,9 +1,9 @@
 import {
   "moonbitlang/core/cmp",
   "mizchi/signals",
-  "internal/jazzene/music" @music,
-  "internal/jazzene/audio" @audio,
-  "internal/jazzene/ui" @ui,
+  "internal/jazzene/music",
+  "internal/jazzene/audio",
+  "internal/jazzene/ui",
 }
 
 options(
