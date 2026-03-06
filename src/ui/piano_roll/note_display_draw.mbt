@@ -76,7 +76,7 @@ fn compute_chord_labels(
 }
 
 ///|
-/// Draw chord name labels on the left edge, rotated 90° CCW (reads bottom to top)
+/// Draw chord name labels on the left edge, horizontal text
 fn draw_chord_labels(
   ctx : @canvas.CanvasRenderingContext2D,
   height : Double,
@@ -104,21 +104,24 @@ fn draw_chord_labels(
     }
     ctx.fillStyle = CHORD_LABEL_BG_COLOR
     ctx.fillRect(0.0, top_y, label_width, band_height)
-    if band_height >= 20.0 {
+    if band_height >= 10.0 {
       ctx.save()
-      // Translate to bottom of band, centered horizontally in label column
-      ctx.translate(label_width / 2.0, bottom_y - 4.0)
-      // Rotate 90° CCW: text reads from bottom to top
-      ctx.rotate(-1.5707963267948966)
-      ctx.font = "bold 16px sans-serif"
+      let font_size = if label_width - 12.0 < band_height - 12.0 {
+        label_width - 12.0
+      } else {
+        band_height - 12.0
+      }
+      let center_x = label_width / 2.0
+      let center_y = top_y + band_height / 2.0
+      ctx.font = "bold \{font_size.to_int()}px sans-serif"
       ctx.fillStyle = "#ffffff"
-      ctx.textAlign = "left"
+      ctx.textAlign = "center"
       ctx.textBaseline = "middle"
       ctx.fillText(
         @music.format_chord(label.chord),
-        0.0,
-        0.0,
-        max_width=band_height - 8.0,
+        center_x,
+        center_y,
+        max_width=label_width - 12.0,
       )
       ctx.restore()
     }

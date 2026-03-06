@@ -114,15 +114,23 @@ fn draw_keyboard(
   ctx.lineWidth = 1.0
   ctx.strokeRect(0.5, 0.5, label_width - 1.0, height - 1.0)
   match current_chord {
-    Some(chord_text) if height >= 20.0 => {
+    Some(chord_text) if height >= 10.0 => {
       ctx.save()
-      ctx.translate(label_width / 2.0, height / 2.0)
-      ctx.rotate(-1.5707963267948966)
-      ctx.font = "bold 16px sans-serif"
+      let font_size = if label_width - 12.0 < height - 12.0 {
+        label_width - 12.0
+      } else {
+        height - 12.0
+      }
+      ctx.font = "bold \{font_size.to_int()}px sans-serif"
       ctx.fillStyle = "#ffffff"
       ctx.textAlign = "center"
       ctx.textBaseline = "middle"
-      ctx.fillText(chord_text, 0.0, 0.0, max_width=height - 8.0)
+      ctx.fillText(
+        chord_text,
+        label_width / 2.0,
+        height / 2.0,
+        max_width=label_width - 12.0,
+      )
       ctx.restore()
     }
     _ => ()
