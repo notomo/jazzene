@@ -81,12 +81,14 @@ src/
 ├── global.css       # Tailwind imports
 ├── test_helper/     # Test utilities
 ├── music/           # Music theory package
+│   ├── sheet/       # Sheet music layout calculations (pure logic)
 │   └── generator/   # Melody/improvisation generation
 ├── audio/           # Audio synthesis package
 │   └── web_audio_api/  # Web Audio API FFI
 └── ui/              # UI components package
     ├── app.mbt      # Main application UI and rendering
-    ├── sheet/       # Sheet music (lead sheet) rendering
+    ├── theme/       # Color theme utilities
+    ├── sheet/       # Sheet music (lead sheet) SVG rendering
     └── piano_roll/  # Piano roll visualization
 
 main.ts              # JavaScript entry (imports compiled MoonBit)
@@ -99,44 +101,28 @@ _build/js/           # MoonBit build output (gitignored)
 
 **CRITICAL**: The main package (`src/moon.pkg`) should ONLY depend on:
 - `internal/jazzene/music` - Music theory and primitives
-- `internal/jazzene/music/generator` - Melody generation
 - `internal/jazzene/audio` - Audio synthesis and Web Audio API
 - `internal/jazzene/ui` - UI components and browser APIs
 - `mizchi/signals` - Reactive state management (exception for core framework)
 
-**Dependency Hierarchy:**
-```
-src/ (main)
-├─→ mizchi/signals (Signal only)
-├─→ internal/jazzene/music (no external dependencies)
-│   └─→ internal/jazzene/music/generator
-│       └─→ internal/jazzene/music
-├─→ internal/jazzene/audio
-│   └─→ internal/jazzene/audio/web_audio_api
-│       └─→ mizchi/js/core
-└─→ internal/jazzene/ui
-    ├─→ mizchi/signals
-    ├─→ mizchi/luna/dom
-    ├─→ mizchi/js/browser/dom
-    ├─→ internal/jazzene/music
-    ├─→ internal/jazzene/ui/sheet
-    └─→ internal/jazzene/ui/piano_roll
-```
-
 **Package Responsibilities:**
 - **music**: Pure music theory logic (chords, notes, MIDI, beaming, measures)
+- **music/sheet**: Sheet music layout calculations (staff positions, note layout, ties, beams — pure logic, no rendering)
 - **music/generator**: Melody generation and improvisation algorithms
 - **audio/web_audio_api**: Low-level Web Audio API FFI wrappers
 - **audio**: Audio synthesis, scheduling, AudioContext management
 - **ui**: Top-level UI components, DOM construction, browser API wrappers
+- **ui/theme**: Color theme utilities (note technique colors, UI color constants)
 - **ui/sheet**: Sheet music (lead sheet) SVG rendering
 - **ui/piano_roll**: Piano roll canvas visualization
 
 **When adding new code:**
 - Music theory logic → `src/music/`
+- Sheet music layout calculations (pure logic) → `src/music/sheet/`
 - Melody generation → `src/music/generator/`
 - Web Audio API bindings → `src/audio/web_audio_api/`
 - Audio synthesis logic → `src/audio/`
+- Color theme constants → `src/ui/theme/`
 - Sheet music rendering → `src/ui/sheet/`
 - Piano roll rendering → `src/ui/piano_roll/`
 - UI components or browser APIs → `src/ui/`
