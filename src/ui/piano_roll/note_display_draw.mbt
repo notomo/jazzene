@@ -106,21 +106,16 @@ fn draw_chord_labels(
     ctx.fillRect(0.0, top_y, label_width, band_height)
     if band_height >= 10.0 {
       ctx.save()
-      let font_size = if label_width - 12.0 < band_height - 12.0 {
-        label_width - 12.0
-      } else {
-        band_height - 12.0
-      }
+      let font_size = label_width * 0.5
       let center_x = label_width / 2.0
-      let center_y = top_y + band_height / 2.0
       ctx.font = "bold \{font_size.to_int()}px sans-serif"
       ctx.fillStyle = "#ffffff"
       ctx.textAlign = "center"
-      ctx.textBaseline = "middle"
+      ctx.textBaseline = "bottom"
       ctx.fillText(
         @music.format_chord(label.chord),
         center_x,
-        center_y,
+        bottom_y - 6.0,
         max_width=label_width - 12.0,
       )
       ctx.restore()

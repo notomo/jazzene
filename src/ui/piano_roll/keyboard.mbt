@@ -116,11 +116,7 @@ fn draw_keyboard(
   match current_chord {
     Some(chord_text) if height >= 10.0 => {
       ctx.save()
-      let font_size = if label_width - 12.0 < height - 12.0 {
-        label_width - 12.0
-      } else {
-        height - 12.0
-      }
+      let font_size = label_width * 0.5
       ctx.font = "bold \{font_size.to_int()}px sans-serif"
       ctx.fillStyle = "#ffffff"
       ctx.textAlign = "center"
