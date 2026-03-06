@@ -116,15 +116,15 @@ pub fn ChordQuality::tensions(self : ChordQuality) -> Array[Int] {
 /// Convert chord quality to display string
 pub fn ChordQuality::to_string(self : ChordQuality) -> String {
   match self {
-    Major7 => "maj7"
+    Major7 => "△"
     Minor7 => "m7"
     Dominant7 => "7"
-    HalfDiminished => "m7♭5"
+    HalfDiminished => "ø7"
     Diminished7 => "°7"
-    MinorMajor7 => "m(maj7)"
-    Augmented => "aug"
-    AugmentedMajor7 => "augMaj7"
-    Augmented7 => "aug7"
+    MinorMajor7 => "mΔ7"
+    Augmented => "+"
+    AugmentedMajor7 => "+△7"
+    Augmented7 => "+7"
     Dominant7sus4 => "7sus4"
     Sus4 => "sus4"
     Sus2 => "sus2"
@@ -132,6 +132,6 @@ pub fn ChordQuality::to_string(self : ChordQuality) -> String {
     Minor6 => "m6"
     Major => ""
     Minor => "m"
-    Diminished => "dim"
+    Diminished => "°"
   }
 }

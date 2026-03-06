@@ -79,7 +79,7 @@ test "format slash chord" {
 ///|
 test "format chord without bass" {
   let chord = Chord::{ root: C, quality: Major7, bass: None }
-  assert_eq(format_chord(chord), "Cmaj7")
+  assert_eq(format_chord(chord), "C△")
 }
 
 ///|
