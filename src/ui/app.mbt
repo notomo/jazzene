@@ -165,9 +165,16 @@ pub fn render(state : AppState) -> Unit {
               ),
             ],
           ),
-          @luna_dom.show(fn() { view_state.get().show_settings }, fn() {
-            settings_panel(jazz_style, show_legend, midi_active_notes)
-          }),
+          @luna_dom.div(
+            dyn_class=fn() {
+              if view_state.get().show_settings {
+                "contents"
+              } else {
+                "hidden"
+              }
+            },
+            [settings_panel(jazz_style, show_legend, midi_active_notes)],
+          ),
         ],
       ),
       @luna_dom.div(

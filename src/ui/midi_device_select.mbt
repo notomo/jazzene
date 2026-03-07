@@ -30,6 +30,7 @@ pub fn midi_device_select(
     let available_inputs : @signals.Signal[Array[@web_midi.MidiInput]] = @signals.signal([],
     )
     let selected_id : @signals.Signal[String] = @signals.signal("")
+    let refresh_count : @signals.Signal[Int] = @signals.signal(0)
     let on_message = fn(status : Int, note : Int, velocity : Int) {
       let high_nibble = status / 16
       match @music.MidiNumber::new(note) {
@@ -65,9 +66,9 @@ pub fn midi_device_select(
           available_inputs.set(inputs)
           let current_id = selected_id.get()
           let still_available = current_id != "" &&
-            inputs.iter().any(fn(input) {
-              @web_midi.MidiInput::id(input) == current_id
-            })
+            inputs
+            .iter()
+            .any(fn(input) { @web_midi.MidiInput::id(input) == current_id })
           if still_available {
             inputs
             .iter()
@@ -80,6 +81,7 @@ pub fn midi_device_select(
             selected_id.set(@web_midi.MidiInput::id(first))
             @web_midi.MidiInput::set_on_midi_message(first, on_message)
           }
+          refresh_count.update(fn(n) { n + 1 })
         },
         fn() { () },
       )
@@ -109,7 +111,13 @@ pub fn midi_device_select(
                 }
               }),
             ),
-            ("value", @luna_dom.AttrValue::Dynamic(fn() { selected_id.get() })),
+            (
+              "value",
+              @luna_dom.AttrValue::Dynamic(fn() {
+                let _ = refresh_count.get()
+                selected_id.get()
+              }),
+            ),
             (
               "change",
               @luna_dom.AttrValue::Handler(fn(e) {
