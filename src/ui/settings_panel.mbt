@@ -12,6 +12,7 @@ let legend_entries : Array[(String, String, String)] = [
   ("●", @theme.COLOR_ENCLOSURE, "Enclosure"),
   ("●", @theme.COLOR_NEIGHBOR, "Neighbor Tone"),
   ("●", @theme.COLOR_COMPING, "Comping"),
+  ("●", @theme.COLOR_MIDI_ACTIVE, "MIDI Input"),
 ]
 
 ///|
@@ -169,6 +170,7 @@ fn technique_toggle(
 pub fn settings_panel(
   jazz_style : @signals.Signal[JazzStyle],
   show_legend : @signals.Signal[Bool],
+  midi_active_notes : @signals.Signal[Array[@music.MidiNumber]],
 ) -> @luna_dom.DomNode {
   @luna_dom.div(
     class="bg-slate-800 border-l border-slate-600 p-3 overflow-y-auto flex flex-col gap-3 w-64 shrink-0",
@@ -177,6 +179,8 @@ pub fn settings_panel(
       ("aria-label", @luna_dom.Attr::AttrString("jazz settings panel")),
     ],
     [
+      // MIDI Input
+      settings_section("MIDI Input", [midi_device_select(midi_active_notes)]),
       // Legend
       settings_section("Legend", [
         toggle_switch(label="Show Colors", value=fn() { show_legend.get() }, on_toggle=fn() {
@@ -194,7 +198,8 @@ pub fn settings_panel(
                     "style",
                     @luna_dom.AttrValue::Dynamic(fn() {
                       let c = if show_legend.get() ||
-                        color == @theme.COLOR_COMPING {
+                        color == @theme.COLOR_COMPING ||
+                        color == @theme.COLOR_MIDI_ACTIVE {
                         color
                       } else {
                         @theme.COLOR_CHORD_TONE

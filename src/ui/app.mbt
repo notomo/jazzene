@@ -56,6 +56,7 @@ pub fn render(state : AppState) -> Unit {
     show_legend,
     view_state,
     is_playing,
+    midi_active_notes,
     measures,
     sounds,
     backing_sounds,
@@ -160,11 +161,12 @@ pub fn render(state : AppState) -> Unit {
                 bpm,
                 playback_position,
                 fn() { show_legend.get() },
+                midi_active_notes,
               ),
             ],
           ),
           @luna_dom.show(fn() { view_state.get().show_settings }, fn() {
-            settings_panel(jazz_style, show_legend)
+            settings_panel(jazz_style, show_legend, midi_active_notes)
           }),
         ],
       ),

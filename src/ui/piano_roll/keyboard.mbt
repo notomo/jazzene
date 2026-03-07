@@ -25,6 +25,7 @@ pub fn keyboard(
   bpm : @signals.Signal[Int],
   playback_position : @signals.Signal[@music.Duration],
   show_legend : () -> Bool,
+  midi_active_notes : @signals.Signal[Array[@music.MidiNumber]],
 ) -> @luna_dom.DomNode {
   let { canvas, ctx } = create_canvas_context()
   let resize_trigger = create_resize_trigger(canvas)
@@ -55,6 +56,10 @@ pub fn keyboard(
         None => ()
       }
     })
+    // MIDI input notes override all other colors (highest priority — live input)
+    midi_active_notes
+    .get()
+    .each(fn(midi) { set[midi.value] = Some(@theme.PLAYING_COLOR_MIDI_ACTIVE) })
     set
   })
 

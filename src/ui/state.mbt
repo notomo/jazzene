@@ -14,6 +14,7 @@ pub struct AppState {
   show_legend : @signals.Signal[Bool]
   view_state : @signals.Signal[ViewState]
   is_playing : @signals.Signal[Bool]
+  midi_active_notes : @signals.Signal[Array[@music.MidiNumber]]
   measures : () -> Array[@music.Measure]
   sounds : () -> Array[@music.ScheduledSound]
   drum_sounds : () -> Array[@music.ScheduledSound]
@@ -43,6 +44,8 @@ pub fn AppState::new() -> AppState {
   let show_legend = @signals.signal(get_initial_show_legend())
   let view_state = @signals.signal(get_initial_view_state())
   let is_playing = @signals.signal(false)
+  let midi_active_notes : @signals.Signal[Array[@music.MidiNumber]] = @signals.signal([],
+  )
 
   let parsed_progression = @signals.memo(fn() {
     @music.parse_measure_progression(raw_chord_progression.get())
@@ -159,6 +162,7 @@ pub fn AppState::new() -> AppState {
     show_legend,
     view_state,
     is_playing,
+    midi_active_notes,
     measures,
     sounds,
     drum_sounds,
