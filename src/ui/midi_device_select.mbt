@@ -77,10 +77,20 @@ pub fn midi_device_select(
         (
           "class",
           @luna_dom.AttrValue::Static(
-            "w-full px-2 py-1 text-xs bg-slate-900 text-white rounded border border-slate-600 focus:border-blue-500 focus:outline-none",
+            "w-full px-2 py-1 text-xs bg-slate-900 text-white rounded border border-slate-600 focus:border-blue-500 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed",
           ),
         ),
         ("aria-label", @luna_dom.AttrValue::Static("MIDI input device")),
+        (
+          "disabled",
+          @luna_dom.AttrValue::Dynamic(fn() {
+            if available_inputs.get().length() == 0 {
+              "true"
+            } else {
+              ""
+            }
+          }),
+        ),
         ("value", @luna_dom.AttrValue::Dynamic(fn() { selected_id.get() })),
         (
           "change",
