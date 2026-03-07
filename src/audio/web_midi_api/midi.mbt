@@ -102,8 +102,7 @@ extern "js" fn ffi_set_on_midi_message(
   input : @js.Any,
   handler : (Int, Int, Int) -> Unit,
 ) -> Unit =
-  #| async (input, handler) => {
-  #|   await input.open();
+  #| (input, handler) => {
   #|   input.onmidimessage = (event) => {
   #|     const data = event.data;
   #|     handler(data[0] !== undefined ? data[0] : 0, data[1] !== undefined ? data[1] : 0, data[2] !== undefined ? data[2] : 0);
@@ -121,3 +120,31 @@ pub fn MidiInput::clear_on_midi_message(self : MidiInput) -> Unit {
 ///|
 extern "js" fn ffi_clear_on_midi_message(input : @js.Any) -> Unit =
   #| (input) => { input.onmidimessage = null; }
+
+///|
+/// [MIDIPort.open()](https://developer.mozilla.org/en-US/docs/Web/API/MIDIPort/open)
+///
+/// Explicitly open this MIDI input port.
+/// Calls `on_success` when opened, or `on_error` with an error message on failure.
+pub fn MidiInput::open(
+  self : MidiInput,
+  on_success : () -> Unit,
+  on_error : (String) -> Unit,
+) -> Unit {
+  ffi_open_midi_input(self.as_any(), on_success, on_error)
+}
+
+///|
+extern "js" fn ffi_open_midi_input(
+  input : @js.Any,
+  on_success : () -> Unit,
+  on_error : (String) -> Unit,
+) -> Unit =
+  #| async (input, onSuccess, onError) => {
+  #|   try {
+  #|     await input.open();
+  #|     onSuccess();
+  #|   } catch (e) {
+  #|     onError(String(e));
+  #|   }
+  #| }

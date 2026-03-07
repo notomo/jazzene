@@ -4,6 +4,11 @@ extern "js" fn get_event_target_value(e : @js.Any) -> String =
   #|(e) => e.target.value
 
 ///|
+/// Extract target.selectedIndex from a JS event object
+extern "js" fn get_event_target_selected_index(e : @js.Any) -> Int =
+  #|(e) => e.target.selectedIndex
+
+///|
 /// Get value from input event target
 fn get_input_value(e : @js_dom.InputEvent) -> String {
   let target = e.target()

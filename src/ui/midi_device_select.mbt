@@ -59,6 +59,13 @@ pub fn midi_device_select(
         None => ()
       }
     }
+    let attach_handler = fn(input : @web_midi.MidiInput) {
+      @web_midi.MidiInput::open(
+        input,
+        fn() { @web_midi.MidiInput::set_on_midi_message(input, on_message) },
+        fn(_) { () },
+      )
+    }
     let do_request = fn() {
       @web_midi.request_midi_access(
         fn(access) {
@@ -73,13 +80,11 @@ pub fn midi_device_select(
             inputs
             .iter()
             .filter(fn(input) { @web_midi.MidiInput::id(input) == current_id })
-            .each(fn(input) {
-              @web_midi.MidiInput::set_on_midi_message(input, on_message)
-            })
+            .each(fn(input) { attach_handler(input) })
           } else if inputs.length() > 0 {
             let first = inputs[0]
             selected_id.set(@web_midi.MidiInput::id(first))
-            @web_midi.MidiInput::set_on_midi_message(first, on_message)
+            attach_handler(first)
           }
           refresh_count.update(fn(n) { n + 1 })
         },
@@ -121,11 +126,11 @@ pub fn midi_device_select(
             (
               "change",
               @luna_dom.AttrValue::Handler(fn(e) {
-                let new_id = get_event_target_value(e)
+                let idx = get_event_target_selected_index(e)
+                let inputs = available_inputs.get()
                 let prev_id = selected_id.get()
                 if prev_id != "" {
-                  available_inputs
-                  .get()
+                  inputs
                   .iter()
                   .filter(fn(input) {
                     @web_midi.MidiInput::id(input) == prev_id
@@ -135,14 +140,11 @@ pub fn midi_device_select(
                   })
                 }
                 midi_active_notes.set([])
-                selected_id.set(new_id)
-                available_inputs
-                .get()
-                .iter()
-                .filter(fn(input) { @web_midi.MidiInput::id(input) == new_id })
-                .each(fn(input) {
-                  @web_midi.MidiInput::set_on_midi_message(input, on_message)
-                })
+                if idx >= 0 && idx < inputs.length() {
+                  let new_input = inputs[idx]
+                  selected_id.set(@web_midi.MidiInput::id(new_input))
+                  attach_handler(new_input)
+                }
               }),
             ),
           ],
