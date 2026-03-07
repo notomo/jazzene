@@ -87,7 +87,7 @@ pub fn midi_device_select(
             if available_inputs.get().length() == 0 {
               "true"
             } else {
-              ""
+              "false"
             }
           }),
         ),
