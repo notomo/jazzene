@@ -44,8 +44,13 @@ extern "js" fn ffi_request_midi_access(
   on_success : (MidiAccess) -> Unit,
   on_failure : () -> Unit,
 ) -> Unit =
-  #| (onSuccess, onFailure) => {
-  #|   navigator.requestMIDIAccess().then(onSuccess).catch(() => onFailure());
+  #| async (onSuccess, onFailure) => {
+  #|   try {
+  #|     const access = await navigator.requestMIDIAccess()
+  #|     onSuccess(access)
+  #|   } catch (e) {
+  #|     onFailure()
+  #|   }
   #| }
 
 ///|
@@ -58,7 +63,11 @@ pub fn MidiAccess::list_inputs(self : MidiAccess) -> Array[MidiInput] {
 
 ///|
 extern "js" fn ffi_list_inputs(access : @js.Any) -> Array[MidiInput] =
-  #| (access) => Array.from(access.inputs.values())
+  #| (access) => {
+  #|   const inputs = []
+  #|   access.inputs.forEach(input => inputs.push(input))
+  #|   return inputs
+  #| }
 
 ///|
 /// [MIDIPort.id](https://developer.mozilla.org/en-US/docs/Web/API/MIDIPort/id)
@@ -96,7 +105,7 @@ extern "js" fn ffi_set_on_midi_message(
   #| (input, handler) => {
   #|   input.onmidimessage = (event) => {
   #|     const data = event.data;
-  #|     handler(data[0] ?? 0, data[1] ?? 0, data[2] ?? 0);
+  #|     handler(data[0] !== undefined ? data[0] : 0, data[1] !== undefined ? data[1] : 0, data[2] !== undefined ? data[2] : 0);
   #|   };
   #| }
 
