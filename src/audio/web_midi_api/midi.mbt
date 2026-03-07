@@ -102,7 +102,8 @@ extern "js" fn ffi_set_on_midi_message(
   input : @js.Any,
   handler : (Int, Int, Int) -> Unit,
 ) -> Unit =
-  #| (input, handler) => {
+  #| async (input, handler) => {
+  #|   await input.open();
   #|   input.onmidimessage = (event) => {
   #|     const data = event.data;
   #|     handler(data[0] !== undefined ? data[0] : 0, data[1] !== undefined ? data[1] : 0, data[2] !== undefined ? data[2] : 0);
