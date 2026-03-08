@@ -1,6 +1,7 @@
 ///|
 /// Note duration types for rhythm variation
 pub(all) enum NoteDuration {
+  Sixteenth // 0.25 beats
   Eighth // 0.5 beats
   Quarter // 1 beat
   Half // 2 beats
@@ -15,6 +16,7 @@ pub(all) enum NoteDuration {
 /// Convert note duration to beats
 pub fn NoteDuration::to_beats(self : NoteDuration) -> Double {
   match self {
+    Sixteenth => 0.25
     Eighth => 0.5
     Quarter => 1.0
     Half => 2.0
@@ -29,7 +31,9 @@ pub fn NoteDuration::to_beats(self : NoteDuration) -> Double {
 ///|
 /// Convert beats to the closest note duration
 pub fn NoteDuration::from_beats(beats : Double) -> NoteDuration {
-  if beats <= 0.625 {
+  if beats <= 0.291 {
+    Sixteenth
+  } else if beats <= 0.625 {
     Eighth
   } else if beats <= 0.875 {
     DottedEighth
@@ -50,7 +54,7 @@ pub fn NoteDuration::from_beats(beats : Double) -> NoteDuration {
 /// Whether this duration can be connected by a beam
 pub fn NoteDuration::is_beamable(self : NoteDuration) -> Bool {
   match self {
-    Eighth | DottedEighth | EighthTriplet => true
+    Sixteenth | Eighth | DottedEighth | EighthTriplet => true
     _ => false
   }
 }
@@ -67,6 +71,7 @@ pub fn NoteDuration::fit(remaining_beats : Double) -> NoteDuration? {
     DottedEighth,
     Eighth,
     EighthTriplet,
+    Sixteenth,
   ]
   .iter()
   .find_first(fn(d) { d.to_beats() <= remaining_beats + 0.001 })

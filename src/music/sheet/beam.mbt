@@ -2,6 +2,9 @@
 pub const BEAM_THICKNESS : Double = 3.5
 
 ///|
+const SECONDARY_BEAM_OFFSET : Double = BEAM_THICKNESS + 2.0
+
+///|
 const BEAM_REST_CLEARANCE : Double = 8.0
 
 ///|
@@ -33,6 +36,7 @@ pub(all) struct SheetBeamGroup {
   show_triplet_label : Bool
   triplet_label_x : Double
   triplet_label_y : Double
+  secondary_beams : Array[(Double, Double, Double, Double)]
 } derive(Show)
 
 ///|
@@ -272,6 +276,50 @@ fn compute_beam_group(
     (0.0, 0.0)
   }
 
+  // Compute secondary beams for Sixteenth note segments
+  let secondary_beams : Array[(Double, Double, Double, Double)] = []
+  let offset = stem_x_offset(stem_up)
+  let secondary_y_offset = if stem_up {
+    SECONDARY_BEAM_OFFSET
+  } else {
+    -SECONDARY_BEAM_OFFSET
+  }
+  let mut seg_start : Int? = None
+  for i, idx in group {
+    let is_sixteenth = positioned[idx].1.duration is Sixteenth &&
+      positioned[idx].1.midi is Some(_)
+    match (is_sixteenth, seg_start) {
+      (true, None) => seg_start = Some(i)
+      (false, Some(start)) => {
+        // end segment at previous index
+        let prev_idx = group[i - 1]
+        let sx = note_positions[group[start]] + offset
+        let ex = note_positions[prev_idx] + offset
+        let sy = beam_y_at(sx, first_x, last_x, first_beam_y, last_beam_y) +
+          secondary_y_offset
+        let ey = beam_y_at(ex, first_x, last_x, first_beam_y, last_beam_y) +
+          secondary_y_offset
+        secondary_beams.push((sx, sy, ex, ey))
+        seg_start = None
+      }
+      _ => ()
+    }
+  }
+  // close any open segment
+  match seg_start {
+    Some(start) => {
+      let last_idx = group[group.length() - 1]
+      let sx = note_positions[group[start]] + offset
+      let ex = note_positions[last_idx] + offset
+      let sy = beam_y_at(sx, first_x, last_x, first_beam_y, last_beam_y) +
+        secondary_y_offset
+      let ey = beam_y_at(ex, first_x, last_x, first_beam_y, last_beam_y) +
+        secondary_y_offset
+      secondary_beams.push((sx, sy, ex, ey))
+    }
+    None => ()
+  }
+
   SheetBeamGroup::{
     stem_up,
     first_x,
@@ -283,5 +331,6 @@ fn compute_beam_group(
     show_triplet_label: is_triplet,
     triplet_label_x,
     triplet_label_y,
+    secondary_beams,
   }
 }

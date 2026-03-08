@@ -55,6 +55,16 @@ fn render_eighth_rest(note_x : Double, rest_y : Double) -> @luna_dom.DomNode {
 }
 
 ///|
+/// Render sixteenth rest symbol (two eighth-rest hooks stacked)
+fn render_sixteenth_rest(note_x : Double, rest_y : Double) -> @luna_dom.DomNode {
+  let hook_offset = @sheet_layout.STAFF_LINE_SPACING * 0.9
+  @luna_dom.svg_g([
+    render_eighth_rest(note_x, rest_y),
+    render_eighth_rest(note_x, rest_y - hook_offset),
+  ])
+}
+
+///|
 /// Render rest symbol based on duration
 fn render_rest_symbol(
   duration : @music.NoteDuration,
@@ -65,6 +75,7 @@ fn render_rest_symbol(
     Quarter | DottedQuarter => render_quarter_rest(note_x, rest_y)
     Half | DottedHalf => render_half_rest(note_x, rest_y)
     Whole => render_whole_rest(note_x, rest_y)
+    Sixteenth => render_sixteenth_rest(note_x, rest_y)
     Eighth | DottedEighth | EighthTriplet => render_eighth_rest(note_x, rest_y)
   }
 }

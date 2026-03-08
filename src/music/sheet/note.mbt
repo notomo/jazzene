@@ -90,6 +90,7 @@ pub fn calculate_stem(
 fn duration_visual_weight(duration : @music.NoteDuration) -> Double {
   match duration {
     EighthTriplet => 0.545
+    Sixteenth => 0.45
     Eighth => 0.667
     DottedEighth => 0.852
     Quarter => 1.0
@@ -113,7 +114,7 @@ fn note_min_spacing(
     false
   } else {
     match prev_note.duration {
-      Eighth | DottedEighth | EighthTriplet => true
+      Sixteenth | Eighth | DottedEighth | EighthTriplet => true
       _ => false
     }
   }

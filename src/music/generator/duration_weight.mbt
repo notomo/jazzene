@@ -1,6 +1,7 @@
 ///|
 /// Weights for random duration selection
 pub(all) struct DurationWeights {
+  sixteenth : Int
   eighth : Int
   dotted_eighth : Int
   quarter : Int
@@ -15,6 +16,7 @@ pub(all) struct DurationWeights {
 /// Default weights for notes, favoring eighth notes for jazz phrasing
 pub fn DurationWeights::note_default() -> DurationWeights {
   DurationWeights::{
+    sixteenth: 20,
     eighth: 45,
     dotted_eighth: 0,
     quarter: 20,
@@ -30,6 +32,7 @@ pub fn DurationWeights::note_default() -> DurationWeights {
 /// Default weights for rests, shorter rests for jazz feel
 pub fn DurationWeights::rest_default() -> DurationWeights {
   DurationWeights::{
+    sixteenth: 20,
     eighth: 40,
     dotted_eighth: 0,
     quarter: 25,
@@ -47,6 +50,7 @@ fn DurationWeights::to_choices(
   self : DurationWeights,
 ) -> Array[(Int, @music.NoteDuration)] {
   [
+    (self.sixteenth, @music.Sixteenth),
     (self.eighth, @music.Eighth),
     (self.dotted_eighth, @music.DottedEighth),
     (self.quarter, @music.Quarter),

@@ -64,8 +64,12 @@ fn render_note_head(
   note_y : Double,
 ) -> @luna_dom.DomNode {
   match duration {
-    Eighth | DottedEighth | Quarter | DottedQuarter | EighthTriplet =>
-      render_filled_note_head(note_x, note_y)
+    Sixteenth
+    | Eighth
+    | DottedEighth
+    | Quarter
+    | DottedQuarter
+    | EighthTriplet => render_filled_note_head(note_x, note_y)
     Half | DottedHalf | Whole => render_hollow_note_head(note_x, note_y)
   }
 }
@@ -123,6 +127,22 @@ fn render_stem_and_flag(
 ) -> Array[@luna_dom.DomNode] {
   match duration {
     Whole => []
+    Sixteenth => {
+      let (stem_x, y1, y2) = @sheet_layout.calculate_stem(
+        note_x, note_y, stem_up,
+      )
+      let flag2_offset = @sheet_layout.STAFF_LINE_SPACING * 0.5
+      let y2_second = if stem_up {
+        y2 + flag2_offset
+      } else {
+        y2 - flag2_offset
+      }
+      [
+        render_stem_line(stem_x, y1, y2),
+        render_flag(stem_x, y2, stem_up),
+        render_flag(stem_x, y2_second, stem_up),
+      ]
+    }
     Eighth | DottedEighth | EighthTriplet => {
       let (stem_x, y1, y2) = @sheet_layout.calculate_stem(
         note_x, note_y, stem_up,

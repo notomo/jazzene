@@ -61,6 +61,34 @@ fn render_beam_group_from_sheet(
     )
   }
 
+  // Render secondary beams (for Sixteenth notes)
+  for seg in group.secondary_beams {
+    let (sx, sy, ex, ey) = seg
+    let (first_top, first_bottom, last_top, last_bottom) = if group.stem_up {
+      (
+        sy,
+        sy + @sheet_layout.BEAM_THICKNESS,
+        ey,
+        ey + @sheet_layout.BEAM_THICKNESS,
+      )
+    } else {
+      (
+        sy - @sheet_layout.BEAM_THICKNESS,
+        sy,
+        ey - @sheet_layout.BEAM_THICKNESS,
+        ey,
+      )
+    }
+    let sx_s = sx.to_string()
+    let ex_s = ex.to_string()
+    let ft_s = first_top.to_string()
+    let lt_s = last_top.to_string()
+    let lb_s = last_bottom.to_string()
+    let fb_s = first_bottom.to_string()
+    let pts = "\{sx_s},\{ft_s} \{ex_s},\{lt_s} \{ex_s},\{lb_s} \{sx_s},\{fb_s}"
+    nodes.push(@luna_dom.svg_polygon(points=pts, stroke="none"))
+  }
+
   // Render rests
   for rest in group.rests {
     nodes.push(render_rest_symbol(rest.duration, rest.x, rest.y))

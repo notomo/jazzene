@@ -3,6 +3,7 @@ test "DurationWeights::note_default has eighth as dominant weight" {
   let w = DurationWeights::note_default()
   assert_true(w.eighth > w.quarter)
   assert_true(w.eighth > w.half)
+  assert_true(w.sixteenth > 0)
 }
 
 ///|
@@ -16,8 +17,8 @@ test "random_duration returns a valid duration" {
   let w = DurationWeights::note_default()
   // Just ensure it doesn't crash and returns something
   let result = random_duration(w, fn(_) { 0 })
-  // Eighth has highest weight, so with r=0 we should get Eighth
-  inspect(result, content="Eighth")
+  // Sixteenth is first in choices with non-zero weight, so r=0 gets Sixteenth
+  inspect(result, content="Sixteenth")
 }
 
 ///|
@@ -41,6 +42,7 @@ test "random_duration_within returns Some when max_beats >= 0.5" {
 ///|
 test "random_duration_within only returns durations that fit" {
   let w = DurationWeights::{
+    sixteenth: 0,
     eighth: 0,
     dotted_eighth: 0,
     quarter: 10,
@@ -64,6 +66,7 @@ test "random_duration_within only returns durations that fit" {
 test "weighted_choice selects first item with weight when r=0" {
   // DurationWeights with only Eighth weight
   let w = DurationWeights::{
+    sixteenth: 0,
     eighth: 10,
     dotted_eighth: 0,
     quarter: 10,
@@ -81,6 +84,7 @@ test "weighted_choice selects first item with weight when r=0" {
 ///|
 test "weighted_choice selects second item when r falls in second bucket" {
   let w = DurationWeights::{
+    sixteenth: 0,
     eighth: 10,
     dotted_eighth: 0,
     quarter: 10,
