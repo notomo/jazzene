@@ -5,9 +5,6 @@ const NOTE_DISPLAY_WINDOW_MS = 3000.0
 const NOTE_DISPLAY_BG_COLOR = "#0f172a"
 
 ///|
-const CHORD_LABEL_BG_COLOR = "rgba(30, 58, 138, 0.9)"
-
-///|
 const NOTE_PLAYING_COLOR = "#3b82f6"
 
 ///|
@@ -102,8 +99,6 @@ fn draw_chord_labels(
     if band_height < 2.0 {
       return
     }
-    ctx.fillStyle = CHORD_LABEL_BG_COLOR
-    ctx.fillRect(0.0, top_y, label_width, band_height)
     if band_height >= 10.0 {
       ctx.save()
       let font_size = label_width * 0.5
