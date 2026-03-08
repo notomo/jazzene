@@ -12,6 +12,10 @@ fn chord_progression_input(
 
   @luna_dom.div(class="flex flex-col min-w-0 flex-1 gap-0.5", [
     @luna_dom.div(class="flex gap-1 lg:gap-2 min-w-0 flex-1 items-center", [
+      @luna_dom.label(
+        class="hidden lg:inline text-sm text-slate-400 whitespace-nowrap",
+        [@luna_dom.text("Chords:")],
+      ),
       @luna_dom.input(
         type_="text",
         dyn_class=fn() {
