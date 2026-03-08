@@ -13,6 +13,11 @@ extern "js" fn raw_set_query_param(name : String, value : String) -> Unit =
   #|}
 
 ///|
+/// Push current URL state to browser history (allows going back)
+extern "js" fn push_current_state() -> Unit =
+  #|() => history.pushState(null, "", window.location.href)
+
+///|
 /// Delete a query parameter from the URL without reloading
 extern "js" fn delete_query_param(name : String) -> Unit =
   #|(name) => {

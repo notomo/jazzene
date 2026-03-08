@@ -1,10 +1,20 @@
 ///|
+extern "js" fn set_timeout(f : () -> Unit, delay : Int) -> Int =
+  #|(f, delay) => setTimeout(f, delay)
+
+///|
+extern "js" fn clear_timeout(id : Int) -> Unit =
+  #|(id) => clearTimeout(id)
+
+///|
 /// Reusable spinbox component for tablet-friendly numeric input.
 /// Displays `{label}: {value} [-][+]` with wheel and drag support.
+/// on_settle is called once when the user finishes interacting (for URL updates etc.)
 fn spinbox(
   label~ : String,
   get_value~ : () -> Int,
   on_change~ : (Int, Int) -> Unit,
+  on_settle? : (Int) -> Unit = fn(_) { () },
   min~ : Int,
   max~ : Int,
   step~ : Int,
@@ -12,6 +22,7 @@ fn spinbox(
 ) -> @luna_dom.DomNode {
   let drag_start_x : Ref[Double?] = Ref::new(None)
   let drag_start_value : Ref[Int] = Ref::new(0)
+  let wheel_timer : Ref[Int] = Ref::new(-1)
 
   fn clamp(value : Int) -> Int {
     @cmp.maximum(min, @cmp.minimum(max, value))
@@ -27,9 +38,11 @@ fn spinbox(
 
   let on_decrement : @luna_dom.MouseHandler = fn(_) {
     update_value(get_value() - step)
+    on_settle(get_value())
   }
   let on_increment : @luna_dom.MouseHandler = fn(_) {
     update_value(get_value() + step)
+    on_settle(get_value())
   }
 
   let on_wheel : @luna_dom.WheelHandler = fn(e) {
@@ -40,6 +53,8 @@ fn spinbox(
     } else if delta_y > 0.0 {
       update_value(get_value() - step)
     }
+    clear_timeout(wheel_timer.val)
+    wheel_timer.val = set_timeout(fn() { on_settle(get_value()) }, 400)
   }
   let on_drag_move : (Double) -> Unit = fn(client_x) {
     match drag_start_x.val {
@@ -52,7 +67,10 @@ fn spinbox(
       None => ()
     }
   }
-  let on_drag_end : () -> Unit = fn() { drag_start_x.val = None }
+  let on_drag_end : () -> Unit = fn() {
+    drag_start_x.val = None
+    on_settle(get_value())
+  }
 
   fn start_drag(client_x : Double) -> Unit {
     drag_start_x.val = Some(client_x)

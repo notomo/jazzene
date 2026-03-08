@@ -78,6 +78,7 @@ fn song_preset_select(
 ) -> @luna_dom.DomNode {
   let is_open = @signals.signal(false)
   let on_preset_select : (SongPreset) -> Unit = fn(preset) {
+    push_current_state()
     raw_chord_progression.set(preset.chords)
     set_query_param("chords", preset.chords, default=default_chords)
     match preset.key {

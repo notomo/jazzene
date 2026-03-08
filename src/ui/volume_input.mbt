@@ -4,8 +4,8 @@ fn volume_input(volume : @signals.Signal[Int]) -> @luna_dom.DomNode {
   spinbox(
     label="Volume",
     get_value=fn() { volume.get() },
-    on_change=fn(new_value, _old_value) {
-      volume.set(new_value)
+    on_change=fn(new_value, _old_value) { volume.set(new_value) },
+    on_settle=fn(new_value) {
       set_query_param(
         "volume",
         new_value.to_string(),
