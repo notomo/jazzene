@@ -5,6 +5,7 @@ priv struct SongPreset {
   key : String?
   bpm : Int?
   measures : Int?
+  time_signature : String?
 }
 
 ///|
@@ -16,6 +17,7 @@ let song_presets : Array[SongPreset] = [
     key: Some("C"),
     bpm: Some(160),
     measures: Some(6),
+    time_signature: None,
   },
   SongPreset::{
     name: "Blues",
@@ -23,6 +25,7 @@ let song_presets : Array[SongPreset] = [
     key: Some("F"),
     bpm: Some(120),
     measures: Some(14),
+    time_signature: None,
   },
   SongPreset::{
     name: "Rhythm Changes A",
@@ -30,13 +33,23 @@ let song_presets : Array[SongPreset] = [
     key: Some("Bb"),
     bpm: Some(220),
     measures: Some(10),
+    time_signature: None,
   },
   SongPreset::{
     name: "Autumn Leaves",
     chords: "IIm7 | V7 | Imaj7 | IVmaj7 | VIIm7b5 | III7 | VIm7 | VIm7",
     key: Some("Bb"),
     bpm: Some(140),
-    measures: Some(10),
+    measures: Some(18),
+    time_signature: None,
+  },
+  SongPreset::{
+    name: "Someday My Prince Will Come",
+    chords: "Imaj7 | III7 | IVmaj7 | bVI7 | IIm7 | V7 | Imaj7 | V7",
+    key: Some("Bb"),
+    bpm: Some(180),
+    measures: Some(18),
+    time_signature: Some("3/4"),
   },
 ]
 
@@ -54,13 +67,14 @@ extern "js" fn add_click_outside_listener(
   #|}
 
 ///|
-/// Render song preset popup button that updates chord progression, key, BPM, and measure count
+/// Render song preset popup button that updates chord progression, key, BPM, measure count, and time signature
 fn song_preset_select(
   raw_chord_progression : @signals.Signal[String],
   key : @signals.Signal[@music.KeySignature],
   bpm : @signals.Signal[Int],
   measure_count : @signals.Signal[Int],
   loop_b_measure : @signals.Signal[Int],
+  time_signature : @signals.Signal[@music.TimeSignature],
 ) -> @luna_dom.DomNode {
   let is_open = @signals.signal(false)
   let on_preset_select : (SongPreset) -> Unit = fn(preset) {
@@ -110,6 +124,20 @@ fn song_preset_select(
           )
         }
       }
+    }
+    match preset.time_signature {
+      None => ()
+      Some(ts_str) =>
+        @music.TimeSignature::from_string(ts_str)
+        |> Result::map(fn(ts) {
+          time_signature.set(ts)
+          set_query_param(
+            "time",
+            ts.to_string(),
+            default=@music.TimeSignature::default().to_string(),
+          )
+        })
+        |> ignore
     }
     is_open.set(false)
   }

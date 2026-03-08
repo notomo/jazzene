@@ -73,7 +73,7 @@ pub fn render(state : AppState) -> Unit {
         [
           @luna_dom.div(class="flex gap-2 lg:gap-4 items-center", [
             song_preset_select(
-              raw_chord_progression, key, bpm, measure_count, loop_b_measure,
+              raw_chord_progression, key, bpm, measure_count, loop_b_measure, time_signature,
             ),
             @luna_dom.div(
               class="flex gap-2 lg:gap-4 items-center min-w-0 flex-1",
