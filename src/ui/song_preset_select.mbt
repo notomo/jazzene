@@ -17,7 +17,7 @@ let song_presets : Array[SongPreset] = [
     key: Some("C"),
     bpm: Some(160),
     measures: Some(6),
-    time_signature: None,
+    time_signature: Some("4/4"),
   },
   SongPreset::{
     name: "Blues",
@@ -25,7 +25,7 @@ let song_presets : Array[SongPreset] = [
     key: Some("F"),
     bpm: Some(120),
     measures: Some(14),
-    time_signature: None,
+    time_signature: Some("4/4"),
   },
   SongPreset::{
     name: "Rhythm Changes A",
@@ -33,7 +33,7 @@ let song_presets : Array[SongPreset] = [
     key: Some("Bb"),
     bpm: Some(220),
     measures: Some(10),
-    time_signature: None,
+    time_signature: Some("4/4"),
   },
   SongPreset::{
     name: "Autumn Leaves",
@@ -41,7 +41,7 @@ let song_presets : Array[SongPreset] = [
     key: Some("Bb"),
     bpm: Some(140),
     measures: Some(18),
-    time_signature: None,
+    time_signature: Some("4/4"),
   },
   SongPreset::{
     name: "Someday My Prince Will Come",
