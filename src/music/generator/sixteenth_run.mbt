@@ -104,7 +104,7 @@ fn generate_sixteenth_run(
   // If we couldn't generate 3 approach notes (edge of MIDI range), fall back to fewer
   let all_notes : Array[(@music.MidiNumber, @music.ToneOrigin)] = approach
     .iter()
-    .map(fn(m) { (m, @music.PassingTone) })
+    .map(fn(m) { (m, @music.ChromaticApproach) })
     .collect()
   all_notes.push((anchor_midi, @music.ChordTone))
 
