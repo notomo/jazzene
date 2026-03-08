@@ -11,13 +11,6 @@ priv struct SongPreset {
 /// Song presets (jazz standards and forms)
 let song_presets : Array[SongPreset] = [
   SongPreset::{
-    name: "Custom",
-    chords: "",
-    key: None,
-    bpm: None,
-    measures: None,
-  },
-  SongPreset::{
     name: "II-V-I",
     chords: "IIm7 | V7 | Imaj7 | Imaj7",
     key: Some("C"),
@@ -48,7 +41,20 @@ let song_presets : Array[SongPreset] = [
 ]
 
 ///|
-/// Render song preset dropdown that updates chord progression, key, BPM, and measure count
+extern "js" fn add_click_outside_listener(
+  container : @js_dom.Element,
+  callback : () -> Unit,
+) -> Unit =
+  #|(container, callback) => {
+  #|  document.addEventListener('click', (e) => {
+  #|    if (!container.contains(e.target)) {
+  #|      callback();
+  #|    }
+  #|  });
+  #|}
+
+///|
+/// Render song preset popup button that updates chord progression, key, BPM, and measure count
 fn song_preset_select(
   raw_chord_progression : @signals.Signal[String],
   key : @signals.Signal[@music.KeySignature],
@@ -56,94 +62,78 @@ fn song_preset_select(
   measure_count : @signals.Signal[Int],
   loop_b_measure : @signals.Signal[Int],
 ) -> @luna_dom.DomNode {
-  let preset_options = song_presets.map(fn(p) { p.name })
-  let on_preset_change : (String) -> Unit = fn(name) {
-    let preset_opt = song_presets
-      .iter()
-      .filter_map(fn(p) {
-        if p.name == name && p.chords != "" {
-          Some(p)
-        } else {
-          None
-        }
-      })
-      .next()
-    match preset_opt {
+  let is_open = @signals.signal(false)
+  let on_preset_select : (SongPreset) -> Unit = fn(preset) {
+    raw_chord_progression.set(preset.chords)
+    set_query_param("chords", preset.chords, default=default_chords)
+    match preset.key {
       None => ()
-      Some(preset) => {
-        raw_chord_progression.set(preset.chords)
-        set_query_param("chords", preset.chords, default=default_chords)
-        match preset.key {
-          None => ()
-          Some(key_str) =>
-            @music.ChordRoot::from_string(key_str)
-            |> Result::map(fn(root) {
-              key.set(@music.KeySignature::from_root(root))
-              set_query_param(
-                "key",
-                root.to_string(),
-                default=@music.KeySignature::c_major().root.to_string(),
-              )
-            })
-            |> ignore
-        }
-        match preset.bpm {
-          None => ()
-          Some(new_bpm) => {
-            bpm.set(new_bpm)
-            set_query_param(
-              "bpm",
-              new_bpm.to_string(),
-              default=default_bpm.to_string(),
-            )
-          }
-        }
-        match preset.measures {
-          None => ()
-          Some(new_measures) => {
-            let old_measures = measure_count.get()
-            measure_count.set(new_measures)
-            set_query_param(
-              "measures",
-              new_measures.to_string(),
-              default=default_measures.to_string(),
-            )
-            if loop_b_measure.get() == old_measures {
-              loop_b_measure.set(new_measures)
-              set_query_param(
-                "loop_b",
-                new_measures.to_string(),
-                default=new_measures.to_string(),
-              )
-            }
-          }
+      Some(key_str) =>
+        @music.ChordRoot::from_string(key_str)
+        |> Result::map(fn(root) {
+          key.set(@music.KeySignature::from_root(root))
+          set_query_param(
+            "key",
+            root.to_string(),
+            default=@music.KeySignature::c_major().root.to_string(),
+          )
+        })
+        |> ignore
+    }
+    match preset.bpm {
+      None => ()
+      Some(new_bpm) => {
+        bpm.set(new_bpm)
+        set_query_param(
+          "bpm",
+          new_bpm.to_string(),
+          default=default_bpm.to_string(),
+        )
+      }
+    }
+    match preset.measures {
+      None => ()
+      Some(new_measures) => {
+        let old_measures = measure_count.get()
+        measure_count.set(new_measures)
+        set_query_param(
+          "measures",
+          new_measures.to_string(),
+          default=default_measures.to_string(),
+        )
+        if loop_b_measure.get() == old_measures {
+          loop_b_measure.set(new_measures)
+          set_query_param(
+            "loop_b",
+            new_measures.to_string(),
+            default=new_measures.to_string(),
+          )
         }
       }
     }
+    is_open.set(false)
   }
-  @luna_dom.create_element(
-    "select",
+  @luna_dom.div(
+    class="relative shrink-0",
+    ref_=fn(el) { add_click_outside_listener(el, fn() { is_open.set(false) }) },
     [
-      (
-        "class",
-        @luna_dom.AttrValue::Static(
-          "shrink-0 px-1 lg:px-2 py-1 lg:py-2 bg-slate-900 text-white text-xs lg:text-sm rounded-lg border border-slate-600 focus:border-blue-500 focus:outline-none",
-        ),
+      @luna_dom.button(
+        class="px-2 py-1 bg-slate-700 hover:bg-slate-600 text-white text-xs lg:text-sm rounded-lg border border-slate-600 transition-colors",
+        on=@luna_dom.events().click(fn(_) { is_open.update(fn(v) { not(v) }) }),
+        [@luna_dom.text("Preset")],
       ),
-      ("aria-label", @luna_dom.AttrValue::Static("song preset")),
-      (
-        "change",
-        @luna_dom.AttrValue::Handler(fn(e) {
-          on_preset_change(get_event_target_value(e))
-        }),
-      ),
+      @luna_dom.show(fn() { is_open.get() }, fn() {
+        @luna_dom.div(
+          class="absolute top-full left-0 mt-1 z-50 bg-slate-800 border border-slate-600 rounded-xl p-2 flex flex-wrap gap-2 shadow-xl min-w-max",
+          song_presets.map(fn(preset) {
+            @luna_dom.button(
+              class="px-3 py-1 bg-slate-700 hover:bg-slate-500 text-white text-xs lg:text-sm rounded-full border border-slate-500 transition-colors whitespace-nowrap",
+              on=@luna_dom.events().click(fn(_) { on_preset_select(preset) }),
+              [@luna_dom.text(preset.name)],
+            )
+          }),
+        )
+      }),
     ],
-    preset_options.map(fn(name) {
-      @luna_dom.create_element(
-        "option",
-        [("value", @luna_dom.AttrValue::Static(name))],
-        [@luna_dom.text(name)],
-      )
-    }),
   )
 }
