@@ -189,6 +189,9 @@ fn techniques_to_string(t : @generator.Techniques) -> String {
   if t.neighbor_tones {
     names.push("neighbor")
   }
+  if t.sixteenth_runs {
+    names.push("sixteenth_runs")
+  }
   names.join(",")
 }
 
@@ -205,6 +208,7 @@ fn techniques_from_string(s : String) -> @generator.Techniques {
     triplets: has("triplets"),
     bebop_scales: has("bebop"),
     neighbor_tones: has("neighbor"),
+    sixteenth_runs: has("sixteenth_runs"),
   }
 }
 

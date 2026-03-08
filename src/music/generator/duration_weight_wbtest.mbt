@@ -3,7 +3,7 @@ test "DurationWeights::note_default has eighth as dominant weight" {
   let w = DurationWeights::note_default()
   assert_true(w.eighth > w.quarter)
   assert_true(w.eighth > w.half)
-  assert_true(w.sixteenth > 0)
+  assert_eq(w.sixteenth, 0)
 }
 
 ///|
@@ -17,8 +17,8 @@ test "random_duration returns a valid duration" {
   let w = DurationWeights::note_default()
   // Just ensure it doesn't crash and returns something
   let result = random_duration(w, fn(_) { 0 })
-  // Sixteenth is first in choices with non-zero weight, so r=0 gets Sixteenth
-  inspect(result, content="Sixteenth")
+  // Sixteenth weight is 0, so r=0 falls to Eighth (first non-zero weight)
+  inspect(result, content="Eighth")
 }
 
 ///|

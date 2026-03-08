@@ -323,6 +323,7 @@ test "with_techniques disabling non-chord-tone techniques: generated notes use o
     triplets: true,
     bebop_scales: false,
     neighbor_tones: false,
+    sixteenth_runs: false,
   }
   let settings = ImprovisationConfig::default(42)
     |> ImprovisationConfig::with_techniques(techniques)

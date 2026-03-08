@@ -365,6 +365,22 @@ pub fn settings_panel(
             })
           },
         ),
+        technique_toggle(
+          "16th Runs",
+          value=fn() { jazz_style.get().techniques.sixteenth_runs },
+          on_toggle=fn() {
+            jazz_style.update(fn(js) {
+              let t = js.techniques
+              JazzStyle::{
+                ..js,
+                techniques: @generator.Techniques::{
+                  ..t,
+                  sixteenth_runs: not(t.sixteenth_runs),
+                },
+              }
+            })
+          },
+        ),
       ]),
       // Comping
       settings_section("Comping", [

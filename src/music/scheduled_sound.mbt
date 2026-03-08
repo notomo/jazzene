@@ -56,7 +56,12 @@ pub fn convert_measures_to_sounds(
       .iter()
       .map(fn(pair) {
         let (start_beat, note) = pair
-        let swing_delay = swing_offset(start_beat, beat_duration_ms, swing)
+        // Swing only applies to eighth notes and longer (not sixteenth notes)
+        let swing_delay = if note.duration.to_beats() >= 0.5 {
+          swing_offset(start_beat, beat_duration_ms, swing)
+        } else {
+          0.0
+        }
         let note_start_ms = measure_start_ms +
           start_beat * beat_duration_ms +
           swing_delay

@@ -106,6 +106,7 @@ pub(all) struct ImprovisationConfig {
   triplet_probability : Int // 0-100, chance of generating eighth-note triplet group when playing (default: 15)
   bebop_ornament_probability : Int // 0-100, chance of generating PT→CT bebop passing tone ornament (default: 30)
   neighbor_ornament_probability : Int // 0-100, chance of generating CT→N→CT neighbor ornament (default: 20)
+  sixteenth_run_probability : Int // 0-100, chance of generating 4-note sixteenth run (P1 P2 P3 CT) ornament (default: 15)
 } derive(Eq, Show)
 
 ///|
@@ -131,6 +132,7 @@ pub fn ImprovisationConfig::default(seed : Int) -> ImprovisationConfig {
     triplet_probability: 8,
     bebop_ornament_probability: 30,
     neighbor_ornament_probability: 20,
+    sixteenth_run_probability: 15,
   }
 }
 
@@ -510,6 +512,23 @@ fn handle_playing(
   )
   match midi_opt {
     Some(midi) => {
+      // Try to generate a sixteenth-note run ornament (P1 P2 P3 CT) when we have a chord tone
+      guard not(
+        tone_origin is Some(@music.ChordTone) &&
+        should_generate_sixteenth_run(
+          state.measure_pos,
+          notes_left,
+          remaining,
+          settings.sixteenth_run_probability,
+          random_int,
+        ),
+      ) else {
+        return Continue(
+          generate_sixteenth_run(
+            state, midi, settings, update_accidental, random_int, notes_left,
+          ),
+        )
+      }
       // Try to generate a neighbor ornament (CT→N→CT) when we have a chord tone
       guard not(
         tone_origin is Some(@music.ChordTone) &&

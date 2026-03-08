@@ -60,6 +60,7 @@ pub fn JazzStyle::straight() -> JazzStyle {
     triplets: false,
     bebop_scales: false,
     neighbor_tones: false,
+    sixteenth_runs: false,
   }
   JazzStyle::{
     swing: @music.SwingConfig::straight(),
@@ -86,6 +87,7 @@ pub fn JazzStyle::simple() -> JazzStyle {
     triplets: true,
     bebop_scales: false,
     neighbor_tones: false,
+    sixteenth_runs: false,
   }
   JazzStyle::{
     swing: @music.SwingConfig::triplet(),

@@ -116,6 +116,7 @@ test "ImprovisationConfig::with_techniques zeros multiple techniques" {
     triplets: true,
     bebop_scales: false,
     neighbor_tones: true,
+    sixteenth_runs: false,
   }
   let result = s.with_techniques(t)
   assert_eq(result.tension_weight_ratio, 0)

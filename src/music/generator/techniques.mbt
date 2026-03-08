@@ -10,6 +10,7 @@ pub(all) struct Techniques {
   triplets : Bool // Eighth-note triplets
   bebop_scales : Bool // Bebop passing tones (major 7th for dom7, #5 for maj7)
   neighbor_tones : Bool // Neighbor tone ornaments (CT→N→CT pattern)
+  sixteenth_runs : Bool // Sixteenth-note run ornaments (P1 P2 P3 CT pattern)
 } derive(Eq, Show)
 
 ///|
@@ -23,6 +24,7 @@ pub fn Techniques::default() -> Techniques {
     triplets: true,
     bebop_scales: true,
     neighbor_tones: true,
+    sixteenth_runs: true,
   }
 }
 
@@ -68,6 +70,11 @@ pub fn ImprovisationConfig::with_techniques(
     },
     neighbor_ornament_probability: if techniques.neighbor_tones {
       self.neighbor_ornament_probability
+    } else {
+      0
+    },
+    sixteenth_run_probability: if techniques.sixteenth_runs {
+      self.sixteenth_run_probability
     } else {
       0
     },
