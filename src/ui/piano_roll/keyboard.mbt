@@ -24,7 +24,7 @@ pub fn keyboard(
   measures : () -> Array[@music.Measure],
   bpm : @signals.Signal[Int],
   playback_position : @signals.Signal[@music.Duration],
-  show_legend : () -> Bool,
+  show_technique_hints : () -> Bool,
   midi_active_notes : @signals.Signal[Array[@music.MidiNumber]],
 ) -> @luna_dom.DomNode {
   let { canvas, ctx } = create_canvas_context()
@@ -45,7 +45,7 @@ pub fn keyboard(
           set[m.value] = Some(
             match s.tone_origin {
               Some(origin) =>
-                if show_legend() {
+                if show_technique_hints() {
                   @theme.tone_origin_playing_color(origin)
                 } else {
                   @theme.PLAYING_COLOR_CHORD_TONE

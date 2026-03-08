@@ -312,7 +312,7 @@ fn draw_falling_notes(
   key_areas : Array[KeyArea],
   playing_color : String,
   default_color : String,
-  show_legend : Bool,
+  show_technique_hints : Bool,
 ) -> Unit {
   note_positions
   .iter()
@@ -339,7 +339,7 @@ fn draw_falling_notes(
     // Determine color: use technique color when legend is on, chord tone when off
     let is_playing = current_pos >= note.start_ms &&
       current_pos < note.start_ms + note.duration_ms
-    ctx.fillStyle = match (note.tone_origin, is_playing, show_legend) {
+    ctx.fillStyle = match (note.tone_origin, is_playing, show_technique_hints) {
       (Some(origin), true, true) => @theme.tone_origin_playing_color(origin)
       (Some(origin), false, true) => @theme.tone_origin_color(origin)
       (Some(_), true, false) => @theme.PLAYING_COLOR_CHORD_TONE
@@ -465,7 +465,7 @@ fn draw_notes(
   beats_per_measure : Double,
   loop_a_measure : Int,
   loop_b_measure : Int,
-  show_legend : Bool,
+  show_technique_hints : Bool,
 ) -> Unit {
   draw_notes_background(ctx, width, height)
   let label_width = calc_label_width(width)
@@ -494,7 +494,7 @@ fn draw_notes(
     key_areas,
     NOTE_PLAYING_COLOR,
     NOTE_DEFAULT_COLOR,
-    show_legend,
+    show_technique_hints,
   )
   draw_approach_arrows(ctx, height, note_positions, current_pos, key_areas)
   draw_key_grid_lines(ctx, height, key_areas)

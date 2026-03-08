@@ -162,7 +162,7 @@ fn render_stem_and_flag(
 /// Render a note from pre-computed SheetNote data
 fn render_note_from_sheet(
   note : @sheet_layout.SheetNote,
-  show_legend : () -> Bool,
+  show_technique_hints : () -> Bool,
 ) -> Array[@luna_dom.DomNode] {
   let note_x = note.x
   let note_y = note.y
@@ -175,7 +175,7 @@ fn render_note_from_sheet(
           (
             "fill",
             @luna_dom.AttrValue::Dynamic(fn() {
-              if show_legend() {
+              if show_technique_hints() {
                 color
               } else {
                 "inherit"
@@ -185,7 +185,7 @@ fn render_note_from_sheet(
           (
             "stroke",
             @luna_dom.AttrValue::Dynamic(fn() {
-              if show_legend() {
+              if show_technique_hints() {
                 color
               } else {
                 "inherit"

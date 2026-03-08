@@ -70,7 +70,7 @@ fn render_measure_clef(
 /// Render a single note or rest from pre-computed SheetNote data
 fn render_sheet_note(
   note : @sheet_layout.SheetNote,
-  show_legend : () -> Bool,
+  show_technique_hints : () -> Bool,
 ) -> Array[@luna_dom.DomNode] {
   if note.is_rest {
     // Rests in beam groups are rendered by beam code
@@ -80,7 +80,7 @@ fn render_sheet_note(
     return render_rest_from_sheet(note)
   }
   [
-    ..render_note_from_sheet(note, show_legend),
+    ..render_note_from_sheet(note, show_technique_hints),
     ..render_tie_arcs_from_sheet(note.tie_arcs),
   ]
 }
@@ -95,7 +95,7 @@ fn render_measure_notes(
   time_signature : @music.TimeSignature,
   display_index : Int,
   measure_width~ : Double,
-  show_legend : () -> Bool,
+  show_technique_hints : () -> Bool,
 ) -> Array[@luna_dom.DomNode] {
   let sheet = @sheet_layout.compute_sheet_measure(
     measure,
@@ -107,7 +107,7 @@ fn render_measure_notes(
 
   let note_nodes : Array[@luna_dom.DomNode] = sheet.notes
     .iter()
-    .flat_map(fn(note) { render_sheet_note(note, show_legend).iter() })
+    .flat_map(fn(note) { render_sheet_note(note, show_technique_hints).iter() })
     .collect()
 
   let beam_nodes = render_beams_from_sheet(sheet.beam_groups)
@@ -118,7 +118,9 @@ fn render_measure_notes(
   }
   let tension_label_nodes : Array[@luna_dom.DomNode] = sheet.notes
     .iter()
-    .filter_map(fn(note) { render_note_tension_label(note, show_legend) })
+    .filter_map(fn(note) {
+      render_note_tension_label(note, show_technique_hints)
+    })
     .collect()
   [..note_nodes, ..beam_nodes, ..ottava_nodes, ..tension_label_nodes]
 }
@@ -133,7 +135,7 @@ fn render_measure(
   time_signature : @music.TimeSignature,
   measure_width? : Double = @sheet_layout.MIN_MEASURE_WIDTH,
   is_outside_loop : () -> Bool,
-  show_legend : () -> Bool,
+  show_technique_hints : () -> Bool,
 ) -> @luna_dom.DomNode {
   let (x, y) = @sheet_layout.measure_position(
     display_index,
@@ -159,7 +161,7 @@ fn render_measure(
         time_signature,
         display_index,
         measure_width~,
-        show_legend,
+        show_technique_hints,
       ),
       render_bar_line(x + measure_width, y),
       render_clickable_background(

@@ -169,7 +169,7 @@ fn technique_toggle(
 /// Render the settings panel with jazz style controls.
 pub fn settings_panel(
   jazz_style : @signals.Signal[JazzStyle],
-  show_legend : @signals.Signal[Bool],
+  show_technique_hints : @signals.Signal[Bool],
   midi_active_notes : @signals.Signal[Array[@music.MidiNumber]],
 ) -> @luna_dom.DomNode {
   @luna_dom.div(
@@ -183,9 +183,11 @@ pub fn settings_panel(
       settings_section("MIDI Input", [midi_device_select(midi_active_notes)]),
       // Legend
       settings_section("Legend", [
-        toggle_switch(label="Show Colors", value=fn() { show_legend.get() }, on_toggle=fn() {
-          show_legend.update(not)
-        }),
+        toggle_switch(
+          label="Technique Hints",
+          value=fn() { show_technique_hints.get() },
+          on_toggle=fn() { show_technique_hints.update(not) },
+        ),
         @luna_dom.div(
           class="flex flex-col gap-1",
           legend_entries.map(fn(entry) {
@@ -197,7 +199,7 @@ pub fn settings_panel(
                   (
                     "style",
                     @luna_dom.AttrValue::Dynamic(fn() {
-                      let c = if show_legend.get() ||
+                      let c = if show_technique_hints.get() ||
                         color == @theme.COLOR_COMPING ||
                         color == @theme.COLOR_MIDI_ACTIVE {
                         color

@@ -53,7 +53,7 @@ pub fn render(state : AppState) -> Unit {
     loop_a_measure,
     loop_b_measure,
     jazz_style,
-    show_legend,
+    show_technique_hints,
     view_state,
     is_playing,
     midi_active_notes,
@@ -130,7 +130,7 @@ pub fn render(state : AppState) -> Unit {
                     time_signature,
                     loop_a_measure,
                     loop_b_measure,
-                    fn() { show_legend.get() },
+                    fn() { show_technique_hints.get() },
                   ),
                 ],
               ),
@@ -155,7 +155,7 @@ pub fn render(state : AppState) -> Unit {
                 time_signature,
                 loop_a_measure,
                 loop_b_measure,
-                fn() { show_legend.get() },
+                fn() { show_technique_hints.get() },
               ),
               @piano_roll.keyboard(
                 sounds,
@@ -163,7 +163,7 @@ pub fn render(state : AppState) -> Unit {
                 measures,
                 bpm,
                 playback_position,
-                fn() { show_legend.get() },
+                fn() { show_technique_hints.get() },
                 midi_active_notes,
               ),
             ],
@@ -176,7 +176,11 @@ pub fn render(state : AppState) -> Unit {
                 "hidden"
               }
             },
-            [settings_panel(jazz_style, show_legend, midi_active_notes)],
+            [
+              settings_panel(
+                jazz_style, show_technique_hints, midi_active_notes,
+              ),
+            ],
           ),
         ],
       ),

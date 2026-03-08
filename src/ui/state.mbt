@@ -11,7 +11,7 @@ pub struct AppState {
   loop_a_measure : @signals.Signal[Int]
   loop_b_measure : @signals.Signal[Int]
   jazz_style : @signals.Signal[JazzStyle]
-  show_legend : @signals.Signal[Bool]
+  show_technique_hints : @signals.Signal[Bool]
   view_state : @signals.Signal[ViewState]
   is_playing : @signals.Signal[Bool]
   midi_active_notes : @signals.Signal[Array[@music.MidiNumber]]
@@ -41,7 +41,7 @@ pub fn AppState::new() -> AppState {
     get_initial_loop_b_measure(measure_count.get()),
   )
   let jazz_style = @signals.signal(get_initial_jazz_style())
-  let show_legend = @signals.signal(get_initial_show_legend())
+  let show_technique_hints = @signals.signal(get_initial_show_technique_hints())
   let view_state = @signals.signal(get_initial_view_state())
   let is_playing = @signals.signal(false)
   let midi_active_notes : @signals.Signal[Array[@music.MidiNumber]] = @signals.signal([],
@@ -143,9 +143,11 @@ pub fn AppState::new() -> AppState {
     )
   })
 
-  // Persist jazz_style and show_legend changes to URL query parameters
+  // Persist jazz_style and show_technique_hints changes to URL query parameters
   let _ = @signals.effect(fn() { save_jazz_style(jazz_style.get()) })
-  let _ = @signals.effect(fn() { save_show_legend(show_legend.get()) })
+  let _ = @signals.effect(fn() {
+    save_show_technique_hints(show_technique_hints.get())
+  })
 
   {
     bpm,
@@ -159,7 +161,7 @@ pub fn AppState::new() -> AppState {
     loop_a_measure,
     loop_b_measure,
     jazz_style,
-    show_legend,
+    show_technique_hints,
     view_state,
     is_playing,
     midi_active_notes,

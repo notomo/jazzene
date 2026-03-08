@@ -358,16 +358,16 @@ pub fn save_jazz_style(js : JazzStyle) -> Unit {
 }
 
 ///|
-pub fn get_initial_show_legend() -> Bool {
-  match get_query_param("legend") {
+pub fn get_initial_show_technique_hints() -> Bool {
+  match get_query_param("hint") {
     Some("off") => false
     _ => true
   }
 }
 
 ///|
-pub fn save_show_legend(show : Bool) -> Unit {
-  set_query_param("legend", if show { "" } else { "off" }, default="")
+pub fn save_show_technique_hints(show : Bool) -> Unit {
+  set_query_param("hint", if show { "" } else { "off" }, default="")
 }
 
 ///|
