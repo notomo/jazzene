@@ -77,7 +77,9 @@ test "select_chromatic_approach_midi result is ±1 semitone from anchor" {
     let anchor_midi = @music.MidiNumber::new(anchor_val).unwrap()
     for seed in 0..<10 {
       let rng = create_random_int(seed)
-      let result = select_chromatic_approach_midi(anchor_midi, chord, 0, 127, rng)
+      let result = select_chromatic_approach_midi(
+        anchor_midi, chord, 0, 127, rng,
+      )
       let dist = (result.value - anchor_val).abs()
       assert_eq(dist, 1)
     }

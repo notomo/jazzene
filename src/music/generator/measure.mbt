@@ -288,12 +288,18 @@ fn generate_measure_notes(
   }
 
   // Fill remaining measure with new notes (all in key of C)
+  // Adjust pitch range to C major space so notes stay in range after transposing back
+  let c_settings = ImprovisationConfig::{
+    ..settings,
+    pitch_min: settings.pitch_min + neg_offset,
+    pitch_max: settings.pitch_max + neg_offset,
+  }
   // Use a temporary accidental calculator for C major during generation
   let c_update_accidental = @music.create_accidental_calculator(
     @music.KeySignature::c_major(),
   )
   let final_state = fill_remaining_measure(
-    state_after_tie, c_ctx, settings, c_update_accidental, random_int,
+    state_after_tie, c_ctx, c_settings, c_update_accidental, random_int,
   )
 
   // Transpose output back to the real key
