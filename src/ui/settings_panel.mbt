@@ -166,6 +166,81 @@ fn technique_toggle(
 }
 
 ///|
+fn midi_to_note_label(midi : Int) -> String {
+  let name = @music.ChordRoot::from_pitch_class(midi % 12).to_string()
+  let octave = (midi / 12 - 1).to_string()
+  name + octave
+}
+
+///|
+// MIDI 21 (A0) to 108 (C8) — standard 88-key piano range
+let pitch_options : Array[(String, Int)] = Array::makei(88, fn(i) { i + 21 }).map(fn(
+    midi,
+  ) {
+    (midi_to_note_label(midi), midi)
+  },
+)
+
+///|
+fn pitch_select(
+  jazz_style : @signals.Signal[JazzStyle],
+  label : String,
+  get_val : (JazzStyle) -> Int,
+  set_val : (JazzStyle, Int) -> JazzStyle,
+  is_disabled : (Int, JazzStyle) -> Bool,
+) -> @luna_dom.DomNode {
+  let initial_val = get_val(jazz_style.get())
+  @luna_dom.div(class="flex items-center gap-2", [
+    @luna_dom.span(class="text-xs text-slate-400 w-8 shrink-0", [
+      @luna_dom.text(label),
+    ]),
+    @luna_dom.create_element(
+      "select",
+      [
+        (
+          "class",
+          @luna_dom.AttrValue::Static(
+            "flex-1 px-2 py-0.5 text-xs bg-slate-900 text-white rounded border border-slate-600 focus:border-blue-500 focus:outline-none",
+          ),
+        ),
+        (
+          "value",
+          @luna_dom.AttrValue::Dynamic(fn() {
+            get_val(jazz_style.get()).to_string()
+          }),
+        ),
+        (
+          "change",
+          @luna_dom.AttrValue::Handler(fn(e) {
+            let raw = get_event_target_value(e)
+            match @js_global.parseInt(raw) {
+              Some(midi) => jazz_style.update(fn(js) { set_val(js, midi) })
+              None => ()
+            }
+          }),
+        ),
+      ],
+      pitch_options.map(fn(pair) {
+        let (lbl, midi) = pair
+        let attrs : Array[(String, @luna_dom.AttrValue)] = [
+          ("value", @luna_dom.AttrValue::Static(midi.to_string())),
+          (
+            "disabled",
+            @luna_dom.AttrValue::Dynamic(fn() {
+              is_disabled(midi, jazz_style.get()).to_string()
+            }),
+          ),
+        ]
+        if midi == initial_val {
+          attrs.push(("selected", @luna_dom.AttrValue::Static("selected")))
+        }
+        @luna_dom.create_element("option", attrs, [@luna_dom.text(lbl)])
+      }),
+    ),
+  ])
+}
+
+///|
 /// Render the settings panel with jazz style controls.
 pub fn settings_panel(
   jazz_style : @signals.Signal[JazzStyle],
@@ -243,6 +318,23 @@ pub fn settings_panel(
           fn(v) {
             jazz_style.update(fn(js) { JazzStyle::{ ..js, melody_mode: v } })
           },
+        ),
+      ]),
+      // Pitch Range
+      settings_section("Pitch Range", [
+        pitch_select(
+          jazz_style,
+          "Low:",
+          fn(js) { js.pitch_min },
+          fn(js, v) { JazzStyle::{ ..js, pitch_min: v } },
+          fn(midi, js) { midi >= js.pitch_max },
+        ),
+        pitch_select(
+          jazz_style,
+          "High:",
+          fn(js) { js.pitch_max },
+          fn(js, v) { JazzStyle::{ ..js, pitch_max: v } },
+          fn(midi, js) { midi <= js.pitch_min },
         ),
       ]),
       // Swing

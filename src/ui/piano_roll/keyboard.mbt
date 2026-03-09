@@ -26,6 +26,8 @@ pub fn keyboard(
   playback_position : @signals.Signal[@music.Duration],
   show_technique_hints : () -> Bool,
   midi_active_notes : @signals.Signal[Array[@music.MidiNumber]],
+  pitch_min : () -> Int,
+  pitch_max : () -> Int,
 ) -> @luna_dom.DomNode {
   let { canvas, ctx } = create_canvas_context()
   let resize_trigger = create_resize_trigger(canvas)
@@ -89,6 +91,8 @@ pub fn keyboard(
       playing_notes(),
       backing_playing_notes(),
       current_chord,
+      pitch_min(),
+      pitch_max(),
     )
   })
   @luna_dom.div(
@@ -107,6 +111,8 @@ fn draw_keyboard(
   playing_notes : Array[String?],
   backing_playing_notes : Array[Bool],
   current_chord : String?,
+  pitch_min : Int,
+  pitch_max : Int,
 ) -> Unit {
   ctx.clearRect(0.0, 0.0, width, height)
   ctx.fillStyle = NOTE_DISPLAY_BG_COLOR
@@ -183,4 +189,30 @@ fn draw_keyboard(
       height * BLACK_KEY_HEIGHT_RATIO,
     )
   })
+
+  // Draw pitch range overlay: dim keys outside [pitch_min, pitch_max]
+  let min_area = key_areas.iter().filter(fn(a) { a.midi == pitch_min }).next()
+  let max_area = key_areas.iter().filter(fn(a) { a.midi == pitch_max }).next()
+  match (min_area, max_area) {
+    (Some(lo), Some(hi)) => {
+      ctx.save()
+      ctx.fillStyle = "rgba(0,0,0,0.4)"
+      // Left out-of-range region
+      let lo_x = lo.rect.left
+      if lo_x > rect.left {
+        ctx.fillRect(rect.left, 0.0, lo_x - rect.left, height)
+      }
+      // Right out-of-range region
+      let hi_x = hi.rect.left + hi.rect.width
+      if hi_x < rect.left + rect.width {
+        ctx.fillRect(hi_x, 0.0, rect.left + rect.width - hi_x, height)
+      }
+      // Draw boundary markers (thin colored lines at the range edges)
+      ctx.fillStyle = "#60a5fa"
+      ctx.fillRect(lo_x, 0.0, 2.0, height)
+      ctx.fillRect(hi_x - 2.0, 0.0, 2.0, height)
+      ctx.restore()
+    }
+    _ => ()
+  }
 }

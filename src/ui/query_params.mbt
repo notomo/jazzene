@@ -67,6 +67,12 @@ pub let default_volume : Int = 50
 pub let default_loop_a : Int = 1
 
 ///|
+pub let default_pitch_min : Int = 48
+
+///|
+pub let default_pitch_max : Int = 84
+
+///|
 pub let default_chords : String = "IIm7 | V7 | Imaj7 | IVmaj7"
 
 ///|
@@ -355,6 +361,16 @@ pub fn save_jazz_style(js : JazzStyle) -> Unit {
     melody_mode_to_string(js.melody_mode),
     default=melody_mode_to_string(default_js.melody_mode),
   )
+  set_query_param(
+    "pitch_min",
+    js.pitch_min.to_string(),
+    default=default_pitch_min.to_string(),
+  )
+  set_query_param(
+    "pitch_max",
+    js.pitch_max.to_string(),
+    default=default_pitch_max.to_string(),
+  )
 }
 
 ///|
@@ -402,6 +418,8 @@ pub fn get_initial_jazz_style() -> JazzStyle {
     Some(s) => melody_mode_from_string(s)
     None => default_js.melody_mode
   }
+  let pitch_min = get_initial_int("pitch_min", default_pitch_min)
+  let pitch_max = get_initial_int("pitch_max", default_pitch_max)
   JazzStyle::{
     swing,
     techniques,
@@ -412,5 +430,7 @@ pub fn get_initial_jazz_style() -> JazzStyle {
     comping_style,
     drum_pattern,
     bass_style,
+    pitch_min,
+    pitch_max,
   }
 }

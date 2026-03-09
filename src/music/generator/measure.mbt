@@ -107,6 +107,8 @@ pub(all) struct ImprovisationConfig {
   bebop_ornament_probability : Int // 0-100, chance of generating PT→CT bebop passing tone ornament (default: 30)
   neighbor_ornament_probability : Int // 0-100, chance of generating CT→N→CT neighbor ornament (default: 20)
   sixteenth_run_probability : Int // 0-100, chance of generating 4-note sixteenth run (P1 P2 P3 CT) ornament (default: 15)
+  pitch_min : Int // Minimum MIDI note, inclusive (default 48 = C3)
+  pitch_max : Int // Maximum MIDI note, inclusive (default 84 = C6)
 } derive(Eq, Show)
 
 ///|
@@ -133,6 +135,8 @@ pub fn ImprovisationConfig::default(seed : Int) -> ImprovisationConfig {
     bebop_ornament_probability: 30,
     neighbor_ornament_probability: 20,
     sixteenth_run_probability: 15,
+    pitch_min: 48,
+    pitch_max: 84,
   }
 }
 
@@ -508,6 +512,8 @@ fn handle_playing(
     0,
     settings.tension_weight_ratio,
     settings.max_interval,
+    settings.pitch_min,
+    settings.pitch_max,
     random_int,
   )
   match midi_opt {
@@ -761,6 +767,8 @@ fn decide_midi_number(
   rest_probability : Int,
   tension_weight_ratio : Int,
   max_interval : Int,
+  pitch_min : Int,
+  pitch_max : Int,
   random_int : (Int) -> Int,
 ) -> (@music.MidiNumber?, @music.ToneOrigin?) {
   let actual_rest_prob = effective_rest_probability(
@@ -768,8 +776,30 @@ fn decide_midi_number(
   )
   guard random_int(100) >= actual_rest_prob else { return (None, None) }
 
-  let chord_tones = extend_across_octaves(chord.tones())
-  let tension_tones = extend_across_octaves(chord.tension_tones())
+  let all_chord_tones = extend_across_octaves(chord.tones())
+  let chord_tones = {
+    let filtered = all_chord_tones
+      .iter()
+      .filter(fn(m) { m.value >= pitch_min && m.value <= pitch_max })
+      .collect()
+    if filtered.is_empty() {
+      all_chord_tones
+    } else {
+      filtered
+    }
+  }
+  let all_tension_tones = extend_across_octaves(chord.tension_tones())
+  let tension_tones = {
+    let filtered = all_tension_tones
+      .iter()
+      .filter(fn(m) { m.value >= pitch_min && m.value <= pitch_max })
+      .collect()
+    if filtered.is_empty() {
+      []
+    } else {
+      filtered
+    }
+  }
   let root_midi = chord.root.midi()
   match last_midi {
     Some(prev) => {

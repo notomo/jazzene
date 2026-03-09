@@ -192,6 +192,10 @@ fn make_app_measures(
       |> @generator.ImprovisationConfig::with_techniques(
         jazz_style.get().techniques,
       )
+      |> @generator.ImprovisationConfig::with_pitch_range(
+        jazz_style.get().pitch_min,
+        jazz_style.get().pitch_max,
+      )
     let music_measures = settings
       |> @generator.create_measure_generator
       |> @generator.improvisation(

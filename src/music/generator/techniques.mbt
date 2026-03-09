@@ -1,4 +1,13 @@
 ///|
+pub fn ImprovisationConfig::with_pitch_range(
+  self : ImprovisationConfig,
+  pitch_min : Int,
+  pitch_max : Int,
+) -> ImprovisationConfig {
+  ImprovisationConfig::{ ..self, pitch_min, pitch_max }
+}
+
+///|
 /// Toggle flags for jazz improvisation techniques.
 /// Each flag controls whether the corresponding technique is enabled.
 /// When disabled, the technique's weight/probability in ImprovisationConfig is zeroed out.

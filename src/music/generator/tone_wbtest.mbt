@@ -116,6 +116,8 @@ test "decide_midi_number first note always returns ChordTone" {
     0,
     50,
     7,
+    0,
+    127,
     rng,
   )
   assert_true(midi is Some(_))
@@ -141,6 +143,8 @@ test "decide_midi_number rest returns None for both midi and origin" {
     100,
     50,
     7,
+    0,
+    127,
     always_rest,
   )
   inspect(midi, content="None")
@@ -166,6 +170,8 @@ test "decide_midi_number chord tone returns ChordTone origin" {
     0,
     0,
     7,
+    0,
+    127,
     rng,
   )
   // Only chord tones enabled → origin must be ChordTone or None (rest)
@@ -201,6 +207,8 @@ test "decide_midi_number origin is always a valid ToneOrigin variant" {
       0,
       50,
       7,
+      0,
+      127,
       rng,
     )
     match (midi, origin) {
@@ -239,6 +247,8 @@ test "Tension origin carries valid jazz degree" {
       0,
       100,
       12,
+      0,
+      127,
       rng, // high max_interval to reach tensions
     )
     match origin {

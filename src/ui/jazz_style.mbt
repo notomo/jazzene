@@ -27,6 +27,8 @@ pub(all) struct JazzStyle {
   comping_style : @music.CompingStyle
   drum_pattern : @music.DrumPatternStyle
   bass_style : @music.BassStyle
+  pitch_min : Int
+  pitch_max : Int
 } derive(Eq, Show)
 
 ///|
@@ -45,6 +47,8 @@ pub fn JazzStyle::default() -> JazzStyle {
     comping_style: @music.WithTensions,
     drum_pattern: @music.SwingRide,
     bass_style: @music.WalkingBass,
+    pitch_min: 48,
+    pitch_max: 84,
   }
 }
 
@@ -72,6 +76,8 @@ pub fn JazzStyle::straight() -> JazzStyle {
     comping_style: @music.GuideTones,
     drum_pattern: @music.SwingRide,
     bass_style: @music.RootOnly,
+    pitch_min: 48,
+    pitch_max: 84,
   }
 }
 
@@ -99,6 +105,8 @@ pub fn JazzStyle::simple() -> JazzStyle {
     comping_style: @music.GuideTones,
     drum_pattern: @music.SwingRide,
     bass_style: @music.RootOnly,
+    pitch_min: 48,
+    pitch_max: 84,
   }
 }
 

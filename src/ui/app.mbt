@@ -165,6 +165,8 @@ pub fn render(state : AppState) -> Unit {
                 playback_position,
                 fn() { show_technique_hints.get() },
                 midi_active_notes,
+                fn() { jazz_style.get().pitch_min },
+                fn() { jazz_style.get().pitch_max },
               ),
             ],
           ),

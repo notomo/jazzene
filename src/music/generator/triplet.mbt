@@ -45,6 +45,8 @@ fn generate_triplet_group(
       0,
       settings.tension_weight_ratio,
       settings.max_interval,
+      settings.pitch_min,
+      settings.pitch_max,
       random_int,
     )
 
