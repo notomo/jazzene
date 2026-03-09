@@ -207,10 +207,6 @@ fn draw_keyboard(
       if hi_x < rect.left + rect.width {
         ctx.fillRect(hi_x, 0.0, rect.left + rect.width - hi_x, height)
       }
-      // Draw boundary markers (thin colored lines at the range edges)
-      ctx.fillStyle = "#60a5fa"
-      ctx.fillRect(lo_x, 0.0, 2.0, height)
-      ctx.fillRect(hi_x - 2.0, 0.0, 2.0, height)
       ctx.restore()
     }
     _ => ()
