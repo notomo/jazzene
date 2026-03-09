@@ -225,7 +225,7 @@ test "select_enclosure_midis excludes chord tones when alternatives exist" {
   let chord_tone_pcs = [0, 4, 7, 11]
   for seed in 0..<20 {
     let rng = create_random_int(seed)
-    let (upper, lower) = select_enclosure_midis(anchor_midi, chord, rng)
+    let (upper, lower) = select_enclosure_midis(anchor_midi, chord, 0, 127, rng)
     let upper_pc = upper.value % 12
     let lower_pc = lower.value % 12
     // Upper (+1 or +2): Db(1) and D(2) are not chord tones → must be non-chord

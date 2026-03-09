@@ -574,7 +574,13 @@ fn handle_playing(
       // Only fires if chord has a bebop passing tone adjacent to the selected note
       guard not(
         tone_origin is Some(@music.ChordTone) &&
-        select_bebop_approach_midi(midi, chord) is Some(_) &&
+        select_bebop_approach_midi(
+          midi,
+          chord,
+          settings.pitch_min,
+          settings.pitch_max,
+        )
+        is Some(_) &&
         should_generate_bebop_ornament(
           notes_left,
           remaining,
@@ -690,15 +696,57 @@ fn fill_remaining_measure(
 }
 
 ///|
-/// Get extended chord tones across multiple octaves
-/// Octave offsets for extending tone sets: one octave below, same, one above
-let octave_offsets : Array[Int] = [-1, 0, 1]
+/// Expand each tone to all instances of its pitch class within [pitch_min, pitch_max].
+fn expand_pitch_classes_in_range(
+  tones : Array[@music.MidiNumber],
+  pitch_min : Int,
+  pitch_max : Int,
+) -> Array[@music.MidiNumber] {
+  tones
+  .iter()
+  .flat_map(fn(tone) {
+    let pc = tone.value % 12
+    let offset = (pc - pitch_min % 12 + 12) % 12
+    let first = pitch_min + offset
+    let count = if first > pitch_max { 0 } else { (pitch_max - first) / 12 + 1 }
+    Array::makei(count, fn(i) { @music.MidiNumber::new(first + i * 12) })
+    .iter()
+    .filter_map(fn(m) { m })
+  })
+  .collect()
+}
+
+///|
+/// Generate chord tones within [pitch_min, pitch_max].
+/// Falls back to the closest tone to the range midpoint if no tones fit in range.
+fn tones_in_pitch_range(
+  tones : Array[@music.MidiNumber],
+  pitch_min : Int,
+  pitch_max : Int,
+) -> Array[@music.MidiNumber] {
+  let in_range = expand_pitch_classes_in_range(tones, pitch_min, pitch_max)
+  guard in_range.is_empty() else { return in_range }
+  // Fallback: pick the closest tone to the range midpoint
+  let all = extend_across_octaves(tones)
+  guard not(all.is_empty()) else { return [] }
+  let mid = (pitch_min + pitch_max) / 2
+  let closest = all
+    .iter()
+    .fold(init=all[0], fn(best, tone) {
+      if (tone.value - mid).abs() < (best.value - mid).abs() {
+        tone
+      } else {
+        best
+      }
+    })
+  [closest]
+}
 
 ///|
 fn extend_across_octaves(
   tones : Array[@music.MidiNumber],
 ) -> Array[@music.MidiNumber] {
-  octave_offsets
+  [-1, 0, 1]
   .iter()
   .flat_map(fn(octave_offset) {
     tones.iter().filter_map(fn(tone) { tone.shift_octave(octave_offset) })
@@ -776,30 +824,13 @@ fn decide_midi_number(
   )
   guard random_int(100) >= actual_rest_prob else { return (None, None) }
 
-  let all_chord_tones = extend_across_octaves(chord.tones())
-  let chord_tones = {
-    let filtered = all_chord_tones
-      .iter()
-      .filter(fn(m) { m.value >= pitch_min && m.value <= pitch_max })
-      .collect()
-    if filtered.is_empty() {
-      all_chord_tones
-    } else {
-      filtered
-    }
-  }
-  let all_tension_tones = extend_across_octaves(chord.tension_tones())
-  let tension_tones = {
-    let filtered = all_tension_tones
-      .iter()
-      .filter(fn(m) { m.value >= pitch_min && m.value <= pitch_max })
-      .collect()
-    if filtered.is_empty() {
-      []
-    } else {
-      filtered
-    }
-  }
+  let chord_tones = tones_in_pitch_range(chord.tones(), pitch_min, pitch_max)
+  // Tension tones: only use those within range; disable entirely if none fit
+  let tension_tones = expand_pitch_classes_in_range(
+    chord.tension_tones(),
+    pitch_min,
+    pitch_max,
+  )
   let root_midi = chord.root.midi()
   match last_midi {
     Some(prev) => {

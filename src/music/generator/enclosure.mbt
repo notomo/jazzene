@@ -18,12 +18,18 @@ fn should_generate_enclosure_ornament(
 /// Select upper and lower enclosure MIDI notes for the EN→EN→CT ornament.
 /// upper: +1 or +2 semitones from anchor (chord tones excluded when possible)
 /// lower: -1 or -2 semitones from anchor (chord tones excluded when possible)
+/// Stays within pitch_min/pitch_max; falls back to anchor if no candidates fit.
 fn select_enclosure_midis(
   anchor_midi : @music.MidiNumber,
   chord : @music.Chord,
+  pitch_min : Int,
+  pitch_max : Int,
   random_int : (Int) -> Int,
 ) -> (@music.MidiNumber, @music.MidiNumber) {
   let chord_tone_pcs = chord.tones().map(fn(t) { t.pitch_class() })
+  let in_range = fn(m : @music.MidiNumber) {
+    m.value >= pitch_min && m.value <= pitch_max
+  }
 
   // Upper candidates: +1, +2 semitones
   let upper_all : Array[@music.MidiNumber] = [1, 2]
@@ -31,15 +37,20 @@ fn select_enclosure_midis(
     .filter_map(fn(offset) {
       @music.MidiNumber::new(anchor_midi.value + offset)
     })
+    .filter(in_range)
     .collect()
-  let upper_non_chord : Array[@music.MidiNumber] = upper_all
-    .iter()
-    .filter(fn(m) { not(chord_tone_pcs.contains(m.pitch_class())) })
-    .collect()
-  let upper_pool = if upper_non_chord.is_empty() {
-    upper_all
+  let upper_pool = if upper_all.is_empty() {
+    [anchor_midi]
   } else {
-    upper_non_chord
+    let upper_non_chord : Array[@music.MidiNumber] = upper_all
+      .iter()
+      .filter(fn(m) { not(chord_tone_pcs.contains(m.pitch_class())) })
+      .collect()
+    if upper_non_chord.is_empty() {
+      upper_all
+    } else {
+      upper_non_chord
+    }
   }
 
   // Lower candidates: -1, -2 semitones
@@ -48,15 +59,20 @@ fn select_enclosure_midis(
     .filter_map(fn(offset) {
       @music.MidiNumber::new(anchor_midi.value + offset)
     })
+    .filter(in_range)
     .collect()
-  let lower_non_chord : Array[@music.MidiNumber] = lower_all
-    .iter()
-    .filter(fn(m) { not(chord_tone_pcs.contains(m.pitch_class())) })
-    .collect()
-  let lower_pool = if lower_non_chord.is_empty() {
-    lower_all
+  let lower_pool = if lower_all.is_empty() {
+    [anchor_midi]
   } else {
-    lower_non_chord
+    let lower_non_chord : Array[@music.MidiNumber] = lower_all
+      .iter()
+      .filter(fn(m) { not(chord_tone_pcs.contains(m.pitch_class())) })
+      .collect()
+    if lower_non_chord.is_empty() {
+      lower_all
+    } else {
+      lower_non_chord
+    }
   }
 
   (
@@ -80,7 +96,11 @@ fn generate_enclosure_ornament(
   notes_left : Int,
 ) -> MeasureState {
   let (upper_midi, lower_midi) = select_enclosure_midis(
-    anchor_midi, chord, random_int,
+    anchor_midi,
+    chord,
+    settings.pitch_min,
+    settings.pitch_max,
+    random_int,
   )
 
   // Randomly choose above-first or below-first

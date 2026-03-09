@@ -16,10 +16,13 @@ fn should_generate_bebop_ornament(
 
 ///|
 /// Select the bebop passing MIDI note adjacent to anchor_midi.
-/// Returns Some(pt_midi) if the chord's bebop passing tone is ±1 semitone from anchor, else None.
+/// Returns Some(pt_midi) if the chord's bebop passing tone is ±1 semitone from anchor
+/// and within pitch_min/pitch_max, else None.
 fn select_bebop_approach_midi(
   anchor_midi : @music.MidiNumber,
   chord : @music.Chord,
+  pitch_min : Int,
+  pitch_max : Int,
 ) -> @music.MidiNumber? {
   let bebop_pcs = chord.bebop_passing_tones().map(fn(t) { t.pitch_class() })
   guard not(bebop_pcs.is_empty()) else { return None }
@@ -28,7 +31,11 @@ fn select_bebop_approach_midi(
     .filter_map(fn(offset) {
       @music.MidiNumber::new(anchor_midi.value + offset)
     })
-    .filter(fn(m) { bebop_pcs.contains(m.pitch_class()) })
+    .filter(fn(m) {
+      m.value >= pitch_min &&
+      m.value <= pitch_max &&
+      bebop_pcs.contains(m.pitch_class())
+    })
     .collect()
   guard not(candidates.is_empty()) else { return None }
   Some(candidates[0])
@@ -47,7 +54,12 @@ fn generate_bebop_ornament(
   random_int : (Int) -> Int,
   notes_left : Int,
 ) -> MeasureState {
-  let pt_midi = select_bebop_approach_midi(anchor_midi, chord).unwrap()
+  let pt_midi = select_bebop_approach_midi(
+    anchor_midi,
+    chord,
+    settings.pitch_min,
+    settings.pitch_max,
+  ).unwrap()
   let pos_after_pt = state.measure_pos + 0.5
 
   // CT duration: fill remaining space after PT (0.5)

@@ -17,22 +17,26 @@ fn should_generate_neighbor_ornament(
 ///|
 /// Select a neighbor MIDI note for the CT→N→CT ornament.
 /// Prefers diatonic (scale tone) candidates; falls back to chromatic.
-/// Excludes chord tones by pitch class.
+/// Excludes chord tones by pitch class. Stays within pitch_min/pitch_max.
 fn select_neighbor_midi(
   anchor_midi : @music.MidiNumber,
   chord : @music.Chord,
+  pitch_min : Int,
+  pitch_max : Int,
   random_int : (Int) -> Int,
 ) -> @music.MidiNumber {
   let chord_tone_pcs = chord.tones().map(fn(t) { t.pitch_class() })
   let scale_tone_pcs = chord.scale_tones().map(fn(t) { t.pitch_class() })
   let offsets = [-2, -1, 1, 2]
-  // All valid MIDI neighbors
+  // All valid MIDI neighbors within range
   let chromatic_candidates : Array[@music.MidiNumber] = offsets
     .iter()
     .filter_map(fn(offset) {
       @music.MidiNumber::new(anchor_midi.value + offset)
     })
+    .filter(fn(m) { m.value >= pitch_min && m.value <= pitch_max })
     .collect()
+  guard not(chromatic_candidates.is_empty()) else { return anchor_midi }
   // Exclude chord tones (they would defeat the ornament purpose)
   let non_chord_candidates : Array[@music.MidiNumber] = chromatic_candidates
     .iter()
@@ -68,7 +72,13 @@ fn generate_neighbor_ornament(
   random_int : (Int) -> Int,
   notes_left : Int,
 ) -> MeasureState {
-  let neighbor_midi = select_neighbor_midi(anchor_midi, chord, random_int)
+  let neighbor_midi = select_neighbor_midi(
+    anchor_midi,
+    chord,
+    settings.pitch_min,
+    settings.pitch_max,
+    random_int,
+  )
 
   // CT1 duration: leave at least 1.0 beats for N (0.5) + CT2 (0.5)
   let ct1_duration = match

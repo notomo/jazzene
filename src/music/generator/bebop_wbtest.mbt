@@ -46,7 +46,7 @@ test "select_bebop_approach_midi - Dominant7 root returns major 7th (1 below)" {
     bass: None,
   }
   let anchor = @music.MidiNumber::new(67).unwrap() // G4
-  let result = select_bebop_approach_midi(anchor, chord)
+  let result = select_bebop_approach_midi(anchor, chord, 0, 127)
   inspect(result, content="Some({value: 66})") // F#4
 }
 
@@ -59,7 +59,7 @@ test "select_bebop_approach_midi - Dominant7 b7 returns major 7th (1 above)" {
     bass: None,
   }
   let anchor = @music.MidiNumber::new(65).unwrap() // F4
-  let result = select_bebop_approach_midi(anchor, chord)
+  let result = select_bebop_approach_midi(anchor, chord, 0, 127)
   inspect(result, content="Some({value: 66})") // F#4
 }
 
@@ -72,7 +72,7 @@ test "select_bebop_approach_midi - Dominant7 3rd returns None (not adjacent)" {
     bass: None,
   }
   let anchor = @music.MidiNumber::new(71).unwrap() // B4
-  let result = select_bebop_approach_midi(anchor, chord)
+  let result = select_bebop_approach_midi(anchor, chord, 0, 127)
   inspect(result, content="None")
 }
 
@@ -87,7 +87,7 @@ test "select_bebop_approach_midi - Major7 5th returns sharp-5 (1 above)" {
     bass: None,
   }
   let anchor = @music.MidiNumber::new(67).unwrap() // G4
-  let result = select_bebop_approach_midi(anchor, chord)
+  let result = select_bebop_approach_midi(anchor, chord, 0, 127)
   inspect(result, content="Some({value: 68})") // G#4
 }
 
@@ -100,7 +100,7 @@ test "select_bebop_approach_midi - Major7 6th returns sharp-5 (1 below)" {
     bass: None,
   }
   let anchor = @music.MidiNumber::new(69).unwrap() // A4
-  let result = select_bebop_approach_midi(anchor, chord)
+  let result = select_bebop_approach_midi(anchor, chord, 0, 127)
   inspect(result, content="Some({value: 68})") // G#4
 }
 
@@ -115,7 +115,7 @@ test "select_bebop_approach_midi - Minor7 b3 returns major 3rd (1 above)" {
     bass: None,
   }
   let anchor = @music.MidiNumber::new(65).unwrap() // F4
-  let result = select_bebop_approach_midi(anchor, chord)
+  let result = select_bebop_approach_midi(anchor, chord, 0, 127)
   inspect(result, content="Some({value: 66})") // F#4
 }
 
@@ -128,7 +128,7 @@ test "select_bebop_approach_midi - Minor7 4th returns major 3rd (1 below)" {
     bass: None,
   }
   let anchor = @music.MidiNumber::new(67).unwrap() // G4
-  let result = select_bebop_approach_midi(anchor, chord)
+  let result = select_bebop_approach_midi(anchor, chord, 0, 127)
   inspect(result, content="Some({value: 66})") // F#4
 }
 
@@ -143,7 +143,7 @@ test "select_bebop_approach_midi - HalfDiminished b5 returns natural 5th (1 abov
     bass: None,
   }
   let anchor = @music.MidiNumber::new(77).unwrap() // F5
-  let result = select_bebop_approach_midi(anchor, chord)
+  let result = select_bebop_approach_midi(anchor, chord, 0, 127)
   inspect(result, content="Some({value: 78})") // F#5
 }
 
@@ -156,7 +156,7 @@ test "select_bebop_approach_midi - chord with no bebop tones returns None" {
     bass: None,
   }
   let anchor = @music.MidiNumber::new(60).unwrap()
-  let result = select_bebop_approach_midi(anchor, chord)
+  let result = select_bebop_approach_midi(anchor, chord, 0, 127)
   inspect(result, content="None")
 }
 

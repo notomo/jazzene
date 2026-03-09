@@ -22,9 +22,12 @@ fn should_generate_sixteenth_run(
 ///|
 /// Generate 3 chromatic approach notes leading to anchor_midi.
 /// Direction is determined by last_midi: ascending = approach from below, descending = from above.
+/// Only includes notes within pitch_min/pitch_max.
 fn select_run_approach_notes(
   anchor_midi : @music.MidiNumber,
   last_midi : @music.MidiNumber?,
+  pitch_min : Int,
+  pitch_max : Int,
   random_int : (Int) -> Int,
 ) -> Array[@music.MidiNumber] {
   // Ascending = approach from below (anchor-3, anchor-2, anchor-1)
@@ -44,6 +47,7 @@ fn select_run_approach_notes(
   offsets
   .iter()
   .filter_map(fn(offset) { @music.MidiNumber::new(anchor_midi.value + offset) })
+  .filter(fn(m) { m.value >= pitch_min && m.value <= pitch_max })
   .collect()
 }
 
@@ -99,6 +103,8 @@ fn generate_sixteenth_run(
   let approach = select_run_approach_notes(
     anchor_midi,
     state.last_midi,
+    settings.pitch_min,
+    settings.pitch_max,
     random_int,
   )
   // If we couldn't generate 3 approach notes (edge of MIDI range), fall back to fewer

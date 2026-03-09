@@ -59,7 +59,7 @@ test "select_chromatic_approach_midi returns non-chord tone when available" {
   // +1 = Db(1) not chord tone, -1 = B(11) IS chord tone → must pick Db
   for seed in 0..<20 {
     let rng = create_random_int(seed)
-    let result = select_chromatic_approach_midi(anchor_midi, chord, rng)
+    let result = select_chromatic_approach_midi(anchor_midi, chord, 0, 127, rng)
     let pc = result.value % 12
     // B(11) is chord tone, Db(1) is not — must not select B
     assert_true(pc != 11)
@@ -77,7 +77,7 @@ test "select_chromatic_approach_midi result is ±1 semitone from anchor" {
     let anchor_midi = @music.MidiNumber::new(anchor_val).unwrap()
     for seed in 0..<10 {
       let rng = create_random_int(seed)
-      let result = select_chromatic_approach_midi(anchor_midi, chord, rng)
+      let result = select_chromatic_approach_midi(anchor_midi, chord, 0, 127, rng)
       let dist = (result.value - anchor_val).abs()
       assert_eq(dist, 1)
     }

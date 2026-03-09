@@ -17,9 +17,12 @@ fn should_generate_chromatic_approach_ornament(
 ///|
 /// Select a chromatic approach MIDI note (±1 semitone) for the AT→CT ornament.
 /// Prefers notes that are not chord tones; falls back to any ±1 neighbor.
+/// Stays within pitch_min/pitch_max.
 fn select_chromatic_approach_midi(
   anchor_midi : @music.MidiNumber,
   chord : @music.Chord,
+  pitch_min : Int,
+  pitch_max : Int,
   random_int : (Int) -> Int,
 ) -> @music.MidiNumber {
   let chord_tone_pcs = chord.tones().map(fn(t) { t.pitch_class() })
@@ -28,7 +31,9 @@ fn select_chromatic_approach_midi(
     .filter_map(fn(offset) {
       @music.MidiNumber::new(anchor_midi.value + offset)
     })
+    .filter(fn(m) { m.value >= pitch_min && m.value <= pitch_max })
     .collect()
+  guard not(all_candidates.is_empty()) else { return anchor_midi }
   let non_chord_candidates : Array[@music.MidiNumber] = all_candidates
     .iter()
     .filter(fn(m) { not(chord_tone_pcs.contains(m.pitch_class())) })
@@ -54,7 +59,13 @@ fn generate_chromatic_approach_ornament(
   random_int : (Int) -> Int,
   notes_left : Int,
 ) -> MeasureState {
-  let at_midi = select_chromatic_approach_midi(anchor_midi, chord, random_int)
+  let at_midi = select_chromatic_approach_midi(
+    anchor_midi,
+    chord,
+    settings.pitch_min,
+    settings.pitch_max,
+    random_int,
+  )
   let pos_after_at = state.measure_pos + 0.5
 
   // CT duration: fill remaining space after AT (0.5)
