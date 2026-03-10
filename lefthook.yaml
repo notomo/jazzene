@@ -1,0 +1,5 @@
+# https://lefthook.dev/configuration/
+
+pre-commit:
+  jobs:
+    - run: npm run format && npm run check && npm run test
