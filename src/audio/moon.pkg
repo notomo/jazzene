@@ -5,5 +5,5 @@ import {
 
 options(
   "is-main": false,
-  "supported-targets": [ "js" ],
+  "supported-targets": "js",
 )
