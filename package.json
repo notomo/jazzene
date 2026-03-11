@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "check_all": "npm run format && npm run check && npm run test && npm run build && npm run test:e2e",
+    "check_all": "npm run format && npm run check && npm run test && npm run build && E2E_PREVIEW=1 npm run test:e2e",
     "check": "moon check src && moon fmt --check",
     "format": "NEW_MOON_PKG=1 moon fmt",
     "test": "moon test -p internal/jazzene/music internal/jazzene/music/generator internal/jazzene/music/sheet --target wasm-gc",

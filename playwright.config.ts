@@ -1,6 +1,9 @@
 import { defineConfig, devices } from "@playwright/test";
 
 const isCI = !!process.env.CI;
+const usePreview = isCI || !!process.env.E2E_PREVIEW;
+const port = usePreview ? 4173 : 5173;
+const baseURL = `http://localhost:${port}`;
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -13,7 +16,7 @@ export default defineConfig({
   workers: isCI ? 1 : undefined,
   reporter: "html",
   use: {
-    baseURL: "http://localhost:4173",
+    baseURL,
     trace: "on-first-retry",
   },
 
@@ -30,8 +33,8 @@ export default defineConfig({
   ],
 
   webServer: {
-    command: "npm run preview",
-    url: "http://localhost:4173",
+    command: usePreview ? "npm run preview" : "npm run dev",
+    url: baseURL,
     reuseExistingServer: !isCI,
   },
 });
