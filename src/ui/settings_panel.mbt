@@ -171,12 +171,7 @@ pub fn settings_panel(
   jazz_style : @signals.Signal[JazzStyle],
   show_technique_hints : @signals.Signal[Bool],
   midi_active_notes : @signals.Signal[Array[@music.MidiNumber]],
-  sounds : () -> Array[@music.ScheduledSound],
-  bpm : () -> Int,
-  time_signature : () -> @music.TimeSignature,
-  key_signature : () -> @music.KeySignature,
-  raw_chord_progression : () -> String,
-  seed : () -> Int,
+  get_midi_bytes : () -> Array[Int],
 ) -> @luna_dom.DomNode {
   @luna_dom.div(
     class="bg-slate-800 border-l border-slate-600 p-3 overflow-y-auto flex flex-col gap-3 w-64 shrink-0",
@@ -188,9 +183,7 @@ pub fn settings_panel(
       // MIDI Input
       settings_section("MIDI Input", [
         midi_device_select(midi_active_notes),
-        midi_export_button(
-          sounds, bpm, time_signature, key_signature, raw_chord_progression, seed,
-        ),
+        midi_export_button(get_midi_bytes),
       ]),
       // Legend
       settings_section("Legend", [

@@ -60,10 +60,27 @@ pub fn render(state : AppState) -> Unit {
     measures,
     sounds,
     backing_sounds,
+    bass_sounds,
+    drum_sounds,
     total_duration,
     chord_parse_error,
-    ..,
   } = state
+  let get_midi_bytes = fn() {
+    let text = "chords: " +
+      raw_chord_progression.get() +
+      " seed: " +
+      seed.get().to_string()
+    @midi.encode_to_midi(
+      sounds(),
+      backing_sounds(),
+      bass_sounds(),
+      drum_sounds(),
+      bpm.get(),
+      time_signature=time_signature.get(),
+      key_signature=key.get(),
+      text~,
+    )
+  }
   let app = @luna_dom.div(
     class="flex flex-col h-dvh overflow-hidden w-dvw bg-gradient-to-br from-slate-950 to-slate-900 text-white touch-manipulation",
     [
@@ -180,15 +197,7 @@ pub fn render(state : AppState) -> Unit {
             },
             [
               settings_panel(
-                jazz_style,
-                show_technique_hints,
-                midi_active_notes,
-                sounds,
-                fn() { bpm.get() },
-                fn() { time_signature.get() },
-                fn() { key.get() },
-                fn() { raw_chord_progression.get() },
-                fn() { seed.get() },
+                jazz_style, show_technique_hints, midi_active_notes, get_midi_bytes,
               ),
             ],
           ),

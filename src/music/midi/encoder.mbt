@@ -30,49 +30,62 @@ pub fn write_vlq(value : Int, buf : Array[Int]) -> Unit {
 }
 
 ///|
-/// Encode ScheduledSound array to MIDI file bytes (Standard MIDI File format 0).
-/// Returns Array[Int] (0-255 values) representing the SMF binary.
-/// Optional metadata: time_signature, key_signature, and text (e.g. chords/seed info).
-pub fn encode_to_midi(
-  sounds : Array[@music.ScheduledSound],
-  bpm : Int,
-  time_signature? : @music.TimeSignature = @music.TimeSignature::default(),
-  key_signature? : @music.KeySignature = @music.KeySignature::c_major(),
-  text? : String = "",
-) -> Array[Int] {
-  // Build events: (tick, kind, pitch) where kind 0=NoteOff, 1=NoteOn
-  let events : Array[(Int, Int, Int)] = []
-  for sound in sounds {
-    match sound.sound_event {
-      Note(midi~, ..) => {
-        let start_tick = seconds_to_ticks(sound.start_time.to_seconds(), bpm)
-        let end_tick = seconds_to_ticks(
-          (sound.start_time + sound.duration).to_seconds(),
-          bpm,
-        )
-        events.push((start_tick, 1, midi.value)) // Note On
-        events.push((end_tick, 0, midi.value)) // Note Off
-      }
-      Rest(..) => ()
-    }
+/// Map ToneOrigin to MIDI velocity for melody notes.
+fn melody_velocity(tone_origin : @music.ToneOrigin?) -> Int {
+  match tone_origin {
+    Some(ChordTone) => 90
+    Some(Tension(_)) => 80
+    Some(ChromaticApproach) => 70
+    Some(Enclosure) => 70
+    Some(NeighborTone) => 65
+    Some(PassingTone) => 65
+    None => 80
   }
+}
 
-  // Sort by tick, then by kind (NoteOff=0 before NoteOn=1 at same tick)
-  events.sort_by(fn(a, b) {
-    let (at, ak, _) = a
-    let (bt, bk, _) = b
-    match at == bt {
-      false => at - bt
-      true => ak - bk
-    }
-  })
+///|
+/// Map drum MIDI note to velocity via DrumVoice.
+fn drum_velocity(midi : @music.MidiNumber) -> Int {
+  match @music.DrumVoice::from_midi(midi) {
+    Some(Kick) => 85
+    Some(Snare) => 80
+    Some(HiHat) => 65
+    Some(Ride) => 58
+    Some(Brush) => 55
+    None => 64
+  }
+}
 
-  // Build track data
+///|
+/// Write MTrk chunk (header + data) into buf.
+fn write_track(buf : Array[Int], track_data : Array[Int]) -> Unit {
+  buf.push(0x4D) // M
+  buf.push(0x54) // T
+  buf.push(0x72) // r
+  buf.push(0x6B) // k
+  let track_len = track_data.length()
+  buf.push((track_len >> 24) & 0xFF)
+  buf.push((track_len >> 16) & 0xFF)
+  buf.push((track_len >> 8) & 0xFF)
+  buf.push(track_len & 0xFF)
+  for b in track_data {
+    buf.push(b)
+  }
+}
+
+///|
+/// Build meta track (track 0) with tempo / time_sig / key_sig / text.
+fn make_meta_track(
+  bpm : Int,
+  time_signature : @music.TimeSignature,
+  key_signature : @music.KeySignature,
+  text : String,
+) -> Array[Int] {
   let track_data : Array[Int] = []
 
   // Tempo meta-event (delta=0): FF 51 03 + 3 bytes microseconds
   let microseconds = 60000000 / bpm
-  track_data.push(0) // delta = 0
+  track_data.push(0)
   track_data.push(0xFF)
   track_data.push(0x51)
   track_data.push(0x03)
@@ -81,7 +94,6 @@ pub fn encode_to_midi(
   track_data.push(microseconds & 0xFF)
 
   // Time signature meta-event (delta=0): FF 58 04 nn dd cc bb
-  // dd = denominator as power of 2 (4 -> 2, 8 -> 3)
   let dd = match time_signature.denominator {
     2 => 1
     8 => 3
@@ -94,11 +106,10 @@ pub fn encode_to_midi(
   track_data.push(0x04)
   track_data.push(time_signature.numerator)
   track_data.push(dd)
-  track_data.push(24) // MIDI clocks per metronome tick
-  track_data.push(8) // 32nd notes per 24 MIDI clocks
+  track_data.push(24)
+  track_data.push(8)
 
   // Key signature meta-event (delta=0): FF 59 02 sf mi
-  // sf: positive = sharps, negative (two's complement) = flats; mi: 0 = major
   let sf = match key_signature.accidental_type {
     Sharp => key_signature.altered_steps.length()
     Flat => 256 - key_signature.altered_steps.length()
@@ -109,9 +120,9 @@ pub fn encode_to_midi(
   track_data.push(0x59)
   track_data.push(0x02)
   track_data.push(sf)
-  track_data.push(0) // major
+  track_data.push(0)
 
-  // Text meta-event (delta=0): FF 01 len text (chords/seed info)
+  // Text meta-event (delta=0): FF 01 len text
   if text != "" {
     track_data.push(0)
     track_data.push(0xFF)
@@ -122,20 +133,86 @@ pub fn encode_to_midi(
     }
   }
 
-  // Note events with delta-time encoding
+  // End of Track
+  track_data.push(0)
+  track_data.push(0xFF)
+  track_data.push(0x2F)
+  track_data.push(0x00)
+
+  track_data
+}
+
+///|
+/// Build an instrument track with optional Program Change, CC7, and note events.
+/// channel: MIDI channel (0-15); program: None skips Program Change (use for ch9 drums)
+fn make_instrument_track(
+  channel : Int,
+  program : Int?,
+  cc7_volume : Int,
+  sounds : Array[@music.ScheduledSound],
+  bpm : Int,
+  velocity_fn : (@music.ScheduledSound) -> Int,
+) -> Array[Int] {
+  let track_data : Array[Int] = []
+
+  // Program Change (skip for drum channel)
+  match program {
+    Some(prog) => {
+      track_data.push(0)
+      track_data.push(0xC0 | channel)
+      track_data.push(prog)
+    }
+    None => ()
+  }
+
+  // CC7 Channel Volume
+  track_data.push(0)
+  track_data.push(0xB0 | channel)
+  track_data.push(0x07)
+  track_data.push(cc7_volume)
+
+  // Build note events: (tick, kind, pitch, velocity)
+  let events : Array[(Int, Int, Int, Int)] = []
+  for sound in sounds {
+    match sound.sound_event {
+      Note(midi~, ..) => {
+        let start_tick = seconds_to_ticks(sound.start_time.to_seconds(), bpm)
+        let end_tick = seconds_to_ticks(
+          (sound.start_time + sound.duration).to_seconds(),
+          bpm,
+        )
+        let vel = velocity_fn(sound)
+        events.push((start_tick, 1, midi.value, vel))
+        events.push((end_tick, 0, midi.value, 0))
+      }
+      Rest(..) => ()
+    }
+  }
+
+  // Sort by tick, then NoteOff before NoteOn at same tick
+  events.sort_by(fn(a, b) {
+    let (at, ak, _, _) = a
+    let (bt, bk, _, _) = b
+    match at == bt {
+      false => at - bt
+      true => ak - bk
+    }
+  })
+
+  // Encode events with delta-time
   let mut prev_tick = 0
   for event in events {
-    let (tick, kind, pitch) = event
+    let (tick, kind, pitch, vel) = event
     let delta = tick - prev_tick
     write_vlq(delta, track_data)
     match kind {
       1 => {
-        track_data.push(0x90) // Note On channel 0
+        track_data.push(0x90 | channel)
         track_data.push(pitch)
-        track_data.push(64) // velocity
+        track_data.push(vel)
       }
       _ => {
-        track_data.push(0x80) // Note Off channel 0
+        track_data.push(0x80 | channel)
         track_data.push(pitch)
         track_data.push(0)
       }
@@ -143,16 +220,61 @@ pub fn encode_to_midi(
     prev_tick = tick
   }
 
-  // End of Track meta-event
+  // End of Track
   track_data.push(0)
   track_data.push(0xFF)
   track_data.push(0x2F)
   track_data.push(0x00)
 
-  // Build final MIDI file
+  track_data
+}
+
+///|
+/// Encode ScheduledSound arrays to MIDI file bytes (Standard MIDI File format 1).
+/// Returns Array[Int] (0-255 values) representing the SMF binary.
+/// Produces 5 tracks: meta (track 0), melody ch0, comping ch1, bass ch2, drum ch9.
+pub fn encode_to_midi(
+  melody_sounds : Array[@music.ScheduledSound],
+  comping_sounds : Array[@music.ScheduledSound],
+  bass_sounds : Array[@music.ScheduledSound],
+  drum_sounds : Array[@music.ScheduledSound],
+  bpm : Int,
+  time_signature? : @music.TimeSignature = @music.TimeSignature::default(),
+  key_signature? : @music.KeySignature = @music.KeySignature::c_major(),
+  text? : String = "",
+) -> Array[Int] {
+  let meta_track = make_meta_track(bpm, time_signature, key_signature, text)
+  let melody_track = make_instrument_track(
+    0,
+    Some(0),
+    100,
+    melody_sounds,
+    bpm,
+    fn(s) { melody_velocity(s.tone_origin) },
+  )
+  let comping_track = make_instrument_track(
+    1,
+    Some(0),
+    50,
+    comping_sounds,
+    bpm,
+    fn(_) { 64 },
+  )
+  let bass_track = make_instrument_track(2, Some(32), 70, bass_sounds, bpm, fn(
+    _,
+  ) {
+    70
+  })
+  let drum_track = make_instrument_track(9, None, 25, drum_sounds, bpm, fn(s) {
+    match s.sound_event {
+      Note(midi~, ..) => drum_velocity(midi)
+      _ => 64
+    }
+  })
+
   let buf : Array[Int] = []
 
-  // Header chunk: MThd, length=6, format=0, 1 track, 480 ticks/quarter
+  // Header chunk: MThd, length=6, format=1, 5 tracks, 480 ticks/quarter
   buf.push(0x4D) // M
   buf.push(0x54) // T
   buf.push(0x68) // h
@@ -160,29 +282,19 @@ pub fn encode_to_midi(
   buf.push(0)
   buf.push(0)
   buf.push(0)
-  buf.push(6) // chunk length = 6
+  buf.push(6)
   buf.push(0)
   buf.push(1) // format = 1 (Parallel)
   buf.push(0)
-  buf.push(1) // 1 track
+  buf.push(5) // 5 tracks
   buf.push(1)
   buf.push(0xE0) // 480 ticks/quarter note (0x01E0)
 
-  // Track chunk: MTrk + 4-byte big-endian length
-  buf.push(0x4D) // M
-  buf.push(0x54) // T
-  buf.push(0x72) // r
-  buf.push(0x6B) // k
-  let track_len = track_data.length()
-  buf.push((track_len >> 24) & 0xFF)
-  buf.push((track_len >> 16) & 0xFF)
-  buf.push((track_len >> 8) & 0xFF)
-  buf.push(track_len & 0xFF)
-
-  // Append track data
-  for b in track_data {
-    buf.push(b)
-  }
+  write_track(buf, meta_track)
+  write_track(buf, melody_track)
+  write_track(buf, comping_track)
+  write_track(buf, bass_track)
+  write_track(buf, drum_track)
 
   buf
 }
