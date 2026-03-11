@@ -1,6 +1,6 @@
 ///|
 /// SoundEvent with pre-calculated duration and start time based on BPM
-pub struct ScheduledSound {
+pub(all) struct ScheduledSound {
   sound_event : SoundEvent
   duration : Duration
   start_time : Duration

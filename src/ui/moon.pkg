@@ -11,6 +11,7 @@ import {
   "internal/jazzene/ui/piano_roll",
   "internal/jazzene/ui/theme",
   "internal/jazzene/audio/web_midi_api" @web_midi,
+  "internal/jazzene/music/midi" @midi,
 }
 
 options(

@@ -1,0 +1,7 @@
+import {
+  "internal/jazzene/music",
+}
+
+options(
+  "is-main": false,
+)
