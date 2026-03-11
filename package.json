@@ -9,6 +9,7 @@
     "test": "moon test -p internal/jazzene/music internal/jazzene/music/generator internal/jazzene/music/sheet --target wasm-gc",
     "test:e2e": "playwright test",
     "dev": "vite",
+    "preview": "vite preview --port 4173",
     "start": "npm run dev -- --open",
     "build": "moon build --release && vite build",
     "download:samples": "bash scripts/download-samples.sh",
