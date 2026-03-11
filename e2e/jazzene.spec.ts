@@ -29,31 +29,6 @@ test.describe("Jazzene - Jazz Improvisation Web App", () => {
     await expect(jazzene.getPlayButton()).toBeEnabled();
   });
 
-  test("should reflect query parameters in controls", async ({ page }) => {
-    const params = {
-      key: "D",
-      time: "3/4",
-      bpm: "140",
-      seed: "42",
-      measures: "16",
-      chords: "IIIm7 | VIm7",
-      view: "sheet",
-      loop_a: "3",
-      loop_b: "6",
-    };
-    const paramJazzene = await openJazzenePage({ page, queryParams: params });
-
-    await expect(paramJazzene.getTimeSignatureSelect()).toHaveValue("3/4");
-    await expect(paramJazzene.getKeySelect()).toHaveValue("D");
-    await expect(paramJazzene.getBpmInput()).toHaveText("140");
-    await expect(paramJazzene.getSeedInput()).toHaveText("42");
-    await expect(paramJazzene.getMeasuresInput()).toHaveText("16");
-    await expect(paramJazzene.getChordInput()).toHaveValue("IIIm7 | VIm7");
-    await expect(paramJazzene.getActiveViewModeButton()).toHaveAttribute("title", "Sheet");
-    await expect(paramJazzene.getLoopAInput()).toHaveText("3");
-    await expect(paramJazzene.getLoopBInput()).toHaveText("6");
-  });
-
   test("should open settings panel with jazz controls", async () => {
     await jazzene.openSettingsPanel();
     const panel = jazzene.getSettingsPanel();
@@ -98,6 +73,40 @@ test.describe("Jazzene - Jazz Improvisation Web App", () => {
     expect(url.searchParams.get("bass")).toBe("off");
   });
 
+  test("should change playback position when clicking a measure", async () => {
+    await jazzene.play();
+    await jazzene.clickMeasure(5);
+
+    await expect(jazzene.getStopButton()).toBeEnabled();
+  });
+});
+
+test.describe("Jazzene - Query Parameters", () => {
+  test("should reflect query parameters in controls", async ({ page }) => {
+    const params = {
+      key: "D",
+      time: "3/4",
+      bpm: "140",
+      seed: "42",
+      measures: "16",
+      chords: "IIIm7 | VIm7",
+      view: "sheet",
+      loop_a: "3",
+      loop_b: "6",
+    };
+    const jazzene = await openJazzenePage({ page, queryParams: params });
+
+    await expect(jazzene.getTimeSignatureSelect()).toHaveValue("3/4");
+    await expect(jazzene.getKeySelect()).toHaveValue("D");
+    await expect(jazzene.getBpmInput()).toHaveText("140");
+    await expect(jazzene.getSeedInput()).toHaveText("42");
+    await expect(jazzene.getMeasuresInput()).toHaveText("16");
+    await expect(jazzene.getChordInput()).toHaveValue("IIIm7 | VIm7");
+    await expect(jazzene.getActiveViewModeButton()).toHaveAttribute("title", "Sheet");
+    await expect(jazzene.getLoopAInput()).toHaveText("3");
+    await expect(jazzene.getLoopBInput()).toHaveText("6");
+  });
+
   test("should restore jazz style from URL query parameters", async ({ page }) => {
     const params = {
       swing: "hard",
@@ -106,21 +115,14 @@ test.describe("Jazzene - Jazz Improvisation Web App", () => {
       drums: "sride",
       bass: "root",
     };
-    const paramJazzene = await openJazzenePage({ page, queryParams: params });
+    const jazzene = await openJazzenePage({ page, queryParams: params });
 
     // Open settings panel to verify the restored state
-    await paramJazzene.openSettingsPanel();
-    const panel = paramJazzene.getSettingsPanel();
+    await jazzene.openSettingsPanel();
+    const panel = jazzene.getSettingsPanel();
     await expect(panel).toBeVisible();
 
     // Comping should show as disabled (toggle off)
     await expect(panel).toContainText("Drums");
-  });
-
-  test("should change playback position when clicking a measure", async () => {
-    await jazzene.play();
-    await jazzene.clickMeasure(5);
-
-    await expect(jazzene.getStopButton()).toBeEnabled();
   });
 });
