@@ -32,9 +32,13 @@ pub fn write_vlq(value : Int, buf : Array[Int]) -> Unit {
 ///|
 /// Encode ScheduledSound array to MIDI file bytes (Standard MIDI File format 0).
 /// Returns Array[Int] (0-255 values) representing the SMF binary.
+/// Optional metadata: time_signature, key_signature, and text (e.g. chords/seed info).
 pub fn encode_to_midi(
   sounds : Array[@music.ScheduledSound],
   bpm : Int,
+  time_signature? : @music.TimeSignature = @music.TimeSignature::default(),
+  key_signature? : @music.KeySignature = @music.KeySignature::c_major(),
+  text? : String = "",
 ) -> Array[Int] {
   // Build events: (tick, kind, pitch) where kind 0=NoteOff, 1=NoteOn
   let events : Array[(Int, Int, Int)] = []
@@ -75,6 +79,48 @@ pub fn encode_to_midi(
   track_data.push((microseconds >> 16) & 0xFF)
   track_data.push((microseconds >> 8) & 0xFF)
   track_data.push(microseconds & 0xFF)
+
+  // Time signature meta-event (delta=0): FF 58 04 nn dd cc bb
+  // dd = denominator as power of 2 (4 -> 2, 8 -> 3)
+  let dd = match time_signature.denominator {
+    2 => 1
+    8 => 3
+    16 => 4
+    _ => 2
+  }
+  track_data.push(0)
+  track_data.push(0xFF)
+  track_data.push(0x58)
+  track_data.push(0x04)
+  track_data.push(time_signature.numerator)
+  track_data.push(dd)
+  track_data.push(24) // MIDI clocks per metronome tick
+  track_data.push(8) // 32nd notes per 24 MIDI clocks
+
+  // Key signature meta-event (delta=0): FF 59 02 sf mi
+  // sf: positive = sharps, negative (two's complement) = flats; mi: 0 = major
+  let sf = match key_signature.accidental_type {
+    Sharp => key_signature.altered_steps.length()
+    Flat => 256 - key_signature.altered_steps.length()
+    Natural => 0
+  }
+  track_data.push(0)
+  track_data.push(0xFF)
+  track_data.push(0x59)
+  track_data.push(0x02)
+  track_data.push(sf)
+  track_data.push(0) // major
+
+  // Text meta-event (delta=0): FF 01 len text (chords/seed info)
+  if text != "" {
+    track_data.push(0)
+    track_data.push(0xFF)
+    track_data.push(0x01)
+    write_vlq(text.length(), track_data)
+    for c in text {
+      track_data.push(c.to_int())
+    }
+  }
 
   // Note events with delta-time encoding
   let mut prev_tick = 0

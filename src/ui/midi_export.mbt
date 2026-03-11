@@ -17,11 +17,25 @@ extern "js" fn open_bytes_as_midi(arr : Array[Int]) -> Unit =
 pub fn midi_export_button(
   sounds : () -> Array[@music.ScheduledSound],
   bpm : () -> Int,
+  time_signature : () -> @music.TimeSignature,
+  key_signature : () -> @music.KeySignature,
+  raw_chord_progression : () -> String,
+  seed : () -> Int,
 ) -> @luna_dom.DomNode {
   @luna_dom.button(
     class="w-full px-2 py-0.5 text-xs bg-slate-900 hover:bg-slate-700 border border-slate-600 rounded text-slate-300 text-left",
     on=@luna_dom.events().click(fn(_) {
-      let bytes = @midi.encode_to_midi(sounds(), bpm())
+      let text = "chords: " +
+        raw_chord_progression() +
+        " seed: " +
+        seed().to_string()
+      let bytes = @midi.encode_to_midi(
+        sounds(),
+        bpm(),
+        time_signature=time_signature(),
+        key_signature=key_signature(),
+        text~,
+      )
       open_bytes_as_midi(bytes)
     }),
     [@luna_dom.text("Export MIDI")],

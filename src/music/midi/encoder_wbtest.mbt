@@ -61,11 +61,11 @@ test "write_vlq: values 16383 and 16384" {
 ///|
 test "encode_to_midi: header bytes match SMF spec" {
   let midi = encode_to_midi([], 120)
-  // Header: MThd + length=6 + format=0 + 1 track + 480 ticks
+  // Header: MThd + length=6 + format=1 (Parallel) + 1 track + 480 ticks
   let header = midi.iter().take(14).collect()
-  inspect(header, content="[77, 84, 104, 100, 0, 0, 0, 6, 0, 0, 0, 1, 1, 224]")
+  inspect(header, content="[77, 84, 104, 100, 0, 0, 0, 6, 0, 1, 0, 1, 1, 224]")
   // 0x4D=77, 0x54=84, 0x68=104, 0x64=100
-  // 0x01=1, 0xE0=224 => 480 ticks
+  // format=1 (Parallel), 1 track, 0x01E0=480 ticks
 }
 
 ///|
@@ -86,10 +86,10 @@ test "encode_to_midi: single note produces Note On and Note Off" {
   // start=0s => tick=0, duration=0.5s => end_tick=480
   let sound = make_note_sound(60, 0.0, 0.5)
   let midi = encode_to_midi([sound], 120)
-  // After header(14) + MTrk header(8) + tempo event(7) = byte 29
+  // After header(14) + MTrk header(8) + tempo(7) + time_sig(7) + key_sig(6) = byte 42
   // Note On: delta=0 (VLQ=0x00), 0x90, pitch=60, vel=64
   // Note Off: delta=480 ticks (VLQ=0x83,0x60), 0x80, pitch=60, 0x00
-  let events = midi.iter().drop(29).collect()
+  let events = midi.iter().drop(42).collect()
   inspect(
     events,
     content="[0, 144, 60, 64, 131, 96, 128, 60, 0, 0, 255, 47, 0]",
@@ -123,12 +123,12 @@ test "encode_to_midi: multiple notes ordered by start time" {
   let c4 = make_note_sound(60, 0.0, 0.5)
   let e4 = make_note_sound(64, 0.5, 0.5)
   let midi = encode_to_midi([c4, e4], 120)
-  // After header(14) + MTrk header(8) + tempo(7) = byte 29
+  // After header(14) + MTrk header(8) + tempo(7) + time_sig(7) + key_sig(6) = byte 42
   // C4 Note On:  delta=0,   0x90, 60, 64
   // C4 Note Off: delta=480, 0x80, 60, 0   (480 ticks VLQ = 0x83 0x60)
   // E4 Note On:  delta=0,   0x90, 64, 64
   // E4 Note Off: delta=480, 0x80, 64, 0
-  let events = midi.iter().drop(29).collect()
+  let events = midi.iter().drop(42).collect()
   inspect(
     events,
     content="[0, 144, 60, 64, 131, 96, 128, 60, 0, 0, 144, 64, 64, 131, 96, 128, 64, 0, 0, 255, 47, 0]",
