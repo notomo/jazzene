@@ -34,7 +34,7 @@ fn[T : Eq] segmented_buttons(
         dyn_class=fn() {
           cn([
             base,
-            "flex-1 text-center",
+            "flex-1 min-w-0 text-center",
             if current() == value {
               active
             } else {
@@ -139,25 +139,25 @@ let comping_mode_options : Array[(String, CompingMode)] = [
 
 ///|
 let comping_style_options : Array[(String, @music.CompingStyle)] = [
-  ("Guide Tones", @music.GuideTones),
+  ("Guide", @music.GuideTones),
   ("Full", @music.FullVoicing),
-  ("Tensions", @music.WithTensions),
-  ("Imported", @music.Imported),
+  ("Tension", @music.WithTensions),
+  ("MIDI", @music.Imported),
 ]
 
 ///|
 let drum_pattern_options : Array[(String, @music.DrumPatternStyle)] = [
   ("Ride", @music.SwingRide),
   ("Brush", @music.Brushes),
-  ("Imported", @music.Imported),
+  ("MIDI", @music.Imported),
 ]
 
 ///|
 let bass_style_options : Array[(String, @music.BassStyle)] = [
   ("Root", @music.RootOnly),
-  ("Root+5th", @music.RootFifth),
-  ("Walking", @music.WalkingBass),
-  ("Imported", @music.Imported),
+  ("R+5th", @music.RootFifth),
+  ("Walk", @music.WalkingBass),
+  ("MIDI", @music.Imported),
 ]
 
 ///|
