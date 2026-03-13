@@ -8,4 +8,5 @@ pub(all) enum ToneOrigin {
   ChromaticApproach // Chromatic approach tone (half-step above/below chord tone), used in AT→CT ornament
   Enclosure // Enclosure pattern (surrounding a chord tone from above and below)
   PassingTone // Passing tone (connecting scale tone)
+  Imported // Note imported from a MIDI file
 } derive(Eq, Show)

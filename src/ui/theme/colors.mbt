@@ -47,10 +47,10 @@ pub const COLOR_MIDI_ACTIVE = "#22d3ee"
 pub const PLAYING_COLOR_MIDI_ACTIVE = "#06b6d4"
 
 ///|
-pub const COLOR_MIDI_IMPORTED = "#a78bfa" // violet-400
+pub const COLOR_MIDI_IMPORTED = "#2dd4bf" // teal-400
 
 ///|
-pub const PLAYING_COLOR_MIDI_IMPORTED = "#7c3aed" // violet-600
+pub const PLAYING_COLOR_MIDI_IMPORTED = "#0d9488" // teal-600
 
 ///|
 pub fn tone_origin_color(origin : @music.ToneOrigin) -> String {
@@ -61,6 +61,7 @@ pub fn tone_origin_color(origin : @music.ToneOrigin) -> String {
     PassingTone => COLOR_PASSING_TONE
     Enclosure => COLOR_ENCLOSURE
     NeighborTone => COLOR_NEIGHBOR
+    Imported => COLOR_MIDI_IMPORTED
   }
 }
 
@@ -73,5 +74,6 @@ pub fn tone_origin_playing_color(origin : @music.ToneOrigin) -> String {
     PassingTone => PLAYING_COLOR_PASSING_TONE
     Enclosure => PLAYING_COLOR_ENCLOSURE
     NeighborTone => PLAYING_COLOR_NEIGHBOR
+    Imported => PLAYING_COLOR_MIDI_IMPORTED
   }
 }

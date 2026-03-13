@@ -340,6 +340,8 @@ fn draw_falling_notes(
     let is_playing = current_pos >= note.start_ms &&
       current_pos < note.start_ms + note.duration_ms
     ctx.fillStyle = match (note.tone_origin, is_playing, show_technique_hints) {
+      (Some(Imported), true, _) => @theme.PLAYING_COLOR_MIDI_IMPORTED
+      (Some(Imported), false, _) => @theme.COLOR_MIDI_IMPORTED
       (Some(origin), true, true) => @theme.tone_origin_playing_color(origin)
       (Some(origin), false, true) => @theme.tone_origin_color(origin)
       (Some(_), true, false) => @theme.PLAYING_COLOR_CHORD_TONE

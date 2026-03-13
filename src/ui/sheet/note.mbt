@@ -168,6 +168,14 @@ fn render_note_from_sheet(
   let note_y = note.y
   let note_head = render_note_head(note.duration, note_x, note_y)
   let colored_head = match note.tone_origin {
+    Some(Imported) =>
+      @luna_dom.svg_g(
+        attrs=[
+          ("fill", @luna_dom.Attr::AttrString(@theme.COLOR_MIDI_IMPORTED)),
+          ("stroke", @luna_dom.Attr::AttrString(@theme.COLOR_MIDI_IMPORTED)),
+        ],
+        [note_head],
+      )
     Some(origin) => {
       let color = @theme.tone_origin_color(origin)
       @luna_dom.svg_g(

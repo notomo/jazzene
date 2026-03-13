@@ -39,6 +39,7 @@ fn melody_velocity(tone_origin : @music.ToneOrigin?) -> Int {
     Some(Enclosure) => 70
     Some(NeighborTone) => 65
     Some(PassingTone) => 65
+    Some(Imported) => 80
     None => 80
   }
 }

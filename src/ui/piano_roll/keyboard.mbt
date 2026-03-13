@@ -46,6 +46,7 @@ pub fn keyboard(
         Some(m) =>
           set[m.value] = Some(
             match s.tone_origin {
+              Some(Imported) => @theme.PLAYING_COLOR_MIDI_IMPORTED
               Some(origin) =>
                 if show_technique_hints() {
                   @theme.tone_origin_playing_color(origin)

@@ -109,7 +109,7 @@ fn push_sound(
         sound_event: @music.Note(midi=m, duration=@music.NoteDuration::Quarter),
         duration: @music.Duration::from_milliseconds(dur_ms),
         start_time: @music.Duration::from_milliseconds(start_ms),
-        tone_origin: None,
+        tone_origin: Some(@music.ToneOrigin::Imported),
       }
       match ch {
         0 => melody.push(sound)
