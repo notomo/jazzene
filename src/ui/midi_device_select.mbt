@@ -149,6 +149,16 @@ pub fn midi_device_select(
             ),
           ],
           [
+            @luna_dom.create_element(
+              "option",
+              [
+                ("value", @luna_dom.AttrValue::Static("")),
+                ("disabled", @luna_dom.AttrValue::Static("true")),
+                ("selected", @luna_dom.AttrValue::Static("true")),
+                ("hidden", @luna_dom.AttrValue::Static("true")),
+              ],
+              [@luna_dom.text("Input device")],
+            ),
             @luna_dom.for_each(fn() { available_inputs.get() }, fn(input, _i) {
               let id = @web_midi.MidiInput::id(input)
               @luna_dom.create_element(

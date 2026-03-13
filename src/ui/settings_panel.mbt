@@ -187,11 +187,12 @@ pub fn settings_panel(
       ("aria-label", @luna_dom.Attr::AttrString("jazz settings panel")),
     ],
     [
-      // MIDI Input
-      settings_section("MIDI Input", [
+      settings_section("MIDI", [
         midi_device_select(midi_active_notes),
-        midi_export_button(get_midi_bytes),
-        midi_import_button(on_import),
+        @luna_dom.div(class="flex gap-1", [
+          midi_import_button(on_import),
+          midi_export_button(get_midi_bytes),
+        ]),
       ]),
       // Legend
       settings_section("Legend", [

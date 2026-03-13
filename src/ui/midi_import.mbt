@@ -24,8 +24,8 @@ pub fn midi_import_button(
   on_import : (Array[Int]) -> Unit,
 ) -> @luna_dom.DomNode {
   @luna_dom.button(
-    class="w-full px-2 py-0.5 text-xs bg-slate-900 hover:bg-slate-700 border border-slate-600 rounded text-slate-300 text-left",
+    class="flex-1 px-2 py-0.5 text-xs bg-slate-900 hover:bg-slate-700 border border-slate-600 rounded text-slate-300 text-center",
     on=@luna_dom.events().click(fn(_) { open_file_picker(on_import) }),
-    [@luna_dom.text("Import MIDI")],
+    [@luna_dom.text("Import")],
   )
 }

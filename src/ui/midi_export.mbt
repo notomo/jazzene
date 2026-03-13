@@ -18,8 +18,8 @@ pub fn midi_export_button(
   get_midi_bytes : () -> Array[Int],
 ) -> @luna_dom.DomNode {
   @luna_dom.button(
-    class="w-full px-2 py-0.5 text-xs bg-slate-900 hover:bg-slate-700 border border-slate-600 rounded text-slate-300 text-left",
+    class="flex-1 px-2 py-0.5 text-xs bg-slate-900 hover:bg-slate-700 border border-slate-600 rounded text-slate-300 text-center",
     on=@luna_dom.events().click(fn(_) { open_bytes_as_midi(get_midi_bytes()) }),
-    [@luna_dom.text("Export MIDI")],
+    [@luna_dom.text("Export")],
   )
 }
