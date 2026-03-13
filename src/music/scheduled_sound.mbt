@@ -175,6 +175,52 @@ pub fn sounds_to_measures(
 }
 
 ///|
+/// Scale all timing values proportionally when BPM changes (original_bpm / current_bpm)
+pub fn rescale_sounds(
+  sounds : Array[ScheduledSound],
+  original_bpm : Int,
+  current_bpm : Int,
+) -> Array[ScheduledSound] {
+  if original_bpm == current_bpm {
+    return sounds
+  }
+  let scale = original_bpm.to_double() / current_bpm.to_double()
+  sounds.map(fn(s) {
+    ScheduledSound::{
+      ..s,
+      start_time: Duration::from_milliseconds(
+        s.start_time.to_milliseconds() * scale,
+      ),
+      duration: Duration::from_milliseconds(
+        s.duration.to_milliseconds() * scale,
+      ),
+    }
+  })
+}
+
+///|
+/// Transpose all Note sounds by the given number of semitones
+pub fn transpose_sounds(
+  sounds : Array[ScheduledSound],
+  semitones : Int,
+) -> Array[ScheduledSound] {
+  if semitones == 0 {
+    return sounds
+  }
+  sounds.map(fn(s) {
+    match s.sound_event {
+      Note(midi~, duration~) =>
+        match MidiNumber::new(midi.value + semitones) {
+          Some(new_midi) =>
+            ScheduledSound::{ ..s, sound_event: Note(midi=new_midi, duration~) }
+          None => s
+        }
+      Rest(_) => s
+    }
+  })
+}
+
+///|
 /// Find the swing_delay of the next sounding note (skipping TieEnd/TieBoth)
 /// Returns 0.0 if no such note exists or if the next note is on-beat
 fn find_next_swing_delay(

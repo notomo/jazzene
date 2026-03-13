@@ -84,14 +84,16 @@ pub fn AppState::new() -> AppState {
     match jazz_style.get().melody_mode {
       On | Silent =>
         match imported_midi.get() {
-          Some(data) if not(data.melody_sounds.is_empty()) =>
+          Some(data) if not(data.melody_sounds.is_empty()) => {
+            let adapted = adapt_melody(data, bpm.get(), key.get())
             @music.sounds_to_measures(
-              data.melody_sounds,
+              adapted,
               bpm.get(),
               time_signature.get(),
               measure_count.get(),
               key.get(),
             )
+          }
           _ => full_measures()
         }
       Off =>
@@ -108,7 +110,8 @@ pub fn AppState::new() -> AppState {
       Off => []
       On | Silent =>
         match imported_midi.get() {
-          Some(data) if not(data.melody_sounds.is_empty()) => data.melody_sounds
+          Some(data) if not(data.melody_sounds.is_empty()) =>
+            adapt_melody(data, bpm.get(), key.get())
           _ => full_sounds()
         }
     }
@@ -118,7 +121,12 @@ pub fn AppState::new() -> AppState {
     match js.drum_pattern {
       @music.Imported =>
         match imported_midi.get() {
-          Some(data) => data.drum_sounds
+          Some(data) =>
+            @music.rescale_sounds(
+              data.drum_sounds,
+              data.bpm.unwrap_or(bpm.get()),
+              bpm.get(),
+            )
           None => []
         }
       _ =>
@@ -140,7 +148,8 @@ pub fn AppState::new() -> AppState {
     match js.comping_style {
       @music.Imported =>
         match imported_midi.get() {
-          Some(data) => data.comping_sounds
+          Some(data) =>
+            adapt_pitched(data, bpm.get(), key.get(), data.comping_sounds)
           None => []
         }
       _ =>
@@ -163,7 +172,8 @@ pub fn AppState::new() -> AppState {
     match js.bass_style {
       @music.Imported =>
         match imported_midi.get() {
-          Some(data) => data.bass_sounds
+          Some(data) =>
+            adapt_pitched(data, bpm.get(), key.get(), data.bass_sounds)
           None => []
         }
       _ =>
@@ -184,6 +194,29 @@ pub fn AppState::new() -> AppState {
       measure_count=measure_count.get(),
       beats_per_measure=time_signature.get().beats_per_measure(),
     )
+  })
+
+  // When chords are entered, switch any Imported accompaniment style to generated
+  let _ = @signals.effect(fn() {
+    if raw_chord_progression.get() != "" {
+      jazz_style.update(fn(js) {
+        JazzStyle::{
+          ..js,
+          comping_style: match js.comping_style {
+            @music.Imported => @music.GuideTones
+            _ => js.comping_style
+          },
+          bass_style: match js.bass_style {
+            @music.Imported => @music.WalkingBass
+            _ => js.bass_style
+          },
+          drum_pattern: match js.drum_pattern {
+            @music.Imported => @music.SwingRide
+            _ => js.drum_pattern
+          },
+        }
+      })
+    }
   })
 
   // Persist jazz_style and show_technique_hints changes to URL query parameters
@@ -261,4 +294,48 @@ fn make_app_measures(
     )
     leading_rest + music_measures + trailing_rest
   })
+}
+
+///|
+/// Compute semitone shift from imported key to current key, normalized to [-6, 6]
+fn key_shift(
+  data : @midi.ImportedMidi,
+  current_key : @music.KeySignature,
+) -> Int {
+  match data.key {
+    None => 0
+    Some(orig_key) => {
+      let raw = current_key.root.midi() - orig_key.root.midi()
+      if raw > 6 {
+        raw - 12
+      } else if raw < -6 {
+        raw + 12
+      } else {
+        raw
+      }
+    }
+  }
+}
+
+///|
+/// Adapt melody/comping/bass sounds: rescale timing by BPM and transpose by key
+fn adapt_pitched(
+  data : @midi.ImportedMidi,
+  current_bpm : Int,
+  current_key : @music.KeySignature,
+  sounds : Array[@music.ScheduledSound],
+) -> Array[@music.ScheduledSound] {
+  sounds
+  |> @music.rescale_sounds(data.bpm.unwrap_or(current_bpm), current_bpm)
+  |> @music.transpose_sounds(key_shift(data, current_key))
+}
+
+///|
+/// Adapt melody sounds specifically
+fn adapt_melody(
+  data : @midi.ImportedMidi,
+  current_bpm : Int,
+  current_key : @music.KeySignature,
+) -> Array[@music.ScheduledSound] {
+  adapt_pitched(data, current_bpm, current_key, data.melody_sounds)
 }
