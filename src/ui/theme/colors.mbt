@@ -47,6 +47,12 @@ pub const COLOR_MIDI_ACTIVE = "#22d3ee"
 pub const PLAYING_COLOR_MIDI_ACTIVE = "#06b6d4"
 
 ///|
+pub const COLOR_MIDI_IMPORTED = "#a78bfa" // violet-400
+
+///|
+pub const PLAYING_COLOR_MIDI_IMPORTED = "#7c3aed" // violet-600
+
+///|
 pub fn tone_origin_color(origin : @music.ToneOrigin) -> String {
   match origin {
     ChordTone => COLOR_CHORD_TONE

@@ -12,6 +12,7 @@ pub(all) enum BassStyle {
   RootOnly // Root note on beat 1 only; rests on other beats
   RootFifth // Root on beat 1, 5th on beat 3; rests on beats 2 and 4
   WalkingBass // Full walking bass: chord tones + approach tones, one note per beat
+  Imported // Imported from MIDI file; caller provides sounds directly
 } derive(Eq, Show)
 
 ///|
@@ -97,6 +98,7 @@ pub fn generate_walking_bass_sounds(
       None
     }
     match style {
+      Imported => () // unreachable; caller guards this
       RootOnly =>
         // One note per chord slot: root on beat 1 only
         for ci in 0..<n_chords {

@@ -13,6 +13,7 @@ let legend_entries : Array[(String, String, String)] = [
   ("●", @theme.COLOR_NEIGHBOR, "Neighbor Tone"),
   ("●", @theme.COLOR_COMPING, "Comping"),
   ("●", @theme.COLOR_MIDI_ACTIVE, "MIDI Input"),
+  ("●", @theme.COLOR_MIDI_IMPORTED, "MIDI Imported"),
 ]
 
 ///|
@@ -141,12 +142,14 @@ let comping_style_options : Array[(String, @music.CompingStyle)] = [
   ("Guide Tones", @music.GuideTones),
   ("Full", @music.FullVoicing),
   ("Tensions", @music.WithTensions),
+  ("Imported", @music.Imported),
 ]
 
 ///|
 let drum_pattern_options : Array[(String, @music.DrumPatternStyle)] = [
   ("Ride", @music.SwingRide),
   ("Brush", @music.Brushes),
+  ("Imported", @music.Imported),
 ]
 
 ///|
@@ -154,6 +157,7 @@ let bass_style_options : Array[(String, @music.BassStyle)] = [
   ("Root", @music.RootOnly),
   ("Root+5th", @music.RootFifth),
   ("Walking", @music.WalkingBass),
+  ("Imported", @music.Imported),
 ]
 
 ///|
@@ -172,7 +176,10 @@ pub fn settings_panel(
   show_technique_hints : @signals.Signal[Bool],
   midi_active_notes : @signals.Signal[Array[@music.MidiNumber]],
   get_midi_bytes : () -> Array[Int],
+  on_import : (Array[Int]) -> Unit,
+  imported_midi : @signals.Signal[@midi.ImportedMidi?],
 ) -> @luna_dom.DomNode {
+  let _ = imported_midi // available for future use in UI
   @luna_dom.div(
     class="bg-slate-800 border-l border-slate-600 p-3 overflow-y-auto flex flex-col gap-3 w-64 shrink-0",
     attrs=[
@@ -184,6 +191,7 @@ pub fn settings_panel(
       settings_section("MIDI Input", [
         midi_device_select(midi_active_notes),
         midi_export_button(get_midi_bytes),
+        midi_import_button(on_import),
       ]),
       // Legend
       settings_section("Legend", [
@@ -205,7 +213,8 @@ pub fn settings_panel(
                     @luna_dom.AttrValue::Dynamic(fn() {
                       let c = if show_technique_hints.get() ||
                         color == @theme.COLOR_COMPING ||
-                        color == @theme.COLOR_MIDI_ACTIVE {
+                        color == @theme.COLOR_MIDI_ACTIVE ||
+                        color == @theme.COLOR_MIDI_IMPORTED {
                         color
                       } else {
                         @theme.COLOR_CHORD_TONE

@@ -24,6 +24,7 @@ pub(all) enum CompingStyle {
   GuideTones // Guide tones only: 3rd and 7th (shell voicing)
   FullVoicing // All chord tones: root, 3rd, 5th, 7th
   WithTensions // Guide tones + one available tension (9th/11th/13th etc.)
+  Imported // Imported from MIDI file; caller provides sounds directly
 } derive(Eq, Show)
 
 ///|
@@ -162,6 +163,7 @@ pub fn generate_comping_sounds(
           GuideTones => shell_voicing(chord, prev_voicing)
           FullVoicing => full_voicing(chord, prev_voicing)
           WithTensions => tension_voicing(chord, prev_voicing, key)
+          Imported => shell_voicing(chord, prev_voicing) // unreachable; caller guards this
         }
         prev_voicing = Some(voicing)
         let is_last_chord = i == n - 1

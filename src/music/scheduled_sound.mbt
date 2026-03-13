@@ -121,6 +121,60 @@ pub fn convert_measures_to_sounds(
 }
 
 ///|
+/// Convert an array of ScheduledSounds back into Measures for sheet music rendering.
+/// Notes are quantized to beats and grouped by measure.
+pub fn sounds_to_measures(
+  sounds : Array[ScheduledSound],
+  bpm : Int,
+  time_signature : TimeSignature,
+  measure_count : Int,
+  key : KeySignature,
+) -> Array[Measure] {
+  let beat_ms = ms_per_beat(bpm)
+  let beats_per_meas = time_signature.beats_per_measure()
+  let meas_ms = ms_per_measure(bpm, beats_per_measure=beats_per_meas)
+  let num_beats = time_signature.numerator
+  Array::makei(measure_count, fn(mi) {
+    let meas_start = mi.to_double() * meas_ms
+    let calc_accidental = create_accidental_calculator(key)
+    let beats = Array::makei(num_beats, fn(bi) {
+      let beat_start = meas_start + bi.to_double() * beat_ms
+      let beat_end = beat_start + beat_ms
+      let notes = sounds
+        .iter()
+        .filter(fn(s) {
+          let t = s.start_time.to_milliseconds()
+          t >= beat_start && t < beat_end
+        })
+        .filter_map(fn(s) {
+          match s.midi() {
+            None => None
+            Some(m) => {
+              let dur_beats = s.duration.to_milliseconds() / beat_ms
+              let duration = NoteDuration::from_beats(dur_beats)
+              let accidental = calc_accidental(m)
+              Some(MeasureNote::{
+                midi: Some(m.value),
+                duration,
+                accidental,
+                tie: None,
+                tone_origin: s.tone_origin,
+              })
+            }
+          }
+        })
+        .collect()
+      Beat::{ count: bi, notes }
+    })
+    Measure::{
+      chords: [],
+      beats,
+      start_time: Duration::from_milliseconds(meas_start),
+    }
+  })
+}
+
+///|
 /// Find the swing_delay of the next sounding note (skipping TieEnd/TieBoth)
 /// Returns 0.0 if no such note exists or if the next note is on-beat
 fn find_next_swing_delay(

@@ -15,6 +15,7 @@ pub struct AppState {
   view_state : @signals.Signal[ViewState]
   is_playing : @signals.Signal[Bool]
   midi_active_notes : @signals.Signal[Array[@music.MidiNumber]]
+  imported_midi : @signals.Signal[@midi.ImportedMidi?]
   measures : () -> Array[@music.Measure]
   sounds : () -> Array[@music.ScheduledSound]
   drum_sounds : () -> Array[@music.ScheduledSound]
@@ -45,6 +46,9 @@ pub fn AppState::new() -> AppState {
   let view_state = @signals.signal(get_initial_view_state())
   let is_playing = @signals.signal(false)
   let midi_active_notes : @signals.Signal[Array[@music.MidiNumber]] = @signals.signal([],
+  )
+  let imported_midi : @signals.Signal[@midi.ImportedMidi?] = @signals.signal(
+    None,
   )
 
   let parsed_progression = @signals.memo(fn() {
@@ -78,7 +82,18 @@ pub fn AppState::new() -> AppState {
   })
   let measures : () -> Array[@music.Measure] = @signals.memo(fn() {
     match jazz_style.get().melody_mode {
-      On | Silent => full_measures()
+      On | Silent =>
+        match imported_midi.get() {
+          Some(data) if not(data.melody_sounds.is_empty()) =>
+            @music.sounds_to_measures(
+              data.melody_sounds,
+              bpm.get(),
+              time_signature.get(),
+              measure_count.get(),
+              key.get(),
+            )
+          _ => full_measures()
+        }
       Off =>
         full_measures().map(fn(m) {
           @music.Measure::{
@@ -90,49 +105,77 @@ pub fn AppState::new() -> AppState {
   })
   let sounds : () -> Array[@music.ScheduledSound] = @signals.memo(fn() {
     match jazz_style.get().melody_mode {
-      On | Silent => full_sounds()
       Off => []
+      On | Silent =>
+        match imported_midi.get() {
+          Some(data) if not(data.melody_sounds.is_empty()) => data.melody_sounds
+          _ => full_sounds()
+        }
     }
   })
   let drum_sounds : () -> Array[@music.ScheduledSound] = @signals.memo(fn() {
     let js = jazz_style.get()
-    if not(js.drums_enabled) {
-      []
-    } else {
-      @music.generate_drum_sounds(
-        bpm.get(),
-        measure_count.get(),
-        time_signature=time_signature.get(),
-        swing=js.swing,
-        pattern_style=js.drum_pattern,
-      )
+    match js.drum_pattern {
+      @music.Imported =>
+        match imported_midi.get() {
+          Some(data) => data.drum_sounds
+          None => []
+        }
+      _ =>
+        if not(js.drums_enabled) {
+          []
+        } else {
+          @music.generate_drum_sounds(
+            bpm.get(),
+            measure_count.get(),
+            time_signature=time_signature.get(),
+            swing=js.swing,
+            pattern_style=js.drum_pattern,
+          )
+        }
     }
   })
   let backing_sounds : () -> Array[@music.ScheduledSound] = @signals.memo(fn() {
     let js = jazz_style.get()
-    match js.comping_mode {
-      Off => []
-      Silent | On =>
-        @music.generate_comping_sounds(
-          full_measures(),
-          bpm.get(),
-          full_sounds(),
-          key.get(),
-          seed=seed.get(),
-          voicing_style=js.comping_style,
-        )
+    match js.comping_style {
+      @music.Imported =>
+        match imported_midi.get() {
+          Some(data) => data.comping_sounds
+          None => []
+        }
+      _ =>
+        match js.comping_mode {
+          Off => []
+          Silent | On =>
+            @music.generate_comping_sounds(
+              full_measures(),
+              bpm.get(),
+              full_sounds(),
+              key.get(),
+              seed=seed.get(),
+              voicing_style=js.comping_style,
+            )
+        }
     }
   })
   let bass_sounds : () -> Array[@music.ScheduledSound] = @signals.memo(fn() {
     let js = jazz_style.get()
-    if not(js.bass_enabled) {
-      []
-    } else {
-      @music.generate_walking_bass_sounds(
-        full_measures(),
-        bpm.get(),
-        js.bass_style,
-      )
+    match js.bass_style {
+      @music.Imported =>
+        match imported_midi.get() {
+          Some(data) => data.bass_sounds
+          None => []
+        }
+      _ =>
+        if not(js.bass_enabled) {
+          []
+        } else {
+          @music.generate_walking_bass_sounds(
+            full_measures(),
+            bpm.get(),
+            js.bass_style,
+          )
+        }
     }
   })
   let total_duration = @signals.memo(fn() {
@@ -165,6 +208,7 @@ pub fn AppState::new() -> AppState {
     view_state,
     is_playing,
     midi_active_notes,
+    imported_midi,
     measures,
     sounds,
     drum_sounds,

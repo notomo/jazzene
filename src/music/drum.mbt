@@ -40,6 +40,7 @@ pub fn DrumVoice::from_midi(midi : MidiNumber) -> DrumVoice? {
 pub(all) enum DrumPatternStyle {
   SwingRide // Swing ride pattern (ride spang-a-lang, hi-hat foot 2&4)
   Brushes // Brush pattern for ballads
+  Imported // Imported from MIDI file; caller provides sounds directly
 } derive(Eq, Show)
 
 ///|
@@ -155,6 +156,7 @@ fn DrumPattern::for_time_signature(
     (3, 4, Brushes) => DrumPattern::brushes_3_4()
     (_, _, SwingRide) => DrumPattern::swing_ride_4_4()
     (_, _, Brushes) => DrumPattern::brushes_4_4()
+    (_, _, Imported) => DrumPattern::swing_ride_4_4() // unreachable; caller guards this
   }
 }
 

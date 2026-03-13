@@ -262,6 +262,7 @@ fn comping_style_to_string(style : @music.CompingStyle) -> String {
     @music.GuideTones => "guide"
     @music.FullVoicing => "full"
     @music.WithTensions => "tensions"
+    @music.Imported => "guide" // not URL-persisted; fall back to default
   }
 }
 
@@ -283,6 +284,7 @@ fn drums_to_string(enabled : Bool, style : @music.DrumPatternStyle) -> String {
     match style {
       @music.SwingRide => "sride"
       @music.Brushes => "brush"
+      @music.Imported => "sride" // not URL-persisted; fall back to default
     }
   }
 }
@@ -307,6 +309,7 @@ fn bass_to_string(enabled : Bool, style : @music.BassStyle) -> String {
       @music.RootOnly => "root"
       @music.RootFifth => "root5"
       @music.WalkingBass => "walking"
+      @music.Imported => "walking" // not URL-persisted; fall back to default
     }
   }
 }

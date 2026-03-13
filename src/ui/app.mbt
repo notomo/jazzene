@@ -57,6 +57,7 @@ pub fn render(state : AppState) -> Unit {
     view_state,
     is_playing,
     midi_active_notes,
+    imported_midi,
     measures,
     sounds,
     backing_sounds,
@@ -80,6 +81,42 @@ pub fn render(state : AppState) -> Unit {
       key_signature=key.get(),
       text~,
     )
+  }
+  let on_import = fn(bytes : Array[Int]) {
+    match @midi.decode_midi(bytes) {
+      None => ()
+      Some(data) => {
+        match data.bpm {
+          Some(b) => bpm.set(b)
+          None => ()
+        }
+        match data.key {
+          Some(k) => key.set(k)
+          None => ()
+        }
+        match data.time_sig {
+          Some(ts) => time_signature.set(ts)
+          None => ()
+        }
+        match data.measure_count {
+          Some(mc) => {
+            measure_count.set(mc)
+            loop_b_measure.set(mc)
+          }
+          None => ()
+        }
+        raw_chord_progression.set("")
+        jazz_style.update(fn(js) {
+          JazzStyle::{
+            ..js,
+            comping_style: @music.Imported,
+            bass_style: @music.Imported,
+            drum_pattern: @music.Imported,
+          }
+        })
+        imported_midi.set(Some(data))
+      }
+    }
   }
   let app = @luna_dom.div(
     class="flex flex-col h-dvh overflow-hidden w-dvw bg-gradient-to-br from-slate-950 to-slate-900 text-white touch-manipulation",
@@ -198,6 +235,7 @@ pub fn render(state : AppState) -> Unit {
             [
               settings_panel(
                 jazz_style, show_technique_hints, midi_active_notes, get_midi_bytes,
+                on_import, imported_midi,
               ),
             ],
           ),
