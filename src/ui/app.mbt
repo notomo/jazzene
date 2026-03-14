@@ -106,7 +106,7 @@ pub fn render(state : AppState) -> Unit {
           None => ()
         }
         jazz_style.update(fn(js) {
-          JazzStyle::{
+          @music.JazzStyle::{
             ..js,
             comping_style: @music.Imported,
             bass_style: @music.Imported,

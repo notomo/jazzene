@@ -8,8 +8,8 @@ test "ImprovisationConfig::default has enclosure_ornament_probability" {
 
 ///|
 /// Verify Techniques has enclosure flag enabled by default
-test "Techniques::default has enclosure enabled" {
-  let t = Techniques::default()
+test "@music.Techniques::default has enclosure enabled" {
+  let t = @music.Techniques::default()
   assert_true(t.enclosure)
 }
 
@@ -17,7 +17,10 @@ test "Techniques::default has enclosure enabled" {
 /// Verify ImprovisationConfig::with_techniques zeros enclosure when disabled
 test "ImprovisationConfig::with_techniques zeros enclosure when disabled" {
   let s = ImprovisationConfig::default(0)
-  let t = Techniques::{ ..Techniques::default(), enclosure: false }
+  let t = @music.Techniques::{
+    ..@music.Techniques::default(),
+    enclosure: false,
+  }
   let result = s.with_techniques(t)
   assert_eq(result.enclosure_ornament_probability, 0)
 }

@@ -18,15 +18,15 @@ pub(all) enum CompingMode {
 /// Unified jazz style configuration for a performance session.
 /// Controls swing feel, melody techniques, and accompaniment elements.
 pub(all) struct JazzStyle {
-  swing : @music.SwingConfig
-  techniques : @generator.Techniques
+  swing : SwingConfig
+  techniques : Techniques
   melody_mode : MelodyMode
   comping_mode : CompingMode
   drums_enabled : Bool
   bass_enabled : Bool
-  comping_style : @music.CompingStyle
-  drum_pattern : @music.DrumPatternStyle
-  bass_style : @music.BassStyle
+  comping_style : CompingStyle
+  drum_pattern : DrumPatternStyle
+  bass_style : BassStyle
   pitch_min : Int
   pitch_max : Int
 } derive(Eq, Show)
@@ -35,18 +35,15 @@ pub(all) struct JazzStyle {
 /// Default JazzStyle: hard swing, all techniques on, full accompaniment.
 pub fn JazzStyle::default() -> JazzStyle {
   JazzStyle::{
-    swing: @music.SwingConfig::triplet(),
-    techniques: @generator.Techniques::{
-      ..@generator.Techniques::default(),
-      bebop_scales: true,
-    },
+    swing: SwingConfig::triplet(),
+    techniques: Techniques::{ ..Techniques::default(), bebop_scales: true },
     melody_mode: On,
     comping_mode: On,
     drums_enabled: true,
     bass_enabled: true,
-    comping_style: @music.WithTensions,
-    drum_pattern: @music.SwingRide,
-    bass_style: @music.WalkingBass,
+    comping_style: WithTensions,
+    drum_pattern: SwingRide,
+    bass_style: WalkingBass,
     pitch_min: 48,
     pitch_max: 84,
   }
@@ -56,7 +53,7 @@ pub fn JazzStyle::default() -> JazzStyle {
 /// Straight: no swing, chord tones only, no accompaniment.
 /// Good for hearing the basic melody structure.
 pub fn JazzStyle::straight() -> JazzStyle {
-  let all_off = @generator.Techniques::{
+  let all_off = Techniques::{
     tension_tones: false,
     chromatic_approach: false,
     enclosure: false,
@@ -67,15 +64,15 @@ pub fn JazzStyle::straight() -> JazzStyle {
     sixteenth_runs: false,
   }
   JazzStyle::{
-    swing: @music.SwingConfig::straight(),
+    swing: SwingConfig::straight(),
     techniques: all_off,
     melody_mode: On,
     comping_mode: Off,
     drums_enabled: false,
     bass_enabled: false,
-    comping_style: @music.GuideTones,
-    drum_pattern: @music.SwingRide,
-    bass_style: @music.RootOnly,
+    comping_style: GuideTones,
+    drum_pattern: SwingRide,
+    bass_style: RootOnly,
     pitch_min: 48,
     pitch_max: 84,
   }
@@ -85,7 +82,7 @@ pub fn JazzStyle::straight() -> JazzStyle {
 /// Simple: triplet swing, core techniques, guide tone comping.
 /// Good balance between readability and jazz character.
 pub fn JazzStyle::simple() -> JazzStyle {
-  let techniques = @generator.Techniques::{
+  let techniques = Techniques::{
     tension_tones: false,
     chromatic_approach: true,
     enclosure: false,
@@ -96,24 +93,16 @@ pub fn JazzStyle::simple() -> JazzStyle {
     sixteenth_runs: false,
   }
   JazzStyle::{
-    swing: @music.SwingConfig::triplet(),
+    swing: SwingConfig::triplet(),
     techniques,
     melody_mode: On,
     comping_mode: On,
     drums_enabled: true,
     bass_enabled: true,
-    comping_style: @music.GuideTones,
-    drum_pattern: @music.SwingRide,
-    bass_style: @music.RootOnly,
+    comping_style: GuideTones,
+    drum_pattern: SwingRide,
+    bass_style: RootOnly,
     pitch_min: 48,
     pitch_max: 84,
   }
 }
-
-///|
-/// All named presets: (label, constructor function)
-pub let presets : Array[(String, () -> JazzStyle)] = [
-  ("Straight", JazzStyle::straight),
-  ("Simple", JazzStyle::simple),
-  ("Default", JazzStyle::default),
-]

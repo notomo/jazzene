@@ -39,12 +39,12 @@ fn make_tick(
     )
 
     let audio_sounds = match state.jazz_style.get().melody_mode {
-      @ui.On =>
+      @music.On =>
         @music.AudioSound::from((state.sounds)(), final_position, lookahead)
-      @ui.Silent | @ui.Off => []
+      @music.Silent | @music.Off => []
     }
     let backing_audio_sounds = match state.jazz_style.get().comping_mode {
-      @ui.Silent => []
+      @music.Silent => []
       _ =>
         @music.AudioSound::from(
           (state.backing_sounds)(),

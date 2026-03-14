@@ -172,7 +172,7 @@ fn swing_from_string(s : String) -> @music.SwingConfig {
 
 ///|
 /// Serialize Techniques to a comma-separated list of enabled technique names.
-fn techniques_to_string(t : @generator.Techniques) -> String {
+fn techniques_to_string(t : @music.Techniques) -> String {
   let names : Array[String] = []
   if t.tension_tones {
     names.push("tension")
@@ -203,10 +203,10 @@ fn techniques_to_string(t : @generator.Techniques) -> String {
 
 ///|
 /// Deserialize Techniques from a comma-separated list of technique names.
-fn techniques_from_string(s : String) -> @generator.Techniques {
+fn techniques_from_string(s : String) -> @music.Techniques {
   let parts = s.split(",").to_array()
   let has = fn(name : String) -> Bool { parts.contains(name) }
-  @generator.Techniques::{
+  @music.Techniques::{
     tension_tones: has("tension"),
     chromatic_approach: has("chromatic"),
     enclosure: has("enclosure"),
@@ -220,39 +220,39 @@ fn techniques_from_string(s : String) -> @generator.Techniques {
 
 ///|
 /// Serialize MelodyMode to a query-string token.
-fn melody_mode_to_string(mode : MelodyMode) -> String {
+fn melody_mode_to_string(mode : @music.MelodyMode) -> String {
   match mode {
-    On => "on"
-    Silent => "silent"
-    Off => "off"
+    @music.On => "on"
+    @music.Silent => "silent"
+    @music.Off => "off"
   }
 }
 
 ///|
 /// Deserialize MelodyMode from a query-string token.
-fn melody_mode_from_string(s : String) -> MelodyMode {
+fn melody_mode_from_string(s : String) -> @music.MelodyMode {
   match s {
-    "silent" => Silent
-    "off" => Off
-    _ => On
+    "silent" => @music.Silent
+    "off" => @music.Off
+    _ => @music.On
   }
 }
 
 ///|
-fn comping_mode_to_string(mode : CompingMode) -> String {
+fn comping_mode_to_string(mode : @music.CompingMode) -> String {
   match mode {
-    Off => "off"
-    Silent => "silent"
-    On => "on"
+    @music.Off => "off"
+    @music.Silent => "silent"
+    @music.On => "on"
   }
 }
 
 ///|
-fn comping_mode_from_string(s : String) -> CompingMode {
+fn comping_mode_from_string(s : String) -> @music.CompingMode {
   match s {
-    "off" => Off
-    "silent" => Silent
-    _ => On
+    "off" => @music.Off
+    "silent" => @music.Silent
+    _ => @music.On
   }
 }
 
@@ -327,8 +327,8 @@ fn bass_from_string(s : String) -> (Bool, @music.BassStyle) {
 
 ///|
 /// Save JazzStyle to URL query parameters, omitting defaults.
-pub fn save_jazz_style(js : JazzStyle) -> Unit {
-  let default_js = JazzStyle::default()
+pub fn save_jazz_style(js : @music.JazzStyle) -> Unit {
+  let default_js = @music.JazzStyle::default()
   set_query_param(
     "swing",
     swing_to_string(js.swing),
@@ -337,7 +337,7 @@ pub fn save_jazz_style(js : JazzStyle) -> Unit {
   set_query_param(
     "techniques",
     techniques_to_string(js.techniques),
-    default=techniques_to_string(@generator.Techniques::default()),
+    default=techniques_to_string(@music.Techniques::default()),
   )
   set_query_param(
     "comping",
@@ -391,8 +391,8 @@ pub fn save_show_technique_hints(show : Bool) -> Unit {
 
 ///|
 /// Load JazzStyle from URL query parameters, falling back to defaults.
-pub fn get_initial_jazz_style() -> JazzStyle {
-  let default_js = JazzStyle::default()
+pub fn get_initial_jazz_style() -> @music.JazzStyle {
+  let default_js = @music.JazzStyle::default()
   let swing = match get_query_param("swing") {
     Some(s) => swing_from_string(s)
     None => default_js.swing
@@ -423,7 +423,7 @@ pub fn get_initial_jazz_style() -> JazzStyle {
   }
   let pitch_min = get_initial_int("pitch_min", default_pitch_min)
   let pitch_max = get_initial_int("pitch_max", default_pitch_max)
-  JazzStyle::{
+  @music.JazzStyle::{
     swing,
     techniques,
     melody_mode,

@@ -48,7 +48,7 @@ fn pct_to_midi(pct : Double) -> Int {
 ///|
 /// Dual-handle horizontal slider for setting pitch_min and pitch_max.
 pub fn pitch_range_slider(
-  jazz_style : @signals.Signal[JazzStyle],
+  jazz_style : @signals.Signal[@music.JazzStyle],
 ) -> @luna_dom.DomNode {
   let track_left : Ref[Double] = Ref::new(0.0)
   let track_width : Ref[Double] = Ref::new(1.0)
@@ -70,13 +70,13 @@ pub fn pitch_range_slider(
         @cmp.maximum(new_midi, pitch_slider_min),
         js.pitch_max - 1,
       )
-      jazz_style.update(fn(s) { JazzStyle::{ ..s, pitch_min: clamped } })
+      jazz_style.update(fn(s) { @music.JazzStyle::{ ..s, pitch_min: clamped } })
     } else {
       let clamped = @cmp.minimum(
         @cmp.maximum(new_midi, js.pitch_min + 1),
         pitch_slider_max,
       )
-      jazz_style.update(fn(s) { JazzStyle::{ ..s, pitch_max: clamped } })
+      jazz_style.update(fn(s) { @music.JazzStyle::{ ..s, pitch_max: clamped } })
     }
     add_document_drag_listeners(
       fn(cx) {
@@ -88,13 +88,17 @@ pub fn pitch_range_slider(
             @cmp.maximum(midi, pitch_slider_min),
             cur.pitch_max - 1,
           )
-          jazz_style.update(fn(s) { JazzStyle::{ ..s, pitch_min: clamped } })
+          jazz_style.update(fn(s) {
+            @music.JazzStyle::{ ..s, pitch_min: clamped }
+          })
         } else {
           let clamped = @cmp.minimum(
             @cmp.maximum(midi, cur.pitch_min + 1),
             pitch_slider_max,
           )
-          jazz_style.update(fn(s) { JazzStyle::{ ..s, pitch_max: clamped } })
+          jazz_style.update(fn(s) {
+            @music.JazzStyle::{ ..s, pitch_max: clamped }
+          })
         }
       },
       fn() {  },

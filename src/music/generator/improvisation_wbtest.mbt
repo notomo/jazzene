@@ -315,7 +315,7 @@ test "improvisation preserves tie when not at last measure" {
 ///|
 test "with_techniques disabling non-chord-tone techniques: generated notes use only chord tones" {
   // Disable all techniques that produce non-chord tones
-  let techniques = Techniques::{
+  let techniques = @music.Techniques::{
     tension_tones: false,
     chromatic_approach: false,
     enclosure: false,

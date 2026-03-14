@@ -10,7 +10,7 @@ pub struct AppState {
   volume : @signals.Signal[Int]
   loop_a_measure : @signals.Signal[Int]
   loop_b_measure : @signals.Signal[Int]
-  jazz_style : @signals.Signal[JazzStyle]
+  jazz_style : @signals.Signal[@music.JazzStyle]
   show_technique_hints : @signals.Signal[Bool]
   view_state : @signals.Signal[ViewState]
   is_playing : @signals.Signal[Bool]
@@ -82,7 +82,7 @@ pub fn AppState::new() -> AppState {
   })
   let measures : () -> Array[@music.Measure] = @signals.memo(fn() {
     match jazz_style.get().melody_mode {
-      On | Silent =>
+      @music.On | @music.Silent =>
         match imported_midi.get() {
           Some(data) if not(data.melody_sounds.is_empty()) => {
             let adapted = adapt_melody(data, bpm.get(), key.get())
@@ -96,7 +96,7 @@ pub fn AppState::new() -> AppState {
           }
           _ => full_measures()
         }
-      Off =>
+      @music.Off =>
         full_measures().map(fn(m) {
           @music.Measure::{
             ..m,
@@ -107,8 +107,8 @@ pub fn AppState::new() -> AppState {
   })
   let sounds : () -> Array[@music.ScheduledSound] = @signals.memo(fn() {
     match jazz_style.get().melody_mode {
-      Off => []
-      On | Silent =>
+      @music.Off => []
+      @music.On | @music.Silent =>
         match imported_midi.get() {
           Some(data) if not(data.melody_sounds.is_empty()) =>
             adapt_melody(data, bpm.get(), key.get())
@@ -154,8 +154,8 @@ pub fn AppState::new() -> AppState {
         }
       _ =>
         match js.comping_mode {
-          Off => []
-          Silent | On =>
+          @music.Off => []
+          @music.Silent | @music.On =>
             @music.generate_comping_sounds(
               full_measures(),
               bpm.get(),
@@ -200,7 +200,7 @@ pub fn AppState::new() -> AppState {
   let _ = @signals.effect(fn() {
     if raw_chord_progression.get() != "" {
       jazz_style.update(fn(js) {
-        JazzStyle::{
+        @music.JazzStyle::{
           ..js,
           comping_style: match js.comping_style {
             @music.Imported => @music.GuideTones
@@ -260,7 +260,7 @@ fn make_app_measures(
   bpm : @signals.Signal[Int],
   key : @signals.Signal[@music.KeySignature],
   time_signature : @signals.Signal[@music.TimeSignature],
-  jazz_style : @signals.Signal[JazzStyle],
+  jazz_style : @signals.Signal[@music.JazzStyle],
 ) -> () -> Array[@music.Measure] {
   @signals.memo(fn() {
     let ts = time_signature.get()

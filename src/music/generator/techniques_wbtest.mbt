@@ -1,21 +1,7 @@
 ///|
-test "Techniques::default enables standard techniques, bebop disabled by default" {
-  let t = Techniques::default()
-  assert_true(t.tension_tones)
-  assert_true(t.chromatic_approach)
-  assert_true(t.enclosure)
-  assert_true(t.syncopation)
-  assert_true(t.triplets)
-  // bebop_scales is enabled by default
-  assert_true(t.bebop_scales)
-  // neighbor_tones enabled by default
-  assert_true(t.neighbor_tones)
-}
-
-///|
 test "ImprovisationConfig::with_techniques preserves values when all enabled" {
   let s = ImprovisationConfig::default(42)
-  let t = Techniques::default()
+  let t = @music.Techniques::default()
   let result = s.with_techniques(t)
   assert_eq(result.tension_weight_ratio, s.tension_weight_ratio)
   assert_eq(
@@ -38,7 +24,10 @@ test "ImprovisationConfig::with_techniques enables bebop when flag is true" {
     ..ImprovisationConfig::default(42),
     bebop_ornament_probability: 40,
   }
-  let t = Techniques::{ ..Techniques::default(), bebop_scales: true }
+  let t = @music.Techniques::{
+    ..@music.Techniques::default(),
+    bebop_scales: true,
+  }
   let result = s.with_techniques(t)
   assert_eq(result.bebop_ornament_probability, 40)
 }
@@ -49,7 +38,10 @@ test "ImprovisationConfig::with_techniques zeros bebop when flag is false" {
     ..ImprovisationConfig::default(42),
     bebop_ornament_probability: 40,
   }
-  let t = Techniques::{ ..Techniques::default(), bebop_scales: false }
+  let t = @music.Techniques::{
+    ..@music.Techniques::default(),
+    bebop_scales: false,
+  }
   let result = s.with_techniques(t)
   assert_eq(result.bebop_ornament_probability, 0)
 }
@@ -57,7 +49,10 @@ test "ImprovisationConfig::with_techniques zeros bebop when flag is false" {
 ///|
 test "ImprovisationConfig::with_techniques preserves neighbor_ornament_probability when enabled" {
   let s = ImprovisationConfig::default(42)
-  let t = Techniques::{ ..Techniques::default(), neighbor_tones: true }
+  let t = @music.Techniques::{
+    ..@music.Techniques::default(),
+    neighbor_tones: true,
+  }
   let result = s.with_techniques(t)
   assert_eq(
     result.neighbor_ornament_probability,
@@ -68,7 +63,10 @@ test "ImprovisationConfig::with_techniques preserves neighbor_ornament_probabili
 ///|
 test "ImprovisationConfig::with_techniques zeros neighbor_ornament_probability when disabled" {
   let s = ImprovisationConfig::default(42)
-  let t = Techniques::{ ..Techniques::default(), neighbor_tones: false }
+  let t = @music.Techniques::{
+    ..@music.Techniques::default(),
+    neighbor_tones: false,
+  }
   let result = s.with_techniques(t)
   assert_eq(result.neighbor_ornament_probability, 0)
 }
@@ -76,7 +74,10 @@ test "ImprovisationConfig::with_techniques zeros neighbor_ornament_probability w
 ///|
 test "ImprovisationConfig::with_techniques zeros tension when disabled" {
   let s = ImprovisationConfig::default(42)
-  let t = Techniques::{ ..Techniques::default(), tension_tones: false }
+  let t = @music.Techniques::{
+    ..@music.Techniques::default(),
+    tension_tones: false,
+  }
   let result = s.with_techniques(t)
   assert_eq(result.tension_weight_ratio, 0)
 }
@@ -84,7 +85,10 @@ test "ImprovisationConfig::with_techniques zeros tension when disabled" {
 ///|
 test "ImprovisationConfig::with_techniques zeros approach tones when disabled" {
   let s = ImprovisationConfig::default(42)
-  let t = Techniques::{ ..Techniques::default(), chromatic_approach: false }
+  let t = @music.Techniques::{
+    ..@music.Techniques::default(),
+    chromatic_approach: false,
+  }
   let result = s.with_techniques(t)
   assert_eq(result.chromatic_approach_ornament_probability, 0)
 }
@@ -92,7 +96,10 @@ test "ImprovisationConfig::with_techniques zeros approach tones when disabled" {
 ///|
 test "ImprovisationConfig::with_techniques zeros syncopation when disabled" {
   let s = ImprovisationConfig::default(42)
-  let t = Techniques::{ ..Techniques::default(), syncopation: false }
+  let t = @music.Techniques::{
+    ..@music.Techniques::default(),
+    syncopation: false,
+  }
   let result = s.with_techniques(t)
   assert_eq(result.syncopation_probability, 0)
 }
@@ -100,7 +107,7 @@ test "ImprovisationConfig::with_techniques zeros syncopation when disabled" {
 ///|
 test "ImprovisationConfig::with_techniques zeros triplets when disabled" {
   let s = ImprovisationConfig::default(42)
-  let t = Techniques::{ ..Techniques::default(), triplets: false }
+  let t = @music.Techniques::{ ..@music.Techniques::default(), triplets: false }
   let result = s.with_techniques(t)
   assert_eq(result.triplet_probability, 0)
 }
@@ -108,7 +115,7 @@ test "ImprovisationConfig::with_techniques zeros triplets when disabled" {
 ///|
 test "ImprovisationConfig::with_techniques zeros multiple techniques" {
   let s = ImprovisationConfig::default(42)
-  let t = Techniques::{
+  let t = @music.Techniques::{
     tension_tones: false,
     chromatic_approach: false,
     enclosure: false,
