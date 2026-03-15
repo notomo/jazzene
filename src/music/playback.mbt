@@ -1,4 +1,65 @@
 ///|
+/// Grouped audio sounds for scheduling across all instrument channels
+pub struct ScheduledSounds {
+  piano : Array[AudioSound]
+  comping : Array[AudioSound]
+  bass : Array[AudioSound]
+  drum : Array[AudioSound]
+}
+
+///|
+/// Abstraction over audio output; implemented by the synthesizer in the audio layer
+pub(open) trait AudioOutput {
+  schedule_sounds(Self, ScheduledSounds) -> Unit
+}
+
+///|
+/// Build a tick function that advances playback and schedules audio each frame.
+/// All inputs are thunks so this function has no dependency on ui or audio packages.
+pub fn[T : AudioOutput] make_tick(
+  audio_output~ : T,
+  total_duration~ : () -> Duration,
+  bpm~ : () -> Int,
+  beats_per_measure~ : () -> Double,
+  playback_position~ : () -> Duration,
+  set_playback_position~ : (Duration) -> Unit,
+  loop_a_measure~ : () -> Int,
+  loop_b_measure~ : () -> Int,
+  jazz_style~ : () -> JazzStyle,
+  sounds~ : () -> Array[ScheduledSound],
+  comping_sounds~ : () -> Array[ScheduledSound],
+  bass_sounds~ : () -> Array[ScheduledSound],
+  drum_sounds~ : () -> Array[ScheduledSound],
+) -> (Double) -> Bool {
+  let lookahead = Duration::from_milliseconds(100)
+  fn(elapsed_ms : Double) -> Bool {
+    let final_position = advance_playback_position(
+      playback_position(),
+      elapsed_ms,
+      total_duration(),
+      bpm(),
+      beats_per_measure(),
+      loop_a_measure(),
+      loop_b_measure(),
+    )
+    let style = jazz_style()
+    let piano = match style.melody_mode {
+      On => AudioSound::from(sounds(), final_position, lookahead)
+      Silent | Off => []
+    }
+    let comping = match style.comping_mode {
+      Silent => []
+      _ => AudioSound::from(comping_sounds(), final_position, lookahead)
+    }
+    let bass = AudioSound::from(bass_sounds(), final_position, lookahead)
+    let drum = AudioSound::from(drum_sounds(), final_position, lookahead)
+    audio_output.schedule_sounds(ScheduledSounds::{ piano, comping, bass, drum })
+    set_playback_position(final_position)
+    false
+  }
+}
+
+///|
 /// Convert a 1-based measure number to its start Duration at the given BPM
 pub fn measure_to_duration(
   measure_number : Int,

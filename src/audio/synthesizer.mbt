@@ -37,6 +37,20 @@ pub fn Synthesizer::set_master_volume(
 }
 
 ///|
+pub impl @music.AudioOutput for Synthesizer with schedule_sounds(
+  self,
+  scheduled,
+) {
+  Synthesizer::schedule_sounds(
+    self,
+    piano_sounds=scheduled.piano,
+    comping_sounds=scheduled.comping,
+    bass_sounds=scheduled.bass,
+    drum_sounds=scheduled.drum,
+  )
+}
+
+///|
 /// Schedule audio sounds for playback across piano, bass, and drum components
 pub fn Synthesizer::schedule_sounds(
   self : Synthesizer,
