@@ -1,5 +1,5 @@
 ///|
-/// FFI: receive byte array, create Blob, and download as melody.mid
+/// FFI: receive byte array, create Blob, and download as jazzene_{datetime}.mid
 extern "js" fn open_bytes_as_midi(arr : Array[Int]) -> Unit =
   #|(arr) => {
   #|  const bytes = new Uint8Array(arr);
@@ -7,7 +7,10 @@ extern "js" fn open_bytes_as_midi(arr : Array[Int]) -> Unit =
   #|  const url = URL.createObjectURL(blob);
   #|  const a = document.createElement('a');
   #|  a.href = url;
-  #|  a.download = 'melody.mid';
+  #|  const now = new Date();
+  #|  const pad = n => String(n).padStart(2, '0');
+  #|  const datetime = `${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+  #|  a.download = `jazzene_${datetime}.mid`;
   #|  a.click();
   #|  URL.revokeObjectURL(url);
   #|}
