@@ -8,14 +8,14 @@ pub(all) struct ChordSegment {
 
 ///|
 /// Phrase state for phrase-based note generation
-priv enum PhraseState {
+pub(all) enum PhraseState {
   Playing(Int) // remaining notes in phrase (including current)
   Resting // must insert rest, then start new phrase
 }
 
 ///|
 /// Context passed to MeasureGenerator
-pub struct MeasureContext {
+pub(all) struct MeasureContext {
   chords : Array[ChordSegment] // Chord segments within this measure
   incoming_tie : TieContext? // Tie from previous measure
   key : @music.KeySignature
@@ -65,14 +65,14 @@ pub fn create_chord_segments(
 
 ///|
 /// Tie information for cross-measure notes
-pub struct TieContext {
+pub(all) struct TieContext {
   midi : @music.MidiNumber
   remaining_beats : Double
 }
 
 ///|
 /// Result from MeasureGenerator
-pub struct MeasureResult {
+pub(all) struct MeasureResult {
   beats : Array[@music.Beat]
   outgoing_tie : TieContext? // Tie to next measure
   outgoing_stamina : Int // Stamina to pass to next measure
@@ -154,7 +154,7 @@ pub fn create_measure_generator(
 
 ///|
 /// Internal state for measure generation
-priv struct MeasureState {
+pub(all) struct MeasureState {
   measure_pos : Double
   beat_notes : Array[Array[@music.MeasureNote]]
   stamina : Int
@@ -164,7 +164,7 @@ priv struct MeasureState {
 }
 
 ///|
-fn MeasureState::new(
+pub fn MeasureState::new(
   num_beats : Int,
   stamina : Int,
   last_midi : @music.MidiNumber?,
@@ -208,7 +208,7 @@ fn MeasureState::to_beats(self : MeasureState) -> Array[@music.Beat] {
 
 ///|
 /// Calculate the stamina cost for an interval jump
-fn interval_cost(prev : @music.MidiNumber, next : @music.MidiNumber) -> Int {
+pub fn interval_cost(prev : @music.MidiNumber, next : @music.MidiNumber) -> Int {
   let distance = prev.distance(next)
   match distance {
     0..=2 => 0
@@ -765,7 +765,7 @@ fn extend_across_octaves(
 /// High stamina → low rest probability (want to play)
 /// Low stamina → high rest probability (need to rest)
 /// After rest → lower rest probability (avoid consecutive rests)
-fn effective_rest_probability(
+pub fn effective_rest_probability(
   base_probability : Int,
   stamina : Int,
   stamina_max : Int,
@@ -784,7 +784,7 @@ fn effective_rest_probability(
 ///|
 /// Filter tones to only those within max_interval semitones of prev.
 /// If all are filtered out, returns the single closest tone as fallback.
-fn filter_by_interval(
+pub fn filter_by_interval(
   tones : Array[@music.MidiNumber],
   prev : @music.MidiNumber,
   max_interval : Int,
@@ -812,7 +812,7 @@ fn filter_by_interval(
 /// Decide whether to generate a note or rest, and if note, which MIDI number.
 /// Returns (midi, tone_origin) pair: both None for rests, both Some for notes.
 /// Uses stamina-based weighted selection for chord tones.
-fn decide_midi_number(
+pub fn decide_midi_number(
   chord : @music.Chord,
   last_midi : @music.MidiNumber?,
   stamina : Int,

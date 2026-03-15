@@ -155,7 +155,7 @@ test "convert_measures_to_sounds: on-beat note not extended when next note is al
 
 ///|
 test "in_range" {
-  let midi = MidiNumber::{ value: 60 }
+  let midi = MidiNumber::new(60).unwrap()
   let sound = ScheduledSound::{
     sound_event: Note(midi~, duration=Quarter),
     duration: Duration::from_milliseconds(500),
@@ -170,7 +170,7 @@ test "in_range" {
 
 ///|
 test "calculate_playing_notes" {
-  let midi = MidiNumber::{ value: 60 }
+  let midi = MidiNumber::new(60).unwrap()
   let sounds = [
     ScheduledSound::{
       sound_event: Note(midi~, duration=Quarter),

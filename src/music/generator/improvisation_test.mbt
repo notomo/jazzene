@@ -76,12 +76,12 @@ test "Chord::approach_tones returns chromatic half-steps around chord tones for 
 }
 
 ///|
-test "create_chord_segments evenly distributes chords" {
+test "@generator.create_chord_segments evenly distributes chords" {
   let chords = [
     @music.Chord::{ root: @music.C, quality: @music.Major7, bass: None },
     @music.Chord::{ root: @music.G, quality: @music.Dominant7, bass: None },
   ]
-  let segments = create_chord_segments(chords, 4.0)
+  let segments = @generator.create_chord_segments(chords, 4.0)
   assert_eq(segments.length(), 2)
   // First chord: beats 0-2
   assert_eq(segments[0].start_beat, 0.0)
@@ -99,8 +99,8 @@ test "MeasureContext::chord_at returns correct chord for position" {
     @music.Chord::{ root: @music.C, quality: @music.Major7, bass: None },
     @music.Chord::{ root: @music.G, quality: @music.Dominant7, bass: None },
   ]
-  let segments = create_chord_segments(chords, 4.0)
-  let ctx = MeasureContext::{
+  let segments = @generator.create_chord_segments(chords, 4.0)
+  let ctx = @generator.MeasureContext::{
     chords: segments,
     incoming_tie: None,
     key: @music.KeySignature::c_major(),
@@ -130,7 +130,7 @@ test "improvisation removes dangling tie at last measure" {
     match ctx.incoming_tie {
       Some(tie_ctx) =>
         // Handle incoming tie
-        MeasureResult::{
+        @generator.MeasureResult::{
           beats: [
             @music.Beat::{
               count: 0,
@@ -154,7 +154,7 @@ test "improvisation removes dangling tie at last measure" {
         }
       None =>
         // Always produce a note that extends beyond the measure (TieStart)
-        MeasureResult::{
+        @generator.MeasureResult::{
           beats: [
             @music.Beat::{
               count: 0,
@@ -169,7 +169,10 @@ test "improvisation removes dangling tie at last measure" {
               ],
             },
           ],
-          outgoing_tie: Some(TieContext::{ midi: midi60, remaining_beats: 2.0 }),
+          outgoing_tie: Some(@generator.TieContext::{
+            midi: midi60,
+            remaining_beats: 2.0,
+          }),
           outgoing_stamina: ctx.incoming_stamina,
           outgoing_last_midi: Some(midi60),
           outgoing_phrase: None,
@@ -206,7 +209,7 @@ test "improvisation preserves tie when not at last measure" {
     call_count.val = call_count.val + 1
     match ctx.incoming_tie {
       Some(tie_ctx) =>
-        MeasureResult::{
+        @generator.MeasureResult::{
           beats: [
             @music.Beat::{
               count: 0,
@@ -238,7 +241,7 @@ test "improvisation preserves tie when not at last measure" {
       None =>
         if call_count.val == 2 {
           // Second measure (first chord measure): create tie
-          MeasureResult::{
+          @generator.MeasureResult::{
             beats: [
               @music.Beat::{
                 count: 0,
@@ -253,7 +256,7 @@ test "improvisation preserves tie when not at last measure" {
                 ],
               },
             ],
-            outgoing_tie: Some(TieContext::{
+            outgoing_tie: Some(@generator.TieContext::{
               midi: midi60,
               remaining_beats: 2.0,
             }),
@@ -263,7 +266,7 @@ test "improvisation preserves tie when not at last measure" {
           }
         } else {
           // Leading rest measure
-          MeasureResult::{
+          @generator.MeasureResult::{
             beats: [
               @music.Beat::{
                 count: 0,

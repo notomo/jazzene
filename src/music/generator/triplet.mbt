@@ -2,7 +2,7 @@
 /// Decide whether to generate a triplet group at the current position.
 /// Requires: on an integer beat, at least 3 notes left in phrase,
 /// at least 1 beat remaining, and probability check passes.
-fn should_generate_triplet(
+pub fn should_generate_triplet(
   measure_pos : Double,
   notes_left : Int,
   remaining : Double,

@@ -35,8 +35,8 @@ test "generated notes can include Enclosure origin" {
     bass: None,
   }
   let generator = create_measure_generator(settings)
-  let ctx = MeasureContext::{
-    chords: create_chord_segments([chord], 4.0),
+  let ctx = @generator.MeasureContext::{
+    chords: @generator.create_chord_segments([chord], 4.0),
     incoming_tie: None,
     key: @music.KeySignature::c_major(),
     time_signature: @music.TimeSignature::default(),
@@ -107,7 +107,12 @@ test "generate_enclosure_ornament produces exactly 3 notes with correct tone ori
     bass: None,
   }
   let anchor_midi = @music.MidiNumber::new(60).unwrap() // C4
-  let state = MeasureState::new(4, 50, Some(anchor_midi), Playing(5))
+  let state = @generator.MeasureState::new(
+    4,
+    50,
+    Some(anchor_midi),
+    @generator.Playing(5),
+  )
   let update_accidental = @music.create_accidental_calculator(
     @music.KeySignature::c_major(),
   )
@@ -139,7 +144,12 @@ test "generate_enclosure_ornament decrements notes_left by 3" {
     bass: None,
   }
   let anchor_midi = @music.MidiNumber::new(60).unwrap()
-  let state = MeasureState::new(4, 50, Some(anchor_midi), Playing(5))
+  let state = @generator.MeasureState::new(
+    4,
+    50,
+    Some(anchor_midi),
+    @generator.Playing(5),
+  )
   let update_accidental = @music.create_accidental_calculator(
     @music.KeySignature::c_major(),
   )
@@ -149,8 +159,8 @@ test "generate_enclosure_ornament decrements notes_left by 3" {
   )
   // notes_left was 5, should now be Playing(2)
   match result.phrase {
-    Playing(n) => assert_eq(n, 2)
-    Resting => fail("Expected Playing(2), got Resting")
+    @generator.Playing(n) => assert_eq(n, 2)
+    @generator.Resting => fail("Expected Playing(2), got Resting")
   }
 }
 
@@ -163,7 +173,12 @@ test "generate_enclosure_ornament transitions to Resting when notes_left becomes
     bass: None,
   }
   let anchor_midi = @music.MidiNumber::new(60).unwrap()
-  let state = MeasureState::new(4, 50, Some(anchor_midi), Playing(3))
+  let state = @generator.MeasureState::new(
+    4,
+    50,
+    Some(anchor_midi),
+    @generator.Playing(3),
+  )
   let update_accidental = @music.create_accidental_calculator(
     @music.KeySignature::c_major(),
   )
@@ -173,8 +188,8 @@ test "generate_enclosure_ornament transitions to Resting when notes_left becomes
   )
   // notes_left was 3, after -3 = 0 → Resting
   match result.phrase {
-    Resting => ()
-    Playing(n) => fail("Expected Resting, got Playing(\{n})")
+    @generator.Resting => ()
+    @generator.Playing(n) => fail("Expected Resting, got Playing(\{n})")
   }
 }
 
@@ -191,7 +206,12 @@ test "generate_enclosure_ornament EN notes surround anchor by 1-2 semitones" {
     @music.KeySignature::c_major(),
   )
   for seed in 0..<20 {
-    let state = MeasureState::new(4, 50, Some(anchor_midi), Playing(5))
+    let state = @generator.MeasureState::new(
+      4,
+      50,
+      Some(anchor_midi),
+      @generator.Playing(5),
+    )
     let rng = create_random_int(seed)
     let result = generate_enclosure_ornament(
       state, anchor_midi, chord, 2.0, settings, update_accidental, rng, 5,
@@ -247,7 +267,12 @@ test "generate_enclosure_ornament EN notes are Eighth duration" {
     bass: None,
   }
   let anchor_midi = @music.MidiNumber::new(60).unwrap()
-  let state = MeasureState::new(4, 50, Some(anchor_midi), Playing(5))
+  let state = @generator.MeasureState::new(
+    4,
+    50,
+    Some(anchor_midi),
+    @generator.Playing(5),
+  )
   let update_accidental = @music.create_accidental_calculator(
     @music.KeySignature::c_major(),
   )

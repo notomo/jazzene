@@ -1,11 +1,11 @@
 ///|
-test "weighted_tone_candidates_tagged returns empty when weight_ratio is 0" {
+test "@generator.weighted_tone_candidates_tagged returns empty when weight_ratio is 0" {
   let prev = @music.MidiNumber::new(60).unwrap()
   let tones = [
     @music.MidiNumber::new(62).unwrap(),
     @music.MidiNumber::new(64).unwrap(),
   ]
-  let result = weighted_tone_candidates_tagged(
+  let result = @generator.weighted_tone_candidates_tagged(
     tones,
     prev,
     50,
@@ -17,13 +17,13 @@ test "weighted_tone_candidates_tagged returns empty when weight_ratio is 0" {
 }
 
 ///|
-test "weighted_tone_candidates_tagged returns candidates with weight_ratio 100" {
+test "@generator.weighted_tone_candidates_tagged returns candidates with weight_ratio 100" {
   let prev = @music.MidiNumber::new(60).unwrap()
   let tones = [
     @music.MidiNumber::new(62).unwrap(),
     @music.MidiNumber::new(64).unwrap(),
   ]
-  let result = weighted_tone_candidates_tagged(
+  let result = @generator.weighted_tone_candidates_tagged(
     tones,
     prev,
     50,
@@ -39,10 +39,10 @@ test "weighted_tone_candidates_tagged returns candidates with weight_ratio 100" 
 }
 
 ///|
-test "weighted_tone_candidates_tagged scales weights by weight_ratio" {
+test "@generator.weighted_tone_candidates_tagged scales weights by weight_ratio" {
   let prev = @music.MidiNumber::new(60).unwrap()
   let tones = [@music.MidiNumber::new(62).unwrap()]
-  let full = weighted_tone_candidates_tagged(
+  let full = @generator.weighted_tone_candidates_tagged(
     tones,
     prev,
     50,
@@ -50,7 +50,7 @@ test "weighted_tone_candidates_tagged scales weights by weight_ratio" {
     100,
     @music.ChordTone,
   )
-  let half = weighted_tone_candidates_tagged(
+  let half = @generator.weighted_tone_candidates_tagged(
     tones,
     prev,
     50,
@@ -63,11 +63,11 @@ test "weighted_tone_candidates_tagged scales weights by weight_ratio" {
 }
 
 ///|
-test "weighted_tone_candidates_tagged filters by max_interval" {
+test "@generator.weighted_tone_candidates_tagged filters by max_interval" {
   let prev = @music.MidiNumber::new(60).unwrap()
   // Tone at distance 12 (octave) with max_interval=7
   let tones = [@music.MidiNumber::new(72).unwrap()]
-  let result = weighted_tone_candidates_tagged(
+  let result = @generator.weighted_tone_candidates_tagged(
     tones,
     prev,
     50,
@@ -80,11 +80,11 @@ test "weighted_tone_candidates_tagged filters by max_interval" {
 }
 
 ///|
-test "weighted_tone_candidates_tagged includes correct MIDI numbers and origin" {
+test "@generator.weighted_tone_candidates_tagged includes correct MIDI numbers and origin" {
   let prev = @music.MidiNumber::new(60).unwrap()
   let c = @music.MidiNumber::new(62).unwrap()
   let e = @music.MidiNumber::new(64).unwrap()
-  let result = weighted_tone_candidates_tagged(
+  let result = @generator.weighted_tone_candidates_tagged(
     [c, e],
     prev,
     50,
@@ -99,15 +99,15 @@ test "weighted_tone_candidates_tagged includes correct MIDI numbers and origin" 
 }
 
 ///|
-/// Verify that decide_midi_number assigns ChordTone for first note (no previous)
-test "decide_midi_number first note always returns ChordTone" {
+/// Verify that @generator.decide_midi_number assigns ChordTone for first note (no previous)
+test "@generator.decide_midi_number first note always returns ChordTone" {
   let chord = @music.Chord::{
     root: @music.C,
     quality: @music.Major7,
     bass: None,
   }
   let rng = create_random_int(0)
-  let (midi, origin) = decide_midi_number(
+  let (midi, origin) = @generator.decide_midi_number(
     chord,
     None,
     50,
@@ -125,8 +125,8 @@ test "decide_midi_number first note always returns ChordTone" {
 }
 
 ///|
-/// Verify that decide_midi_number returns None for rest (both midi and origin)
-test "decide_midi_number rest returns None for both midi and origin" {
+/// Verify that @generator.decide_midi_number returns None for rest (both midi and origin)
+test "@generator.decide_midi_number rest returns None for both midi and origin" {
   let chord = @music.Chord::{
     root: @music.C,
     quality: @music.Major7,
@@ -134,7 +134,7 @@ test "decide_midi_number rest returns None for both midi and origin" {
   }
   // Force rest by passing rest_probability=100
   let always_rest = fn(_max : Int) -> Int { 0 } // always 0, so 0 < 100 → rest
-  let (midi, origin) = decide_midi_number(
+  let (midi, origin) = @generator.decide_midi_number(
     chord,
     Some(@music.MidiNumber::new(60).unwrap()),
     50,
@@ -153,7 +153,7 @@ test "decide_midi_number rest returns None for both midi and origin" {
 
 ///|
 /// Verify that chord tone selection produces ChordTone origin
-test "decide_midi_number chord tone returns ChordTone origin" {
+test "@generator.decide_midi_number chord tone returns ChordTone origin" {
   let chord = @music.Chord::{
     root: @music.C,
     quality: @music.Major7,
@@ -161,7 +161,7 @@ test "decide_midi_number chord tone returns ChordTone origin" {
   }
   // Use weight ratios that only enable chord tones (scale/tension all 0)
   let rng = create_random_int(42)
-  let (midi, origin) = decide_midi_number(
+  let (midi, origin) = @generator.decide_midi_number(
     chord,
     Some(@music.MidiNumber::new(60).unwrap()),
     50,
@@ -188,8 +188,8 @@ test "decide_midi_number chord tone returns ChordTone origin" {
 }
 
 ///|
-/// Verify that decide_midi_number returns valid origin types for all categories
-test "decide_midi_number origin is always a valid ToneOrigin variant" {
+/// Verify that @generator.decide_midi_number returns valid origin types for all categories
+test "@generator.decide_midi_number origin is always a valid ToneOrigin variant" {
   let chord = @music.Chord::{
     root: @music.C,
     quality: @music.Major7,
@@ -198,7 +198,7 @@ test "decide_midi_number origin is always a valid ToneOrigin variant" {
   // Run many trials with different seeds and verify all origins are valid
   for seed in 0..<20 {
     let rng = create_random_int(seed)
-    let (midi, origin) = decide_midi_number(
+    let (midi, origin) = @generator.decide_midi_number(
       chord,
       Some(@music.MidiNumber::new(60).unwrap()),
       50,
@@ -238,7 +238,7 @@ test "Tension origin carries valid jazz degree" {
   // Run many trials and collect all Tension origins to verify degrees
   for seed in 0..<50 {
     let rng = create_random_int(seed)
-    let (_, origin) = decide_midi_number(
+    let (_, origin) = @generator.decide_midi_number(
       chord,
       Some(@music.MidiNumber::new(62).unwrap()),
       50,
@@ -272,8 +272,8 @@ test "generated MeasureNote carries tone_origin" {
     bass: None,
   }
   let generator = create_measure_generator(settings)
-  let ctx = MeasureContext::{
-    chords: create_chord_segments([chord], 4.0),
+  let ctx = @generator.MeasureContext::{
+    chords: @generator.create_chord_segments([chord], 4.0),
     incoming_tie: None,
     key: @music.KeySignature::c_major(),
     time_signature: @music.TimeSignature::default(),
@@ -297,20 +297,20 @@ test "generated MeasureNote carries tone_origin" {
 }
 
 ///|
-/// Verify tension_degree helper returns valid jazz degree values
-test "tension_degree returns valid jazz degrees" {
+/// Verify @generator.tension_degree helper returns valid jazz degree values
+test "@generator.tension_degree returns valid jazz degrees" {
   // Root C = MIDI 60
   let root_midi = 60
   // 9th: interval 2 semitones above root
   let d2 = @music.MidiNumber::new(62).unwrap()
-  assert_eq(tension_degree(root_midi, d2), 9)
+  assert_eq(@generator.tension_degree(root_midi, d2), 9)
   // 11th: interval 5 semitones
   let d5 = @music.MidiNumber::new(65).unwrap()
-  assert_eq(tension_degree(root_midi, d5), 11)
+  assert_eq(@generator.tension_degree(root_midi, d5), 11)
   // #11: interval 6 semitones
   let d6 = @music.MidiNumber::new(66).unwrap()
-  assert_eq(tension_degree(root_midi, d6), 11)
+  assert_eq(@generator.tension_degree(root_midi, d6), 11)
   // 13th: interval 9 semitones
   let d9 = @music.MidiNumber::new(69).unwrap()
-  assert_eq(tension_degree(root_midi, d9), 13)
+  assert_eq(@generator.tension_degree(root_midi, d9), 13)
 }

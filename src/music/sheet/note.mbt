@@ -87,7 +87,7 @@ pub fn calculate_stem(
 
 ///|
 /// Visual weight for duration-proportional spacing
-fn duration_visual_weight(duration : @music.NoteDuration) -> Double {
+pub fn duration_visual_weight(duration : @music.NoteDuration) -> Double {
   match duration {
     EighthTriplet => 0.545
     Sixteenth => 0.45
@@ -126,7 +126,7 @@ fn note_min_spacing(
 
 ///|
 /// Compute x positions for all notes in a measure
-fn compute_note_positions(
+pub fn compute_note_positions(
   positioned : Array[(Double, @music.MeasureNote)],
   measure_x : Double,
   beamed_indices : Map[Int, Bool],

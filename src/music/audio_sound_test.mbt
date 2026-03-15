@@ -1,6 +1,6 @@
 ///|
 test "AudioSound::from creates audio sounds" {
-  let midi = MidiNumber::{ value: 60 }
+  let midi = MidiNumber::new(60).unwrap()
   let sounds = [
     ScheduledSound::{
       sound_event: Note(midi~, duration=Quarter),
@@ -21,7 +21,7 @@ test "AudioSound::from creates audio sounds" {
 
 ///|
 test "AudioSound::from filters out rests" {
-  let midi = MidiNumber::{ value: 60 }
+  let midi = MidiNumber::new(60).unwrap()
   let sounds = [
     ScheduledSound::{
       sound_event: Note(midi~, duration=Quarter),
@@ -62,19 +62,19 @@ test "AudioSound::from filters out rests" {
 test "AudioSound::from extracts notes in lookahead range" {
   let sounds = [
     ScheduledSound::{
-      sound_event: Note(midi=MidiNumber::{ value: 60 }, duration=Quarter),
+      sound_event: Note(midi=MidiNumber::new(60).unwrap(), duration=Quarter),
       duration: Duration::from_milliseconds(500),
       start_time: Duration::from_milliseconds(0),
       tone_origin: None,
     },
     ScheduledSound::{
-      sound_event: Note(midi=MidiNumber::{ value: 62 }, duration=Quarter),
+      sound_event: Note(midi=MidiNumber::new(62).unwrap(), duration=Quarter),
       duration: Duration::from_milliseconds(500),
       start_time: Duration::from_milliseconds(500),
       tone_origin: None,
     },
     ScheduledSound::{
-      sound_event: Note(midi=MidiNumber::{ value: 64 }, duration=Quarter),
+      sound_event: Note(midi=MidiNumber::new(64).unwrap(), duration=Quarter),
       duration: Duration::from_milliseconds(500),
       start_time: Duration::from_milliseconds(1000),
       tone_origin: None,
@@ -84,8 +84,8 @@ test "AudioSound::from extracts notes in lookahead range" {
   let lookahead = Duration::from_milliseconds(1000)
   let audio_sounds = AudioSound::from(sounds, position, lookahead)
   assert_eq(audio_sounds.length(), 2)
-  assert_eq(audio_sounds[0].midi, MidiNumber::{ value: 62 })
-  assert_eq(audio_sounds[1].midi, MidiNumber::{ value: 64 })
+  assert_eq(audio_sounds[0].midi, MidiNumber::new(62).unwrap())
+  assert_eq(audio_sounds[1].midi, MidiNumber::new(64).unwrap())
 }
 
 ///|

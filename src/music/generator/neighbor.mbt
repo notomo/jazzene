@@ -2,7 +2,7 @@
 /// Decide whether to generate a neighbor ornament at the current position.
 /// Requires: at least 3 notes left in phrase, at least 1.5 beats remaining,
 /// and probability check passes.
-fn should_generate_neighbor_ornament(
+pub fn should_generate_neighbor_ornament(
   notes_left : Int,
   remaining : Double,
   probability : Int,
@@ -62,7 +62,7 @@ fn select_neighbor_midi(
 ///|
 /// Generate a CT→N→CT neighbor ornament (3 notes).
 /// CT1: anchor chord tone, N: neighbor ±1-2 semitones, CT2: same anchor.
-fn generate_neighbor_ornament(
+pub fn generate_neighbor_ornament(
   state : MeasureState,
   anchor_midi : @music.MidiNumber,
   chord : @music.Chord,

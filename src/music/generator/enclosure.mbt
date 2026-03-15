@@ -2,7 +2,7 @@
 /// Decide whether to generate an enclosure ornament at the current position.
 /// Requires: at least 3 notes left in phrase, at least 1.5 beats remaining,
 /// and probability check passes.
-fn should_generate_enclosure_ornament(
+pub fn should_generate_enclosure_ornament(
   notes_left : Int,
   remaining : Double,
   probability : Int,
@@ -19,7 +19,7 @@ fn should_generate_enclosure_ornament(
 /// upper: +1 or +2 semitones from anchor (chord tones excluded when possible)
 /// lower: -1 or -2 semitones from anchor (chord tones excluded when possible)
 /// Stays within pitch_min/pitch_max; falls back to anchor if no candidates fit.
-fn select_enclosure_midis(
+pub fn select_enclosure_midis(
   anchor_midi : @music.MidiNumber,
   chord : @music.Chord,
   pitch_min : Int,
@@ -85,7 +85,7 @@ fn select_enclosure_midis(
 /// Generate an EN→EN→CT enclosure ornament (3 notes).
 /// Randomly selects above-first or below-first ordering.
 /// EN1: Eighth (0.5 beats), EN2: Eighth (0.5 beats), CT: remaining duration.
-fn generate_enclosure_ornament(
+pub fn generate_enclosure_ornament(
   state : MeasureState,
   anchor_midi : @music.MidiNumber,
   chord : @music.Chord,

@@ -2,7 +2,7 @@
 /// Build weighted candidates tagged with ToneOrigin.
 /// Each candidate is (weight, midi, origin).
 /// Returns empty array when weight_ratio is 0 (technique disabled).
-fn weighted_tone_candidates_tagged(
+pub fn weighted_tone_candidates_tagged(
   tones : Array[@music.MidiNumber],
   prev : @music.MidiNumber,
   stamina : Int,
@@ -44,7 +44,7 @@ fn weighted_random_select_tagged(
 ///|
 /// Compute the jazz tension degree (9, 11, 13 etc.) for a tension tone
 /// given the chord root MIDI pitch class.
-fn tension_degree(root_midi : Int, tone : @music.MidiNumber) -> Int {
+pub fn tension_degree(root_midi : Int, tone : @music.MidiNumber) -> Int {
   let interval = (tone.value - root_midi + 120) % 12
   match interval {
     2 => 9

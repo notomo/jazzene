@@ -15,7 +15,7 @@ const FIRST_LEDGER_LINE_ABOVE_STEP : Int = 10
 
 ///|
 /// Calculate diatonic steps from E4 (bottom line of treble clef)
-fn midi_to_diatonic_step(midi : Int, key : @music.KeySignature) -> Int {
+pub fn midi_to_diatonic_step(midi : Int, key : @music.KeySignature) -> Int {
   let pitch_class = midi % 12
   let octave = midi / 12 - 1
   let e4_pitch_class = 4

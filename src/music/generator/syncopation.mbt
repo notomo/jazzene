@@ -2,7 +2,7 @@
 /// Syncopation check: on downbeats, probabilistically return an eighth rest
 /// to shift the phrase start to the upbeat.
 /// Returns Some(Eighth) if syncopation fires, None otherwise.
-fn syncopation_rest(
+pub fn syncopation_rest(
   measure_pos : Double,
   remaining : Double,
   probability : Int,

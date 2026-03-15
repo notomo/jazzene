@@ -8,7 +8,7 @@ pub(all) struct SheetTieArc {
 } derive(Show)
 
 ///|
-fn compute_tie_arcs(
+pub fn compute_tie_arcs(
   tie : @music.Tie?,
   note_x : Double,
   midi : Int,

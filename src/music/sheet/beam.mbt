@@ -41,7 +41,7 @@ pub(all) struct SheetBeamGroup {
 
 ///|
 /// Determine stem direction for a beam group.
-fn beam_stem_up(
+pub fn beam_stem_up(
   group : Array[Int],
   positioned : Array[(Double, @music.MeasureNote)],
 ) -> Bool {

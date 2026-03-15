@@ -17,7 +17,9 @@ pub(all) enum OttavaMarking {
 
 ///|
 /// Returns true if any pitched note in the measure has MIDI >= threshold
-fn should_apply_8va(positioned : Array[(Double, @music.MeasureNote)]) -> Bool {
+pub fn should_apply_8va(
+  positioned : Array[(Double, @music.MeasureNote)],
+) -> Bool {
   positioned
   .iter()
   .any(fn(pair) {
@@ -49,7 +51,7 @@ fn should_apply_8vb(
 
 ///|
 /// Creates a copy with all MIDI values shifted down by OTTAVA_SHIFT
-fn shift_for_8va(
+pub fn shift_for_8va(
   positioned : Array[(Double, @music.MeasureNote)],
 ) -> Array[(Double, @music.MeasureNote)] {
   positioned.map(fn(pair) {
@@ -61,7 +63,7 @@ fn shift_for_8va(
 
 ///|
 /// Creates a copy with all MIDI values shifted up by OTTAVA_SHIFT
-fn shift_for_8vb(
+pub fn shift_for_8vb(
   positioned : Array[(Double, @music.MeasureNote)],
 ) -> Array[(Double, @music.MeasureNote)] {
   positioned.map(fn(pair) {

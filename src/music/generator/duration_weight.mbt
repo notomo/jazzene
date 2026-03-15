@@ -92,7 +92,7 @@ pub fn random_duration(
 
 ///|
 /// Generate a random duration that fits within the given beat capacity
-fn random_duration_within(
+pub fn random_duration_within(
   max_beats : Double,
   weights : DurationWeights,
   random_int : (Int) -> Int,

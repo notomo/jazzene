@@ -9,6 +9,6 @@ test "ChordRoot from_string" {
 
 ///|
 test "ChordRoot midi" {
-  assert_eq(C.midi(), 60) // C4
-  assert_eq(CSharp.midi(), 61)
+  assert_eq(@music.C.midi(), 60) // C4
+  assert_eq(@music.CSharp.midi(), 61)
 }

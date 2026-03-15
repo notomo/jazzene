@@ -1,26 +1,26 @@
 ///|
 test "DrumVoice::midi_number returns GM standard numbers" {
-  assert_eq(DrumVoice::Kick.midi_number(), MidiNumber::{ value: 36 })
-  assert_eq(DrumVoice::Snare.midi_number(), MidiNumber::{ value: 38 })
-  assert_eq(DrumVoice::Brush.midi_number(), MidiNumber::{ value: 40 })
-  assert_eq(DrumVoice::HiHat.midi_number(), MidiNumber::{ value: 42 })
-  assert_eq(DrumVoice::Ride.midi_number(), MidiNumber::{ value: 51 })
+  assert_eq(DrumVoice::Kick.midi_number(), MidiNumber::new(36).unwrap())
+  assert_eq(DrumVoice::Snare.midi_number(), MidiNumber::new(38).unwrap())
+  assert_eq(DrumVoice::Brush.midi_number(), MidiNumber::new(40).unwrap())
+  assert_eq(DrumVoice::HiHat.midi_number(), MidiNumber::new(42).unwrap())
+  assert_eq(DrumVoice::Ride.midi_number(), MidiNumber::new(51).unwrap())
 }
 
 ///|
 test "DrumVoice::from_midi returns correct voice for valid numbers" {
-  assert_eq(DrumVoice::from_midi(MidiNumber::{ value: 36 }), Some(Kick))
-  assert_eq(DrumVoice::from_midi(MidiNumber::{ value: 38 }), Some(Snare))
-  assert_eq(DrumVoice::from_midi(MidiNumber::{ value: 40 }), Some(Brush))
-  assert_eq(DrumVoice::from_midi(MidiNumber::{ value: 42 }), Some(HiHat))
-  assert_eq(DrumVoice::from_midi(MidiNumber::{ value: 51 }), Some(Ride))
+  assert_eq(DrumVoice::from_midi(MidiNumber::new(36).unwrap()), Some(Kick))
+  assert_eq(DrumVoice::from_midi(MidiNumber::new(38).unwrap()), Some(Snare))
+  assert_eq(DrumVoice::from_midi(MidiNumber::new(40).unwrap()), Some(Brush))
+  assert_eq(DrumVoice::from_midi(MidiNumber::new(42).unwrap()), Some(HiHat))
+  assert_eq(DrumVoice::from_midi(MidiNumber::new(51).unwrap()), Some(Ride))
 }
 
 ///|
 test "DrumVoice::from_midi returns None for non-drum numbers" {
-  assert_eq(DrumVoice::from_midi(MidiNumber::{ value: 60 }), None)
-  assert_eq(DrumVoice::from_midi(MidiNumber::{ value: 0 }), None)
-  assert_eq(DrumVoice::from_midi(MidiNumber::{ value: 127 }), None)
+  assert_eq(DrumVoice::from_midi(MidiNumber::new(60).unwrap()), None)
+  assert_eq(DrumVoice::from_midi(MidiNumber::new(0).unwrap()), None)
+  assert_eq(DrumVoice::from_midi(MidiNumber::new(127).unwrap()), None)
 }
 
 ///|

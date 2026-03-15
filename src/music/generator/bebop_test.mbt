@@ -171,7 +171,12 @@ test "generate_bebop_ornament produces exactly 2 notes" {
     bass: None,
   }
   let anchor_midi = @music.MidiNumber::new(67).unwrap() // G4 (root)
-  let state = MeasureState::new(4, 50, Some(anchor_midi), Playing(5))
+  let state = @generator.MeasureState::new(
+    4,
+    50,
+    Some(anchor_midi),
+    @generator.Playing(5),
+  )
   let update_accidental = @music.create_accidental_calculator(
     @music.KeySignature::c_major(),
   )
@@ -195,7 +200,12 @@ test "generate_bebop_ornament emits PT then CT with correct tone origins" {
     bass: None,
   }
   let anchor_midi = @music.MidiNumber::new(67).unwrap() // G4 (root)
-  let state = MeasureState::new(4, 50, Some(anchor_midi), Playing(5))
+  let state = @generator.MeasureState::new(
+    4,
+    50,
+    Some(anchor_midi),
+    @generator.Playing(5),
+  )
   let update_accidental = @music.create_accidental_calculator(
     @music.KeySignature::c_major(),
   )
@@ -225,7 +235,12 @@ test "generate_bebop_ornament PT is ±1 semitone from anchor" {
     bass: None,
   }
   let anchor_midi = @music.MidiNumber::new(67).unwrap() // G4
-  let state = MeasureState::new(4, 50, Some(anchor_midi), Playing(5))
+  let state = @generator.MeasureState::new(
+    4,
+    50,
+    Some(anchor_midi),
+    @generator.Playing(5),
+  )
   let update_accidental = @music.create_accidental_calculator(
     @music.KeySignature::c_major(),
   )
@@ -251,7 +266,12 @@ test "generate_bebop_ornament decrements notes_left by 2" {
     bass: None,
   }
   let anchor_midi = @music.MidiNumber::new(67).unwrap()
-  let state = MeasureState::new(4, 50, Some(anchor_midi), Playing(5))
+  let state = @generator.MeasureState::new(
+    4,
+    50,
+    Some(anchor_midi),
+    @generator.Playing(5),
+  )
   let update_accidental = @music.create_accidental_calculator(
     @music.KeySignature::c_major(),
   )
@@ -260,8 +280,8 @@ test "generate_bebop_ornament decrements notes_left by 2" {
     state, anchor_midi, chord, 2.0, settings, update_accidental, rng, 5,
   )
   match result.phrase {
-    Playing(n) => assert_eq(n, 3)
-    Resting => fail("Expected Playing(3), got Resting")
+    @generator.Playing(n) => assert_eq(n, 3)
+    @generator.Resting => fail("Expected Playing(3), got Resting")
   }
 }
 
@@ -274,7 +294,12 @@ test "generate_bebop_ornament transitions to Resting when notes_left <= 0" {
     bass: None,
   }
   let anchor_midi = @music.MidiNumber::new(67).unwrap()
-  let state = MeasureState::new(4, 50, Some(anchor_midi), Playing(2))
+  let state = @generator.MeasureState::new(
+    4,
+    50,
+    Some(anchor_midi),
+    @generator.Playing(2),
+  )
   let update_accidental = @music.create_accidental_calculator(
     @music.KeySignature::c_major(),
   )
@@ -283,8 +308,8 @@ test "generate_bebop_ornament transitions to Resting when notes_left <= 0" {
     state, anchor_midi, chord, 2.0, settings, update_accidental, rng, 2,
   )
   match result.phrase {
-    Resting => ()
-    Playing(n) => fail("Expected Resting, got Playing(\{n})")
+    @generator.Resting => ()
+    @generator.Playing(n) => fail("Expected Resting, got Playing(\{n})")
   }
 }
 
@@ -297,7 +322,7 @@ test "generate_bebop_ornament last_midi is set to anchor after generation" {
     bass: None,
   }
   let anchor_midi = @music.MidiNumber::new(67).unwrap() // G4
-  let state = MeasureState::new(4, 50, None, Playing(5))
+  let state = @generator.MeasureState::new(4, 50, None, @generator.Playing(5))
   let update_accidental = @music.create_accidental_calculator(
     @music.KeySignature::c_major(),
   )

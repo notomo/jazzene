@@ -2,7 +2,7 @@
 /// Decide whether to generate a bebop passing tone ornament at the current position.
 /// Requires: at least 2 notes left in phrase, at least 1.0 beats remaining,
 /// and probability check passes.
-fn should_generate_bebop_ornament(
+pub fn should_generate_bebop_ornament(
   notes_left : Int,
   remaining : Double,
   probability : Int,
@@ -18,7 +18,7 @@ fn should_generate_bebop_ornament(
 /// Select the bebop passing MIDI note adjacent to anchor_midi.
 /// Returns Some(pt_midi) if the chord's bebop passing tone is ±1 semitone from anchor
 /// and within pitch_min/pitch_max, else None.
-fn select_bebop_approach_midi(
+pub fn select_bebop_approach_midi(
   anchor_midi : @music.MidiNumber,
   chord : @music.Chord,
   pitch_min : Int,
@@ -44,7 +44,7 @@ fn select_bebop_approach_midi(
 ///|
 /// Generate a PT→CT bebop passing tone ornament (2 notes).
 /// PT: bebop passing tone (Eighth, 0.5 beats), CT: anchor chord tone (remaining duration).
-fn generate_bebop_ornament(
+pub fn generate_bebop_ornament(
   state : MeasureState,
   anchor_midi : @music.MidiNumber,
   chord : @music.Chord,

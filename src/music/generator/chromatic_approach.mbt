@@ -2,7 +2,7 @@
 /// Decide whether to generate a chromatic approach ornament at the current position.
 /// Requires: at least 2 notes left in phrase, at least 1.0 beats remaining,
 /// and probability check passes.
-fn should_generate_chromatic_approach_ornament(
+pub fn should_generate_chromatic_approach_ornament(
   notes_left : Int,
   remaining : Double,
   probability : Int,
@@ -18,7 +18,7 @@ fn should_generate_chromatic_approach_ornament(
 /// Select a chromatic approach MIDI note (±1 semitone) for the AT→CT ornament.
 /// Prefers notes that are not chord tones; falls back to any ±1 neighbor.
 /// Stays within pitch_min/pitch_max.
-fn select_chromatic_approach_midi(
+pub fn select_chromatic_approach_midi(
   anchor_midi : @music.MidiNumber,
   chord : @music.Chord,
   pitch_min : Int,
@@ -49,7 +49,7 @@ fn select_chromatic_approach_midi(
 ///|
 /// Generate an AT→CT chromatic approach ornament (2 notes).
 /// AT: approach tone (Eighth, 0.5 beats), CT: anchor chord tone (remaining duration).
-fn generate_chromatic_approach_ornament(
+pub fn generate_chromatic_approach_ornament(
   state : MeasureState,
   anchor_midi : @music.MidiNumber,
   chord : @music.Chord,
