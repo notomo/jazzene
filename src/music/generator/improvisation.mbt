@@ -1,4 +1,44 @@
 ///|
+/// Generate app measures with leading/trailing rests
+pub fn generate_app_measures(
+  measure_chords : Array[Array[@music.Chord]],
+  seed : Int,
+  measure_count : Int,
+  bpm : Int,
+  key : @music.KeySignature,
+  time_signature : @music.TimeSignature,
+  jazz_style : @music.JazzStyle,
+) -> Array[@music.Measure] {
+  let beats_per_measure = time_signature.beats_per_measure()
+  let settings = ImprovisationConfig::default(seed)
+    |> ImprovisationConfig::with_techniques(jazz_style.techniques)
+    |> ImprovisationConfig::with_pitch_range(
+      jazz_style.pitch_min,
+      jazz_style.pitch_max,
+    )
+  let music_measures = settings
+    |> create_measure_generator
+    |> improvisation(
+      measure_chords,
+      bpm,
+      measure_count - 2,
+      key,
+      settings,
+      time_signature~,
+      beats_per_measure~,
+      start_offset=1,
+    )
+  let leading_rest = leading_rest_measure(beats_per_measure~)
+  let trailing_rest_start = (measure_count - 1).to_double() *
+    @music.ms_per_measure(bpm, beats_per_measure~)
+  let trailing_rest = trailing_rest_measure(
+    start_time=@music.Duration::from_milliseconds(trailing_rest_start),
+    beats_per_measure~,
+  )
+  leading_rest + music_measures + trailing_rest
+}
+
+///|
 /// Create a leading rest measure (empty measure at the beginning)
 pub fn leading_rest_measure(
   beats_per_measure~ : Double,

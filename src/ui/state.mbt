@@ -81,117 +81,53 @@ pub fn AppState::new() -> AppState {
     )
   })
   let measures : () -> Array[@music.Measure] = @signals.memo(fn() {
-    match jazz_style.get().melody_mode {
-      @music.On | @music.Silent =>
-        match imported_midi.get() {
-          Some(data) if not(data.melody_sounds.is_empty()) => {
-            let adapted = @midi.adapt_pitched(
-              data,
-              bpm.get(),
-              key.get(),
-              data.melody_sounds,
-            )
-            @music.sounds_to_measures(
-              adapted,
-              bpm.get(),
-              time_signature.get(),
-              measure_count.get(),
-              key.get(),
-            )
-          }
-          _ => full_measures()
-        }
-      @music.Off =>
-        full_measures().map(fn(m) {
-          @music.Measure::{
-            ..m,
-            beats: m.beats.map(fn(b) { @music.Beat::{ ..b, notes: [] } }),
-          }
-        })
-    }
+    @midi.select_measures(
+      jazz_style.get().melody_mode,
+      imported_midi.get(),
+      full_measures(),
+      bpm.get(),
+      time_signature.get(),
+      measure_count.get(),
+      key.get(),
+    )
   })
   let sounds : () -> Array[@music.ScheduledSound] = @signals.memo(fn() {
-    match jazz_style.get().melody_mode {
-      @music.Off => []
-      @music.On | @music.Silent =>
-        match imported_midi.get() {
-          Some(data) if not(data.melody_sounds.is_empty()) =>
-            @midi.adapt_pitched(data, bpm.get(), key.get(), data.melody_sounds)
-          _ => full_sounds()
-        }
-    }
+    @midi.select_melody_sounds(
+      jazz_style.get().melody_mode,
+      imported_midi.get(),
+      full_sounds(),
+      bpm.get(),
+      key.get(),
+    )
   })
   let drum_sounds : () -> Array[@music.ScheduledSound] = @signals.memo(fn() {
-    let js = jazz_style.get()
-    match js.drum_pattern {
-      @music.Imported =>
-        match imported_midi.get() {
-          Some(data) =>
-            @music.rescale_sounds(
-              data.drum_sounds,
-              data.bpm.unwrap_or(bpm.get()),
-              bpm.get(),
-            )
-          None => []
-        }
-      _ =>
-        if not(js.drums_enabled) {
-          []
-        } else {
-          @music.generate_drum_sounds(
-            bpm.get(),
-            measure_count.get(),
-            time_signature=time_signature.get(),
-            swing=js.swing,
-            pattern_style=js.drum_pattern,
-          )
-        }
-    }
+    @midi.select_drum_sounds(
+      jazz_style.get(),
+      imported_midi.get(),
+      bpm.get(),
+      measure_count.get(),
+      time_signature.get(),
+    )
   })
   let comping_sounds : () -> Array[@music.ScheduledSound] = @signals.memo(fn() {
-    let js = jazz_style.get()
-    match js.comping_style {
-      @music.Imported =>
-        match imported_midi.get() {
-          Some(data) =>
-            @midi.adapt_pitched(data, bpm.get(), key.get(), data.comping_sounds)
-          None => []
-        }
-      _ =>
-        match js.comping_mode {
-          @music.Off => []
-          @music.Silent | @music.On =>
-            @music.generate_comping_sounds(
-              full_measures(),
-              bpm.get(),
-              full_sounds(),
-              key.get(),
-              seed=seed.get(),
-              voicing_style=js.comping_style,
-            )
-        }
-    }
+    @midi.select_comping_sounds(
+      jazz_style.get(),
+      imported_midi.get(),
+      full_measures(),
+      bpm.get(),
+      full_sounds(),
+      key.get(),
+      seed.get(),
+    )
   })
   let bass_sounds : () -> Array[@music.ScheduledSound] = @signals.memo(fn() {
-    let js = jazz_style.get()
-    match js.bass_style {
-      @music.Imported =>
-        match imported_midi.get() {
-          Some(data) =>
-            @midi.adapt_pitched(data, bpm.get(), key.get(), data.bass_sounds)
-          None => []
-        }
-      _ =>
-        if not(js.bass_enabled) {
-          []
-        } else {
-          @music.generate_walking_bass_sounds(
-            full_measures(),
-            bpm.get(),
-            js.bass_style,
-          )
-        }
-    }
+    @midi.select_bass_sounds(
+      jazz_style.get(),
+      imported_midi.get(),
+      full_measures(),
+      bpm.get(),
+      key.get(),
+    )
   })
   let total_duration = @signals.memo(fn() {
     @music.calculate_total_duration(
@@ -299,35 +235,14 @@ fn make_app_measures(
   jazz_style : @signals.Signal[@music.JazzStyle],
 ) -> () -> Array[@music.Measure] {
   @signals.memo(fn() {
-    let ts = time_signature.get()
-    let beats_per_measure = ts.beats_per_measure()
-    let settings = @generator.ImprovisationConfig::default(seed.get())
-      |> @generator.ImprovisationConfig::with_techniques(
-        jazz_style.get().techniques,
-      )
-      |> @generator.ImprovisationConfig::with_pitch_range(
-        jazz_style.get().pitch_min,
-        jazz_style.get().pitch_max,
-      )
-    let music_measures = settings
-      |> @generator.create_measure_generator
-      |> @generator.improvisation(
-        measure_chords(),
-        bpm.get(),
-        measure_count.get() - 2,
-        key.get(),
-        settings,
-        time_signature=ts,
-        beats_per_measure~,
-        start_offset=1,
-      )
-    let leading_rest = @generator.leading_rest_measure(beats_per_measure~)
-    let trailing_rest_start = (measure_count.get() - 1).to_double() *
-      @music.ms_per_measure(bpm.get(), beats_per_measure~)
-    let trailing_rest = @generator.trailing_rest_measure(
-      start_time=@music.Duration::from_milliseconds(trailing_rest_start),
-      beats_per_measure~,
+    @generator.generate_app_measures(
+      measure_chords(),
+      seed.get(),
+      measure_count.get(),
+      bpm.get(),
+      key.get(),
+      time_signature.get(),
+      jazz_style.get(),
     )
-    leading_rest + music_measures + trailing_rest
   })
 }
