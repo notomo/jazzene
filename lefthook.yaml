@@ -2,4 +2,4 @@
 
 pre-commit:
   jobs:
-    - run: npm run format && npm run check && npm run test
+    - run: npm run format -- --check && npm run check && npm run test
