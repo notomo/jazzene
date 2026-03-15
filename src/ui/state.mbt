@@ -197,6 +197,7 @@ pub fn AppState::new() -> AppState {
   })
 
   // When chords are entered, switch any Imported accompaniment style to generated
+  // and clear imported MIDI so melody also falls back to generated
   let _ = @signals.effect(fn() {
     if raw_chord_progression.get() != "" {
       let js = jazz_style.peek()
@@ -215,6 +216,7 @@ pub fn AppState::new() -> AppState {
           _ => js.drum_pattern
         },
       })
+      imported_midi.set(None)
     }
   })
 

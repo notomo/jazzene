@@ -105,6 +105,7 @@ pub fn render(state : AppState) -> Unit {
           }
           None => ()
         }
+        raw_chord_progression.set("")
         jazz_style.update(fn(js) {
           @music.JazzStyle::{
             ..js,
