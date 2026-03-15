@@ -40,9 +40,7 @@ pub fn generate_full_measures(
 
 ///|
 /// Create a leading rest measure (empty measure at the beginning)
-pub fn leading_rest_measure(
-  beats_per_measure~ : Double,
-) -> Array[@music.Measure] {
+fn leading_rest_measure(beats_per_measure~ : Double) -> Array[@music.Measure] {
   [
     @music.Measure::{
       chords: [],
@@ -59,7 +57,7 @@ pub fn leading_rest_measure(
 
 ///|
 /// Create a trailing rest measure (empty measure at the end)
-pub fn trailing_rest_measure(
+fn trailing_rest_measure(
   start_time~ : @music.Duration,
   beats_per_measure~ : Double,
 ) -> Array[@music.Measure] {
