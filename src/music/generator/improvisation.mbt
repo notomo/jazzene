@@ -1,6 +1,6 @@
 ///|
 /// Generate app measures with leading/trailing rests
-pub fn generate_app_measures(
+pub fn generate_full_measures(
   measure_chords : Array[Array[@music.Chord]],
   seed : Int,
   measure_count : Int,

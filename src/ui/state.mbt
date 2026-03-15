@@ -70,9 +70,17 @@ pub fn AppState::new() -> AppState {
     }
   })
 
-  let full_measures = make_app_measures(
-    measure_chords, seed, measure_count, bpm, key, time_signature, jazz_style,
-  )
+  let full_measures : () -> Array[@music.Measure] = @signals.memo(fn() {
+    @generator.generate_full_measures(
+      measure_chords(),
+      seed.get(),
+      measure_count.get(),
+      bpm.get(),
+      key.get(),
+      time_signature.get(),
+      jazz_style.get(),
+    )
+  })
   let full_sounds : () -> Array[@music.ScheduledSound] = @signals.memo(fn() {
     @music.convert_measures_to_sounds(
       full_measures(),
@@ -222,27 +230,4 @@ pub fn AppState::new() -> AppState {
     total_duration,
     chord_parse_error,
   }
-}
-
-///|
-fn make_app_measures(
-  measure_chords : () -> Array[Array[@music.Chord]],
-  seed : @signals.Signal[Int],
-  measure_count : @signals.Signal[Int],
-  bpm : @signals.Signal[Int],
-  key : @signals.Signal[@music.KeySignature],
-  time_signature : @signals.Signal[@music.TimeSignature],
-  jazz_style : @signals.Signal[@music.JazzStyle],
-) -> () -> Array[@music.Measure] {
-  @signals.memo(fn() {
-    @generator.generate_app_measures(
-      measure_chords(),
-      seed.get(),
-      measure_count.get(),
-      bpm.get(),
-      key.get(),
-      time_signature.get(),
-      jazz_style.get(),
-    )
-  })
 }
