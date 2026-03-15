@@ -13,7 +13,8 @@
     "start": "npm run dev -- --open",
     "build": "moon build --release && vite build",
     "download:samples": "bash scripts/download-samples.sh",
-    "tunnel": "cloudflared tunnel --url localhost:5173"
+    "tunnel": "cloudflared tunnel --url localhost:5173",
+    "update:skills": "git clone --depth=1 https://github.com/moonbitlang/moonbit-agent-guide /tmp/moonbit-skills-update && cp -r /tmp/moonbit-skills-update/moonbit-agent-guide/. .claude/skills/moonbit-agent-guide/ && cp -r /tmp/moonbit-skills-update/moonbit-refactoring/. .claude/skills/moonbit-refactoring/ && rm -rf /tmp/moonbit-skills-update"
   },
   "devDependencies": {
     "@playwright/test": "^1.58.2",
