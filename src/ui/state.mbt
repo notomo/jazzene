@@ -219,7 +219,19 @@ pub fn AppState::new() -> AppState {
     }
   })
 
-  // Persist jazz_style and show_technique_hints changes to URL query parameters
+  // Persist all state changes to URL query parameters
+  let _ = @signals.effect(fn() { save_bpm(bpm.get()) })
+  let _ = @signals.effect(fn() { save_seed(seed.get()) })
+  let _ = @signals.effect(fn() { save_measure_count(measure_count.get()) })
+  let _ = @signals.effect(fn() { save_loop_a(loop_a_measure.get()) })
+  let _ = @signals.effect(fn() {
+    save_loop_b(loop_b_measure.get(), measure_count.get())
+  })
+  let _ = @signals.effect(fn() { save_volume(volume.get()) })
+  let _ = @signals.effect(fn() { save_key(key.get()) })
+  let _ = @signals.effect(fn() { save_time_signature(time_signature.get()) })
+  let _ = @signals.effect(fn() { save_chords(raw_chord_progression.get()) })
+  let _ = @signals.effect(fn() { save_view_state(view_state.get()) })
   let _ = @signals.effect(fn() { save_jazz_style(jazz_style.get()) })
   let _ = @signals.effect(fn() {
     save_show_technique_hints(show_technique_hints.get())

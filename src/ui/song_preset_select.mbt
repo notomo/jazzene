@@ -25,59 +25,27 @@ fn song_preset_select(
   let on_preset_select : (@music.SongPreset) -> Unit = fn(preset) {
     push_current_state()
     raw_chord_progression.set(preset.chords)
-    set_query_param("chords", preset.chords, default=default_chords)
     match preset.key {
       None => ()
-      Some(root) => {
-        key.set(@music.KeySignature::from_root(root))
-        set_query_param(
-          "key",
-          root.to_string(),
-          default=@music.KeySignature::c_major().root.to_string(),
-        )
-      }
+      Some(root) => key.set(@music.KeySignature::from_root(root))
     }
     match preset.bpm {
       None => ()
-      Some(new_bpm) => {
-        bpm.set(new_bpm)
-        set_query_param(
-          "bpm",
-          new_bpm.to_string(),
-          default=default_bpm.to_string(),
-        )
-      }
+      Some(new_bpm) => bpm.set(new_bpm)
     }
     match preset.measures {
       None => ()
       Some(new_measures) => {
         let old_measures = measure_count.get()
         measure_count.set(new_measures)
-        set_query_param(
-          "measures",
-          new_measures.to_string(),
-          default=default_measures.to_string(),
-        )
         if loop_b_measure.get() == old_measures {
           loop_b_measure.set(new_measures)
-          set_query_param(
-            "loop_b",
-            new_measures.to_string(),
-            default=new_measures.to_string(),
-          )
         }
       }
     }
     match preset.time_signature {
       None => ()
-      Some(ts) => {
-        time_signature.set(ts)
-        set_query_param(
-          "time",
-          ts.to_string(),
-          default=@music.TimeSignature::default().to_string(),
-        )
-      }
+      Some(ts) => time_signature.set(ts)
     }
     is_open.set(false)
   }

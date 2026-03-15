@@ -5,9 +5,7 @@ fn chord_progression_input(
   parse_error : () -> String?,
 ) -> @luna_dom.DomNode {
   let on_input : @luna_dom.InputHandler = fn(e) {
-    let value = get_input_value(e)
-    raw_chord_progression.set(value)
-    set_query_param("chords", value, default=default_chords)
+    raw_chord_progression.set(get_input_value(e))
   }
 
   @luna_dom.div(class="flex flex-col min-w-0 flex-1 gap-0.5", [

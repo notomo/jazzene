@@ -386,6 +386,80 @@ pub fn save_show_technique_hints(show : Bool) -> Unit {
 }
 
 ///|
+pub fn save_bpm(bpm : Int) -> Unit {
+  set_query_param("bpm", bpm.to_string(), default=default_bpm.to_string())
+}
+
+///|
+pub fn save_seed(seed : Int) -> Unit {
+  set_query_param("seed", seed.to_string(), default=default_seed.to_string())
+}
+
+///|
+pub fn save_measure_count(measures : Int) -> Unit {
+  set_query_param(
+    "measures",
+    measures.to_string(),
+    default=default_measures.to_string(),
+  )
+}
+
+///|
+pub fn save_loop_a(value : Int) -> Unit {
+  set_query_param(
+    "loop_a",
+    value.to_string(),
+    default=default_loop_a.to_string(),
+  )
+}
+
+///|
+pub fn save_loop_b(value : Int, measure_count : Int) -> Unit {
+  set_query_param(
+    "loop_b",
+    value.to_string(),
+    default=measure_count.to_string(),
+  )
+}
+
+///|
+pub fn save_volume(volume : Int) -> Unit {
+  set_query_param(
+    "volume",
+    volume.to_string(),
+    default=default_volume.to_string(),
+  )
+}
+
+///|
+pub fn save_key(key : @music.KeySignature) -> Unit {
+  set_query_param(
+    "key",
+    key.root.to_string(),
+    default=@music.KeySignature::c_major().root.to_string(),
+  )
+}
+
+///|
+pub fn save_time_signature(ts : @music.TimeSignature) -> Unit {
+  set_query_param(
+    "time",
+    ts.to_string(),
+    default=@music.TimeSignature::default().to_string(),
+  )
+}
+
+///|
+pub fn save_chords(chords : String) -> Unit {
+  set_query_param("chords", chords, default=default_chords)
+}
+
+///|
+pub fn save_view_state(vs : ViewState) -> Unit {
+  set_query_param("view", vs.to_view_query_string(), default="sheet,pianoroll")
+}
+
+///|
 /// Load JazzStyle from URL query parameters, falling back to defaults.
 pub fn get_initial_jazz_style() -> @music.JazzStyle {
   let default_js = @music.JazzStyle::default()

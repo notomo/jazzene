@@ -80,14 +80,12 @@ fn ab_loop(
   measure_count : () -> Int,
 ) -> @luna_dom.DomNode {
   let on_a_change = fn(delta : Int) {
-    let max_a = loop_b_measure.get()
-    let clamped = clamp_int(1, loop_a_measure.get() + delta, max_a)
-    loop_a_measure.set(clamped)
-    set_query_param(
-      "loop_a",
-      clamped.to_string(),
-      default=default_loop_a.to_string(),
+    let clamped = clamp_int(
+      1,
+      loop_a_measure.get() + delta,
+      loop_b_measure.get(),
     )
+    loop_a_measure.set(clamped)
   }
 
   let on_b_change = fn(delta : Int) {
@@ -97,11 +95,6 @@ fn ab_loop(
       measure_count(),
     )
     loop_b_measure.set(clamped)
-    set_query_param(
-      "loop_b",
-      clamped.to_string(),
-      default=measure_count().to_string(),
-    )
   }
 
   @luna_dom.div(

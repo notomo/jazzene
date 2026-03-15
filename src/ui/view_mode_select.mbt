@@ -191,13 +191,7 @@ fn view_mode_select(
       ])
     },
     on=@luna_dom.events().click(fn(_) {
-      let next = toggle_sheet(view_state.get())
-      view_state.set(next)
-      set_query_param(
-        "view",
-        next.to_view_query_string(),
-        default="sheet,pianoroll",
-      )
+      view_state.set(toggle_sheet(view_state.get()))
     }),
     [eighth_note_icon(view_state.get().show_sheet)],
     attrs=[("title", @luna_dom.Attr::AttrString("Sheet"))],
@@ -214,13 +208,7 @@ fn view_mode_select(
       ])
     },
     on=@luna_dom.events().click(fn(_) {
-      let next = toggle_piano(view_state.get())
-      view_state.set(next)
-      set_query_param(
-        "view",
-        next.to_view_query_string(),
-        default="sheet,pianoroll",
-      )
+      view_state.set(toggle_piano(view_state.get()))
     }),
     [piano_icon(view_state.get().show_piano_roll)],
     attrs=[("title", @luna_dom.Attr::AttrString("Piano"))],
@@ -238,16 +226,10 @@ fn view_mode_select(
       ])
     },
     on=@luna_dom.events().click(fn(_) {
-      let next = {
+      view_state.set({
         ..view_state.get(),
         show_settings: not(view_state.get().show_settings),
-      }
-      view_state.set(next)
-      set_query_param(
-        "view",
-        next.to_view_query_string(),
-        default="sheet,pianoroll",
-      )
+      })
     }),
     [settings_icon(view_state.get().show_settings)],
     attrs=[("title", @luna_dom.Attr::AttrString("Settings"))],

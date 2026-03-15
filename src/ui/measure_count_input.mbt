@@ -15,19 +15,6 @@ fn measure_count_input(
         loop_b_measure.set(new_value)
       }
     },
-    on_settle=fn(new_value) {
-      set_query_param(
-        "measures",
-        new_value.to_string(),
-        default=default_measures.to_string(),
-      )
-      let loop_b = loop_b_measure.get()
-      set_query_param(
-        "loop_b",
-        loop_b.to_string(),
-        default=new_value.to_string(),
-      )
-    },
     min=2,
     max=32,
     step=1,
