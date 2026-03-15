@@ -219,22 +219,40 @@ pub fn AppState::new() -> AppState {
     }
   })
 
-  // Persist all state changes to URL query parameters
-  let _ = @signals.effect(fn() { save_bpm(bpm.get()) })
-  let _ = @signals.effect(fn() { save_seed(seed.get()) })
-  let _ = @signals.effect(fn() { save_measure_count(measure_count.get()) })
-  let _ = @signals.effect(fn() { save_loop_a(loop_a_measure.get()) })
+  // Persist all state changes to URL query parameters (debounced to avoid
+  // exceeding browser replaceState rate limits during rapid input like scroll)
+  let url_save_timer : Ref[Int] = Ref::new(-1)
   let _ = @signals.effect(fn() {
-    save_loop_b(loop_b_measure.get(), measure_count.get())
-  })
-  let _ = @signals.effect(fn() { save_volume(volume.get()) })
-  let _ = @signals.effect(fn() { save_key(key.get()) })
-  let _ = @signals.effect(fn() { save_time_signature(time_signature.get()) })
-  let _ = @signals.effect(fn() { save_chords(raw_chord_progression.get()) })
-  let _ = @signals.effect(fn() { save_view_state(view_state.get()) })
-  let _ = @signals.effect(fn() { save_jazz_style(jazz_style.get()) })
-  let _ = @signals.effect(fn() {
-    save_show_technique_hints(show_technique_hints.get())
+    let bpm_val = bpm.get()
+    let seed_val = seed.get()
+    let measure_count_val = measure_count.get()
+    let loop_a_val = loop_a_measure.get()
+    let loop_b_val = loop_b_measure.get()
+    let volume_val = volume.get()
+    let key_val = key.get()
+    let ts_val = time_signature.get()
+    let chords_val = raw_chord_progression.get()
+    let view_val = view_state.get()
+    let jazz_val = jazz_style.get()
+    let hints_val = show_technique_hints.get()
+    clear_timeout(url_save_timer.val)
+    url_save_timer.val = set_timeout(
+      fn() {
+        save_bpm(bpm_val)
+        save_seed(seed_val)
+        save_measure_count(measure_count_val)
+        save_loop_a(loop_a_val)
+        save_loop_b(loop_b_val, measure_count_val)
+        save_volume(volume_val)
+        save_key(key_val)
+        save_time_signature(ts_val)
+        save_chords(chords_val)
+        save_view_state(view_val)
+        save_jazz_style(jazz_val)
+        save_show_technique_hints(hints_val)
+      },
+      400,
+    )
   })
 
   {
