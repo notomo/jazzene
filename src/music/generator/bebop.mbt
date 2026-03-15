@@ -302,12 +302,7 @@ test "generate_bebop_ornament produces exactly 2 notes" {
     bass: None,
   }
   let anchor_midi = @music.MidiNumber::new(67).unwrap() // G4 (root)
-  let state = MeasureState::new(
-    4,
-    50,
-    Some(anchor_midi),
-    Playing(5),
-  )
+  let state = MeasureState::new(4, 50, Some(anchor_midi), Playing(5))
   let update_accidental = @music.create_accidental_calculator(
     @music.KeySignature::c_major(),
   )
@@ -331,12 +326,7 @@ test "generate_bebop_ornament emits PT then CT with correct tone origins" {
     bass: None,
   }
   let anchor_midi = @music.MidiNumber::new(67).unwrap() // G4 (root)
-  let state = MeasureState::new(
-    4,
-    50,
-    Some(anchor_midi),
-    Playing(5),
-  )
+  let state = MeasureState::new(4, 50, Some(anchor_midi), Playing(5))
   let update_accidental = @music.create_accidental_calculator(
     @music.KeySignature::c_major(),
   )
@@ -366,12 +356,7 @@ test "generate_bebop_ornament PT is ±1 semitone from anchor" {
     bass: None,
   }
   let anchor_midi = @music.MidiNumber::new(67).unwrap() // G4
-  let state = MeasureState::new(
-    4,
-    50,
-    Some(anchor_midi),
-    Playing(5),
-  )
+  let state = MeasureState::new(4, 50, Some(anchor_midi), Playing(5))
   let update_accidental = @music.create_accidental_calculator(
     @music.KeySignature::c_major(),
   )
@@ -397,12 +382,7 @@ test "generate_bebop_ornament decrements notes_left by 2" {
     bass: None,
   }
   let anchor_midi = @music.MidiNumber::new(67).unwrap()
-  let state = MeasureState::new(
-    4,
-    50,
-    Some(anchor_midi),
-    Playing(5),
-  )
+  let state = MeasureState::new(4, 50, Some(anchor_midi), Playing(5))
   let update_accidental = @music.create_accidental_calculator(
     @music.KeySignature::c_major(),
   )
@@ -425,12 +405,7 @@ test "generate_bebop_ornament transitions to Resting when notes_left <= 0" {
     bass: None,
   }
   let anchor_midi = @music.MidiNumber::new(67).unwrap()
-  let state = MeasureState::new(
-    4,
-    50,
-    Some(anchor_midi),
-    Playing(2),
-  )
+  let state = MeasureState::new(4, 50, Some(anchor_midi), Playing(2))
   let update_accidental = @music.create_accidental_calculator(
     @music.KeySignature::c_major(),
   )

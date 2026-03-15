@@ -143,9 +143,7 @@ fn ImprovisationConfig::default(seed : Int) -> ImprovisationConfig {
 ///|
 /// Create a measure generator from settings
 /// Returns a function that generates notes for one measure
-fn create_measure_generator(
-  settings : ImprovisationConfig,
-) -> MeasureGenerator {
+fn create_measure_generator(settings : ImprovisationConfig) -> MeasureGenerator {
   let random_int = create_random_int(settings.seed)
   fn(ctx : MeasureContext) -> MeasureResult {
     generate_measure_notes(ctx, settings, random_int)

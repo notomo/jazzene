@@ -224,12 +224,7 @@ test "generate_neighbor_ornament produces exactly 3 notes with correct tone orig
     bass: None,
   }
   let anchor_midi = @music.MidiNumber::new(60).unwrap() // C4
-  let state = MeasureState::new(
-    4,
-    50,
-    Some(anchor_midi),
-    Playing(5),
-  )
+  let state = MeasureState::new(4, 50, Some(anchor_midi), Playing(5))
   let update_accidental = @music.create_accidental_calculator(
     @music.KeySignature::c_major(),
   )
@@ -266,12 +261,7 @@ test "generate_neighbor_ornament decrements notes_left by 3" {
     bass: None,
   }
   let anchor_midi = @music.MidiNumber::new(60).unwrap()
-  let state = MeasureState::new(
-    4,
-    50,
-    Some(anchor_midi),
-    Playing(5),
-  )
+  let state = MeasureState::new(4, 50, Some(anchor_midi), Playing(5))
   let update_accidental = @music.create_accidental_calculator(
     @music.KeySignature::c_major(),
   )
@@ -295,12 +285,7 @@ test "generate_neighbor_ornament transitions to Resting when notes_left becomes 
     bass: None,
   }
   let anchor_midi = @music.MidiNumber::new(60).unwrap()
-  let state = MeasureState::new(
-    4,
-    50,
-    Some(anchor_midi),
-    Playing(3),
-  )
+  let state = MeasureState::new(4, 50, Some(anchor_midi), Playing(3))
   let update_accidental = @music.create_accidental_calculator(
     @music.KeySignature::c_major(),
   )
@@ -332,12 +317,7 @@ test "generate_neighbor_ornament neighbor is not a chord tone pitch class" {
   let chord_tone_pcs = [0, 4, 7, 11] // C, E, G, B
   for seed in 0..<20 {
     // Create a fresh state per iteration (beat_notes is mutated in place)
-    let state = MeasureState::new(
-      4,
-      50,
-      Some(anchor_midi),
-      Playing(5),
-    )
+    let state = MeasureState::new(4, 50, Some(anchor_midi), Playing(5))
     let rng = create_random_int(seed)
     let result = generate_neighbor_ornament(
       state, anchor_midi, chord, 2.0, settings, update_accidental, rng, 5,

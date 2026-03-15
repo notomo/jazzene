@@ -388,10 +388,7 @@ test "improvisation removes dangling tie at last measure" {
               ],
             },
           ],
-          outgoing_tie: Some(TieContext::{
-            midi: midi60,
-            remaining_beats: 2.0,
-          }),
+          outgoing_tie: Some(TieContext::{ midi: midi60, remaining_beats: 2.0 }),
           outgoing_stamina: ctx.incoming_stamina,
           outgoing_last_midi: Some(midi60),
           outgoing_phrase: None,
