@@ -60,7 +60,7 @@ pub fn render(state : AppState) -> Unit {
     imported_midi,
     measures,
     sounds,
-    backing_sounds,
+    comping_sounds,
     bass_sounds,
     drum_sounds,
     total_duration,
@@ -73,7 +73,7 @@ pub fn render(state : AppState) -> Unit {
       seed.get().to_string()
     @midi.encode_to_midi(
       sounds(),
-      backing_sounds(),
+      comping_sounds(),
       bass_sounds(),
       drum_sounds(),
       bpm.get(),
@@ -201,7 +201,7 @@ pub fn render(state : AppState) -> Unit {
             [
               @piano_roll.note_display(
                 sounds,
-                backing_sounds,
+                comping_sounds,
                 measures,
                 playback_position,
                 bpm,
@@ -213,7 +213,7 @@ pub fn render(state : AppState) -> Unit {
               ),
               @piano_roll.keyboard(
                 sounds,
-                backing_sounds,
+                comping_sounds,
                 measures,
                 bpm,
                 playback_position,

@@ -19,7 +19,7 @@ pub struct AppState {
   measures : () -> Array[@music.Measure]
   sounds : () -> Array[@music.ScheduledSound]
   drum_sounds : () -> Array[@music.ScheduledSound]
-  backing_sounds : () -> Array[@music.ScheduledSound]
+  comping_sounds : () -> Array[@music.ScheduledSound]
   bass_sounds : () -> Array[@music.ScheduledSound]
   total_duration : () -> @music.Duration
   chord_parse_error : () -> String?
@@ -143,7 +143,7 @@ pub fn AppState::new() -> AppState {
         }
     }
   })
-  let backing_sounds : () -> Array[@music.ScheduledSound] = @signals.memo(fn() {
+  let comping_sounds : () -> Array[@music.ScheduledSound] = @signals.memo(fn() {
     let js = jazz_style.get()
     match js.comping_style {
       @music.Imported =>
@@ -276,7 +276,7 @@ pub fn AppState::new() -> AppState {
     measures,
     sounds,
     drum_sounds,
-    backing_sounds,
+    comping_sounds,
     bass_sounds,
     total_duration,
     chord_parse_error,

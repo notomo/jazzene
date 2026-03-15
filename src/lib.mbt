@@ -48,7 +48,7 @@ fn make_tick(
       @music.Silent => []
       _ =>
         @music.AudioSound::from(
-          (state.backing_sounds)(),
+          (state.comping_sounds)(),
           final_position,
           lookahead,
         )

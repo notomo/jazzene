@@ -20,7 +20,7 @@ const BLACK_KEY_HEIGHT_RATIO = 0.6
 /// Render piano keyboard component using Canvas API
 pub fn keyboard(
   sounds : () -> Array[@music.ScheduledSound],
-  backing_sounds : () -> Array[@music.ScheduledSound],
+  comping_sounds : () -> Array[@music.ScheduledSound],
   measures : () -> Array[@music.Measure],
   bpm : @signals.Signal[Int],
   playback_position : @signals.Signal[@music.Duration],
@@ -69,7 +69,7 @@ pub fn keyboard(
   // Calculate currently playing backing notes as a boolean lookup array (O(1) key lookup)
   let backing_playing_notes = @signals.memo(fn() {
     let set = Array::make(128, false)
-    @music.calculate_playing_notes(backing_sounds(), playback_position.get())
+    @music.calculate_playing_notes(comping_sounds(), playback_position.get())
     .filter_map(fn(s) { s.midi() })
     .each(fn(m) { set[m.value] = true })
     set
