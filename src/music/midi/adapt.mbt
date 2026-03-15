@@ -28,13 +28,3 @@ pub fn adapt_pitched(
   |> @music.rescale_sounds(data.bpm.unwrap_or(current_bpm), current_bpm)
   |> @music.transpose_sounds(key_shift(data, current_key))
 }
-
-///|
-/// Adapt melody sounds specifically
-pub fn adapt_melody(
-  data : ImportedMidi,
-  current_bpm : Int,
-  current_key : @music.KeySignature,
-) -> Array[@music.ScheduledSound] {
-  adapt_pitched(data, current_bpm, current_key, data.melody_sounds)
-}

@@ -85,7 +85,12 @@ pub fn AppState::new() -> AppState {
       @music.On | @music.Silent =>
         match imported_midi.get() {
           Some(data) if not(data.melody_sounds.is_empty()) => {
-            let adapted = @midi.adapt_melody(data, bpm.get(), key.get())
+            let adapted = @midi.adapt_pitched(
+              data,
+              bpm.get(),
+              key.get(),
+              data.melody_sounds,
+            )
             @music.sounds_to_measures(
               adapted,
               bpm.get(),
@@ -111,7 +116,7 @@ pub fn AppState::new() -> AppState {
       @music.On | @music.Silent =>
         match imported_midi.get() {
           Some(data) if not(data.melody_sounds.is_empty()) =>
-            @midi.adapt_melody(data, bpm.get(), key.get())
+            @midi.adapt_pitched(data, bpm.get(), key.get(), data.melody_sounds)
           _ => full_sounds()
         }
     }
