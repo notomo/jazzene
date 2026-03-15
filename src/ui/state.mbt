@@ -199,22 +199,21 @@ pub fn AppState::new() -> AppState {
   // When chords are entered, switch any Imported accompaniment style to generated
   let _ = @signals.effect(fn() {
     if raw_chord_progression.get() != "" {
-      jazz_style.update(fn(js) {
-        @music.JazzStyle::{
-          ..js,
-          comping_style: match js.comping_style {
-            @music.Imported => @music.GuideTones
-            _ => js.comping_style
-          },
-          bass_style: match js.bass_style {
-            @music.Imported => @music.WalkingBass
-            _ => js.bass_style
-          },
-          drum_pattern: match js.drum_pattern {
-            @music.Imported => @music.SwingRide
-            _ => js.drum_pattern
-          },
-        }
+      let js = jazz_style.peek()
+      jazz_style.set(@music.JazzStyle::{
+        ..js,
+        comping_style: match js.comping_style {
+          @music.Imported => @music.GuideTones
+          _ => js.comping_style
+        },
+        bass_style: match js.bass_style {
+          @music.Imported => @music.WalkingBass
+          _ => js.bass_style
+        },
+        drum_pattern: match js.drum_pattern {
+          @music.Imported => @music.SwingRide
+          _ => js.drum_pattern
+        },
       })
     }
   })
