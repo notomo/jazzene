@@ -82,15 +82,6 @@ fn[T] weighted_choice(
 }
 
 ///|
-/// Generate a random duration based on weights
-fn random_duration(
-  weights : DurationWeights,
-  random_int : (Int) -> Int,
-) -> @music.NoteDuration {
-  weighted_choice(weights.to_choices(), random_int)
-}
-
-///|
 /// Generate a random duration that fits within the given beat capacity
 fn random_duration_within(
   max_beats : Double,

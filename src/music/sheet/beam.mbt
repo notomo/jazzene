@@ -9,7 +9,7 @@ const BEAM_REST_CLEARANCE : Double = 8.0
 
 ///|
 /// Pre-computed beam stem data
-pub(all) struct SheetBeamStem {
+pub struct SheetBeamStem {
   x : Double
   y1 : Double
   y2 : Double
@@ -17,7 +17,7 @@ pub(all) struct SheetBeamStem {
 
 ///|
 /// Pre-computed beam rest data
-pub(all) struct SheetBeamRest {
+pub struct SheetBeamRest {
   x : Double
   y : Double
   duration : @music.NoteDuration
@@ -25,7 +25,7 @@ pub(all) struct SheetBeamRest {
 
 ///|
 /// Pre-computed beam group layout data
-pub(all) struct SheetBeamGroup {
+pub struct SheetBeamGroup {
   stem_up : Bool
   first_x : Double
   first_beam_y : Double

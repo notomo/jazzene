@@ -21,7 +21,7 @@ pub const KEY_SIG_SYMBOL_SPACING : Double = 12.0
 
 ///|
 /// Pre-computed measure layout data
-pub(all) struct SheetMeasure {
+pub struct SheetMeasure {
   x : Double
   y : Double
   width : Double

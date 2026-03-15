@@ -1,6 +1,6 @@
 ///|
 /// Song preset with typed music fields
-pub(all) struct SongPreset {
+pub struct SongPreset {
   name : String
   chords : String
   key : ChordRoot?

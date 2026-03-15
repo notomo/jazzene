@@ -1,9 +1,9 @@
 ///|
 /// Audio sound with offset from current position for Web Audio scheduling
 pub(all) struct AudioSound {
-  pub offset : Duration
-  pub duration : Duration
-  pub midi : MidiNumber
+  offset : Duration
+  duration : Duration
+  midi : MidiNumber
 } derive(Eq, Show)
 
 ///|

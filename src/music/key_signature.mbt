@@ -1,6 +1,6 @@
 ///|
 /// Key signature representation for music theory
-pub(all) struct KeySignature {
+pub struct KeySignature {
   root : ChordRoot
   /// Diatonic steps (0-6) altered by this key, in signature order
   altered_steps : Array[Int]

@@ -1,6 +1,6 @@
 ///|
 /// View state for visualization panels and settings
-pub(all) struct ViewState {
+pub struct ViewState {
   show_sheet : Bool
   show_piano_roll : Bool
   show_settings : Bool

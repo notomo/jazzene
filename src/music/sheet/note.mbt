@@ -33,7 +33,7 @@ const ACCIDENTAL_EXTRA_SPACING : Double = 14.0
 
 ///|
 /// Pre-computed note layout data
-pub(all) struct SheetNote {
+pub struct SheetNote {
   x : Double
   y : Double
   duration : @music.NoteDuration

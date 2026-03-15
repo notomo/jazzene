@@ -1,6 +1,6 @@
 ///|
 /// Accidental types for note display
-pub(all) enum Accidental {
+pub enum Accidental {
   Sharp
   Flat
   Natural

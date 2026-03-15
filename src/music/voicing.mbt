@@ -15,7 +15,7 @@
 /// - tension_voicing: A form = [3rd, 5th, 7th, R/9th], B form = [7th, R/9th, 3rd, 5th/13th]
 ///
 /// This consistent ordering allows smooth voice leading across chord changes.
-pub(all) struct Voicing {
+pub struct Voicing {
   notes : Array[MidiNumber]
 }
 

@@ -1,6 +1,6 @@
 ///|
 /// Pre-computed tie arc layout data
-pub(all) struct SheetTieArc {
+pub struct SheetTieArc {
   start_x : Double
   end_x : Double
   note_y : Double
