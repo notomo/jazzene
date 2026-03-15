@@ -6,8 +6,9 @@ fn main {
   let tick = make_tick(state, synthesizer)
 
   let _ = @signals.effect(fn() {
+    let volume = state.volume.get().to_double() / 100.0
     if state.is_playing.get() {
-      synthesizer.unmute()
+      synthesizer.set_master_volume(volume)
     } else {
       synthesizer.mute()
     }
@@ -67,7 +68,6 @@ fn make_tick(
       comping_sounds=backing_audio_sounds,
       bass_sounds=bass_audio_sounds,
       drum_sounds=drum_audio_sounds,
-      volume=state.volume.get().to_double() / 100.0,
     )
 
     state.playback_position.set(final_position)

@@ -28,9 +28,12 @@ pub fn Synthesizer::mute(self : Synthesizer) -> Unit {
 }
 
 ///|
-/// Unmute audio by restoring master gain to 1
-pub fn Synthesizer::unmute(self : Synthesizer) -> Unit {
-  set_gain_immediate(self.master_gain, 1.0)
+/// Set master volume (0.0–1.0); use this instead of unmute to apply volume
+pub fn Synthesizer::set_master_volume(
+  self : Synthesizer,
+  volume : Double,
+) -> Unit {
+  set_gain_immediate(self.master_gain, volume)
 }
 
 ///|
@@ -41,10 +44,9 @@ pub fn Synthesizer::schedule_sounds(
   comping_sounds? : Array[@music.AudioSound] = [],
   bass_sounds? : Array[@music.AudioSound] = [],
   drum_sounds? : Array[@music.AudioSound] = [],
-  volume~ : Double,
 ) -> Unit {
-  self.piano.schedule_notes(piano_sounds, volume)
-  self.piano.schedule_notes(comping_sounds, volume * 0.5)
-  self.bass.schedule_notes(bass_sounds, volume)
-  self.drum.schedule_notes(drum_sounds, volume)
+  self.piano.schedule_notes(piano_sounds, 1.0)
+  self.piano.schedule_notes(comping_sounds, 0.5)
+  self.bass.schedule_notes(bass_sounds, 1.0)
+  self.drum.schedule_notes(drum_sounds, 1.0)
 }
