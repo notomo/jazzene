@@ -45,28 +45,36 @@ fn canvas_to_dom_node(canvas : @js_dom.HTMLCanvasElement) -> @luna_dom.DomNode {
 }
 
 ///|
-extern "js" fn get_device_pixel_ratio() -> Double =
-  #|() => window.devicePixelRatio || 1
+fn get_device_pixel_ratio() -> Double {
+  @js_dom.window().device_pixel_ratio()
+}
 
 ///|
-extern "js" fn get_context_2d(
+fn get_context_2d(
   canvas : @js_dom.HTMLCanvasElement,
-) -> @canvas.CanvasRenderingContext2D =
-  #|(canvas) => canvas.getContext("2d")
+) -> @canvas.CanvasRenderingContext2D {
+  canvas.getContext("2d").cast()
+}
 
 ///|
-extern "js" fn set_canvas_style_width(
+fn set_canvas_style_width(
   canvas : @js_dom.HTMLCanvasElement,
   width : String,
-) -> Unit =
-  #|(canvas, width) => { canvas.style.width = width; }
+) -> Unit {
+  @js_dom.css_style_from_val(canvas.as_any()._get("style")).set_property(
+    "width", width,
+  )
+}
 
 ///|
-extern "js" fn set_canvas_style_height(
+fn set_canvas_style_height(
   canvas : @js_dom.HTMLCanvasElement,
   height : String,
-) -> Unit =
-  #|(canvas, height) => { canvas.style.height = height; }
+) -> Unit {
+  @js_dom.css_style_from_val(canvas.as_any()._get("style")).set_property(
+    "height", height,
+  )
+}
 
 ///|
 /// Create a signal that increments whenever the canvas element resizes.
@@ -75,18 +83,11 @@ fn create_resize_trigger(
   canvas : @js_dom.HTMLCanvasElement,
 ) -> @signals.Signal[Int] {
   let trigger = @signals.signal(0)
-  observe_resize(canvas, fn() { trigger.update(fn(n) { n + 1 }) })
+  @js_observer.ResizeObserver::new(fn(_entries, _observer) {
+    trigger.update(fn(n) { n + 1 })
+  }).observe(canvas.as_element())
   trigger
 }
-
-///|
-extern "js" fn observe_resize(
-  canvas : @js_dom.HTMLCanvasElement,
-  callback : () -> Unit,
-) -> Unit =
-  #|function(canvas, callback) {
-  #|  new ResizeObserver(function() { callback(); }).observe(canvas);
-  #|}
 
 ///|
 fn cast_to_canvas(elem : @js_dom.Element) -> @js_dom.HTMLCanvasElement = "%identity"

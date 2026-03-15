@@ -8,8 +8,13 @@ const COLOR_FOREGROUND = "#f1f5f9"
 const LEAD_SHEET_CONTAINER_ID = "lead-sheet-container"
 
 ///|
-extern "js" fn scroll_element_to(element : @js_dom.Element, top : Int) -> Unit =
-  #|(element, top) => { element.scrollTo({ top: top, behavior: 'smooth' }); }
+fn scroll_element_to(element : @js_dom.Element, top : Int) -> Unit {
+  let opts = @js.from_entries([
+    ("top", @js.any(top)),
+    ("behavior", @js.any("smooth")),
+  ])
+  element.as_any()._call("scrollTo", [opts]) |> ignore
+}
 
 ///|
 /// Calculate the current playback row based on position

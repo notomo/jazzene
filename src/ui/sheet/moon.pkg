@@ -3,6 +3,7 @@ import {
   "mizchi/signals",
   "mizchi/luna/dom" @luna_dom,
   "mizchi/js/browser/dom" @js_dom,
+  "mizchi/js/core" @js,
   "internal/jazzene/music",
   "internal/jazzene/music/sheet" @sheet_layout,
   "internal/jazzene/ui/theme",

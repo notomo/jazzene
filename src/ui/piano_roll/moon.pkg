@@ -6,6 +6,8 @@ import {
   "mizchi/js/browser/canvas",
   "internal/jazzene/ui/theme",
   "mizchi/js/browser/dom" @js_dom,
+  "mizchi/js/web/performance" @js_perf,
+  "mizchi/js/browser/observer" @js_observer,
 }
 
 options(

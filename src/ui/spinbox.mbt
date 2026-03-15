@@ -1,10 +1,12 @@
 ///|
-extern "js" fn set_timeout(f : () -> Unit, delay : Int) -> Int =
-  #|(f, delay) => setTimeout(f, delay)
+fn set_timeout(f : () -> Unit, delay : Int) -> Int {
+  @js_dom.window().set_timeout(f, delay)
+}
 
 ///|
-extern "js" fn clear_timeout(id : Int) -> Unit =
-  #|(id) => clearTimeout(id)
+fn clear_timeout(id : Int) -> Unit {
+  @js_dom.window().clear_timeout(id)
+}
 
 ///|
 /// Reusable spinbox component for tablet-friendly numeric input.
@@ -53,8 +55,11 @@ fn spinbox(
     } else if delta_y > 0.0 {
       update_value(get_value() - step)
     }
-    clear_timeout(wheel_timer.val)
-    wheel_timer.val = set_timeout(fn() { on_settle(get_value()) }, 400)
+    @js_dom.window().clear_timeout(wheel_timer.val)
+    wheel_timer.val = @js_dom.window().set_timeout(
+      fn() { on_settle(get_value()) },
+      400,
+    )
   }
   let on_drag_move : (Double) -> Unit = fn(client_x) {
     match drag_start_x.val {

@@ -73,10 +73,6 @@ extern "js" fn add_canvas_drag_start_listeners(
   #|}
 
 ///|
-extern "js" fn performance_now() -> Double =
-  #|() => performance.now()
-
-///|
 /// Set up mouse wheel seeking on the note display canvas
 fn setup_wheel_seek(
   canvas : @js_dom.HTMLCanvasElement,
@@ -139,7 +135,7 @@ fn setup_drag_seek(
   let on_drag_move : (Double) -> Unit = fn(client_y) {
     match (drag_start_y.val, drag_start_position_ms.val) {
       (Some(start_y), Some(start_pos)) => {
-        let now = performance_now()
+        let now = @js_perf.performance().now()
         let dt = now - last_time.val
         if dt > 0.0 {
           let raw_velocity = (client_y - last_y.val) / dt
@@ -204,7 +200,7 @@ fn setup_drag_seek(
     drag_start_y.val = Some(client_y)
     drag_start_position_ms.val = Some(playback_position.get().to_milliseconds())
     last_y.val = client_y
-    last_time.val = performance_now()
+    last_time.val = @js_perf.performance().now()
     smoothed_velocity.val = 0.0
     add_document_drag_listeners_y(on_drag_move, on_drag_end)
   })
