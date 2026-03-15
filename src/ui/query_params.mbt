@@ -40,11 +40,7 @@ fn set_query_param(name : String, value : String, default~ : String) -> Unit {
 ///|
 fn get_initial_int(name : String, default : Int) -> Int {
   match get_query_param(name) {
-    Some(value) =>
-      match @js_global.parseInt(value) {
-        Some(n) => n
-        None => default
-      }
+    Some(value) => (try? @strconv.parse_int(value)).unwrap_or(default)
     None => default
   }
 }
@@ -143,7 +139,7 @@ pub fn get_initial_loop_a_measure() -> Int {
 ///|
 pub fn get_initial_loop_b_measure(measure_count : Int) -> Int {
   match get_query_param("loop_b") {
-    Some(value) => @js_global.parseInt(value).unwrap_or(measure_count)
+    Some(value) => (try? @strconv.parse_int(value)).unwrap_or(measure_count)
     None => measure_count
   }
 }

@@ -3,7 +3,6 @@ import {
   "mizchi/signals",
   "mizchi/luna/dom" @luna_dom,
   "mizchi/js/core" @js,
-  "mizchi/js/builtins/global" @js_global,
   "internal/jazzene/music",
   "internal/jazzene/music/generator",
   "mizchi/js/browser/dom" @js_dom,
@@ -12,6 +11,7 @@ import {
   "internal/jazzene/ui/theme",
   "internal/jazzene/audio/web_midi_api" @web_midi,
   "internal/jazzene/music/midi" @midi,
+  "moonbitlang/core/strconv",
 }
 
 options(
