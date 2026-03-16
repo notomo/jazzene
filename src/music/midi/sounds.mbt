@@ -56,6 +56,9 @@ pub fn select_drum_sounds(
   measure_count : Int,
   time_signature : @music.TimeSignature,
 ) -> Array[@music.ScheduledSound] {
+  if not(js.drums_enabled) {
+    return []
+  }
   match js.drum_pattern {
     @music.Imported =>
       match imported_midi {
@@ -64,17 +67,13 @@ pub fn select_drum_sounds(
         None => []
       }
     _ =>
-      if not(js.drums_enabled) {
-        []
-      } else {
-        @music.generate_drum_sounds(
-          bpm,
-          measure_count,
-          time_signature~,
-          swing=js.swing,
-          pattern_style=js.drum_pattern,
-        )
-      }
+      @music.generate_drum_sounds(
+        bpm,
+        measure_count,
+        time_signature~,
+        swing=js.swing,
+        pattern_style=js.drum_pattern,
+      )
   }
 }
 
@@ -88,6 +87,9 @@ pub fn select_comping_sounds(
   key : @music.KeySignature,
   seed : Int,
 ) -> Array[@music.ScheduledSound] {
+  if js.comping_mode == @music.Off {
+    return []
+  }
   match js.comping_style {
     @music.Imported =>
       match imported_midi {
@@ -95,18 +97,14 @@ pub fn select_comping_sounds(
         None => []
       }
     _ =>
-      match js.comping_mode {
-        @music.Off => []
-        @music.Silent | @music.On =>
-          @music.generate_comping_sounds(
-            full_measures,
-            bpm,
-            full_sounds,
-            key,
-            seed~,
-            voicing_style=js.comping_style,
-          )
-      }
+      @music.generate_comping_sounds(
+        full_measures,
+        bpm,
+        full_sounds,
+        key,
+        seed~,
+        voicing_style=js.comping_style,
+      )
   }
 }
 
@@ -118,17 +116,15 @@ pub fn select_bass_sounds(
   bpm : Int,
   key : @music.KeySignature,
 ) -> Array[@music.ScheduledSound] {
+  if not(js.bass_enabled) {
+    return []
+  }
   match js.bass_style {
     @music.Imported =>
       match imported_midi {
         Some(data) => adapt_pitched(data, bpm, key, data.bass_sounds)
         None => []
       }
-    _ =>
-      if not(js.bass_enabled) {
-        []
-      } else {
-        @music.generate_walking_bass_sounds(full_measures, bpm, js.bass_style)
-      }
+    _ => @music.generate_walking_bass_sounds(full_measures, bpm, js.bass_style)
   }
 }
