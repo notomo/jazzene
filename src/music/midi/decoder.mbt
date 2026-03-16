@@ -1,7 +1,7 @@
 ///|
 /// Imported MIDI data parsed from a .mid file.
 /// Sounds are pre-scheduled with absolute start times and durations in ms.
-pub struct ImportedMidi {
+pub(all) struct ImportedMidi {
   melody_sounds : Array[@music.ScheduledSound]
   comping_sounds : Array[@music.ScheduledSound]
   bass_sounds : Array[@music.ScheduledSound]

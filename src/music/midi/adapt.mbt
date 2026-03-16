@@ -1,6 +1,6 @@
 ///|
 /// Compute semitone shift from imported key to current key, normalized to [-6, 6]
-pub fn key_shift(data : ImportedMidi, current_key : @music.KeySignature) -> Int {
+fn key_shift(data : ImportedMidi, current_key : @music.KeySignature) -> Int {
   match data.key {
     None => 0
     Some(orig_key) => {
@@ -18,7 +18,7 @@ pub fn key_shift(data : ImportedMidi, current_key : @music.KeySignature) -> Int 
 
 ///|
 /// Adapt melody/comping/bass sounds: rescale timing by BPM and transpose by key
-pub fn adapt_pitched(
+fn adapt_pitched(
   data : ImportedMidi,
   current_bpm : Int,
   current_key : @music.KeySignature,
