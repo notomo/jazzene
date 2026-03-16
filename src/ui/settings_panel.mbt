@@ -18,14 +18,17 @@ let legend_entries : Array[(String, String, String)] = [
 
 ///|
 /// Segmented button control: renders a row of option buttons where one is active.
+/// is_disabled: called inside reactive context (dyn_class/on), so signal access is tracked.
 fn[T : Eq] segmented_buttons(
   options : Array[(String, T)],
   current : () -> T,
   on_select : (T) -> Unit,
+  is_disabled? : (T) -> Bool = fn(_) { false },
 ) -> @luna_dom.DomNode {
   let base = "px-2 py-0.5 text-xs border-y border-r first:border-l first:rounded-l last:rounded-r transition-colors"
   let active = "bg-blue-800 border-blue-500 text-white"
   let inactive = "bg-slate-900 border-slate-600 text-slate-300 hover:bg-slate-700"
+  let disabled_style = "opacity-40 cursor-not-allowed bg-slate-900 border-slate-700 text-slate-500"
   @luna_dom.div(
     class="flex w-full",
     options.map(fn(pair) {
@@ -35,14 +38,20 @@ fn[T : Eq] segmented_buttons(
           cn([
             base,
             "flex-1 min-w-0 text-center",
-            if current() == value {
+            if is_disabled(value) {
+              disabled_style
+            } else if current() == value {
               active
             } else {
               inactive
             },
           ])
         },
-        on=@luna_dom.events().click(fn(_) { on_select(value) }),
+        on=@luna_dom.events().click(fn(_) {
+          if not(is_disabled(value)) {
+            on_select(value)
+          }
+        }),
         [@luna_dom.text(label)],
       )
     }),
@@ -186,7 +195,7 @@ pub fn settings_panel(
   on_import : (Array[Int]) -> Unit,
   imported_midi : @signals.Signal[@midi.ImportedMidi?],
 ) -> @luna_dom.DomNode {
-  let _ = imported_midi // available for future use in UI
+  let midi_imported = fn() { imported_midi.get() is Some(_) }
   @luna_dom.div(
     class="bg-slate-800 border-l border-slate-600 p-3 overflow-y-auto flex flex-col gap-3 w-64 shrink-0",
     attrs=[
@@ -439,6 +448,13 @@ pub fn settings_panel(
                   @music.JazzStyle::{ ..js, comping_style: v }
                 })
               },
+              is_disabled=fn(v) {
+                if midi_imported() {
+                  v != @music.CompingStyle::Imported
+                } else {
+                  v == @music.CompingStyle::Imported
+                }
+              },
             ),
           ],
         ),
@@ -474,6 +490,13 @@ pub fn settings_panel(
                   @music.JazzStyle::{ ..js, bass_style: v }
                 })
               },
+              is_disabled=fn(v) {
+                if midi_imported() {
+                  v != @music.BassStyle::Imported
+                } else {
+                  v == @music.BassStyle::Imported
+                }
+              },
             ),
           ],
         ),
@@ -508,6 +531,13 @@ pub fn settings_panel(
                 jazz_style.update(fn(js) {
                   @music.JazzStyle::{ ..js, drum_pattern: v }
                 })
+              },
+              is_disabled=fn(v) {
+                if midi_imported() {
+                  v != @music.DrumPatternStyle::Imported
+                } else {
+                  v == @music.DrumPatternStyle::Imported
+                }
               },
             ),
           ],
