@@ -105,10 +105,12 @@ pub fn render(state : AppState) -> Unit {
           }
           None => ()
         }
+        playback_position.set(@music.Duration::from_milliseconds(0))
         raw_chord_progression.set("")
         jazz_style.update(fn(js) {
           @music.JazzStyle::{
             ..js,
+            melody_mode: @music.On,
             comping_style: @music.Imported,
             bass_style: @music.Imported,
             drum_pattern: @music.Imported,
