@@ -8,7 +8,7 @@ pub(all) struct ImportedMidi {
   drum_sounds : Array[@music.ScheduledSound]
   bpm : Int?
   key : @music.KeySignature?
-  time_sig : @music.TimeSignature?
+  time_signature : @music.TimeSignature?
   measure_count : Int?
 }
 
@@ -173,7 +173,7 @@ pub fn decode_midi(bytes : Array[Int]) -> ImportedMidi? {
   let mut found_key = false
   let mut found_time = false
   let mut key_sig : @music.KeySignature? = None
-  let mut time_sig : @music.TimeSignature? = None
+  let mut time_signature : @music.TimeSignature? = None
   for ti in 0..<track_starts.length() {
     let t_start = track_starts[ti]
     let t_end = t_start + track_lengths[ti]
@@ -208,7 +208,7 @@ pub fn decode_midi(bytes : Array[Int]) -> ImportedMidi? {
               found_time = true
               let nn = bytes[mstart]
               let dd = bytes[mstart + 1]
-              time_sig = Some(@music.TimeSignature::{
+              time_signature = Some(@music.TimeSignature::{
                 numerator: nn,
                 denominator: 1 << dd,
               })
@@ -341,7 +341,7 @@ pub fn decode_midi(bytes : Array[Int]) -> ImportedMidi? {
       acc
     }
   })
-  let beats_per_meas = match time_sig {
+  let beats_per_meas = match time_signature {
     Some(ts) => ts.beats_per_measure()
     None => 4.0
   }
@@ -367,7 +367,7 @@ pub fn decode_midi(bytes : Array[Int]) -> ImportedMidi? {
     drum_sounds: drums,
     bpm: Some(bpm_val),
     key: key_sig,
-    time_sig,
+    time_signature,
     measure_count: measure_count_val,
   })
 }

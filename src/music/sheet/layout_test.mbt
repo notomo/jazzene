@@ -31,8 +31,8 @@ test "compute_sheet_measure - basic quarter note measure" {
     start_time: @music.Duration::from_milliseconds(0.0),
   }
   let key = @music.KeySignature::c_major()
-  let time_sig = @music.TimeSignature::default()
-  let sheet = compute_sheet_measure(measure, 0, key, time_sig)
+  let time_signature = @music.TimeSignature::default()
+  let sheet = compute_sheet_measure(measure, 0, key, time_signature)
   inspect(sheet.notes.length(), content="2")
   inspect(sheet.beam_groups.length(), content="0")
   inspect(sheet.ottava, content="OttavaNone")
@@ -67,8 +67,8 @@ test "compute_sheet_measure - eighth notes get beamed" {
     start_time: @music.Duration::from_milliseconds(0.0),
   }
   let key = @music.KeySignature::c_major()
-  let time_sig = @music.TimeSignature::default()
-  let sheet = compute_sheet_measure(measure, 0, key, time_sig)
+  let time_signature = @music.TimeSignature::default()
+  let sheet = compute_sheet_measure(measure, 0, key, time_signature)
   inspect(sheet.notes.length(), content="2")
   inspect(sheet.beam_groups.length(), content="1")
   inspect(sheet.notes[0].beamed, content="true")
@@ -96,8 +96,8 @@ test "compute_sheet_measure - high note triggers 8va" {
     start_time: @music.Duration::from_milliseconds(0.0),
   }
   let key = @music.KeySignature::c_major()
-  let time_sig = @music.TimeSignature::default()
-  let sheet = compute_sheet_measure(measure, 0, key, time_sig)
+  let time_signature = @music.TimeSignature::default()
+  let sheet = compute_sheet_measure(measure, 0, key, time_signature)
   inspect(sheet.ottava, content="OttavaAlta")
   // Note should be shifted down by 12
   inspect(sheet.notes[0].midi, content="Some(76)")

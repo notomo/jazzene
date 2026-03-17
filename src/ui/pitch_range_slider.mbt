@@ -57,10 +57,10 @@ pub fn pitch_range_slider(
   fn start_drag(left : Double, width : Double, client_x : Double) -> Unit {
     track_left.val = left
     track_width.val = width
-    let js = jazz_style.get()
+    let style = jazz_style.get()
     let clicked_pct = (client_x - left) / width * 100.0
-    let min_pct = midi_to_pct(js.pitch_min)
-    let max_pct = midi_to_pct(js.pitch_max)
+    let min_pct = midi_to_pct(style.pitch_min)
+    let max_pct = midi_to_pct(style.pitch_max)
     let dist_min = (clicked_pct - min_pct).abs()
     let dist_max = (clicked_pct - max_pct).abs()
     dragging_min.val = dist_min <= dist_max
@@ -68,12 +68,12 @@ pub fn pitch_range_slider(
     if dragging_min.val {
       let clamped = @cmp.minimum(
         @cmp.maximum(new_midi, pitch_slider_min),
-        js.pitch_max - 1,
+        style.pitch_max - 1,
       )
       jazz_style.update(fn(s) { @music.JazzStyle::{ ..s, pitch_min: clamped } })
     } else {
       let clamped = @cmp.minimum(
-        @cmp.maximum(new_midi, js.pitch_min + 1),
+        @cmp.maximum(new_midi, style.pitch_min + 1),
         pitch_slider_max,
       )
       jazz_style.update(fn(s) { @music.JazzStyle::{ ..s, pitch_max: clamped } })

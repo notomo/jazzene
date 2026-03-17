@@ -149,20 +149,20 @@ pub fn AppState::new() -> AppState {
   // and clear imported MIDI so melody also falls back to generated
   let _ = @signals.effect(fn() {
     if raw_chord_progression.get() != "" {
-      let js = jazz_style.peek()
+      let style = jazz_style.peek()
       jazz_style.set(@music.JazzStyle::{
-        ..js,
-        comping_style: match js.comping_style {
+        ..style,
+        comping_style: match style.comping_style {
           @music.Imported => @music.GuideTones
-          _ => js.comping_style
+          _ => style.comping_style
         },
-        bass_style: match js.bass_style {
+        bass_style: match style.bass_style {
           @music.Imported => @music.WalkingBass
-          _ => js.bass_style
+          _ => style.bass_style
         },
-        drum_pattern: match js.drum_pattern {
+        drum_pattern: match style.drum_pattern {
           @music.Imported => @music.SwingRide
-          _ => js.drum_pattern
+          _ => style.drum_pattern
         },
       })
       imported_midi.set(None)

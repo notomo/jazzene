@@ -271,8 +271,8 @@ pub fn settings_panel(
           melody_mode_options,
           fn() { jazz_style.get().melody_mode },
           fn(v) {
-            jazz_style.update(fn(js) {
-              @music.JazzStyle::{ ..js, melody_mode: v }
+            jazz_style.update(fn(style) {
+              @music.JazzStyle::{ ..style, melody_mode: v }
             })
           },
         ),
@@ -284,7 +284,9 @@ pub fn settings_panel(
         segmented_buttons(swing_options, fn() { jazz_style.get().swing }, fn(
           v,
         ) {
-          jazz_style.update(fn(js) { @music.JazzStyle::{ ..js, swing: v } })
+          jazz_style.update(fn(style) {
+            @music.JazzStyle::{ ..style, swing: v }
+          })
         }),
       ]),
       // Melody Techniques
@@ -293,10 +295,10 @@ pub fn settings_panel(
           "Tension Tones",
           value=fn() { jazz_style.get().techniques.tension_tones },
           on_toggle=fn() {
-            jazz_style.update(fn(js) {
-              let t = js.techniques
+            jazz_style.update(fn(style) {
+              let t = style.techniques
               @music.JazzStyle::{
-                ..js,
+                ..style,
                 techniques: @music.Techniques::{
                   ..t,
                   tension_tones: not(t.tension_tones),
@@ -309,10 +311,10 @@ pub fn settings_panel(
           "Chromatic Approach",
           value=fn() { jazz_style.get().techniques.chromatic_approach },
           on_toggle=fn() {
-            jazz_style.update(fn(js) {
-              let t = js.techniques
+            jazz_style.update(fn(style) {
+              let t = style.techniques
               @music.JazzStyle::{
-                ..js,
+                ..style,
                 techniques: @music.Techniques::{
                   ..t,
                   chromatic_approach: not(t.chromatic_approach),
@@ -325,10 +327,10 @@ pub fn settings_panel(
           "Enclosures",
           value=fn() { jazz_style.get().techniques.enclosure },
           on_toggle=fn() {
-            jazz_style.update(fn(js) {
-              let t = js.techniques
+            jazz_style.update(fn(style) {
+              let t = style.techniques
               @music.JazzStyle::{
-                ..js,
+                ..style,
                 techniques: @music.Techniques::{
                   ..t,
                   enclosure: not(t.enclosure),
@@ -341,10 +343,10 @@ pub fn settings_panel(
           "Syncopation",
           value=fn() { jazz_style.get().techniques.syncopation },
           on_toggle=fn() {
-            jazz_style.update(fn(js) {
-              let t = js.techniques
+            jazz_style.update(fn(style) {
+              let t = style.techniques
               @music.JazzStyle::{
-                ..js,
+                ..style,
                 techniques: @music.Techniques::{
                   ..t,
                   syncopation: not(t.syncopation),
@@ -357,10 +359,10 @@ pub fn settings_panel(
           "Triplets",
           value=fn() { jazz_style.get().techniques.triplets },
           on_toggle=fn() {
-            jazz_style.update(fn(js) {
-              let t = js.techniques
+            jazz_style.update(fn(style) {
+              let t = style.techniques
               @music.JazzStyle::{
-                ..js,
+                ..style,
                 techniques: @music.Techniques::{
                   ..t,
                   triplets: not(t.triplets),
@@ -373,10 +375,10 @@ pub fn settings_panel(
           "Bebop Scales",
           value=fn() { jazz_style.get().techniques.bebop_scales },
           on_toggle=fn() {
-            jazz_style.update(fn(js) {
-              let t = js.techniques
+            jazz_style.update(fn(style) {
+              let t = style.techniques
               @music.JazzStyle::{
-                ..js,
+                ..style,
                 techniques: @music.Techniques::{
                   ..t,
                   bebop_scales: not(t.bebop_scales),
@@ -389,10 +391,10 @@ pub fn settings_panel(
           "Neighbor Tones",
           value=fn() { jazz_style.get().techniques.neighbor_tones },
           on_toggle=fn() {
-            jazz_style.update(fn(js) {
-              let t = js.techniques
+            jazz_style.update(fn(style) {
+              let t = style.techniques
               @music.JazzStyle::{
-                ..js,
+                ..style,
                 techniques: @music.Techniques::{
                   ..t,
                   neighbor_tones: not(t.neighbor_tones),
@@ -405,10 +407,10 @@ pub fn settings_panel(
           "16th Runs",
           value=fn() { jazz_style.get().techniques.sixteenth_runs },
           on_toggle=fn() {
-            jazz_style.update(fn(js) {
-              let t = js.techniques
+            jazz_style.update(fn(style) {
+              let t = style.techniques
               @music.JazzStyle::{
-                ..js,
+                ..style,
                 techniques: @music.Techniques::{
                   ..t,
                   sixteenth_runs: not(t.sixteenth_runs),
@@ -424,8 +426,8 @@ pub fn settings_panel(
           comping_mode_options,
           fn() { jazz_style.get().comping_mode },
           fn(v) {
-            jazz_style.update(fn(js) {
-              @music.JazzStyle::{ ..js, comping_mode: v }
+            jazz_style.update(fn(style) {
+              @music.JazzStyle::{ ..style, comping_mode: v }
             })
           },
         ),
@@ -444,8 +446,8 @@ pub fn settings_panel(
               comping_style_options,
               fn() { jazz_style.get().comping_style },
               fn(v) {
-                jazz_style.update(fn(js) {
-                  @music.JazzStyle::{ ..js, comping_style: v }
+                jazz_style.update(fn(style) {
+                  @music.JazzStyle::{ ..style, comping_style: v }
                 })
               },
               is_disabled=fn(v) {
@@ -465,8 +467,11 @@ pub fn settings_panel(
           label="Enabled",
           value=fn() { jazz_style.get().bass_enabled },
           on_toggle=fn() {
-            jazz_style.update(fn(js) {
-              @music.JazzStyle::{ ..js, bass_enabled: not(js.bass_enabled) }
+            jazz_style.update(fn(style) {
+              @music.JazzStyle::{
+                ..style,
+                bass_enabled: not(style.bass_enabled),
+              }
             })
           },
         ),
@@ -486,8 +491,8 @@ pub fn settings_panel(
               bass_style_options,
               fn() { jazz_style.get().bass_style },
               fn(v) {
-                jazz_style.update(fn(js) {
-                  @music.JazzStyle::{ ..js, bass_style: v }
+                jazz_style.update(fn(style) {
+                  @music.JazzStyle::{ ..style, bass_style: v }
                 })
               },
               is_disabled=fn(v) {
@@ -507,8 +512,11 @@ pub fn settings_panel(
           label="Enabled",
           value=fn() { jazz_style.get().drums_enabled },
           on_toggle=fn() {
-            jazz_style.update(fn(js) {
-              @music.JazzStyle::{ ..js, drums_enabled: not(js.drums_enabled) }
+            jazz_style.update(fn(style) {
+              @music.JazzStyle::{
+                ..style,
+                drums_enabled: not(style.drums_enabled),
+              }
             })
           },
         ),
@@ -528,8 +536,8 @@ pub fn settings_panel(
               drum_pattern_options,
               fn() { jazz_style.get().drum_pattern },
               fn(v) {
-                jazz_style.update(fn(js) {
-                  @music.JazzStyle::{ ..js, drum_pattern: v }
+                jazz_style.update(fn(style) {
+                  @music.JazzStyle::{ ..style, drum_pattern: v }
                 })
               },
               is_disabled=fn(v) {

@@ -94,7 +94,7 @@ pub fn render(state : AppState) -> Unit {
           Some(k) => key.set(k)
           None => ()
         }
-        match data.time_sig {
+        match data.time_signature {
           Some(ts) => time_signature.set(ts)
           None => ()
         }
@@ -107,9 +107,9 @@ pub fn render(state : AppState) -> Unit {
         }
         playback_position.set(@music.Duration::from_milliseconds(0))
         raw_chord_progression.set("")
-        jazz_style.update(fn(js) {
+        jazz_style.update(fn(style) {
           @music.JazzStyle::{
-            ..js,
+            ..style,
             melody_mode: @music.On,
             comping_style: @music.Imported,
             bass_style: @music.Imported,

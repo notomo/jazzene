@@ -323,51 +323,54 @@ fn bass_from_string(s : String) -> (Bool, @music.BassStyle) {
 
 ///|
 /// Save JazzStyle to URL query parameters, omitting defaults.
-pub fn save_jazz_style(js : @music.JazzStyle) -> Unit {
-  let default_js = @music.JazzStyle::default()
+pub fn save_jazz_style(style : @music.JazzStyle) -> Unit {
+  let default_style = @music.JazzStyle::default()
   set_query_param(
     "swing",
-    swing_to_string(js.swing),
-    default=swing_to_string(default_js.swing),
+    swing_to_string(style.swing),
+    default=swing_to_string(default_style.swing),
   )
   set_query_param(
     "techniques",
-    techniques_to_string(js.techniques),
+    techniques_to_string(style.techniques),
     default=techniques_to_string(@music.Techniques::default()),
   )
   set_query_param(
     "comping",
-    comping_mode_to_string(js.comping_mode),
-    default=comping_mode_to_string(default_js.comping_mode),
+    comping_mode_to_string(style.comping_mode),
+    default=comping_mode_to_string(default_style.comping_mode),
   )
   set_query_param(
     "comping_style",
-    comping_style_to_string(js.comping_style),
-    default=comping_style_to_string(default_js.comping_style),
+    comping_style_to_string(style.comping_style),
+    default=comping_style_to_string(default_style.comping_style),
   )
   set_query_param(
     "drums",
-    drums_to_string(js.drums_enabled, js.drum_pattern),
-    default=drums_to_string(default_js.drums_enabled, default_js.drum_pattern),
+    drums_to_string(style.drums_enabled, style.drum_pattern),
+    default=drums_to_string(
+      default_style.drums_enabled,
+      default_style.drum_pattern,
+    ),
   )
   set_query_param(
     "bass",
-    bass_to_string(js.bass_enabled, js.bass_style),
-    default=bass_to_string(default_js.bass_enabled, default_js.bass_style),
+    bass_to_string(style.bass_enabled, style.bass_style),
+    default=bass_to_string(default_style.bass_enabled, default_style.bass_style),
   )
   set_query_param(
     "melody",
-    melody_mode_to_string(js.melody_mode),
-    default=melody_mode_to_string(default_js.melody_mode),
+    melody_mode_to_string(style.melody_mode),
+    default=melody_mode_to_string(default_style.melody_mode),
   )
   set_query_param(
     "pitch_min",
-    js.pitch_min.to_string(),
+    style.pitch_min.to_string(),
     default=default_pitch_min.to_string(),
   )
   set_query_param(
     "pitch_max",
-    js.pitch_max.to_string(),
+    style.pitch_max.to_string(),
     default=default_pitch_max.to_string(),
   )
 }

@@ -84,7 +84,7 @@ test "encode_to_midi: tempo event correct for 120 BPM" {
 test "encode_to_midi: single note produces Note On and Note Off" {
   // 120 BPM: 1 beat = 0.5s, 480 ticks = 0.5s; tone_origin=None → velocity=80
   // Layout: header(14) + meta_chunk(33) + melody_MTrk_header(8) = 55
-  // Meta data = tempo(7)+time_sig(8)+key_sig(6)+EOT(4) = 25; chunk = 8+25 = 33
+  // Meta data = tempo(7)+time_signature(8)+key_sig(6)+EOT(4) = 25; chunk = 8+25 = 33
   // Melody data: PC[0,192,0] + CC7[0,176,7,100] + NoteOn + NoteOff + EOT
   let sound = make_note_sound(60, 0.0, 0.5)
   let midi = encode_to_midi([sound], [], [], [], 120)

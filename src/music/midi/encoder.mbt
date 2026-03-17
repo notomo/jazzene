@@ -75,7 +75,7 @@ fn write_track(buf : Array[Int], track_data : Array[Int]) -> Unit {
 }
 
 ///|
-/// Build meta track (track 0) with tempo / time_sig / key_sig / text.
+/// Build meta track (track 0) with tempo / time_signature / key_sig / text.
 fn make_meta_track(
   bpm : Int,
   time_signature : @music.TimeSignature,

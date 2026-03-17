@@ -78,7 +78,7 @@ test "decode_midi: minimal valid SMF returns empty sounds and default BPM" {
     content="Some(None)",
   )
   inspect(
-    result.map(fn(m) { m.time_sig.map(fn(ts) { ts.numerator }) }),
+    result.map(fn(m) { m.time_signature.map(fn(ts) { ts.numerator }) }),
     content="Some(None)",
   )
   inspect(result.map(fn(m) { m.measure_count }), content="Some(None)")
@@ -217,11 +217,11 @@ test "decode_midi: time signature meta event sets numerator and denominator" {
   ]
   let result = decode_midi(smf0(480, track_data))
   inspect(
-    result.map(fn(m) { m.time_sig.map(fn(ts) { ts.numerator }) }),
+    result.map(fn(m) { m.time_signature.map(fn(ts) { ts.numerator }) }),
     content="Some(Some(3))",
   )
   inspect(
-    result.map(fn(m) { m.time_sig.map(fn(ts) { ts.denominator }) }),
+    result.map(fn(m) { m.time_signature.map(fn(ts) { ts.denominator }) }),
     content="Some(Some(4))",
   )
 }
