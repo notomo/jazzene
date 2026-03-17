@@ -66,6 +66,15 @@ export async function openPage({
     getLoopAInput: () => page.getByLabel("loop_a"),
     getLoopBInput: () => page.getByLabel("loop_b"),
     getTimeSignatureSelect: () => page.getByLabel("time signature"),
+
+    getLeadSheetContainer: () => page.locator("#lead-sheet-container"),
+    getPianoRollCanvas: () =>
+      page.getByLabel("falling notes").locator("canvas"),
+    getPlaybackIndicator: () => page.locator('line[stroke="#3b82f6"]').first(),
+    getMidiImportButton: () =>
+      page.getByLabel("jazz settings panel").getByRole("button", { name: "Import" }),
+    getMidiExportButton: () =>
+      page.getByLabel("jazz settings panel").getByRole("button", { name: "Export" }),
   };
 
   return jazzenePage;
