@@ -1,6 +1,6 @@
 import type { Page } from "@playwright/test";
 
-export async function openJazzenePage({
+export async function openPage({
   page,
   queryParams,
 }: {
@@ -12,20 +12,16 @@ export async function openJazzenePage({
   await page.goto(url);
 
   const jazzenePage = {
-    // Main sections
     getLeadSheet: () => page.getByLabel("lead sheet"),
     getVisualization: () => page.getByLabel("visualization"),
     getFallingNotes: () => page.getByLabel("falling notes"),
 
-    // Chord progression input
     getChordInput: () => page.getByPlaceholder(/Enter chord progression/),
 
-    // Playback controls
     getPlayButton: () => page.getByRole("button", { name: "▶" }),
     getStopButton: () => page.getByRole("button", { name: "■" }),
     getPlayOrStopButton: () => page.getByRole("button", { name: /▶|■/ }),
 
-    // Helper methods
     setChordProgression: async (chords: string) => {
       const input = jazzenePage.getChordInput();
       await input.clear();

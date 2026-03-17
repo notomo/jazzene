@@ -1,11 +1,11 @@
 import { test, expect } from "@playwright/test";
-import { openJazzenePage } from "./page";
+import { openPage } from "./page";
 
-test.describe("Jazzene - Jazz Improvisation Web App", () => {
-  let jazzene: Awaited<ReturnType<typeof openJazzenePage>>;
+test.describe("Jazz Improvisation Web App", () => {
+  let jazzene: Awaited<ReturnType<typeof openPage>>;
 
   test.beforeEach(async ({ page }) => {
-    jazzene = await openJazzenePage({ page });
+    jazzene = await openPage({ page });
   });
 
   test("should render all three main sections", async () => {
@@ -64,7 +64,7 @@ test.describe("Jazzene - Jazz Improvisation Web App", () => {
 
     // URL should be updated with jazz style params
     await page.waitForFunction(() =>
-      new URLSearchParams(window.location.search).has("swing")
+      new URLSearchParams(window.location.search).has("swing"),
     );
     const url = new URL(page.url());
     expect(url.searchParams.get("swing")).toBe("straight");
@@ -81,7 +81,7 @@ test.describe("Jazzene - Jazz Improvisation Web App", () => {
   });
 });
 
-test.describe("Jazzene - Query Parameters", () => {
+test.describe("Query Parameters", () => {
   test("should reflect query parameters in controls", async ({ page }) => {
     const params = {
       key: "D",
@@ -94,7 +94,7 @@ test.describe("Jazzene - Query Parameters", () => {
       loop_a: "3",
       loop_b: "6",
     };
-    const jazzene = await openJazzenePage({ page, queryParams: params });
+    const jazzene = await openPage({ page, queryParams: params });
 
     await expect(jazzene.getTimeSignatureSelect()).toHaveValue("3/4");
     await expect(jazzene.getKeySelect()).toHaveValue("D");
@@ -102,12 +102,17 @@ test.describe("Jazzene - Query Parameters", () => {
     await expect(jazzene.getSeedInput()).toHaveText("42");
     await expect(jazzene.getMeasuresInput()).toHaveText("16");
     await expect(jazzene.getChordInput()).toHaveValue("IIIm7 | VIm7");
-    await expect(jazzene.getActiveViewModeButton()).toHaveAttribute("title", "Sheet");
+    await expect(jazzene.getActiveViewModeButton()).toHaveAttribute(
+      "title",
+      "Sheet",
+    );
     await expect(jazzene.getLoopAInput()).toHaveText("3");
     await expect(jazzene.getLoopBInput()).toHaveText("6");
   });
 
-  test("should restore jazz style from URL query parameters", async ({ page }) => {
+  test("should restore jazz style from URL query parameters", async ({
+    page,
+  }) => {
     const params = {
       swing: "hard",
       techniques: "00000000",
@@ -115,7 +120,7 @@ test.describe("Jazzene - Query Parameters", () => {
       drums: "sride",
       bass: "root",
     };
-    const jazzene = await openJazzenePage({ page, queryParams: params });
+    const jazzene = await openPage({ page, queryParams: params });
 
     // Open settings panel to verify the restored state
     await jazzene.openSettingsPanel();
