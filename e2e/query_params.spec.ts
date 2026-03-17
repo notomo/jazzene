@@ -1,0 +1,70 @@
+import { test, expect } from "@playwright/test";
+import { openPage } from "./page";
+
+test("should reflect query parameters in controls", async ({ page }) => {
+  const jazzene = await openPage({
+    page,
+    queryParams: {
+      key: "D",
+      time: "3/4",
+      bpm: "140",
+      seed: "42",
+      measures: "16",
+      chords: "IIIm7 | VIm7",
+      view: "sheet",
+      loop_a: "3",
+      loop_b: "6",
+    },
+  });
+
+  await expect(jazzene.getTimeSignatureSelect()).toHaveValue("3/4");
+  await expect(jazzene.getKeySelect()).toHaveValue("D");
+  await expect(jazzene.getBpmInput()).toHaveText("140");
+  await expect(jazzene.getSeedInput()).toHaveText("42");
+  await expect(jazzene.getMeasuresInput()).toHaveText("16");
+  await expect(jazzene.getChordInput()).toHaveValue("IIIm7 | VIm7");
+  await expect(jazzene.getActiveViewModeButton()).toHaveAttribute(
+    "title",
+    "Sheet",
+  );
+  await expect(jazzene.getLoopAInput()).toHaveText("3");
+  await expect(jazzene.getLoopBInput()).toHaveText("6");
+});
+
+test("should persist jazz style to URL when changed", async ({ page }) => {
+  const jazzene = await openPage({ page });
+
+  await jazzene.openSettingsPanel();
+  const panel = jazzene.getSettingsPanel();
+
+  await panel.getByRole("button", { name: "Straight" }).click();
+
+  await page.waitForFunction(() =>
+    new URLSearchParams(window.location.search).has("swing"),
+  );
+  const url = new URL(page.url());
+  expect(url.searchParams.get("swing")).toBe("straight");
+  expect(url.searchParams.get("comping")).toBe("off");
+  expect(url.searchParams.get("drums")).toBe("off");
+  expect(url.searchParams.get("bass")).toBe("off");
+});
+
+test("should restore jazz style from URL query parameters", async ({
+  page,
+}) => {
+  const jazzene = await openPage({
+    page,
+    queryParams: {
+      swing: "hard",
+      techniques: "00000000",
+      comping: "off",
+      drums: "sride",
+      bass: "root",
+    },
+  });
+
+  await jazzene.openSettingsPanel();
+  const panel = jazzene.getSettingsPanel();
+  await expect(panel).toBeVisible();
+  await expect(panel).toContainText("Drums");
+});
