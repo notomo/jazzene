@@ -39,3 +39,9 @@ test("should restore sheet when sheet button toggled back on", async ({
   await jazzene.getViewModeSelect().getByTitle("Sheet").click();
   await expect(jazzene.getLeadSheetContainer()).toBeVisible();
 });
+
+test("should open settings panel with jazz controls", async ({ page }) => {
+  const jazzene = await openPage({ page, view: ["sheet", "pianoroll", "setting"] });
+
+  await expect(jazzene.getSettingsPanel()).toBeVisible();
+});

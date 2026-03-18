@@ -32,9 +32,8 @@ test("should reflect query parameters in controls", async ({ page }) => {
 });
 
 test("should persist jazz style to URL when changed", async ({ page }) => {
-  const jazzene = await openPage({ page });
+  const jazzene = await openPage({ page, view: ["sheet", "pianoroll", "setting"] });
 
-  await jazzene.openSettingsPanel();
   const panel = jazzene.getSettingsPanel();
 
   await panel.getByRole("button", { name: "Straight" }).click();
@@ -61,9 +60,9 @@ test("should restore jazz style from URL query parameters", async ({
       drums: "sride",
       bass: "root",
     },
+    view: ["sheet", "pianoroll", "setting"],
   });
 
-  await jazzene.openSettingsPanel();
   const panel = jazzene.getSettingsPanel();
   await expect(panel).toBeVisible();
   await expect(panel).toContainText("Drums");

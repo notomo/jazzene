@@ -36,8 +36,7 @@ const MINIMAL_MIDI_BYTES = (globalThis as any).Buffer.from([
 test("should trigger download with .mid extension when Export clicked", async ({
   page,
 }) => {
-  const jazzene = await openPage({ page });
-  await jazzene.openSettingsPanel();
+  const jazzene = await openPage({ page, view: ["sheet", "pianoroll", "setting"] });
 
   const [download] = await Promise.all([
     page.waitForEvent("download"),
@@ -47,27 +46,13 @@ test("should trigger download with .mid extension when Export clicked", async ({
   expect(download.suggestedFilename()).toMatch(/jazzene_\d{8}_\d{6}\.mid$/);
 });
 
-test("should open file chooser when Import clicked", async ({ page }) => {
-  const jazzene = await openPage({ page });
-  await jazzene.openSettingsPanel();
-
-  const [fileChooser] = await Promise.all([
-    page.waitForEvent("filechooser"),
-    jazzene.getMidiImportButton().click(),
-  ]);
-
-  expect(fileChooser.isMultiple()).toBe(false);
-});
-
 test("should clear chord progression after importing a MIDI file", async ({
   page,
 }) => {
-  const jazzene = await openPage({ page });
+  const jazzene = await openPage({ page, view: ["sheet", "pianoroll", "setting"] });
 
   // Default chord progression should be non-empty
   await expect(jazzene.getChordInput()).not.toHaveValue("");
-
-  await jazzene.openSettingsPanel();
 
   const [fileChooser] = await Promise.all([
     page.waitForEvent("filechooser"),

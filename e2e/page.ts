@@ -1,13 +1,21 @@
 import type { Page } from "@playwright/test";
 
+export type ViewName = "sheet" | "pianoroll" | "setting";
+
 export async function openPage({
   page,
   queryParams,
+  view,
 }: {
   page: Page;
   queryParams?: Record<string, string>;
+  view?: ViewName[];
 }) {
-  const params = new URLSearchParams(queryParams);
+  const allParams: Record<string, string> = { ...queryParams };
+  if (view !== undefined) {
+    allParams["view"] = view.join(",");
+  }
+  const params = new URLSearchParams(allParams);
   const url = params.size > 0 ? `/?${params.toString()}` : "/";
   await page.goto(url);
 
@@ -50,11 +58,7 @@ export async function openPage({
       await measure.click();
     },
 
-    getSettingsButton: () => page.getByRole("button", { name: "Setting" }),
     getSettingsPanel: () => page.getByLabel("jazz settings panel"),
-    openSettingsPanel: async () => {
-      await jazzenePage.getSettingsButton().click();
-    },
 
     getBpmInput: () => page.getByLabel("bpm"),
     getSeedInput: () => page.getByLabel("seed"),
