@@ -65,8 +65,6 @@ export async function openPage({
     getMeasuresInput: () => page.getByLabel("measures"),
     getKeySelect: () => page.getByLabel("key", { exact: true }),
     getViewModeSelect: () => page.getByLabel("view mode"),
-    getActiveViewModeButton: () =>
-      page.getByLabel("view mode").locator("button.bg-blue-900"),
     getLoopAInput: () => page.getByLabel("loop_a"),
     getLoopBInput: () => page.getByLabel("loop_b"),
     getTimeSignatureSelect: () => page.getByLabel("time signature"),
@@ -84,9 +82,13 @@ export async function openPage({
       return Number(await indicator.getAttribute("x1"));
     },
     getMidiImportButton: () =>
-      page.getByLabel("jazz settings panel").getByRole("button", { name: "Import" }),
+      page
+        .getByLabel("jazz settings panel")
+        .getByRole("button", { name: "Import" }),
     getMidiExportButton: () =>
-      page.getByLabel("jazz settings panel").getByRole("button", { name: "Export" }),
+      page
+        .getByLabel("jazz settings panel")
+        .getByRole("button", { name: "Export" }),
   };
 
   return jazzenePage;

@@ -23,3 +23,14 @@ test("should seek to clicked measure position", async ({ page }) => {
   expect(positionAfter).toBeGreaterThan(positionBefore);
   await expect(jazzene.getStopButton()).toBeEnabled();
 });
+
+test("should seek by scrolling on piano roll", async ({ page }) => {
+  const jazzene = await openPage({ page });
+
+  const canvas = jazzene.getPianoRollCanvas();
+  const positionBefore = await jazzene.getPlaybackPosition();
+
+  await canvas.dispatchEvent("wheel", { deltaY: 300, deltaMode: 0 });
+  const positionAfter = await jazzene.getPlaybackPosition();
+  expect(positionAfter).toBeGreaterThan(positionBefore);
+});

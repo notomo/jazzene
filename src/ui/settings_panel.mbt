@@ -52,6 +52,14 @@ fn[T : Eq] segmented_buttons(
             on_select(value)
           }
         }),
+        dyn_attrs=[
+          (
+            "aria-pressed",
+            @luna_dom.AttrValue::Dynamic(fn() {
+              (current() == value).to_string()
+            }),
+          ),
+        ],
         [@luna_dom.text(label)],
       )
     }),
@@ -115,8 +123,13 @@ fn toggle_switch(
 fn settings_section(
   title : String,
   children : Array[@luna_dom.DomNode],
+  aria_label? : String,
 ) -> @luna_dom.DomNode {
-  @luna_dom.div(class="flex flex-col gap-1.5", [
+  let attrs : Array[(String, @luna_dom.Attr)] = match aria_label {
+    Some(l) => [("aria-label", @luna_dom.Attr::AttrString(l))]
+    None => []
+  }
+  @luna_dom.div(class="flex flex-col gap-1.5", attrs~, [
     @luna_dom.div(
       class="text-xs font-semibold text-slate-400 uppercase tracking-wide",
       [@luna_dom.text(title)],
@@ -266,29 +279,37 @@ pub fn settings_panel(
         ),
       ]),
       // Melody
-      settings_section("Melody", [
-        segmented_buttons(
-          melody_mode_options,
-          fn() { jazz_style.get().melody_mode },
-          fn(v) {
-            jazz_style.update(fn(style) {
-              @music.JazzStyle::{ ..style, melody_mode: v }
-            })
-          },
-        ),
-      ]),
+      settings_section(
+        "Melody",
+        [
+          segmented_buttons(
+            melody_mode_options,
+            fn() { jazz_style.get().melody_mode },
+            fn(v) {
+              jazz_style.update(fn(style) {
+                @music.JazzStyle::{ ..style, melody_mode: v }
+              })
+            },
+          ),
+        ],
+        aria_label="melody",
+      ),
       // Pitch Range
       settings_section("Pitch Range", [pitch_range_slider(jazz_style)]),
       // Swing
-      settings_section("Swing", [
-        segmented_buttons(swing_options, fn() { jazz_style.get().swing }, fn(
-          v,
-        ) {
-          jazz_style.update(fn(style) {
-            @music.JazzStyle::{ ..style, swing: v }
-          })
-        }),
-      ]),
+      settings_section(
+        "Swing",
+        [
+          segmented_buttons(swing_options, fn() { jazz_style.get().swing }, fn(
+            v,
+          ) {
+            jazz_style.update(fn(style) {
+              @music.JazzStyle::{ ..style, swing: v }
+            })
+          }),
+        ],
+        aria_label="swing",
+      ),
       // Melody Techniques
       settings_section("Melody Techniques", [
         technique_toggle(
@@ -421,136 +442,148 @@ pub fn settings_panel(
         ),
       ]),
       // Comping
-      settings_section("Comping", [
-        segmented_buttons(
-          comping_mode_options,
-          fn() { jazz_style.get().comping_mode },
-          fn(v) {
-            jazz_style.update(fn(style) {
-              @music.JazzStyle::{ ..style, comping_mode: v }
-            })
-          },
-        ),
-        @luna_dom.div(
-          dyn_class=fn() {
-            cn([
-              "transition-opacity",
-              match jazz_style.get().comping_mode {
-                @music.Off => "opacity-40 pointer-events-none"
-                _ => ""
-              },
-            ])
-          },
-          [
-            segmented_buttons(
-              comping_style_options,
-              fn() { jazz_style.get().comping_style },
-              fn(v) {
-                jazz_style.update(fn(style) {
-                  @music.JazzStyle::{ ..style, comping_style: v }
-                })
-              },
-              is_disabled=fn(v) {
-                if midi_imported() {
-                  v != @music.CompingStyle::Imported
-                } else {
-                  v == @music.CompingStyle::Imported
-                }
-              },
-            ),
-          ],
-        ),
-      ]),
+      settings_section(
+        "Comping",
+        [
+          segmented_buttons(
+            comping_mode_options,
+            fn() { jazz_style.get().comping_mode },
+            fn(v) {
+              jazz_style.update(fn(style) {
+                @music.JazzStyle::{ ..style, comping_mode: v }
+              })
+            },
+          ),
+          @luna_dom.div(
+            dyn_class=fn() {
+              cn([
+                "transition-opacity",
+                match jazz_style.get().comping_mode {
+                  @music.Off => "opacity-40 pointer-events-none"
+                  _ => ""
+                },
+              ])
+            },
+            [
+              segmented_buttons(
+                comping_style_options,
+                fn() { jazz_style.get().comping_style },
+                fn(v) {
+                  jazz_style.update(fn(style) {
+                    @music.JazzStyle::{ ..style, comping_style: v }
+                  })
+                },
+                is_disabled=fn(v) {
+                  if midi_imported() {
+                    v != @music.CompingStyle::Imported
+                  } else {
+                    v == @music.CompingStyle::Imported
+                  }
+                },
+              ),
+            ],
+          ),
+        ],
+        aria_label="comping",
+      ),
       // Bass
-      settings_section("Bass", [
-        toggle_switch(
-          label="Enabled",
-          value=fn() { jazz_style.get().bass_enabled },
-          on_toggle=fn() {
-            jazz_style.update(fn(style) {
-              @music.JazzStyle::{
-                ..style,
-                bass_enabled: not(style.bass_enabled),
-              }
-            })
-          },
-        ),
-        @luna_dom.div(
-          dyn_class=fn() {
-            cn([
-              "transition-opacity",
-              if jazz_style.get().bass_enabled {
-                ""
-              } else {
-                "opacity-40 pointer-events-none"
-              },
-            ])
-          },
-          [
-            segmented_buttons(
-              bass_style_options,
-              fn() { jazz_style.get().bass_style },
-              fn(v) {
-                jazz_style.update(fn(style) {
-                  @music.JazzStyle::{ ..style, bass_style: v }
-                })
-              },
-              is_disabled=fn(v) {
-                if midi_imported() {
-                  v != @music.BassStyle::Imported
-                } else {
-                  v == @music.BassStyle::Imported
+      settings_section(
+        "Bass",
+        [
+          toggle_switch(
+            label="Enabled",
+            value=fn() { jazz_style.get().bass_enabled },
+            on_toggle=fn() {
+              jazz_style.update(fn(style) {
+                @music.JazzStyle::{
+                  ..style,
+                  bass_enabled: not(style.bass_enabled),
                 }
-              },
-            ),
-          ],
-        ),
-      ]),
+              })
+            },
+          ),
+          @luna_dom.div(
+            dyn_class=fn() {
+              cn([
+                "transition-opacity",
+                if jazz_style.get().bass_enabled {
+                  ""
+                } else {
+                  "opacity-40 pointer-events-none"
+                },
+              ])
+            },
+            [
+              segmented_buttons(
+                bass_style_options,
+                fn() { jazz_style.get().bass_style },
+                fn(v) {
+                  jazz_style.update(fn(style) {
+                    @music.JazzStyle::{ ..style, bass_style: v }
+                  })
+                },
+                is_disabled=fn(v) {
+                  if midi_imported() {
+                    v != @music.BassStyle::Imported
+                  } else {
+                    v == @music.BassStyle::Imported
+                  }
+                },
+              ),
+            ],
+          ),
+        ],
+        aria_label="bass",
+      ),
       // Drums
-      settings_section("Drums", [
-        toggle_switch(
-          label="Enabled",
-          value=fn() { jazz_style.get().drums_enabled },
-          on_toggle=fn() {
-            jazz_style.update(fn(style) {
-              @music.JazzStyle::{
-                ..style,
-                drums_enabled: not(style.drums_enabled),
-              }
-            })
-          },
-        ),
-        @luna_dom.div(
-          dyn_class=fn() {
-            cn([
-              "transition-opacity",
-              if jazz_style.get().drums_enabled {
-                ""
-              } else {
-                "opacity-40 pointer-events-none"
-              },
-            ])
-          },
-          [
-            segmented_buttons(
-              drum_pattern_options,
-              fn() { jazz_style.get().drum_pattern },
-              fn(v) {
-                jazz_style.update(fn(style) {
-                  @music.JazzStyle::{ ..style, drum_pattern: v }
-                })
-              },
-              is_disabled=fn(v) {
-                if midi_imported() {
-                  v != @music.DrumPatternStyle::Imported
-                } else {
-                  v == @music.DrumPatternStyle::Imported
+      settings_section(
+        "Drums",
+        [
+          toggle_switch(
+            label="Enabled",
+            value=fn() { jazz_style.get().drums_enabled },
+            on_toggle=fn() {
+              jazz_style.update(fn(style) {
+                @music.JazzStyle::{
+                  ..style,
+                  drums_enabled: not(style.drums_enabled),
                 }
-              },
-            ),
-          ],
-        ),
-      ]),
+              })
+            },
+          ),
+          @luna_dom.div(
+            dyn_class=fn() {
+              cn([
+                "transition-opacity",
+                if jazz_style.get().drums_enabled {
+                  ""
+                } else {
+                  "opacity-40 pointer-events-none"
+                },
+              ])
+            },
+            [
+              segmented_buttons(
+                drum_pattern_options,
+                fn() { jazz_style.get().drum_pattern },
+                fn(v) {
+                  jazz_style.update(fn(style) {
+                    @music.JazzStyle::{ ..style, drum_pattern: v }
+                  })
+                },
+                is_disabled=fn(v) {
+                  if midi_imported() {
+                    v != @music.DrumPatternStyle::Imported
+                  } else {
+                    v == @music.DrumPatternStyle::Imported
+                  }
+                },
+              ),
+            ],
+          ),
+        ],
+        aria_label="drums",
+      ),
     ],
   )
 }

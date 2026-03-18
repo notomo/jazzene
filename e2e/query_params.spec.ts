@@ -23,10 +23,8 @@ test("should reflect query parameters in controls", async ({ page }) => {
   await expect(jazzene.getSeedInput()).toHaveText("42");
   await expect(jazzene.getMeasuresInput()).toHaveText("16");
   await expect(jazzene.getChordInput()).toHaveValue("IIIm7 | VIm7");
-  await expect(jazzene.getActiveViewModeButton()).toHaveAttribute(
-    "title",
-    "Sheet",
-  );
+  await expect(jazzene.getLeadSheetContainer()).toBeVisible();
+  await expect(jazzene.getFallingNotes()).not.toBeVisible();
   await expect(jazzene.getLoopAInput()).toHaveText("3");
   await expect(jazzene.getLoopBInput()).toHaveText("6");
 });
@@ -55,15 +53,27 @@ test("should restore jazz style from URL query parameters", async ({
     page,
     queryParams: {
       swing: "hard",
-      techniques: "00000000",
+      melody: "off",
       comping: "off",
-      drums: "sride",
       bass: "root",
     },
     view: ["sheet", "pianoroll", "setting"],
   });
 
   const panel = jazzene.getSettingsPanel();
-  await expect(panel).toBeVisible();
-  await expect(panel).toContainText("Drums");
+  await expect(
+    panel
+      .getByLabel("swing")
+      .getByRole("button", { name: "Hard", pressed: true }),
+  ).toBeVisible();
+  await expect(
+    panel
+      .getByLabel("melody")
+      .getByRole("button", { name: "Off", pressed: true }),
+  ).toBeVisible();
+  await expect(
+    panel
+      .getByLabel("comping")
+      .getByRole("button", { name: "Off", pressed: true }),
+  ).toBeVisible();
 });

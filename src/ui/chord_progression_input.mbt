@@ -31,11 +31,15 @@ fn chord_progression_input(
       ),
     ]),
     @luna_dom.show(fn() { parse_error() is Some(_) }, fn() {
-      @luna_dom.div(class="flex items-center gap-1 text-red-400 text-xs", [
-        @luna_dom.text(
-          "⚠ Invalid chord: use Roman numerals (e.g., IIm7 V7 | Imaj7). Qualities: maj7, m7, 7, m7b5, dim7, sus4",
-        ),
-      ])
+      @luna_dom.div(
+        class="flex items-center gap-1 text-red-400 text-xs",
+        attrs=[("aria-label", @luna_dom.Attr::AttrString("chord parse error"))],
+        [
+          @luna_dom.text(
+            "⚠ Invalid chord: use Roman numerals (e.g., IIm7 V7 | Imaj7). Qualities: maj7, m7, 7, m7b5, dim7, sus4",
+          ),
+        ],
+      )
     }),
   ])
 }
