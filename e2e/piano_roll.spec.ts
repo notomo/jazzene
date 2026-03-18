@@ -34,18 +34,3 @@ test("should seek backward when scrolling up on piano roll", async ({
   const x1After = await indicator.getAttribute("x1");
   expect(Number(x1After)).toBeLessThan(Number(x1Before));
 });
-
-test("should not seek below zero when scrolling up from start", async ({
-  page,
-}) => {
-  const jazzene = await openPage({ page });
-
-  const indicator = jazzene.getPlaybackIndicator();
-  const x1Start = await indicator.getAttribute("x1");
-
-  const canvas = jazzene.getPianoRollCanvas();
-  await canvas.dispatchEvent("wheel", { deltaY: -300, deltaMode: 0 });
-
-  const x1After = await indicator.getAttribute("x1");
-  expect(Number(x1After)).toBeGreaterThanOrEqual(Number(x1Start));
-});

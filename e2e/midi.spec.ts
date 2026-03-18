@@ -3,15 +3,34 @@ import { openPage } from "./page";
 
 // Minimal valid SMF0 MIDI file: format 0, 1 track, 480 tpq, end-of-track only.
 // Equivalent to smf0(480, [0, 255, 47, 0]) from the MoonBit decoder tests.
-const MINIMAL_MIDI_BYTES = Buffer.from([
-  77, 84, 104, 100, // MThd magic
-  0, 0, 0, 6, // header length
-  0, 0, // format 0
-  0, 1, // 1 track
-  1, 224, // 480 tpq
-  77, 84, 114, 107, // MTrk magic
-  0, 0, 0, 4, // track data length
-  0, 255, 47, 0, // delta=0, end-of-track
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const MINIMAL_MIDI_BYTES = (globalThis as any).Buffer.from([
+  77,
+  84,
+  104,
+  100, // MThd magic
+  0,
+  0,
+  0,
+  6, // header length
+  0,
+  0, // format 0
+  0,
+  1, // 1 track
+  1,
+  224, // 480 tpq
+  77,
+  84,
+  114,
+  107, // MTrk magic
+  0,
+  0,
+  0,
+  4, // track data length
+  0,
+  255,
+  47,
+  0, // delta=0, end-of-track
 ]);
 
 test("should trigger download with .mid extension when Export clicked", async ({
