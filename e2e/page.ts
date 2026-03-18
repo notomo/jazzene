@@ -70,7 +70,15 @@ export async function openPage({
     getLeadSheetContainer: () => page.locator("#lead-sheet-container"),
     getPianoRollCanvas: () =>
       page.getByLabel("falling notes").locator("canvas"),
-    getPlaybackIndicator: () => page.locator('line[stroke="#3b82f6"]').first(),
+    getPlaybackIndicator: () =>
+      page.locator('line[aria-label="playback indicator"]').first(),
+    getPlaybackPosition: async () => {
+      const indicator = page
+        .locator('line[aria-label="playback indicator"]')
+        .first();
+      await indicator.waitFor({ state: "attached" });
+      return Number(await indicator.getAttribute("x1"));
+    },
     getMidiImportButton: () =>
       page.getByLabel("jazz settings panel").getByRole("button", { name: "Import" }),
     getMidiExportButton: () =>

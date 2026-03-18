@@ -55,6 +55,7 @@ fn render_playback_indicator(
     stroke=PLAYBACK_INDICATOR_COLOR,
     stroke_width=PLAYBACK_INDICATOR_STROKE_WIDTH,
     attrs=[
+      ("aria-label", @luna_dom.Attr::AttrString("playback indicator")),
       ("stroke-linecap", @luna_dom.Attr::AttrString("round")),
       ("stroke-opacity", @luna_dom.Attr::AttrString("0.5")),
     ],
