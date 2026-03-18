@@ -1,47 +1,38 @@
 import { test, expect } from "@playwright/test";
 import { openPage } from "./page";
 
-test("should show both sheet and piano roll by default", async ({ page }) => {
+test("should toggle sheet view", async ({ page }) => {
   const jazzene = await openPage({ page });
 
   await expect(jazzene.getLeadSheetContainer()).toBeVisible();
-  await expect(jazzene.getFallingNotes()).toBeVisible();
-});
-
-test("should hide sheet when sheet button toggled off", async ({ page }) => {
-  const jazzene = await openPage({ page });
 
   await jazzene.getViewModeSelect().getByTitle("Sheet").click();
-
   await expect(jazzene.getLeadSheetContainer()).not.toBeVisible();
-  await expect(jazzene.getFallingNotes()).toBeVisible();
+
+  await jazzene.getViewModeSelect().getByTitle("Sheet").click();
+  await expect(jazzene.getLeadSheetContainer()).toBeVisible();
 });
 
-test("should hide piano roll when piano button toggled off", async ({
-  page,
-}) => {
+test("should toggle piano roll view", async ({ page }) => {
   const jazzene = await openPage({ page });
+
+  await expect(jazzene.getFallingNotes()).toBeVisible();
 
   await jazzene.getViewModeSelect().getByTitle("Piano").click();
-
   await expect(jazzene.getFallingNotes()).not.toBeVisible();
-  await expect(jazzene.getLeadSheetContainer()).toBeVisible();
+
+  await jazzene.getViewModeSelect().getByTitle("Piano").click();
+  await expect(jazzene.getFallingNotes()).toBeVisible();
 });
 
-test("should restore sheet when sheet button toggled back on", async ({
-  page,
-}) => {
+test("should toggle settings panel", async ({ page }) => {
   const jazzene = await openPage({ page });
 
-  await jazzene.getViewModeSelect().getByTitle("Sheet").click();
-  await expect(jazzene.getLeadSheetContainer()).not.toBeVisible();
+  await expect(jazzene.getSettingsPanel()).not.toBeVisible();
 
-  await jazzene.getViewModeSelect().getByTitle("Sheet").click();
-  await expect(jazzene.getLeadSheetContainer()).toBeVisible();
-});
-
-test("should open settings panel with jazz controls", async ({ page }) => {
-  const jazzene = await openPage({ page, view: ["sheet", "pianoroll", "setting"] });
-
+  await jazzene.getViewModeSelect().getByTitle("Settings").click();
   await expect(jazzene.getSettingsPanel()).toBeVisible();
+
+  await jazzene.getViewModeSelect().getByTitle("Settings").click();
+  await expect(jazzene.getSettingsPanel()).not.toBeVisible();
 });
