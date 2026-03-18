@@ -21,6 +21,7 @@ fn spinbox(
   max~ : Int,
   step~ : Int,
   aria_label? : String = "",
+  container_aria_label? : String = "",
 ) -> @luna_dom.DomNode {
   let drag_start_x : Ref[Double?] = Ref::new(None)
   let drag_start_value : Ref[Int] = Ref::new(0)
@@ -92,9 +93,16 @@ fn spinbox(
 
   let aria = if aria_label == "" { label } else { aria_label }
   let btn_class = "bg-blue-900/60 hover:bg-blue-800/70 border border-blue-700/50 rounded-lg w-7 lg:w-9 py-1 text-base lg:text-lg text-blue-200 text-center cursor-pointer select-none"
+  let container_attrs : Array[(String, @luna_dom.Attr)] = if container_aria_label ==
+    "" {
+    []
+  } else {
+    [("aria-label", @luna_dom.Attr::AttrString(container_aria_label))]
+  }
 
   @luna_dom.div(
     class="flex items-center gap-1 lg:gap-2 shrink min-w-0",
+    attrs=container_attrs,
     on=@luna_dom.events()
       .wheel(on_wheel)
       .mousedown(on_mousedown)

@@ -8,5 +8,6 @@ fn volume_input(volume : @signals.Signal[Int]) -> @luna_dom.DomNode {
     min=0,
     max=100,
     step=5,
+    container_aria_label="volume control",
   )
 }

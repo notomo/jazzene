@@ -48,6 +48,7 @@ fn ab_loop_spinbox(
   let value_class = "w-7 lg:w-9 flex items-center justify-center bg-slate-800 text-slate-100 text-sm lg:text-base tabular-nums select-none cursor-ew-resize"
   @luna_dom.div(
     class="flex rounded-lg border border-slate-600",
+    attrs=[("aria-label", @luna_dom.Attr::AttrString(aria_label + " control"))],
     on=@luna_dom.events()
       .wheel(on_wheel)
       .mousedown(on_mousedown)

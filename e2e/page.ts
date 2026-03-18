@@ -65,8 +65,21 @@ export async function openPage({
     getMeasuresInput: () => page.getByLabel("measures"),
     getKeySelect: () => page.getByLabel("key", { exact: true }),
     getViewModeSelect: () => page.getByLabel("view mode"),
-    getLoopAInput: () => page.getByLabel("loop_a"),
-    getLoopBInput: () => page.getByLabel("loop_b"),
+    getLoopAInput: () => page.getByLabel("loop_a", { exact: true }),
+    getLoopBInput: () => page.getByLabel("loop_b", { exact: true }),
+    incrementLoopA: async () => {
+      await page
+        .getByLabel("loop_a control")
+        .getByRole("button", { name: "+" })
+        .click();
+    },
+    getVolumeInput: () => page.getByLabel("Volume", { exact: true }),
+    incrementVolume: async () => {
+      await page
+        .getByLabel("volume control")
+        .getByRole("button", { name: "+" })
+        .click();
+    },
     getTimeSignatureSelect: () => page.getByLabel("time signature"),
 
     getLeadSheetContainer: () => page.locator("#lead-sheet-container"),
