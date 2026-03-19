@@ -121,6 +121,7 @@ pub fn generate_walking_bass_sounds(
                 ),
                 start_time: Duration::from_milliseconds(start_ms),
                 tone_origin: None,
+                beat_position: 0.0,
               })
             None => ()
           }
@@ -158,6 +159,7 @@ pub fn generate_walking_bass_sounds(
                 duration: Duration::from_milliseconds(beat_duration_ms * 0.85),
                 start_time: Duration::from_milliseconds(beat_start_ms),
                 tone_origin: None,
+                beat_position: 0.0,
               })
             None => ()
           }
@@ -211,6 +213,7 @@ pub fn generate_walking_bass_sounds(
                 duration: Duration::from_milliseconds(beat_duration_ms * 0.85),
                 start_time: Duration::from_milliseconds(beat_start_ms),
                 tone_origin: None,
+                beat_position: 0.0,
               })
             None => ()
           }

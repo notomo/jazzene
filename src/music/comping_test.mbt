@@ -36,6 +36,7 @@ fn make_melody_note(
     duration: Duration::from_milliseconds(dur_ms),
     start_time: Duration::from_milliseconds(start_ms),
     tone_origin: None,
+    beat_position: 0.0,
   }
 }
 

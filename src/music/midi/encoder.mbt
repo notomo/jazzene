@@ -30,14 +30,18 @@ pub fn write_vlq(value : Int, buf : Array[Int]) -> Unit {
 }
 
 ///|
-/// Map ToneOrigin to MIDI velocity for melody notes.
-/// Uses ToneOrigin::intensity() scaled to 0–90.
-fn melody_velocity(tone_origin : @music.ToneOrigin?) -> Int {
+/// Map ToneOrigin and beat position to MIDI velocity for melody notes.
+/// Combines ToneOrigin::intensity() with TimeSignature::beat_accent(), scaled to 0–90.
+fn melody_velocity(
+  tone_origin : @music.ToneOrigin?,
+  beat_position : Double,
+  time_signature : @music.TimeSignature,
+) -> Int {
   let intensity = match tone_origin {
     Some(origin) => origin.intensity()
     None => 0.85
   }
-  (intensity * 90.0).to_int()
+  (intensity * time_signature.beat_accent(beat_position) * 90.0).to_int()
 }
 
 ///|
@@ -247,7 +251,7 @@ pub fn encode_to_midi(
     100,
     melody_sounds,
     bpm,
-    fn(s) { melody_velocity(s.tone_origin) },
+    fn(s) { melody_velocity(s.tone_origin, s.beat_position, time_signature) },
   )
   let comping_track = make_instrument_track(
     1,

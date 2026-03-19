@@ -16,6 +16,7 @@ pub fn AudioSound::from(
   sounds : Array[ScheduledSound],
   current_pos : Duration,
   lookahead : Duration,
+  time_signature? : TimeSignature = TimeSignature::default(),
 ) -> Array[AudioSound] {
   let window_end = current_pos + lookahead
   sounds
@@ -26,10 +27,11 @@ pub fn AudioSound::from(
     sound
     .midi()
     .map(fn(midi) {
-      let volume = match sound.tone_origin {
+      let intensity = match sound.tone_origin {
         Some(origin) => origin.intensity()
         None => 0.85
       }
+      let volume = intensity * time_signature.beat_accent(sound.beat_position)
       AudioSound::{
         offset: sound.start_time - current_pos,
         duration: sound.duration,

@@ -110,6 +110,7 @@ fn push_sound(
         duration: @music.Duration::from_milliseconds(dur_ms),
         start_time: @music.Duration::from_milliseconds(start_ms),
         tone_origin: Some(@music.ToneOrigin::Imported),
+        beat_position: 0.0,
       }
       match ch {
         0 => melody.push(sound)

@@ -69,6 +69,41 @@ pub fn TimeSignature::beat_group_remaining(
 }
 
 ///|
+/// Dynamic accent multiplier (0.0–1.0) for a given beat position within a measure.
+/// Downbeats are stronger; off-beat eighth notes are softest.
+/// 4/4: beat 1 → 1.0, beat 3 → 0.97, beats 2/4 → 0.93, off-beat 8th → 0.88
+/// 3/4: beat 1 → 1.0, beats 2/3 → 0.90, off-beat 8th → 0.85
+pub fn TimeSignature::beat_accent(
+  self : TimeSignature,
+  beat_position : Double,
+) -> Double {
+  let fraction = beat_position - beat_position.floor()
+  let is_offbeat = (fraction - 0.5).abs() < 0.01
+  let beat = beat_position.floor().to_int()
+  match (self.numerator, self.denominator) {
+    (3, 4) =>
+      if is_offbeat {
+        0.85
+      } else {
+        match beat % 3 {
+          0 => 1.0
+          _ => 0.90
+        }
+      }
+    _ =>
+      if is_offbeat {
+        0.88
+      } else {
+        match beat % 4 {
+          0 => 1.0
+          2 => 0.97
+          _ => 0.93
+        }
+      }
+  }
+}
+
+///|
 /// Returns all supported time signatures
 pub fn TimeSignature::all() -> Array[TimeSignature] {
   [

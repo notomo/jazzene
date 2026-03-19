@@ -21,6 +21,7 @@ pub fn[T : AudioOutput] make_tick(
   total_duration~ : () -> Duration,
   bpm~ : () -> Int,
   beats_per_measure~ : () -> Double,
+  time_signature~ : () -> TimeSignature,
   playback_position~ : () -> Duration,
   set_playback_position~ : (Duration) -> Unit,
   loop_a_measure~ : () -> Int,
@@ -43,13 +44,21 @@ pub fn[T : AudioOutput] make_tick(
       loop_b_measure(),
     )
     let style = jazz_style()
+    let ts = time_signature()
     let piano = match style.melody_mode {
-      On => AudioSound::from(sounds(), final_position, lookahead)
+      On =>
+        AudioSound::from(sounds(), final_position, lookahead, time_signature=ts)
       Silent | Off => []
     }
     let comping = match style.comping_mode {
       Silent => []
-      _ => AudioSound::from(comping_sounds(), final_position, lookahead)
+      _ =>
+        AudioSound::from(
+          comping_sounds(),
+          final_position,
+          lookahead,
+          time_signature=ts,
+        )
     }
     let bass = AudioSound::from(bass_sounds(), final_position, lookahead)
     let drum = AudioSound::from(drum_sounds(), final_position, lookahead)

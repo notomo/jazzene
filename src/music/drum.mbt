@@ -191,6 +191,7 @@ pub fn generate_drum_sounds(
         duration: drum_note_duration,
         start_time: Duration::from_milliseconds(start_ms),
         tone_origin: None,
+        beat_position: 0.0,
       }
     })
   }).flatten()

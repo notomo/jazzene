@@ -12,6 +12,7 @@ fn make_note_sound(
     duration: @music.Duration::from_seconds(duration_seconds),
     start_time: @music.Duration::from_seconds(start_seconds),
     tone_origin: None,
+    beat_position: 0.0,
   }
 }
 
@@ -25,6 +26,7 @@ fn make_rest_sound(
     duration: @music.Duration::from_seconds(duration_seconds),
     start_time: @music.Duration::from_seconds(start_seconds),
     tone_origin: None,
+    beat_position: 0.0,
   }
 }
 

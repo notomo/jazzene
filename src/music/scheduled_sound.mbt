@@ -5,6 +5,7 @@ pub(all) struct ScheduledSound {
   duration : Duration
   start_time : Duration
   tone_origin : ToneOrigin?
+  beat_position : Double // beat within measure (0.0 = beat 1, 1.0 = beat 2, ...)
 } derive(Eq, Show)
 
 ///|
@@ -47,7 +48,7 @@ pub fn convert_measures_to_sounds(
   let beat_duration_ms = ms_per_beat(bpm)
 
   // Flatten all notes with their absolute start times
-  let flat_notes : Array[(Double, Double, MeasureNote)] = measures
+  let flat_notes : Array[(Double, Double, Double, MeasureNote)] = measures
     .iter()
     .flat_map(fn(measure) {
       let measure_start_ms = measure.start_time.to_milliseconds()
@@ -65,7 +66,7 @@ pub fn convert_measures_to_sounds(
         let note_start_ms = measure_start_ms +
           start_beat * beat_duration_ms +
           swing_delay
-        (note_start_ms, swing_delay, note)
+        (note_start_ms, swing_delay, start_beat, note)
       })
     })
     .collect()
@@ -74,7 +75,7 @@ pub fn convert_measures_to_sounds(
 
   let sounds : Array[ScheduledSound] = []
   for i in 0..<flat_notes.length() {
-    let (start_ms, swing_delay, note) = flat_notes[i]
+    let (start_ms, swing_delay, start_beat, note) = flat_notes[i]
 
     // Skip TieEnd and TieBoth - they were already counted by TieStart
     match note.tie {
@@ -115,6 +116,7 @@ pub fn convert_measures_to_sounds(
       duration: Duration::from_milliseconds(duration_ms),
       start_time: Duration::from_milliseconds(start_ms),
       tone_origin: note.tone_origin,
+      beat_position: start_beat,
     })
   }
   sounds
@@ -224,11 +226,11 @@ pub fn transpose_sounds(
 /// Find the swing_delay of the next sounding note (skipping TieEnd/TieBoth)
 /// Returns 0.0 if no such note exists or if the next note is on-beat
 fn find_next_swing_delay(
-  flat_notes : Array[(Double, Double, MeasureNote)],
+  flat_notes : Array[(Double, Double, Double, MeasureNote)],
   start_index : Int,
 ) -> Double {
   for j in start_index..<flat_notes.length() {
-    let (_, delay, note) = flat_notes[j]
+    let (_, delay, _, note) = flat_notes[j]
     match note.tie {
       Some(TieEnd | TieBoth) => continue
       _ => return delay
@@ -240,14 +242,14 @@ fn find_next_swing_delay(
 ///|
 /// Accumulate beats from tied notes (TieEnd/TieBoth) following a TieStart
 fn accumulate_tied_beats(
-  flat_notes : Array[(Double, Double, MeasureNote)],
+  flat_notes : Array[(Double, Double, Double, MeasureNote)],
   start_index : Int,
   initial_beats : Double,
 ) -> Double {
   let mut total = initial_beats
 
   for j in start_index..<flat_notes.length() {
-    let (_, _, next_note) = flat_notes[j]
+    let (_, _, _, next_note) = flat_notes[j]
     match next_note.tie {
       Some(TieBoth) => total = total + next_note.duration.to_beats()
       Some(TieEnd) => {

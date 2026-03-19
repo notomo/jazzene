@@ -161,6 +161,7 @@ test "in_range" {
     duration: Duration::from_milliseconds(500),
     start_time: Duration::from_milliseconds(0),
     tone_origin: None,
+    beat_position: 0.0,
   }
   assert_false(sound.in_range(Duration::from_milliseconds(-1)))
   assert_true(sound.in_range(Duration::from_milliseconds(0)))
@@ -177,6 +178,7 @@ test "calculate_playing_notes" {
       duration: Duration::from_milliseconds(500),
       start_time: Duration::from_milliseconds(0),
       tone_origin: None,
+      beat_position: 0.0,
     },
   ]
   assert_eq(calculate_playing_notes(sounds, Duration::from_milliseconds(-1)), [])

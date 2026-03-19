@@ -280,6 +280,7 @@ pub fn generate_comping_sounds(
                   duration: Duration::from_milliseconds(final_duration_ms),
                   start_time: Duration::from_milliseconds(hit_start_ms),
                   tone_origin: None,
+                  beat_position: 0.0,
                 })
               None => ()
             }

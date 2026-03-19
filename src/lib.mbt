@@ -8,6 +8,7 @@ fn main {
     total_duration=state.total_duration,
     bpm=fn() { state.bpm.get() },
     beats_per_measure=fn() { state.time_signature.get().beats_per_measure() },
+    time_signature=fn() { state.time_signature.get() },
     playback_position=fn() { state.playback_position.get() },
     set_playback_position=fn(pos) { state.playback_position.set(pos) },
     loop_a_measure=fn() { state.loop_a_measure.get() },

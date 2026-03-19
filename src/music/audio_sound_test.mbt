@@ -7,6 +7,7 @@ test "AudioSound::from creates audio sounds" {
       duration: Duration::from_milliseconds(500),
       start_time: Duration::from_milliseconds(0),
       tone_origin: None,
+      beat_position: 0.0,
     },
   ]
   let current_pos = Duration::from_milliseconds(0)
@@ -29,24 +30,28 @@ test "AudioSound::from filters out rests" {
       duration: Duration::from_milliseconds(500),
       start_time: Duration::from_milliseconds(0),
       tone_origin: None,
+      beat_position: 0.0,
     },
     ScheduledSound::{
       sound_event: Rest(duration=Quarter),
       duration: Duration::from_milliseconds(500),
       start_time: Duration::from_milliseconds(500),
       tone_origin: None,
+      beat_position: 0.0,
     },
     ScheduledSound::{
       sound_event: Note(midi~, duration=Quarter),
       duration: Duration::from_milliseconds(500),
       start_time: Duration::from_milliseconds(1000),
       tone_origin: None,
+      beat_position: 0.0,
     },
     ScheduledSound::{
       sound_event: Note(midi~, duration=Quarter),
       duration: Duration::from_milliseconds(500),
       start_time: Duration::from_milliseconds(1500),
       tone_origin: None,
+      beat_position: 0.0,
     },
   ]
   let current_pos = Duration::from_milliseconds(0)
@@ -67,18 +72,21 @@ test "AudioSound::from extracts notes in lookahead range" {
       duration: Duration::from_milliseconds(500),
       start_time: Duration::from_milliseconds(0),
       tone_origin: None,
+      beat_position: 0.0,
     },
     ScheduledSound::{
       sound_event: Note(midi=MidiNumber::new(62).unwrap(), duration=Quarter),
       duration: Duration::from_milliseconds(500),
       start_time: Duration::from_milliseconds(500),
       tone_origin: None,
+      beat_position: 0.0,
     },
     ScheduledSound::{
       sound_event: Note(midi=MidiNumber::new(64).unwrap(), duration=Quarter),
       duration: Duration::from_milliseconds(500),
       start_time: Duration::from_milliseconds(1000),
       tone_origin: None,
+      beat_position: 0.0,
     },
   ]
   let position = Duration::from_milliseconds(500)
