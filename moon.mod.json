@@ -2,7 +2,7 @@
   "name": "internal/jazzene",
   "version": "0.0.1",
   "deps": {
-    "mizchi/luna": "0.12.3",
+    "mizchi/luna": "0.18.0",
     "mizchi/js": "0.10.14",
     "mizchi/signals": "0.6.3"
   },
