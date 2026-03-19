@@ -1,31 +1,46 @@
 ///|
+extern "js" fn @js_url.URLSearchParams::new(
+  init : String,
+) -> @js_url.URLSearchParams =
+  #|(s) => new URLSearchParams(s)
+
+///|
 /// Read a query parameter from the URL
-extern "js" fn get_query_param(name : String) -> String? =
-  #|(name) => new URLSearchParams(window.location.search).get(name) ?? undefined
+fn get_query_param(name : String) -> String? {
+  @js_url.URLSearchParams::new(@js_location.location().search).get(name)
+}
 
 ///|
 /// Set a query parameter in the URL without reloading
-extern "js" fn raw_set_query_param(name : String, value : String) -> Unit =
-  #|(name, value) => {
-  #|  const params = new URLSearchParams(window.location.search)
-  #|  params.set(name, value)
-  #|  history.replaceState(null, "", "?" + params.toString())
-  #|}
+fn raw_set_query_param(name : String, value : String) -> Unit {
+  let params = @js_url.URLSearchParams::new(@js_location.location().search)
+  params.set(name, value)
+  @js_history.history().replace_state(
+    @js.null(),
+    "",
+    url="?" + params.to_string(),
+  )
+}
 
 ///|
 /// Push current URL state to browser history (allows going back)
-extern "js" fn push_current_state() -> Unit =
-  #|() => history.pushState(null, "", window.location.href)
+fn push_current_state() -> Unit {
+  @js_history.history().push_state(
+    @js.null(),
+    "",
+    url=@js_location.location().href,
+  )
+}
 
 ///|
 /// Delete a query parameter from the URL without reloading
-extern "js" fn delete_query_param(name : String) -> Unit =
-  #|(name) => {
-  #|  const params = new URLSearchParams(window.location.search)
-  #|  params.delete(name)
-  #|  const qs = params.toString()
-  #|  history.replaceState(null, "", qs ? "?" + qs : window.location.pathname)
-  #|}
+fn delete_query_param(name : String) -> Unit {
+  let params = @js_url.URLSearchParams::new(@js_location.location().search)
+  params.delete(name)
+  let qs = params.to_string()
+  let url = if qs == "" { @js_location.location().pathname } else { "?" + qs }
+  @js_history.history().replace_state(@js.null(), "", url~)
+}
 
 ///|
 /// Set a query parameter, or delete it if the value matches the default

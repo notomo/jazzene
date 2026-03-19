@@ -1,22 +1,42 @@
 ///|
-/// JS FFI: get the bounding rect left of a mouse event's current target
-extern "js" fn mouse_event_target_rect_left(e : @js_dom.MouseEvent) -> Double =
-  #|(e) => e.currentTarget.getBoundingClientRect().left
+fn mouse_event_target_rect_left(e : @js_dom.MouseEvent) -> Double {
+  e
+  .as_any()
+  ._get("currentTarget")
+  ._call("getBoundingClientRect", [])
+  ._get("left")
+  .cast()
+}
 
 ///|
-/// JS FFI: get the bounding rect width of a mouse event's current target
-extern "js" fn mouse_event_target_rect_width(e : @js_dom.MouseEvent) -> Double =
-  #|(e) => e.currentTarget.getBoundingClientRect().width
+fn mouse_event_target_rect_width(e : @js_dom.MouseEvent) -> Double {
+  e
+  .as_any()
+  ._get("currentTarget")
+  ._call("getBoundingClientRect", [])
+  ._get("width")
+  .cast()
+}
 
 ///|
-/// JS FFI: get the bounding rect left of a touch event's current target
-extern "js" fn touch_event_target_rect_left(e : @js_dom.TouchEvent) -> Double =
-  #|(e) => e.currentTarget.getBoundingClientRect().left
+fn touch_event_target_rect_left(e : @js_dom.TouchEvent) -> Double {
+  e
+  .as_any()
+  ._get("currentTarget")
+  ._call("getBoundingClientRect", [])
+  ._get("left")
+  .cast()
+}
 
 ///|
-/// JS FFI: get the bounding rect width of a touch event's current target
-extern "js" fn touch_event_target_rect_width(e : @js_dom.TouchEvent) -> Double =
-  #|(e) => e.currentTarget.getBoundingClientRect().width
+fn touch_event_target_rect_width(e : @js_dom.TouchEvent) -> Double {
+  e
+  .as_any()
+  ._get("currentTarget")
+  ._call("getBoundingClientRect", [])
+  ._get("width")
+  .cast()
+}
 
 ///|
 let pitch_slider_min = 21 // A0

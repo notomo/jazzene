@@ -9,29 +9,16 @@
 priv type SampleBank
 
 ///|
+fn SampleBank::as_any(self : SampleBank) -> @js.Any = "%identity"
+
+///|
 /// Look up a decoded sample by note name (e.g. "A0", "C1", "Ds1", "Fs1")
 fn SampleBank::lookup(
   self : SampleBank,
   note_name : String,
 ) -> @web_audio.AudioBuffer? {
-  let result = ffi_sample_bank_get(self, note_name)
-  if is_undefined(result) {
-    None
-  } else {
-    Some(result)
-  }
+  @js.identity_option(self.as_any()._call("get", [@js.any(note_name)]))
 }
-
-///|
-extern "js" fn ffi_sample_bank_get(
-  bank : SampleBank,
-  note_name : String,
-) -> @web_audio.AudioBuffer =
-  #| (bank, name) => bank.get(name)
-
-///|
-extern "js" fn is_undefined(buf : @web_audio.AudioBuffer) -> Bool =
-  #| (buf) => buf === undefined
 
 ///|
 /// Sample info: which sample to use and how many cents to detune

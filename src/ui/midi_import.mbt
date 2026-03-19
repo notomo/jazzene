@@ -1,22 +1,34 @@
 ///|
-/// FFI: open a file picker for .mid files and call onBytes with the raw bytes.
-extern "js" fn open_file_picker(on_bytes : (Array[Int]) -> Unit) -> Unit =
-  #|(onBytes) => {
-  #|  const input = document.createElement('input');
-  #|  input.type = 'file';
-  #|  input.accept = '.mid,.midi';
-  #|  input.onchange = (e) => {
-  #|    const file = e.target.files[0];
-  #|    if (!file) return;
-  #|    const reader = new FileReader();
-  #|    reader.onload = (ev) => {
-  #|      const buf = new Uint8Array(ev.target.result);
-  #|      onBytes(Array.from(buf));
-  #|    };
-  #|    reader.readAsArrayBuffer(file);
-  #|  };
-  #|  input.click();
-  #|}
+fn open_file_picker(on_bytes : (Array[Int]) -> Unit) -> Unit {
+  let input = @js_dom.document().create_element("input")
+  input.as_any()._set("type", @js.any("file"))
+  input.as_any()._set("accept", @js.any(".mid,.midi"))
+  input
+  .as_event_target()
+  .addEventListener("change", fn(e) {
+    let files = e._get("target")._get("files")
+    let length : Int = files._get("length").cast()
+    if length == 0 {
+      return
+    }
+    let file = files._get_by_index(0)
+    let reader = @js_file.FileReader::new()
+    reader
+    .as_any()
+    ._set(
+      "onload",
+      @js.from_fn1(fn(ev : @js.Any) {
+        let result = ev._get("target")._get("result")
+        let uint8 = @arraybuffer.Uint8Array::from_array_buffer(result.cast())
+        let bytes = @arraybuffer.uint8array_to_bytes(uint8)
+        let arr = Array::makei(bytes.length(), fn(i) { bytes[i].to_int() })
+        on_bytes(arr)
+      }),
+    )
+    reader.as_any()._call("readAsArrayBuffer", [file]) |> ignore
+  })
+  input.as_any()._call("click", []) |> ignore
+}
 
 ///|
 /// Button that opens a MIDI file picker and calls on_import with the file bytes.

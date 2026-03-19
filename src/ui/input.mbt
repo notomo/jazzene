@@ -1,12 +1,14 @@
 ///|
 /// Extract target.value from a JS event object
-extern "js" fn get_event_target_value(e : @js.Any) -> String =
-  #|(e) => e.target.value
+fn get_event_target_value(e : @js.Any) -> String {
+  e._get("target")._get("value").cast()
+}
 
 ///|
 /// Extract target.selectedIndex from a JS event object
-extern "js" fn get_event_target_selected_index(e : @js.Any) -> Int =
-  #|(e) => e.target.selectedIndex
+fn get_event_target_selected_index(e : @js.Any) -> Int {
+  e._get("target")._get("selectedIndex").cast()
+}
 
 ///|
 /// Get value from input event target
