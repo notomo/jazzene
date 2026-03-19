@@ -1,19 +1,13 @@
 ///|
-extern "js" fn @js_url.URLSearchParams::new(
-  init : String,
-) -> @js_url.URLSearchParams =
-  #|(s) => new URLSearchParams(s)
-
-///|
 /// Read a query parameter from the URL
 fn get_query_param(name : String) -> String? {
-  @js_url.URLSearchParams::new(@js_location.location().search).get(name)
+  (try! @js_url.URL::new(@js_location.location().href)).searchParams().get(name)
 }
 
 ///|
 /// Set a query parameter in the URL without reloading
 fn raw_set_query_param(name : String, value : String) -> Unit {
-  let params = @js_url.URLSearchParams::new(@js_location.location().search)
+  let params = (try! @js_url.URL::new(@js_location.location().href)).searchParams()
   params.set(name, value)
   @js_history.history().replace_state(
     @js.null(),
@@ -35,7 +29,7 @@ fn push_current_state() -> Unit {
 ///|
 /// Delete a query parameter from the URL without reloading
 fn delete_query_param(name : String) -> Unit {
-  let params = @js_url.URLSearchParams::new(@js_location.location().search)
+  let params = (try! @js_url.URL::new(@js_location.location().href)).searchParams()
   params.delete(name)
   let qs = params.to_string()
   let url = if qs == "" { @js_location.location().pathname } else { "?" + qs }
