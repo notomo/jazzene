@@ -31,17 +31,13 @@ pub fn write_vlq(value : Int, buf : Array[Int]) -> Unit {
 
 ///|
 /// Map ToneOrigin to MIDI velocity for melody notes.
+/// Uses ToneOrigin::intensity() scaled to 0–90.
 fn melody_velocity(tone_origin : @music.ToneOrigin?) -> Int {
-  match tone_origin {
-    Some(ChordTone) => 90
-    Some(Tension(_)) => 80
-    Some(ChromaticApproach) => 70
-    Some(Enclosure) => 70
-    Some(NeighborTone) => 65
-    Some(PassingTone) => 65
-    Some(Imported) => 80
-    None => 80
+  let intensity = match tone_origin {
+    Some(origin) => origin.intensity()
+    None => 0.85
   }
+  (intensity * 90.0).to_int()
 }
 
 ///|

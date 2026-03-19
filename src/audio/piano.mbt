@@ -87,6 +87,12 @@ fn Piano::schedule_notes(
 
   for sound in sounds {
     let start_time = sound.start_time(current_time)
-    self.schedule_note(bank, sound.midi, start_time, sound.duration, volume)
+    self.schedule_note(
+      bank,
+      sound.midi,
+      start_time,
+      sound.duration,
+      volume * sound.volume,
+    )
   }
 }

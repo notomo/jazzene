@@ -4,6 +4,7 @@ pub(all) struct AudioSound {
   offset : Duration
   duration : Duration
   midi : MidiNumber
+  volume : Double
 } derive(Eq, Show)
 
 ///|
@@ -25,10 +26,15 @@ pub fn AudioSound::from(
     sound
     .midi()
     .map(fn(midi) {
+      let volume = match sound.tone_origin {
+        Some(origin) => origin.intensity()
+        None => 0.85
+      }
       AudioSound::{
         offset: sound.start_time - current_pos,
         duration: sound.duration,
         midi,
+        volume,
       }
     })
   })

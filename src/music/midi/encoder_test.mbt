@@ -82,7 +82,7 @@ test "encode_to_midi: tempo event correct for 120 BPM" {
 
 ///|
 test "encode_to_midi: single note produces Note On and Note Off" {
-  // 120 BPM: 1 beat = 0.5s, 480 ticks = 0.5s; tone_origin=None → velocity=80
+  // 120 BPM: 1 beat = 0.5s, 480 ticks = 0.5s; tone_origin=None → velocity=76 (0.85*90)
   // Layout: header(14) + meta_chunk(33) + melody_MTrk_header(8) = 55
   // Meta data = tempo(7)+time_signature(8)+key_sig(6)+EOT(4) = 25; chunk = 8+25 = 33
   // Melody data: PC[0,192,0] + CC7[0,176,7,100] + NoteOn + NoteOff + EOT
@@ -91,9 +91,9 @@ test "encode_to_midi: single note produces Note On and Note Off" {
   let events = midi.iter().drop(55).take(20).collect()
   inspect(
     events,
-    content="[0, 192, 0, 0, 176, 7, 100, 0, 144, 60, 80, 131, 96, 128, 60, 0, 0, 255, 47, 0]",
+    content="[0, 192, 0, 0, 176, 7, 100, 0, 144, 60, 76, 131, 96, 128, 60, 0, 0, 255, 47, 0]",
   )
-  // PC: C0 00; CC7: B0 07 64=100; NoteOn: 90 3C 50=80; NoteOff: 80 3C 00 at 480 ticks VLQ=[131,96]
+  // PC: C0 00; CC7: B0 07 64=100; NoteOn: 90 3C 4C=76; NoteOff: 80 3C 00 at 480 ticks VLQ=[131,96]
 }
 
 ///|
@@ -118,14 +118,14 @@ test "encode_to_midi: end of track marker present" {
 ///|
 test "encode_to_midi: multiple notes ordered by start time" {
   // Two notes: C4 at 0s, E4 at 0.5s (both 0.5s duration at 120 BPM)
-  // tone_origin=None → velocity=80 for both
+  // tone_origin=None → velocity=76 (0.85*90) for both
   let c4 = make_note_sound(60, 0.0, 0.5)
   let e4 = make_note_sound(64, 0.5, 0.5)
   let midi = encode_to_midi([c4, e4], [], [], [], 120)
   let events = midi.iter().drop(55).take(29).collect()
   inspect(
     events,
-    content="[0, 192, 0, 0, 176, 7, 100, 0, 144, 60, 80, 131, 96, 128, 60, 0, 0, 144, 64, 80, 131, 96, 128, 64, 0, 0, 255, 47, 0]",
+    content="[0, 192, 0, 0, 176, 7, 100, 0, 144, 60, 76, 131, 96, 128, 60, 0, 0, 144, 64, 76, 131, 96, 128, 64, 0, 0, 255, 47, 0]",
   )
 }
 

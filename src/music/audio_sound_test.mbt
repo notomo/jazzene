@@ -17,6 +17,7 @@ test "AudioSound::from creates audio sounds" {
   assert_eq(audio_sound.offset, Duration::from_milliseconds(0))
   assert_eq(audio_sound.midi, midi)
   assert_eq(audio_sound.duration, Duration::from_milliseconds(500))
+  assert_eq(audio_sound.volume, 0.85) // None tone_origin → default intensity
 }
 
 ///|
@@ -93,6 +94,7 @@ let default_audio_sound : AudioSound = AudioSound::{
   offset: Duration::from_milliseconds(0),
   duration: Duration::from_milliseconds(100),
   midi: MidiNumber::new(60).unwrap(),
+  volume: 0.85,
 }
 
 ///|

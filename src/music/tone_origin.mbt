@@ -10,3 +10,16 @@ pub(all) enum ToneOrigin {
   PassingTone // Passing tone (connecting scale tone)
   Imported // Note imported from a MIDI file
 } derive(Eq, Show)
+
+///|
+/// Relative dynamic intensity (0.0–1.0).
+/// Structural tones are louder; ornamental tones are softer.
+/// Used for both MIDI velocity and audio gain scaling.
+pub fn ToneOrigin::intensity(self : ToneOrigin) -> Double {
+  match self {
+    ChordTone => 1.0
+    Tension(_) | Imported => 0.85
+    ChromaticApproach | Enclosure => 0.75
+    NeighborTone | PassingTone => 0.70
+  }
+}
