@@ -39,31 +39,30 @@ fn create_noise_buffer(
   ctx : @web_audio.AudioContext,
   duration_seconds : Double,
 ) -> @web_audio.AudioBuffer {
-  ffi_create_noise_buffer(ctx, duration_seconds)
+  let sr = ctx.sample_rate()
+  let len = (sr * duration_seconds).ceil().to_int()
+  let buf = ctx.create_buffer(1, len, sr)
+  let data = buf.get_channel_data(0)
+  // XorShift32 PRNG
+  let mut seed = 0x12345678
+  for i in 0..<len {
+    seed = seed ^ (seed << 13)
+    seed = seed ^ (seed >> 17)
+    seed = seed ^ (seed << 5)
+    let raw = seed.to_double() / 2147483647.0
+    data[i] = raw.clamp(min=-0.8, max=0.8)
+  }
+  // Fade in/out to avoid clicks
+  let fade = 64
+  for i in 0..<fade {
+    if i < len {
+      let factor = i.to_double() / fade.to_double()
+      data[i] = data[i] * factor
+      data[len - 1 - i] = data[len - 1 - i] * factor
+    }
+  }
+  buf
 }
-
-///|
-extern "js" fn ffi_create_noise_buffer(
-  ctx : @web_audio.AudioContext,
-  duration_seconds : Double,
-) -> @web_audio.AudioBuffer =
-  #| (ctx, dur) => {
-  #|   const sr = ctx.sampleRate;
-  #|   const len = Math.ceil(sr * dur);
-  #|   const buf = ctx.createBuffer(1, len, sr);
-  #|   const data = buf.getChannelData(0);
-  #|   let seed = 0x12345678;
-  #|   for (let i = 0; i < len; i++) {
-  #|     seed ^= seed << 13;
-  #|     seed ^= seed >> 17;
-  #|     seed ^= seed << 5;
-  #|     data[i] = Math.max(-0.8, Math.min(0.8, seed / 0x7fffffff));
-  #|   }
-  #|   const fade = 64;
-  #|   for (let i = 0; i < fade && i < len; i++) data[i] *= i / fade;
-  #|   for (let i = 0; i < fade && i < len; i++) data[len - 1 - i] *= i / fade;
-  #|   return buf;
-  #| }
 
 ///|
 /// Play a noise burst through a gain envelope

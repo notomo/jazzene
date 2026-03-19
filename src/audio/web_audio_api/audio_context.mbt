@@ -232,6 +232,52 @@ pub fn AudioContext::create_buffer(
   .cast()
 }
 
+// ChannelData wrapper (Float32Array returned by getChannelData)
+
+///|
+/// Float32Array returned by [getChannelData()](https://developer.mozilla.org/en-US/docs/Web/API/AudioBuffer/getChannelData)
+#external
+pub type ChannelData
+
+///|
+pub fn ChannelData::as_any(self : ChannelData) -> @js.Any = "%identity"
+
+///|
+/// [getChannelData()](https://developer.mozilla.org/en-US/docs/Web/API/AudioBuffer/getChannelData)
+///
+/// Get the Float32Array for a channel
+pub fn AudioBuffer::get_channel_data(self : Self, channel : Int) -> ChannelData {
+  self.as_any()._call("getChannelData", [@js.any(channel)]).cast()
+}
+
+///|
+/// Get the number of samples in the channel data
+pub fn ChannelData::length(self : Self) -> Int {
+  self.as_any()._get("length").cast()
+}
+
+///|
+extern "js" fn ffi_channel_data_get(data : ChannelData, index : Int) -> Double =
+  #| (data, i) => data[i]
+
+///|
+pub fn ChannelData::op_get(self : Self, index : Int) -> Double {
+  ffi_channel_data_get(self, index)
+}
+
+///|
+extern "js" fn ffi_channel_data_set(
+  data : ChannelData,
+  index : Int,
+  value : Double,
+) -> Unit =
+  #| (data, i, v) => { data[i] = v; }
+
+///|
+pub fn ChannelData::op_set(self : Self, index : Int, value : Double) -> Unit {
+  ffi_channel_data_set(self, index, value)
+}
+
 ///|
 /// [sampleRate](https://developer.mozilla.org/en-US/docs/Web/API/BaseAudioContext/sampleRate)
 ///
