@@ -11,9 +11,10 @@ test("should update jazz style via settings panel controls", async ({
   await panel.getByLabel("swing").getByRole("button", { name: "Hard" }).click();
   await panel.getByLabel("comping").getByRole("button", { name: "Off" }).click();
 
-  await page.waitForFunction(() =>
-    new URLSearchParams(window.location.search).has("melody"),
-  );
+  await page.waitForFunction(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.has("melody") && params.has("swing") && params.has("comping");
+  });
 
   const url = new URL(page.url());
   expect(url.searchParams.get("melody")).toBe("off");
