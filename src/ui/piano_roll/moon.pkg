@@ -5,7 +5,9 @@ import {
   "internal/jazzene/music",
   "mizchi/js/browser/canvas",
   "internal/jazzene/ui/theme",
+  "mizchi/js/core" @js,
   "mizchi/js/browser/dom" @js_dom,
+  "mizchi/js/web/event",
   "mizchi/js/web/performance" @js_perf,
   "mizchi/js/browser/observer" @js_observer,
 }

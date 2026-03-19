@@ -6,6 +6,7 @@ import {
   "internal/jazzene/music",
   "internal/jazzene/music/generator",
   "mizchi/js/browser/dom" @js_dom,
+  "mizchi/js/web/event",
   "internal/jazzene/ui/sheet",
   "internal/jazzene/ui/piano_roll",
   "internal/jazzene/ui/theme",

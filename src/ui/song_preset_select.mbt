@@ -1,15 +1,16 @@
 ///|
-extern "js" fn add_click_outside_listener(
+fn add_click_outside_listener(
   container : @js_dom.Element,
   callback : () -> Unit,
-) -> Unit =
-  #|(container, callback) => {
-  #|  document.addEventListener('click', (e) => {
-  #|    if (!container.contains(e.target)) {
-  #|      callback();
-  #|    }
-  #|  });
-  #|}
+) -> Unit {
+  @js_dom.document()
+  .as_event_target()
+  .addEventListener("click", fn(e) {
+    if not(container.as_any()._call("contains", [e._get("target")]).cast()) {
+      callback()
+    }
+  })
+}
 
 ///|
 /// Render song preset popup button that updates chord progression, key, BPM, measure count, and time signature

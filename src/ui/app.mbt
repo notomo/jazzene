@@ -276,12 +276,16 @@ pub fn render(state : AppState) -> Unit {
 }
 
 ///|
-extern "js" fn disable_pinch_zoom() -> Unit =
-  #|() => {
-  #|  document.addEventListener('touchmove', (e) => {
-  #|    if (e.touches.length > 1) { e.preventDefault(); }
-  #|  }, { passive: false });
-  #|}
+fn disable_pinch_zoom() -> Unit {
+  @js_dom.document()
+  .as_event_target()
+  .addEventListener("touchmove", fn(e) {
+    let length : Int = e._get("touches")._get("length").cast()
+    if length > 1 {
+      e._call("preventDefault", []) |> ignore
+    }
+  })
+}
 
 ///|
 extern "js" fn request_wake_lock() -> Unit =

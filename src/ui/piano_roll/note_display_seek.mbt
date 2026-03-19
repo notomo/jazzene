@@ -17,60 +17,77 @@ const MIN_VELOCITY = 0.1
 const VELOCITY_SMOOTHING = 0.3
 
 ///|
-extern "js" fn add_wheel_listener_notes(
+fn add_wheel_listener_notes(
   canvas : @js_dom.HTMLCanvasElement,
   handler : (@js_dom.WheelEvent) -> Unit,
-) -> Unit =
-  #|(canvas, handler) => { canvas.addEventListener('wheel', handler); }
+) -> Unit {
+  canvas
+  .as_event_target()
+  .addEventListener("wheel", fn(e) { handler(e.cast()) })
+}
 
 ///|
 /// Register document-level drag listeners for vertical (Y-axis) drag.
 /// Call this from a mousedown/touchstart handler to track the drag until release.
-extern "js" fn add_document_drag_listeners_y(
+fn add_document_drag_listeners_y(
   on_move : (Double) -> Unit,
   on_up : () -> Unit,
-) -> Unit =
-  #|(onMove, onUp) => {
-  #|  const moveHandler = (e) => onMove(e.clientY);
-  #|  const upHandler = () => {
-  #|    onUp();
-  #|    document.removeEventListener('mousemove', moveHandler);
-  #|    document.removeEventListener('mouseup', upHandler);
-  #|  };
-  #|  document.addEventListener('mousemove', moveHandler);
-  #|  document.addEventListener('mouseup', upHandler);
-  #|  const touchMoveHandler = (e) => {
-  #|    if (e.touches.length > 0) {
-  #|      e.preventDefault();
-  #|      onMove(e.touches[0].clientY);
-  #|    }
-  #|  };
-  #|  const touchEndHandler = () => {
-  #|    onUp();
-  #|    document.removeEventListener('touchmove', touchMoveHandler);
-  #|    document.removeEventListener('touchend', touchEndHandler);
-  #|    document.removeEventListener('touchcancel', touchEndHandler);
-  #|  };
-  #|  document.addEventListener('touchmove', touchMoveHandler, { passive: false });
-  #|  document.addEventListener('touchend', touchEndHandler);
-  #|  document.addEventListener('touchcancel', touchEndHandler);
-  #|}
+) -> Unit {
+  let doc = @js_dom.document().as_event_target()
+  let move_ref : Ref[(@js.Any) -> Unit] = { val: fn(_) { () } }
+  let up_ref : Ref[(@js.Any) -> Unit] = { val: fn(_) { () } }
+  move_ref.val = fn(e) { on_move(e._get("clientY").cast()) }
+  up_ref.val = fn(_e) {
+    on_up()
+    doc.removeEventListener("mousemove", move_ref.val)
+    doc.removeEventListener("mouseup", up_ref.val)
+  }
+  doc.addEventListener("mousemove", move_ref.val)
+  doc.addEventListener("mouseup", up_ref.val)
+  let touch_move_ref : Ref[(@js.Any) -> Unit] = { val: fn(_) { () } }
+  let touch_end_ref : Ref[(@js.Any) -> Unit] = { val: fn(_) { () } }
+  touch_move_ref.val = fn(e) {
+    let touches = e._get("touches")
+    if (touches._get("length").cast() : Int) > 0 {
+      e._call("preventDefault", []) |> ignore
+      on_move(touches._get_by_index(0)._get("clientY").cast())
+    }
+  }
+  touch_end_ref.val = fn(_e) {
+    on_up()
+    doc.removeEventListener("touchmove", touch_move_ref.val)
+    doc.removeEventListener("touchend", touch_end_ref.val)
+    doc.removeEventListener("touchcancel", touch_end_ref.val)
+  }
+  doc.addEventListener("touchmove", touch_move_ref.val)
+  doc.addEventListener("touchend", touch_end_ref.val)
+  doc.addEventListener("touchcancel", touch_end_ref.val)
+}
 
 ///|
 /// Attach mousedown/touchstart listeners to a canvas element.
 /// Calls on_start with the clientY coordinate when drag begins.
-extern "js" fn add_canvas_drag_start_listeners(
+fn add_canvas_drag_start_listeners(
   canvas : @js_dom.HTMLCanvasElement,
   on_start : (Double) -> Unit,
-) -> Unit =
-  #|(canvas, onStart) => {
-  #|  canvas.addEventListener('mousedown', (e) => {
-  #|    if (e.button === 0) { onStart(e.clientY); }
-  #|  });
-  #|  canvas.addEventListener('touchstart', (e) => {
-  #|    if (e.touches.length > 0) { onStart(e.touches[0].clientY); }
-  #|  });
-  #|}
+) -> Unit {
+  canvas
+  .as_event_target()
+  .addEventListener("mousedown", fn(e) {
+    let button : Int = e._get("button").cast()
+    if button == 0 {
+      on_start(e._get("clientY").cast())
+    }
+  })
+  canvas
+  .as_event_target()
+  .addEventListener("touchstart", fn(e) {
+    let touches = e._get("touches")
+    if (touches._get("length").cast() : Int) > 0 {
+      on_start(touches._get_by_index(0)._get("clientY").cast())
+    }
+  })
+}
 
 ///|
 /// Set up mouse wheel seeking on the note display canvas
