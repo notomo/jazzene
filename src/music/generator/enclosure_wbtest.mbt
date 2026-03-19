@@ -14,14 +14,12 @@ test "@music.Techniques::default has enclosure enabled" {
 }
 
 ///|
-/// Verify ImprovisationConfig::with_techniques zeros enclosure when disabled
-test "ImprovisationConfig::with_techniques zeros enclosure when disabled" {
-  let s = ImprovisationConfig::default(0)
-  let t = @music.Techniques::{
+/// Verify ImprovisationConfig::default zeros enclosure when disabled
+test "ImprovisationConfig::default zeros enclosure when disabled" {
+  let result = ImprovisationConfig::default(0, techniques={
     ..@music.Techniques::default(),
     enclosure: false,
-  }
-  let result = s.with_techniques(t)
+  })
   assert_eq(result.enclosure_ornament_probability, 0)
 }
 

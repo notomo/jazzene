@@ -325,8 +325,7 @@ test "with_techniques disabling non-chord-tone techniques: generated notes use o
     neighbor_tones: false,
     sixteenth_runs: false,
   }
-  let settings = ImprovisationConfig::default(42)
-    |> ImprovisationConfig::with_techniques(techniques)
+  let settings = ImprovisationConfig::default(42, techniques~)
   let chords = [
     [@music.Chord::{ root: @music.C, quality: @music.Major7, bass: None }],
     [@music.Chord::{ root: @music.G, quality: @music.Dominant7, bass: None }],

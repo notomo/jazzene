@@ -10,12 +10,12 @@ pub fn generate_full_measures(
   jazz_style : @music.JazzStyle,
 ) -> Array[@music.Measure] {
   let beats_per_measure = time_signature.beats_per_measure()
-  let settings = ImprovisationConfig::default(seed)
-    |> ImprovisationConfig::with_techniques(jazz_style.techniques)
-    |> ImprovisationConfig::with_pitch_range(
-      jazz_style.pitch_min,
-      jazz_style.pitch_max,
-    )
+  let settings = ImprovisationConfig::default(
+    seed,
+    techniques=jazz_style.techniques,
+    pitch_min=jazz_style.pitch_min,
+    pitch_max=jazz_style.pitch_max,
+  )
   let music_measures = settings
     |> create_measure_generator
     |> improvisation(

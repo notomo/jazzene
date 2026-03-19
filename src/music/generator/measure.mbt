@@ -113,7 +113,13 @@ struct ImprovisationConfig {
 
 ///|
 /// Create default settings with given seed
-fn ImprovisationConfig::default(seed : Int) -> ImprovisationConfig {
+fn ImprovisationConfig::default(
+  seed : Int,
+  techniques? : @music.Techniques,
+  pitch_min? : Int = 48,
+  pitch_max? : Int = 84,
+) -> ImprovisationConfig {
+  let t = techniques
   ImprovisationConfig::{
     seed,
     rest_probability: 25,
@@ -123,20 +129,44 @@ fn ImprovisationConfig::default(seed : Int) -> ImprovisationConfig {
     stamina_max: 50,
     stamina_recovery_per_beat: 20,
     stamina_passive_recovery: 5,
-    tension_weight_ratio: 25,
-    chromatic_approach_ornament_probability: 20,
-    enclosure_ornament_probability: 20,
+    tension_weight_ratio: match t {
+      Some({ tension_tones: false, .. }) => 0
+      _ => 25
+    },
+    chromatic_approach_ornament_probability: match t {
+      Some({ chromatic_approach: false, .. }) => 0
+      _ => 20
+    },
+    enclosure_ornament_probability: match t {
+      Some({ enclosure: false, .. }) => 0
+      _ => 20
+    },
     phrase_length_min: 2,
     phrase_length_max: 8,
     phrase_early_end_stamina: 15,
     max_interval: 7,
-    syncopation_probability: 40,
-    triplet_probability: 8,
-    bebop_ornament_probability: 30,
-    neighbor_ornament_probability: 20,
-    sixteenth_run_probability: 15,
-    pitch_min: 48,
-    pitch_max: 84,
+    syncopation_probability: match t {
+      Some({ syncopation: false, .. }) => 0
+      _ => 40
+    },
+    triplet_probability: match t {
+      Some({ triplets: false, .. }) => 0
+      _ => 8
+    },
+    bebop_ornament_probability: match t {
+      Some({ bebop_scales: false, .. }) => 0
+      _ => 30
+    },
+    neighbor_ornament_probability: match t {
+      Some({ neighbor_tones: false, .. }) => 0
+      _ => 20
+    },
+    sixteenth_run_probability: match t {
+      Some({ sixteenth_runs: false, .. }) => 0
+      _ => 15
+    },
+    pitch_min,
+    pitch_max,
   }
 }
 
