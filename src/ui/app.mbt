@@ -288,35 +288,106 @@ fn disable_pinch_zoom() -> Unit {
 }
 
 ///|
-extern "js" fn request_wake_lock() -> Unit =
-  #|() => {
-  #|  if (!('wakeLock' in navigator)) return;
-  #|  const request = () => navigator.wakeLock.request('screen').catch(() => {});
-  #|  request();
-  #|  document.addEventListener('visibilitychange', () => {
-  #|    if (document.visibilityState === 'visible') request();
-  #|  });
-  #|}
+fn request_wake_lock() -> Unit {
+  match
+    (
+      @js.identity_option(@js_dom.window().navigator()._get("wakeLock")) :
+      @js.Any?) {
+    None => ()
+    Some(wl) => {
+      let request : () -> Unit = fn() {
+        wl
+        ._call("request", [@js.any("screen")])
+        ._call("catch", [@js.from_fn1(fn(_ : @js.Any) { () })])
+        |> ignore
+      }
+      request()
+      @js_dom.document()
+      .as_event_target()
+      .addEventListener("visibilitychange", fn(_) {
+        let state : String = @js_dom.document()
+          .as_any()
+          ._get("visibilityState")
+          .cast()
+        if state == "visible" {
+          request()
+        }
+      })
+    }
+  }
+}
 
 ///|
-extern "js" fn lock_landscape() -> Unit =
-  #|() => {
-  #|  const so = screen.orientation;
-  #|  if (!so || !so.lock) return;
-  #|  const isNarrow = () => Math.min(window.innerWidth, window.innerHeight) <= 767;
-  #|  if (!isNarrow()) return;
-  #|  const lock = () => so.lock('landscape').catch(() => {});
-  #|  const goFullscreenAndLock = () => {
-  #|    if (document.fullscreenElement) { lock(); return; }
-  #|    const el = document.documentElement;
-  #|    const req = el.requestFullscreen || el.webkitRequestFullscreen;
-  #|    if (!req) return;
-  #|    req.call(el).then(() => lock()).catch(() => {});
-  #|  };
-  #|  lock();
-  #|  document.addEventListener('click', goFullscreenAndLock);
-  #|  document.addEventListener('touchend', goFullscreenAndLock, { once: true });
-  #|  document.addEventListener('fullscreenchange', () => {
-  #|    if (document.fullscreenElement) lock();
-  #|  });
-  #|}
+fn lock_landscape() -> Unit {
+  match
+    (
+      @js.identity_option(@js_dom.window().screen()._get("orientation")) :
+      @js.Any?) {
+    None => ()
+    Some(orientation) => {
+      if @js.is_nullish(orientation._get("lock")) {
+        return
+      }
+      let w = @js_dom.window().inner_width()
+      let h = @js_dom.window().inner_height()
+      if @cmp.minimum(w, h) > 767 {
+        return
+      }
+      let lock : () -> Unit = fn() {
+        orientation
+        ._call("lock", [@js.any("landscape")])
+        ._call("catch", [@js.from_fn1(fn(_ : @js.Any) { () })])
+        |> ignore
+      }
+      let go_fullscreen_and_lock : () -> Unit = fn() {
+        if not(
+            @js.is_nullish(
+              @js_dom.document().as_any()._get("fullscreenElement"),
+            ),
+          ) {
+          lock()
+          return
+        }
+        let el = @js_dom.document().as_any()._get("documentElement")
+        let req_method = if not(@js.is_nullish(el._get("requestFullscreen"))) {
+          Some("requestFullscreen")
+        } else if not(@js.is_nullish(el._get("webkitRequestFullscreen"))) {
+          Some("webkitRequestFullscreen")
+        } else {
+          None
+        }
+        match req_method {
+          None => ()
+          Some(m) =>
+            el
+            ._call(m, [])
+            ._call("then", [@js.from_fn1(fn(_ : @js.Any) { lock() })])
+            ._call("catch", [@js.from_fn1(fn(_ : @js.Any) { () })])
+            |> ignore
+        }
+      }
+      lock()
+      @js_dom.document()
+      .as_event_target()
+      .addEventListener("click", fn(_) { go_fullscreen_and_lock() })
+      @js_dom.document()
+      .as_event_target()
+      .addEventListener(
+        "touchend",
+        fn(_) { go_fullscreen_and_lock() },
+        once=true,
+      )
+      @js_dom.document()
+      .as_event_target()
+      .addEventListener("fullscreenchange", fn(_) {
+        if not(
+            @js.is_nullish(
+              @js_dom.document().as_any()._get("fullscreenElement"),
+            ),
+          ) {
+          lock()
+        }
+      })
+    }
+  }
+}
