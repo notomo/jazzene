@@ -28,7 +28,7 @@ fn[T : Eq] segmented_buttons(
   let base = "px-2 py-0.5 text-xs border-y border-r first:border-l first:rounded-l last:rounded-r transition-colors"
   let active = "bg-blue-800 border-blue-500 text-white"
   let inactive = "bg-slate-900 border-slate-600 text-slate-300 hover:bg-slate-700"
-  let disabled_style = "opacity-40 cursor-not-allowed bg-slate-900 border-slate-700 text-slate-500"
+  let disabled_style = "cursor-not-allowed bg-slate-950 border-slate-800 text-slate-600"
   @luna_dom.div(
     class="flex w-full",
     options.map(fn(pair) {
