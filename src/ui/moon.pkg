@@ -12,6 +12,8 @@ import {
   "mizchi/js/browser/history" @js_history,
   "mizchi/js/browser/location" @js_location,
   "mizchi/js/web/url" @js_url,
+  "mizchi/js/web/blob" @js_blob,
+  "mizchi/js/builtins/date" @js_date,
   "internal/jazzene/ui/sheet",
   "internal/jazzene/ui/piano_roll",
   "internal/jazzene/ui/theme",
