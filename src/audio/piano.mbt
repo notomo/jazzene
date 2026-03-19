@@ -20,7 +20,10 @@ fn Piano::new(
 ///|
 /// Load Salamander Grand Piano samples asynchronously
 fn Piano::load_samples(self : Piano) -> Unit {
-  load_sample_bank(self.ctx, fn(bank) { self.sample_bank = Some(bank) })
+  @js.run_async(async fn() noraise {
+    let bank = load_sample_bank(self.ctx) catch { _ => return }
+    self.sample_bank = Some(bank)
+  })
 }
 
 ///|
@@ -37,7 +40,7 @@ fn Piano::schedule_note(
   let duration_sec = duration.to_seconds()
   let info = midi_to_sample_info(midi.value)
 
-  let buffer = match bank.lookup(info.note_name) {
+  let buffer = match bank.get(info.note_name) {
     Some(buf) => buf
     None => return
   }

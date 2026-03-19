@@ -240,6 +240,24 @@ pub fn AudioContext::sample_rate(self : Self) -> Double {
   self.as_any()._get("sampleRate").cast()
 }
 
+///|
+extern "js" fn ffi_decode_audio_data(
+  ctx : AudioContext,
+  array_buffer : @js.Any,
+) -> @js.Promise[AudioBuffer] =
+  #| (ctx, buf) => ctx.decodeAudioData(buf)
+
+///|
+/// [decodeAudioData()](https://developer.mozilla.org/en-US/docs/Web/API/BaseAudioContext/decodeAudioData)
+///
+/// Decode audio data from an ArrayBuffer
+pub async fn AudioContext::decode_audio_data(
+  self : AudioContext,
+  array_buffer : @js.Any,
+) -> AudioBuffer {
+  ffi_decode_audio_data(self, array_buffer).wait()
+}
+
 // AudioBufferSourceNode wrapper
 
 ///|

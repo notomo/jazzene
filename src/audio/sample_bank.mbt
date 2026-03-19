@@ -4,21 +4,20 @@
 /// and provides MIDI-to-sample mapping with pitch shifting
 
 ///|
-/// Opaque JS Map<string, AudioBuffer> holding decoded samples
-#external
-priv type SampleBank
+/// Map from note name (e.g. "A0", "C1") to decoded AudioBuffer
+type SampleBank = Map[String, @web_audio.AudioBuffer]
 
 ///|
-fn SampleBank::as_any(self : SampleBank) -> @js.Any = "%identity"
+/// Vite base URL for resolving sample paths
+extern "js" fn ffi_base_url() -> String =
+  #| () => import.meta.env.BASE_URL
 
 ///|
-/// Look up a decoded sample by note name (e.g. "A0", "C1", "Ds1", "Fs1")
-fn SampleBank::lookup(
-  self : SampleBank,
-  note_name : String,
-) -> @web_audio.AudioBuffer? {
-  @js.identity_option(self.as_any()._call("get", [@js.any(note_name)]))
-}
+/// Fetch response body as ArrayBuffer (JS native)
+extern "js" fn ffi_response_array_buffer(
+  response : @http.Response,
+) -> @js.Promise[@js.Any] =
+  #| (r) => r.arrayBuffer()
 
 ///|
 /// Sample info: which sample to use and how many cents to detune
@@ -99,43 +98,36 @@ fn midi_to_sample_info(midi_value : Int) -> SampleInfo {
 }
 
 ///|
-/// Load all Salamander Grand Piano samples asynchronously.
-/// Calls callback with the SampleBank when all samples are loaded.
-fn load_sample_bank(
+/// Fetch and decode a single sample, returning None on any error
+async fn load_one_sample(
   ctx : @web_audio.AudioContext,
-  callback : (SampleBank) -> Unit,
-) -> Unit {
-  ffi_load_sample_bank(ctx, sample_note_names(), callback)
+  note_name : String,
+) -> @web_audio.AudioBuffer? {
+  let url = ffi_base_url() + "samples/salamander/" + note_name + ".mp3"
+  let response = @http.fetch(url, method_="GET") catch { _ => return None }
+  let array_buf = ffi_response_array_buffer(response).wait() catch {
+    _ => return None
+  }
+  let audio_buf = ctx.decode_audio_data(array_buf) catch { _ => return None }
+  Some(audio_buf)
 }
 
 ///|
-extern "js" fn ffi_load_sample_bank(
-  ctx : @web_audio.AudioContext,
-  note_names : Array[String],
-  callback : (SampleBank) -> Unit,
-) -> Unit =
-  #| (ctx, noteNames, callback) => {
-  #|   const baseUrl = import.meta.env.BASE_URL + "samples/salamander/";
-  #|   const bank = new Map();
-  #|   let loaded = 0;
-  #|   const total = noteNames.length;
-  #|   for (const name of noteNames) {
-  #|     fetch(baseUrl + name + ".mp3")
-  #|       .then(r => r.arrayBuffer())
-  #|       .then(buf => ctx.decodeAudioData(buf))
-  #|       .then(audioBuffer => {
-  #|         bank.set(name, audioBuffer);
-  #|         loaded++;
-  #|         if (loaded === total) {
-  #|           callback(bank);
-  #|         }
-  #|       })
-  #|       .catch(err => {
-  #|         console.warn("Failed to load sample: " + name, err);
-  #|         loaded++;
-  #|         if (loaded === total) {
-  #|           callback(bank);
-  #|         }
-  #|       });
-  #|   }
-  #| }
+/// Load all Salamander Grand Piano samples asynchronously.
+/// All samples are fetched in parallel; failed samples are silently skipped.
+async fn load_sample_bank(ctx : @web_audio.AudioContext) -> SampleBank {
+  let bank : Map[String, @web_audio.AudioBuffer] = {}
+  let promises = sample_note_names().map(fn(name) {
+    @js.from_async(async fn() {
+      let buf = load_one_sample(ctx, name)
+      match buf {
+        Some(b) => bank[name] = b
+        None => ()
+      }
+    })
+  })
+  ignore(@js.Promise::all(promises).wait()) catch {
+    _ => ()
+  }
+  bank
+}
