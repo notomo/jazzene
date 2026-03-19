@@ -3,6 +3,7 @@ dist
 target
 _build
 .mooncakes
+.playwright-cli/
 .playwright-mcp/
 playwright-report/
 test-results/
