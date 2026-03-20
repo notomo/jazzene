@@ -102,6 +102,15 @@ export async function openPage({
       page
         .getByLabel("jazz settings panel")
         .getByRole("button", { name: "Export" }),
+
+    getMidiDeviceSelect: () => page.getByLabel("MIDI input device"),
+    getMidiDeviceSelectNotSupported: () =>
+      page.getByLabel("MIDI input device (not supported)"),
+    getRecordToggleButton: () =>
+      page.getByRole("button", { name: "toggle recording" }),
+    getRecordedLine: (n: number) => page.getByText(`● Rec ${n}`),
+    getDeleteRecordedLineButton: () =>
+      page.getByRole("button", { name: "delete recorded line" }),
   };
 
   return jazzenePage;
