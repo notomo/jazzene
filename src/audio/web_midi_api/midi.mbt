@@ -64,14 +64,34 @@ extern "js" fn ffi_is_midi_supported() -> Bool =
 /// [Navigator.requestMIDIAccess()](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/requestMIDIAccess)
 ///
 /// Request access to MIDI devices.
-pub async fn request_midi_access() -> MidiAccess {
-  let raw = ffi_request_midi_access().wait()
-  make_midi_access(raw)
+///
+/// Note: intentionally callback-based rather than `async fn`.
+/// MoonBit's `Promise::wait()` calls `.then()` via `Any.__call` (i.e. `obj[key]`),
+/// but Web MIDI Browser (iOS) returns a non-standard Promise-like object
+/// that is incompatible with this mechanism, causing
+/// "undefined is not an object (evaluating 'obj[key]')" at runtime.
+/// Calling `.then()` directly from JS FFI avoids the issue.
+pub fn request_midi_access(
+  on_success : (MidiAccess) -> Unit,
+  on_error : () -> Unit,
+) -> Unit {
+  ffi_request_midi_access(
+    fn(raw) { on_success(make_midi_access(raw)) },
+    on_error,
+  )
 }
 
 ///|
-extern "js" fn ffi_request_midi_access() -> @js.Promise[@js.Any] =
-  #| () => navigator.requestMIDIAccess()
+extern "js" fn ffi_request_midi_access(
+  on_success : (@js.Any) -> Unit,
+  on_error : () -> Unit,
+) -> Unit =
+  #| (on_success, on_error) => {
+  #|   navigator.requestMIDIAccess().then(
+  #|     function(access) { on_success(access) },
+  #|     function(e) { on_error() }
+  #|   )
+  #| }
 
 ///|
 // Note: Array.from() is intentionally avoided here — it is not supported
@@ -120,10 +140,26 @@ extern "js" fn ffi_clear_on_midi_message(input : @js.Any) -> Unit =
 /// [MIDIPort.open()](https://developer.mozilla.org/en-US/docs/Web/API/MIDIPort/open)
 ///
 /// Explicitly open this MIDI input port.
-pub async fn MidiInput::open(self : MidiInput) -> Unit {
-  ignore(ffi_open_midi_input(self.raw).wait())
+///
+/// Note: same callback-based design as `request_midi_access` — see that
+/// function's comment for the reason.
+pub fn MidiInput::open(
+  self : MidiInput,
+  on_done : () -> Unit,
+  on_error : () -> Unit,
+) -> Unit {
+  ffi_open_midi_input(self.raw, on_done, on_error)
 }
 
 ///|
-extern "js" fn ffi_open_midi_input(input : @js.Any) -> @js.Promise[@js.Any] =
-  #| (input) => input.open()
+extern "js" fn ffi_open_midi_input(
+  input : @js.Any,
+  on_done : () -> Unit,
+  on_error : () -> Unit,
+) -> Unit =
+  #| (input, on_done, on_error) => {
+  #|   input.open().then(
+  #|     function() { on_done() },
+  #|     function(e) { on_error() }
+  #|   )
+  #| }

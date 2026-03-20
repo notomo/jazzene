@@ -72,19 +72,15 @@ pub fn midi_device_select(
       }
     }
     let attach_handler = fn(input : @web_midi.MidiInput) {
-      ignore(
-        @js.from_async(async fn() {
-          @web_midi.MidiInput::open(input) catch {
-            _ => return
-          }
-          @web_midi.MidiInput::set_on_midi_message(input, on_message)
-        }),
+      @web_midi.MidiInput::open(
+        input,
+        fn() { @web_midi.MidiInput::set_on_midi_message(input, on_message) },
+        fn() {  },
       )
     }
     let do_request = fn() {
-      ignore(
-        @js.from_async(async fn() {
-          let access = @web_midi.request_midi_access() catch { _ => return }
+      @web_midi.request_midi_access(
+        fn(access) {
           let inputs = access.inputs.values().to_array()
           available_inputs.set(inputs)
           let current_id = selected_id.get()
@@ -101,7 +97,8 @@ pub fn midi_device_select(
             attach_handler(first)
           }
           refresh_count.update(fn(n) { n + 1 })
-        }),
+        },
+        fn() {  },
       )
     }
     do_request()
