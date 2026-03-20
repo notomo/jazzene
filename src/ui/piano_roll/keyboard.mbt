@@ -21,6 +21,7 @@ const BLACK_KEY_HEIGHT_RATIO = 0.6
 pub fn keyboard(
   sounds : () -> Array[@music.ScheduledSound],
   comping_sounds : () -> Array[@music.ScheduledSound],
+  recorded_sounds : () -> Array[@music.ScheduledSound],
   measures : () -> Array[@music.Measure],
   bpm : @signals.Signal[Int],
   playback_position : @signals.Signal[@music.Duration],
@@ -57,6 +58,14 @@ pub fn keyboard(
             },
           )
         None => ()
+      }
+    })
+    // Recorded notes playing use MIDI_ACTIVE color
+    @music.calculate_playing_notes(recorded_sounds(), playback_position.get())
+    .filter_map(fn(s) { s.midi() })
+    .each(fn(m) {
+      if set[m.value] == None {
+        set[m.value] = Some(@theme.PLAYING_COLOR_MIDI_ACTIVE)
       }
     })
     // MIDI input notes override all other colors (highest priority — live input)

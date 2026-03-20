@@ -5,6 +5,7 @@ pub struct ScheduledSounds {
   comping : Array[AudioSound]
   bass : Array[AudioSound]
   drum : Array[AudioSound]
+  recorded : Array[AudioSound]
 }
 
 ///|
@@ -31,6 +32,7 @@ pub fn[T : AudioOutput] make_tick(
   comping_sounds~ : () -> Array[ScheduledSound],
   bass_sounds~ : () -> Array[ScheduledSound],
   drum_sounds~ : () -> Array[ScheduledSound],
+  recorded_sounds~ : () -> Array[ScheduledSound],
 ) -> (Double) -> Bool {
   let lookahead = Duration::from_milliseconds(100)
   fn(elapsed_ms : Double) -> Bool {
@@ -62,7 +64,18 @@ pub fn[T : AudioOutput] make_tick(
     }
     let bass = AudioSound::from(bass_sounds(), final_position, lookahead)
     let drum = AudioSound::from(drum_sounds(), final_position, lookahead)
-    audio_output.schedule_sounds(ScheduledSounds::{ piano, comping, bass, drum })
+    let recorded = AudioSound::from(
+      recorded_sounds(),
+      final_position,
+      lookahead,
+    )
+    audio_output.schedule_sounds(ScheduledSounds::{
+      piano,
+      comping,
+      bass,
+      drum,
+      recorded,
+    })
     set_playback_position(final_position)
     false
   }

@@ -5,6 +5,8 @@
 /// When the browser does not support Web MIDI, shows a disabled select.
 pub fn midi_device_select(
   midi_active_notes : @signals.Signal[Array[@music.MidiNumber]],
+  on_note_on? : (@music.MidiNumber) -> Unit = fn(_) {  },
+  on_note_off? : (@music.MidiNumber) -> Unit = fn(_) {  },
 ) -> @luna_dom.DomNode {
   if not(@web_midi.is_midi_supported()) {
     @luna_dom.create_element(
@@ -40,7 +42,7 @@ pub fn midi_device_select(
       match @music.MidiNumber::new(note) {
         Some(midi) =>
           match (high_nibble, velocity) {
-            (9, v) if v > 0 =>
+            (9, v) if v > 0 => {
               midi_active_notes.update(fn(notes) {
                 if notes.iter().any(fn(n) { n == midi }) {
                   notes
@@ -50,14 +52,20 @@ pub fn midi_device_select(
                   new_notes
                 }
               })
-            (8, _) =>
+              on_note_on(midi)
+            }
+            (8, _) => {
               midi_active_notes.update(fn(notes) {
                 notes.filter(fn(n) { n != midi })
               })
-            (9, 0) =>
+              on_note_off(midi)
+            }
+            (9, 0) => {
               midi_active_notes.update(fn(notes) {
                 notes.filter(fn(n) { n != midi })
               })
+              on_note_off(midi)
+            }
             _ => ()
           }
         None => ()

@@ -233,12 +233,13 @@ fn make_instrument_track(
 ///|
 /// Encode ScheduledSound arrays to MIDI file bytes (Standard MIDI File format 1).
 /// Returns Array[Int] (0-255 values) representing the SMF binary.
-/// Produces 5 tracks: meta (track 0), melody ch0, comping ch1, bass ch2, drum ch9.
+/// Produces 6 tracks: meta (track 0), melody ch0, comping ch1, bass ch2, drum ch9, recorded ch3.
 pub fn encode_to_midi(
   melody_sounds : Array[@music.ScheduledSound],
   comping_sounds : Array[@music.ScheduledSound],
   bass_sounds : Array[@music.ScheduledSound],
   drum_sounds : Array[@music.ScheduledSound],
+  recorded_sounds : Array[@music.ScheduledSound],
   bpm : Int,
   time_signature? : @music.TimeSignature = @music.TimeSignature::default(),
   key_signature? : @music.KeySignature = @music.KeySignature::c_major(),
@@ -272,10 +273,18 @@ pub fn encode_to_midi(
       _ => 64
     }
   })
+  let recorded_track = make_instrument_track(
+    3,
+    Some(0),
+    80,
+    recorded_sounds,
+    bpm,
+    fn(_) { 80 },
+  )
 
   let buf : Array[Int] = []
 
-  // Header chunk: MThd, length=6, format=1, 5 tracks, 480 ticks/quarter
+  // Header chunk: MThd, length=6, format=1, 6 tracks, 480 ticks/quarter
   buf.push(0x4D) // M
   buf.push(0x54) // T
   buf.push(0x68) // h
@@ -287,7 +296,7 @@ pub fn encode_to_midi(
   buf.push(0)
   buf.push(1) // format = 1 (Parallel)
   buf.push(0)
-  buf.push(5) // 5 tracks
+  buf.push(6) // 6 tracks
   buf.push(1)
   buf.push(0xE0) // 480 ticks/quarter note (0x01E0)
 
@@ -296,6 +305,7 @@ pub fn encode_to_midi(
   write_track(buf, comping_track)
   write_track(buf, bass_track)
   write_track(buf, drum_track)
+  write_track(buf, recorded_track)
 
   buf
 }

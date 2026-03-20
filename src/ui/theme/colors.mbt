@@ -62,6 +62,7 @@ pub fn tone_origin_color(origin : @music.ToneOrigin) -> String {
     Enclosure => COLOR_ENCLOSURE
     NeighborTone => COLOR_NEIGHBOR
     Imported => COLOR_MIDI_IMPORTED
+    Recorded => COLOR_MIDI_ACTIVE
   }
 }
 
@@ -75,5 +76,6 @@ pub fn tone_origin_playing_color(origin : @music.ToneOrigin) -> String {
     Enclosure => PLAYING_COLOR_ENCLOSURE
     NeighborTone => PLAYING_COLOR_NEIGHBOR
     Imported => PLAYING_COLOR_MIDI_IMPORTED
+    Recorded => PLAYING_COLOR_MIDI_ACTIVE
   }
 }

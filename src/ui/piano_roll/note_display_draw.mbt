@@ -342,6 +342,8 @@ fn draw_falling_notes(
     ctx.fillStyle = match (note.tone_origin, is_playing, show_technique_hints) {
       (Some(Imported), true, _) => @theme.PLAYING_COLOR_MIDI_IMPORTED
       (Some(Imported), false, _) => @theme.COLOR_MIDI_IMPORTED
+      (Some(Recorded), true, _) => @theme.PLAYING_COLOR_MIDI_ACTIVE
+      (Some(Recorded), false, _) => @theme.COLOR_MIDI_ACTIVE
       (Some(origin), true, true) => @theme.tone_origin_playing_color(origin)
       (Some(origin), false, true) => @theme.tone_origin_color(origin)
       (Some(_), true, false) => @theme.PLAYING_COLOR_CHORD_TONE
@@ -460,6 +462,7 @@ fn draw_notes(
   height : Double,
   note_positions : Array[NotePosition],
   backing_positions : Array[NotePosition],
+  recorded_positions : Array[NotePosition],
   scale_bands : Array[ScaleBand],
   chord_labels : Array[ChordLabel],
   current_pos : Double,
@@ -486,6 +489,16 @@ fn draw_notes(
     key_areas,
     @theme.PLAYING_COLOR_COMPING,
     @theme.COLOR_COMPING,
+    true,
+  )
+  draw_falling_notes(
+    ctx,
+    height,
+    recorded_positions,
+    current_pos,
+    key_areas,
+    @theme.PLAYING_COLOR_MIDI_ACTIVE,
+    @theme.COLOR_MIDI_ACTIVE,
     true,
   )
   draw_falling_notes(

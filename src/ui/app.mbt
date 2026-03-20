@@ -58,13 +58,19 @@ pub fn render(state : AppState) -> Unit {
     is_playing,
     midi_active_notes,
     imported_midi,
+    is_recording,
+    recorded_lines,
+    on_note_on,
+    on_note_off,
     measures,
     sounds,
     comping_sounds,
     bass_sounds,
     drum_sounds,
+    recorded_sounds_visual,
     total_duration,
     chord_parse_error,
+    ..,
   } = state
   let get_midi_bytes = fn() {
     let text = "chords: " +
@@ -76,6 +82,7 @@ pub fn render(state : AppState) -> Unit {
       comping_sounds(),
       bass_sounds(),
       drum_sounds(),
+      recorded_sounds_visual(),
       bpm.get(),
       time_signature=time_signature.get(),
       key_signature=key.get(),
@@ -204,6 +211,7 @@ pub fn render(state : AppState) -> Unit {
               @piano_roll.note_display(
                 sounds,
                 comping_sounds,
+                recorded_sounds_visual,
                 measures,
                 playback_position,
                 bpm,
@@ -216,6 +224,7 @@ pub fn render(state : AppState) -> Unit {
               @piano_roll.keyboard(
                 sounds,
                 comping_sounds,
+                recorded_sounds_visual,
                 measures,
                 bpm,
                 playback_position,
@@ -237,7 +246,8 @@ pub fn render(state : AppState) -> Unit {
             [
               settings_panel(
                 jazz_style, show_technique_hints, midi_active_notes, get_midi_bytes,
-                on_import, imported_midi,
+                on_import, imported_midi, is_recording, recorded_lines, on_note_on,
+                on_note_off,
               ),
             ],
           ),

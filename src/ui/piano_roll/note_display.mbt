@@ -3,6 +3,7 @@
 pub fn note_display(
   sounds : () -> Array[@music.ScheduledSound],
   comping_sounds : () -> Array[@music.ScheduledSound],
+  recorded_sounds : () -> Array[@music.ScheduledSound],
   measures : () -> Array[@music.Measure],
   playback_position : @signals.Signal[@music.Duration],
   bpm : @signals.Signal[Int],
@@ -47,6 +48,22 @@ pub fn note_display(
     })
   })
 
+  // Pre-calculate recorded note positions
+  let recorded_positions = @signals.memo(fn() {
+    recorded_sounds().filter_map(fn(sound) {
+      match sound.sound_event {
+        Note(midi=midi_val, ..) =>
+          Some({
+            midi: midi_val.value,
+            start_ms: sound.start_time.to_milliseconds(),
+            duration_ms: sound.duration.to_milliseconds(),
+            tone_origin: sound.tone_origin,
+          })
+        Rest(..) => None
+      }
+    })
+  })
+
   // Pre-calculate scale bands from chord progression
   let scale_bands = @signals.memo(fn() {
     compute_scale_bands(measures(), bpm.get())
@@ -71,6 +88,7 @@ pub fn note_display(
       height,
       note_positions(),
       backing_positions(),
+      recorded_positions(),
       scale_bands(),
       chord_labels(),
       playback_position.get().to_milliseconds(),

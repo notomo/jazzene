@@ -9,6 +9,7 @@ pub(all) enum ToneOrigin {
   Enclosure // Enclosure pattern (surrounding a chord tone from above and below)
   PassingTone // Passing tone (connecting scale tone)
   Imported // Note imported from a MIDI file
+  Recorded // Note captured from live MIDI input recording
 } derive(Eq, Show)
 
 ///|
@@ -21,5 +22,6 @@ pub fn ToneOrigin::intensity(self : ToneOrigin) -> Double {
     Tension(_) | Imported => 0.85
     ChromaticApproach | Enclosure => 0.75
     NeighborTone | PassingTone => 0.70
+    Recorded => 0.9
   }
 }

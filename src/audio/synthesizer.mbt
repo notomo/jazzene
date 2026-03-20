@@ -47,6 +47,7 @@ pub impl @music.AudioOutput for Synthesizer with schedule_sounds(
     comping_sounds=scheduled.comping,
     bass_sounds=scheduled.bass,
     drum_sounds=scheduled.drum,
+    recorded_sounds=scheduled.recorded,
   )
 }
 
@@ -58,9 +59,11 @@ pub fn Synthesizer::schedule_sounds(
   comping_sounds? : Array[@music.AudioSound] = [],
   bass_sounds? : Array[@music.AudioSound] = [],
   drum_sounds? : Array[@music.AudioSound] = [],
+  recorded_sounds? : Array[@music.AudioSound] = [],
 ) -> Unit {
   self.piano.schedule_notes(piano_sounds, 1.0)
   self.piano.schedule_notes(comping_sounds, 0.5)
   self.bass.schedule_notes(bass_sounds, 1.0)
   self.drum.schedule_notes(drum_sounds, 1.0)
+  self.piano.schedule_notes(recorded_sounds, 1.0)
 }

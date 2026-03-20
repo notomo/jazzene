@@ -1,4 +1,11 @@
 ///|
+pub struct RecordedLine {
+  id : Int
+  sounds : Array[@music.ScheduledSound]
+  mode : @signals.Signal[@music.MelodyMode]
+}
+
+///|
 pub struct AppState {
   bpm : @signals.Signal[Int]
   raw_chord_progression : @signals.Signal[String]
@@ -16,11 +23,17 @@ pub struct AppState {
   is_playing : @signals.Signal[Bool]
   midi_active_notes : @signals.Signal[Array[@music.MidiNumber]]
   imported_midi : @signals.Signal[@midi.ImportedMidi?]
+  is_recording : @signals.Signal[Bool]
+  recorded_lines : @signals.Signal[Array[RecordedLine]]
+  on_note_on : (@music.MidiNumber) -> Unit
+  on_note_off : (@music.MidiNumber) -> Unit
   measures : () -> Array[@music.Measure]
   sounds : () -> Array[@music.ScheduledSound]
   drum_sounds : () -> Array[@music.ScheduledSound]
   comping_sounds : () -> Array[@music.ScheduledSound]
   bass_sounds : () -> Array[@music.ScheduledSound]
+  recorded_sounds : () -> Array[@music.ScheduledSound]
+  recorded_sounds_visual : () -> Array[@music.ScheduledSound]
   total_duration : () -> @music.Duration
   chord_parse_error : () -> String?
 }
@@ -145,6 +158,86 @@ pub fn AppState::new() -> AppState {
     )
   })
 
+  // Recording state
+  let is_recording : @signals.Signal[Bool] = @signals.signal(false)
+  let recorded_lines : @signals.Signal[Array[RecordedLine]] = @signals.signal([])
+  let next_line_id : Ref[Int] = { val: 0 }
+  // Per-note start times indexed by MIDI note value (0-127); None = not active
+  let recording_note_starts : Ref[Array[@music.Duration?]] = {
+    val: Array::make(128, None),
+  }
+  let recording_buffer : Ref[Array[@music.ScheduledSound]] = { val: [] }
+  let on_note_on : (@music.MidiNumber) -> Unit = fn(midi) {
+    if not(is_recording.peek()) {
+      return
+    }
+    recording_note_starts.val[midi.value] = Some(playback_position.peek())
+  }
+  let on_note_off : (@music.MidiNumber) -> Unit = fn(midi) {
+    if not(is_recording.peek()) {
+      return
+    }
+    match recording_note_starts.val[midi.value] {
+      None => ()
+      Some(start) => {
+        recording_note_starts.val[midi.value] = None
+        let dur = playback_position.peek() - start
+        if dur.to_milliseconds() <= 0.0 {
+          return
+        }
+        let beat_dur = @music.NoteDuration::from_beats(
+          dur.to_milliseconds() / @music.ms_per_beat(bpm.peek()),
+        )
+        let sound = @music.ScheduledSound::{
+          sound_event: @music.Note(midi~, duration=beat_dur),
+          duration: dur,
+          start_time: start,
+          tone_origin: Some(@music.ToneOrigin::Recorded),
+          beat_position: 0.0,
+        }
+        recording_buffer.val.push(sound)
+      }
+    }
+  }
+  // When recording stops, commit the buffer as a new RecordedLine
+  let _ = @signals.effect(fn() {
+    if not(is_recording.get()) {
+      let sounds = recording_buffer.val
+      if not(sounds.is_empty()) {
+        let id = next_line_id.val
+        next_line_id.val = id + 1
+        recorded_lines.update(fn(lines) {
+          let new_lines = lines.copy()
+          new_lines.push(RecordedLine::{
+            id,
+            sounds,
+            mode: @signals.signal(@music.On),
+          })
+          new_lines
+        })
+      }
+      recording_buffer.val = []
+      recording_note_starts.val = Array::make(128, None)
+    }
+  })
+  let recorded_sounds : () -> Array[@music.ScheduledSound] = @signals.memo(fn() {
+    recorded_lines
+    .get()
+    .iter()
+    .filter(fn(line) { line.mode.get() == @music.On })
+    .flat_map(fn(line) { line.sounds.iter() })
+    .collect()
+  })
+  let recorded_sounds_visual : () -> Array[@music.ScheduledSound] = @signals.memo(fn() {
+      recorded_lines
+      .get()
+      .iter()
+      .filter(fn(line) { line.mode.get() != @music.Off })
+      .flat_map(fn(line) { line.sounds.iter() })
+      .collect()
+    },
+  )
+
   // When chords are entered, switch any Imported accompaniment style to generated
   // and clear imported MIDI so melody also falls back to generated
   let _ = @signals.effect(fn() {
@@ -222,11 +315,17 @@ pub fn AppState::new() -> AppState {
     is_playing,
     midi_active_notes,
     imported_midi,
+    is_recording,
+    recorded_lines,
+    on_note_on,
+    on_note_off,
     measures,
     sounds,
     drum_sounds,
     comping_sounds,
     bass_sounds,
+    recorded_sounds,
+    recorded_sounds_visual,
     total_duration,
     chord_parse_error,
   }

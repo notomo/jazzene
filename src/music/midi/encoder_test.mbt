@@ -61,18 +61,18 @@ test "write_vlq: values 16383 and 16384" {
 }
 
 ///|
-test "encode_to_midi: header bytes match SMF spec with 5 tracks" {
-  let midi = encode_to_midi([], [], [], [], 120)
-  // Header: MThd + length=6 + format=1 (Parallel) + 5 tracks + 480 ticks
+test "encode_to_midi: header bytes match SMF spec with 6 tracks" {
+  let midi = encode_to_midi([], [], [], [], [], 120)
+  // Header: MThd + length=6 + format=1 (Parallel) + 6 tracks + 480 ticks
   let header = midi.iter().take(14).collect()
-  inspect(header, content="[77, 84, 104, 100, 0, 0, 0, 6, 0, 1, 0, 5, 1, 224]")
+  inspect(header, content="[77, 84, 104, 100, 0, 0, 0, 6, 0, 1, 0, 6, 1, 224]")
   // 0x4D=77, 0x54=84, 0x68=104, 0x64=100
-  // format=1 (Parallel), 5 tracks, 0x01E0=480 ticks
+  // format=1 (Parallel), 6 tracks, 0x01E0=480 ticks
 }
 
 ///|
 test "encode_to_midi: tempo event correct for 120 BPM" {
-  let midi = encode_to_midi([], [], [], [], 120)
+  let midi = encode_to_midi([], [], [], [], [], 120)
   // Meta track chunk starts at byte 14 (after MThd header)
   // MTrk header is 8 bytes (4 id + 4 length)
   // Tempo event starts at byte 22: delta=0, FF 51 03, then 3 bytes
@@ -89,7 +89,7 @@ test "encode_to_midi: single note produces Note On and Note Off" {
   // Meta data = tempo(7)+time_signature(8)+key_sig(6)+EOT(4) = 25; chunk = 8+25 = 33
   // Melody data: PC[0,192,0] + CC7[0,176,7,100] + NoteOn + NoteOff + EOT
   let sound = make_note_sound(60, 0.0, 0.5)
-  let midi = encode_to_midi([sound], [], [], [], 120)
+  let midi = encode_to_midi([sound], [], [], [], [], 120)
   let events = midi.iter().drop(55).take(20).collect()
   inspect(
     events,
@@ -101,15 +101,15 @@ test "encode_to_midi: single note produces Note On and Note Off" {
 ///|
 test "encode_to_midi: rest sounds are excluded" {
   let rest = make_rest_sound(0.0, 0.5)
-  let midi_with_rest = encode_to_midi([rest], [], [], [], 120)
-  let midi_empty = encode_to_midi([], [], [], [], 120)
+  let midi_with_rest = encode_to_midi([rest], [], [], [], [], 120)
+  let midi_empty = encode_to_midi([], [], [], [], [], 120)
   // Both should have the same length (rest produces no note events)
   inspect(midi_with_rest.length() == midi_empty.length(), content="true")
 }
 
 ///|
 test "encode_to_midi: end of track marker present" {
-  let midi = encode_to_midi([], [], [], [], 120)
+  let midi = encode_to_midi([], [], [], [], [], 120)
   let n = midi.length()
   // Last 4 bytes: VLQ(0)=0x00, 0xFF, 0x2F, 0x00
   let eot = midi.iter().drop(n - 4).collect()
@@ -123,7 +123,7 @@ test "encode_to_midi: multiple notes ordered by start time" {
   // tone_origin=None → velocity=76 (0.85*90) for both
   let c4 = make_note_sound(60, 0.0, 0.5)
   let e4 = make_note_sound(64, 0.5, 0.5)
-  let midi = encode_to_midi([c4, e4], [], [], [], 120)
+  let midi = encode_to_midi([c4, e4], [], [], [], [], 120)
   let events = midi.iter().drop(55).take(29).collect()
   inspect(
     events,
@@ -139,7 +139,7 @@ test "encode_to_midi: bass track has Program Change ch2 prog32 and CC7" {
   // comping_chunk = 8+11 = 19
   // bass MTrk header at 85, data at 93
   // bass data: PC[0,194,32] + CC7[0,178,7,70] + EOT[0,255,47,0]
-  let midi = encode_to_midi([], [], [], [], 120)
+  let midi = encode_to_midi([], [], [], [], [], 120)
   let bass_data = midi.iter().drop(93).take(11).collect()
   inspect(bass_data, content="[0, 194, 32, 0, 178, 7, 70, 0, 255, 47, 0]")
   // 0xC2=194, 32=prog32; 0xB2=178, CC7=7, vol=70
@@ -153,8 +153,8 @@ test "encode_to_midi: drum track uses channel 9 for Note On" {
   // drum MTrk header at 104, data at 112
   // drum data: CC7[0,185,7,25] + NoteOn[0,153,36,85] + NoteOff[131,96,137,36,0] + EOT
   let kick = make_note_sound(36, 0.0, 0.5)
-  let midi = encode_to_midi([], [], [], [kick], 120)
-  let drum_data = midi.iter().drop(112).collect()
+  let midi = encode_to_midi([], [], [], [kick], [], 120)
+  let drum_data = midi.iter().drop(112).take(17).collect()
   inspect(
     drum_data,
     content="[0, 185, 7, 25, 0, 153, 36, 85, 131, 96, 137, 36, 0, 0, 255, 47, 0]",

@@ -18,6 +18,7 @@ fn main {
     comping_sounds=state.comping_sounds,
     bass_sounds=state.bass_sounds,
     drum_sounds=state.drum_sounds,
+    recorded_sounds=state.recorded_sounds,
   )
 
   let _ = @signals.effect(fn() {
