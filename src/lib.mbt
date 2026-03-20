@@ -1,6 +1,7 @@
 ///|
 /// Jazzene - Jazz Improvisation Web App (Tick-based Architecture)
 fn main {
+  @ui.setup_error_overlay()
   let state = @ui.AppState::new()
   let synthesizer = @audio.Synthesizer::new()
   let tick = @music.make_tick(

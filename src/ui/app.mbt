@@ -1,4 +1,94 @@
 ///|
+/// Setup global error overlay for browsers without DevTools.
+/// Catches window "error" and "unhandledrejection" events and renders
+/// a fixed overlay so errors are visible on screen.
+pub fn setup_error_overlay() -> Unit {
+  let container : Ref[@js.Any?] = { val: None }
+  let show_error = fn(msg : String) {
+    match container.val {
+      None => {
+        let overlay = @js_dom.document().create_element("div")
+        let style = @js_dom.css_style_from_val(overlay.as_any()._get("style"))
+        style.set_property("position", "fixed")
+        style.set_property("top", "0")
+        style.set_property("left", "0")
+        style.set_property("width", "100%")
+        style.set_property("height", "100%")
+        style.set_property("background", "rgba(0,0,0,0.92)")
+        style.set_property("color", "#ff5555")
+        style.set_property("font-family", "monospace")
+        style.set_property("font-size", "14px")
+        style.set_property("padding", "16px")
+        style.set_property("box-sizing", "border-box")
+        style.set_property("white-space", "pre-wrap")
+        style.set_property("word-break", "break-all")
+        style.set_property("z-index", "9999")
+        style.set_property("overflow", "auto")
+        overlay.as_any()._set("textContent", @js.any("ERROR:\n" + msg))
+        @js_dom.document()
+        .as_any()
+        ._get("body")
+        ._call("appendChild", [overlay.as_any()])
+        |> ignore
+        container.val = Some(overlay.as_any())
+      }
+      Some(c) => {
+        let current : String = c._get("textContent").cast()
+        c._set("textContent", @js.any(current + "\n\n" + msg))
+      }
+    }
+  }
+  let win = @js_dom.window()
+  win
+  .as_event_target()
+  .addEventListener("error", fn(ev) {
+    let error = ev._get("error")
+    let detail = if not(@js.is_nullish(error)) {
+      let msg : String = error._get("message").cast()
+      let stack = error._get("stack")
+      if @js.is_nullish(stack) {
+        msg
+      } else {
+        msg + "\n" + (stack.cast() : String)
+      }
+    } else {
+      let msg : String = ev._get("message").cast()
+      let filename : String = ev._get("filename").cast()
+      let lineno : Int = ev._get("lineno").cast()
+      if filename == "" {
+        msg
+      } else {
+        msg + "\n  at " + filename + ":" + lineno.to_string()
+      }
+    }
+    show_error(detail)
+  })
+  win
+  .as_event_target()
+  .addEventListener("unhandledrejection", fn(ev) {
+    let reason = ev._get("reason")
+    let detail = if @js.is_nullish(reason) {
+      "Unhandled Promise Rejection"
+    } else {
+      let m = reason._get("message")
+      let msg_part = if @js.is_nullish(m) {
+        (reason.cast() : String)
+      } else {
+        (m.cast() : String)
+      }
+      let prefix = "Unhandled Promise Rejection: " + msg_part
+      let stack = reason._get("stack")
+      if @js.is_nullish(stack) {
+        prefix
+      } else {
+        prefix + "\n" + (stack.cast() : String)
+      }
+    }
+    show_error(detail)
+  })
+}
+
+///|
 /// Setup animation loop
 pub fn setup_loop(
   is_playing : @signals.Signal[Bool],
