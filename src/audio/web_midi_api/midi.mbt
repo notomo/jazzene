@@ -1,18 +1,51 @@
 ///|
-/// [MIDIAccess](https://developer.mozilla.org/en-US/docs/Web/API/MIDIAccess)
-#external
-pub type MidiAccess
-
-///|
-pub fn MidiAccess::as_any(self : MidiAccess) -> @js.Any = "%identity"
+/// [MIDIMessageEvent](https://developer.mozilla.org/en-US/docs/Web/API/MIDIMessageEvent)
+pub struct MidiMessageEvent {
+  data : Bytes
+}
 
 ///|
 /// [MIDIInput](https://developer.mozilla.org/en-US/docs/Web/API/MIDIInput)
-#external
-pub type MidiInput
+pub struct MidiInput {
+  id : String
+  name : String
+  priv raw : @js.Any
+}
 
 ///|
-pub fn MidiInput::as_any(self : MidiInput) -> @js.Any = "%identity"
+/// [MIDIInputMap](https://developer.mozilla.org/en-US/docs/Web/API/MIDIInputMap)
+pub type MidiInputMap = @sorted_map.SortedMap[String, MidiInput]
+
+///|
+/// [MIDIAccess](https://developer.mozilla.org/en-US/docs/Web/API/MIDIAccess)
+pub struct MidiAccess {
+  inputs : MidiInputMap
+  sysex_enabled : Bool
+}
+
+///|
+fn make_midi_input(raw : @js.Any) -> MidiInput {
+  { id: raw._get("id").cast(), name: raw._get("name").cast(), raw }
+}
+
+///|
+fn make_midi_input_map(access_any : @js.Any) -> MidiInputMap {
+  let raws = ffi_collect_inputs(access_any)
+  @sorted_map.from_array(
+    raws.map(fn(raw) {
+      let input = make_midi_input(raw)
+      (input.id, input)
+    }),
+  )
+}
+
+///|
+fn make_midi_access(raw : @js.Any) -> MidiAccess {
+  {
+    inputs: make_midi_input_map(raw),
+    sysex_enabled: raw._get("sysexEnabled").cast(),
+  }
+}
 
 ///|
 /// Check if the browser supports the Web MIDI API.
@@ -30,39 +63,20 @@ extern "js" fn ffi_is_midi_supported() -> Bool =
 ///|
 /// [Navigator.requestMIDIAccess()](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/requestMIDIAccess)
 ///
-/// Request access to MIDI devices. Calls `on_success` with a `MidiAccess` on
-/// success, or `on_failure` if permission is denied or an error occurs.
-pub fn request_midi_access(
-  on_success : (MidiAccess) -> Unit,
-  on_failure : () -> Unit,
-) -> Unit {
-  ffi_request_midi_access(on_success, on_failure)
+/// Request access to MIDI devices.
+pub async fn request_midi_access() -> MidiAccess {
+  let raw = ffi_request_midi_access().wait()
+  make_midi_access(raw)
 }
 
 ///|
-extern "js" fn ffi_request_midi_access(
-  on_success : (MidiAccess) -> Unit,
-  on_failure : () -> Unit,
-) -> Unit =
-  #| async (onSuccess, onFailure) => {
-  #|   try {
-  #|     const access = await navigator.requestMIDIAccess()
-  #|     onSuccess(access)
-  #|   } catch (e) {
-  #|     onFailure()
-  #|   }
-  #| }
+extern "js" fn ffi_request_midi_access() -> @js.Promise[@js.Any] =
+  #| () => navigator.requestMIDIAccess()
 
 ///|
-/// [MIDIAccess.inputs](https://developer.mozilla.org/en-US/docs/Web/API/MIDIAccess/inputs)
-///
-/// Get all available MIDI input devices.
-pub fn MidiAccess::list_inputs(self : MidiAccess) -> Array[MidiInput] {
-  ffi_list_inputs(self.as_any())
-}
-
-///|
-extern "js" fn ffi_list_inputs(access : @js.Any) -> Array[MidiInput] =
+// Note: Array.from() is intentionally avoided here — it is not supported
+// in some Web MIDI browser environments (e.g. Web MIDI Browser on iOS).
+extern "js" fn ffi_collect_inputs(access : @js.Any) -> Array[@js.Any] =
   #| (access) => {
   #|   const inputs = []
   #|   access.inputs.forEach(input => inputs.push(input))
@@ -70,81 +84,46 @@ extern "js" fn ffi_list_inputs(access : @js.Any) -> Array[MidiInput] =
   #| }
 
 ///|
-/// [MIDIPort.id](https://developer.mozilla.org/en-US/docs/Web/API/MIDIPort/id)
-///
-/// Get the unique identifier of the MIDI input.
-pub fn MidiInput::id(self : MidiInput) -> String {
-  self.as_any()._get("id").cast()
-}
-
-///|
-/// [MIDIPort.name](https://developer.mozilla.org/en-US/docs/Web/API/MIDIPort/name)
-///
-/// Get the name of the MIDI input device.
-pub fn MidiInput::name(self : MidiInput) -> String {
-  self.as_any()._get("name").cast()
-}
-
-///|
 /// [MIDIInput: midimessage event](https://developer.mozilla.org/en-US/docs/Web/API/MIDIInput/midimessage_event)
 ///
-/// Set the message handler for this MIDI input. The handler receives
-/// `(status, note, velocity)` from the MIDI message data bytes.
+/// Set the message handler for this MIDI input.
 pub fn MidiInput::set_on_midi_message(
   self : MidiInput,
-  handler : (Int, Int, Int) -> Unit,
+  handler : (MidiMessageEvent) -> Unit,
 ) -> Unit {
-  ffi_set_on_midi_message(self.as_any(), handler)
+  ffi_set_on_midi_message(self.raw, fn(event_any) {
+    let data : Bytes = event_any._get("data").cast()
+    handler({ data, })
+  })
 }
 
 ///|
 extern "js" fn ffi_set_on_midi_message(
   input : @js.Any,
-  handler : (Int, Int, Int) -> Unit,
+  handler : (@js.Any) -> Unit,
 ) -> Unit =
-  #| (input, handler) => {
-  #|   input.onmidimessage = (event) => {
-  #|     const data = event.data;
-  #|     handler(data[0] !== undefined ? data[0] : 0, data[1] !== undefined ? data[1] : 0, data[2] !== undefined ? data[2] : 0);
-  #|   };
-  #| }
+  #| (input, handler) => { input.onmidimessage = (event) => handler(event) }
 
 ///|
 /// Clear the message handler for this MIDI input.
 ///
 /// See [MIDIInput: midimessage event](https://developer.mozilla.org/en-US/docs/Web/API/MIDIInput/midimessage_event)
 pub fn MidiInput::clear_on_midi_message(self : MidiInput) -> Unit {
-  ffi_clear_on_midi_message(self.as_any())
+  ffi_clear_on_midi_message(self.raw)
 }
 
 ///|
 extern "js" fn ffi_clear_on_midi_message(input : @js.Any) -> Unit =
-  #| (input) => { input.onmidimessage = null; }
+  #| (input) => { input.onmidimessage = null }
 
 ///|
 /// [MIDIPort.open()](https://developer.mozilla.org/en-US/docs/Web/API/MIDIPort/open)
 ///
 /// Explicitly open this MIDI input port.
-/// Calls `on_success` when opened, or `on_error` with an error message on failure.
-pub fn MidiInput::open(
-  self : MidiInput,
-  on_success : () -> Unit,
-  on_error : (String) -> Unit,
-) -> Unit {
-  ffi_open_midi_input(self.as_any(), on_success, on_error)
+pub async fn MidiInput::open(self : MidiInput) -> Unit {
+  ignore(ffi_open_midi_input(self.raw).wait())
 }
 
 ///|
-extern "js" fn ffi_open_midi_input(
-  input : @js.Any,
-  on_success : () -> Unit,
-  on_error : (String) -> Unit,
-) -> Unit =
-  #| async (input, onSuccess, onError) => {
-  #|   try {
-  #|     await input.open();
-  #|     onSuccess();
-  #|   } catch (e) {
-  #|     onError(String(e));
-  #|   }
-  #| }
+extern "js" fn ffi_open_midi_input(input : @js.Any) -> @js.Promise[@js.Any] =
+  #| (input) => input.open()

@@ -1,5 +1,6 @@
 import {
   "mizchi/js/core" @js,
+  "moonbitlang/core/immut/sorted_map",
 }
 
 options(

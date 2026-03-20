@@ -31,7 +31,11 @@ pub fn midi_device_select(
     )
     let selected_id : @signals.Signal[String] = @signals.signal("")
     let refresh_count : @signals.Signal[Int] = @signals.signal(0)
-    let on_message = fn(status : Int, note : Int, velocity : Int) {
+    let on_message = fn(event : @web_midi.MidiMessageEvent) {
+      let data = event.data
+      let status = if data.length() > 0 { data[0].to_int() } else { 0 }
+      let note = if data.length() > 1 { data[1].to_int() } else { 0 }
+      let velocity = if data.length() > 2 { data[2].to_int() } else { 0 }
       let high_nibble = status / 16
       match @music.MidiNumber::new(note) {
         Some(midi) =>
@@ -60,35 +64,36 @@ pub fn midi_device_select(
       }
     }
     let attach_handler = fn(input : @web_midi.MidiInput) {
-      @web_midi.MidiInput::open(
-        input,
-        fn() { @web_midi.MidiInput::set_on_midi_message(input, on_message) },
-        fn(_) { () },
+      ignore(
+        @js.from_async(async fn() {
+          @web_midi.MidiInput::open(input) catch {
+            _ => return
+          }
+          @web_midi.MidiInput::set_on_midi_message(input, on_message)
+        }),
       )
     }
     let do_request = fn() {
-      @web_midi.request_midi_access(
-        fn(access) {
-          let inputs = @web_midi.MidiAccess::list_inputs(access)
+      ignore(
+        @js.from_async(async fn() {
+          let access = @web_midi.request_midi_access() catch { _ => return }
+          let inputs = access.inputs.values().to_array()
           available_inputs.set(inputs)
           let current_id = selected_id.get()
           let still_available = current_id != "" &&
-            inputs
-            .iter()
-            .any(fn(input) { @web_midi.MidiInput::id(input) == current_id })
+            inputs.iter().any(fn(input) { input.id == current_id })
           if still_available {
             inputs
             .iter()
-            .filter(fn(input) { @web_midi.MidiInput::id(input) == current_id })
+            .filter(fn(input) { input.id == current_id })
             .each(fn(input) { attach_handler(input) })
           } else if inputs.length() > 0 {
             let first = inputs[0]
-            selected_id.set(@web_midi.MidiInput::id(first))
+            selected_id.set(first.id)
             attach_handler(first)
           }
           refresh_count.update(fn(n) { n + 1 })
-        },
-        fn() { () },
+        }),
       )
     }
     do_request()
@@ -132,9 +137,7 @@ pub fn midi_device_select(
                 if prev_id != "" {
                   inputs
                   .iter()
-                  .filter(fn(input) {
-                    @web_midi.MidiInput::id(input) == prev_id
-                  })
+                  .filter(fn(input) { input.id == prev_id })
                   .each(fn(input) {
                     @web_midi.MidiInput::clear_on_midi_message(input)
                   })
@@ -142,7 +145,7 @@ pub fn midi_device_select(
                 midi_active_notes.set([])
                 if idx >= 0 && idx < inputs.length() {
                   let new_input = inputs[idx]
-                  selected_id.set(@web_midi.MidiInput::id(new_input))
+                  selected_id.set(new_input.id)
                   attach_handler(new_input)
                 }
               }),
@@ -160,11 +163,10 @@ pub fn midi_device_select(
               [@luna_dom.text("Input device")],
             ),
             @luna_dom.for_each(fn() { available_inputs.get() }, fn(input, _i) {
-              let id = @web_midi.MidiInput::id(input)
               @luna_dom.create_element(
                 "option",
-                [("value", @luna_dom.AttrValue::Static(id))],
-                [@luna_dom.text(@web_midi.MidiInput::name(input))],
+                [("value", @luna_dom.AttrValue::Static(input.id))],
+                [@luna_dom.text(input.name)],
               )
             }),
           ],
