@@ -33,11 +33,13 @@ pub fn[T : AudioOutput] make_tick(
   bass_sounds~ : () -> Array[ScheduledSound],
   drum_sounds~ : () -> Array[ScheduledSound],
   recorded_sounds~ : () -> Array[ScheduledSound],
+  on_loop_restart? : () -> Unit = fn() { () },
 ) -> (Double) -> Bool {
   let lookahead = Duration::from_milliseconds(100)
   fn(elapsed_ms : Double) -> Bool {
+    let current = playback_position()
     let final_position = advance_playback_position(
-      playback_position(),
+      current,
       elapsed_ms,
       total_duration(),
       bpm(),
@@ -45,6 +47,9 @@ pub fn[T : AudioOutput] make_tick(
       loop_a_measure(),
       loop_b_measure(),
     )
+    if final_position.to_milliseconds() < current.to_milliseconds() - 1.0 {
+      on_loop_restart()
+    }
     let style = jazz_style()
     let ts = time_signature()
     let piano = match style.melody_mode {

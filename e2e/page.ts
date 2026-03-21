@@ -111,6 +111,10 @@ export async function openPage({
     getRecordedLine: (n: number) => page.getByText(`● Rec ${n}`),
     getDeleteRecordedLineButton: () =>
       page.getByRole("button", { name: "delete recorded line" }),
+
+    getPracticeCurrentScore: () =>
+      page.getByLabel("practice current score"),
+    getPracticeBestScore: () => page.getByLabel("practice best score"),
   };
 
   return jazzenePage;

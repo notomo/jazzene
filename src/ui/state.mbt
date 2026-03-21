@@ -25,8 +25,12 @@ pub struct AppState {
   imported_midi : @signals.Signal[@midi.ImportedMidi?]
   is_recording : @signals.Signal[Bool]
   recorded_lines : @signals.Signal[Array[RecordedLine]]
+  practice_score : @signals.Signal[Double]
+  practice_best_score : @signals.Signal[Double]
+  practice_max_score : () -> Int
   on_note_on : (@music.MidiNumber) -> Unit
   on_note_off : (@music.MidiNumber) -> Unit
+  on_loop_restart : () -> Unit
   measures : () -> Array[@music.Measure]
   sounds : () -> Array[@music.ScheduledSound]
   drum_sounds : () -> Array[@music.ScheduledSound]
@@ -167,37 +171,139 @@ pub fn AppState::new() -> AppState {
     val: Array::make(128, None),
   }
   let recording_buffer : Ref[Array[@music.ScheduledSound]] = { val: [] }
-  let on_note_on : (@music.MidiNumber) -> Unit = fn(midi) {
-    if not(is_recording.peek()) {
-      return
+
+  // Practice state
+  let practice_score : @signals.Signal[Double] = @signals.signal(0.0)
+  let practice_best_score : @signals.Signal[Double] = @signals.signal(0.0)
+  // Tracks press-matched target notes awaiting release check: (midi_value, target_sound)
+  let practice_matched : Ref[Array[(@music.MidiNumber, @music.ScheduledSound)]] = {
+    val: [],
+  }
+  let practice_tolerance_ms = 300.0
+  // Total number of target notes (melody + comping). Changes when song composition
+  // changes (chords, key, seed, etc.) but not when BPM changes (BPM only affects
+  // timing, not note count). Used as the denominator in score display.
+  let practice_max_score : () -> Int = @signals.memo(fn() {
+    let count_notes = fn(s_arr : Array[@music.ScheduledSound]) -> Int {
+      let mut n = 0
+      for i in 0..<s_arr.length() {
+        if s_arr[i].midi() is Some(_) {
+          n = n + 1
+        }
+      }
+      n
     }
-    recording_note_starts.val[midi.value] = Some(playback_position.peek())
+    count_notes(sounds()) + count_notes(comping_sounds())
+  })
+  // Reset scores whenever the song changes (practice_max_score changes)
+  let _ = @signals.effect(fn() {
+    let _ = practice_max_score()
+    practice_score.set(0.0)
+    practice_best_score.set(0.0)
+    practice_matched.val = []
+  })
+
+  let on_note_on : (@music.MidiNumber) -> Unit = fn(midi) {
+    if is_recording.peek() {
+      recording_note_starts.val[midi.value] = Some(playback_position.peek())
+    }
+    let pos_ms = playback_position.peek().to_milliseconds()
+    fn find_target(
+      s_arr : Array[@music.ScheduledSound],
+    ) -> @music.ScheduledSound? {
+      let mut result : @music.ScheduledSound? = None
+      for i in 0..<s_arr.length() {
+        let s = s_arr[i]
+        let is_midi_match = match s.midi() {
+          None => false
+          Some(m) => m.value == midi.value
+        }
+        if is_midi_match {
+          let diff = s.start_time.to_milliseconds() - pos_ms
+          if diff > -practice_tolerance_ms && diff < practice_tolerance_ms {
+            result = Some(s)
+            break
+          }
+        }
+      }
+      result
+    }
+
+    let target = match find_target(sounds()) {
+      Some(t) => Some(t)
+      None => find_target(comping_sounds())
+    }
+    match target {
+      Some(t) => practice_matched.val.push((midi, t))
+      None => ()
+    }
   }
   let on_note_off : (@music.MidiNumber) -> Unit = fn(midi) {
-    if not(is_recording.peek()) {
-      return
-    }
-    match recording_note_starts.val[midi.value] {
-      None => ()
-      Some(start) => {
-        recording_note_starts.val[midi.value] = None
-        let dur = playback_position.peek() - start
-        if dur.to_milliseconds() <= 0.0 {
-          return
+    if is_recording.peek() {
+      match recording_note_starts.val[midi.value] {
+        None => ()
+        Some(start) => {
+          recording_note_starts.val[midi.value] = None
+          let dur = playback_position.peek() - start
+          if dur.to_milliseconds() > 0.0 {
+            let beat_dur = @music.NoteDuration::from_beats(
+              dur.to_milliseconds() / @music.ms_per_beat(bpm.peek()),
+            )
+            let sound = @music.ScheduledSound::{
+              sound_event: @music.Note(midi~, duration=beat_dur),
+              duration: dur,
+              start_time: start,
+              tone_origin: Some(@music.ToneOrigin::Recorded),
+              beat_position: 0.0,
+            }
+            recording_buffer.val.push(sound)
+          }
         }
-        let beat_dur = @music.NoteDuration::from_beats(
-          dur.to_milliseconds() / @music.ms_per_beat(bpm.peek()),
-        )
-        let sound = @music.ScheduledSound::{
-          sound_event: @music.Note(midi~, duration=beat_dur),
-          duration: dur,
-          start_time: start,
-          tone_origin: Some(@music.ToneOrigin::Recorded),
-          beat_position: 0.0,
-        }
-        recording_buffer.val.push(sound)
       }
     }
+    let pos_ms = playback_position.peek().to_milliseconds()
+    let mut found_idx : Int? = None
+    for i in 0..<practice_matched.val.length() {
+      let (m, _) = practice_matched.val[i]
+      if m.value == midi.value {
+        found_idx = Some(i)
+        break
+      }
+    }
+    match found_idx {
+      None => ()
+      Some(idx) => {
+        let (_, target) = practice_matched.val[idx]
+        let new_matched : Array[(@music.MidiNumber, @music.ScheduledSound)] = []
+        for i in 0..<practice_matched.val.length() {
+          if i != idx {
+            new_matched.push(practice_matched.val[i])
+          }
+        }
+        practice_matched.val = new_matched
+        let expected_ms = (target.start_time + target.duration).to_milliseconds()
+        let diff = expected_ms - pos_ms
+        let release_score = if diff > -practice_tolerance_ms &&
+          diff < practice_tolerance_ms {
+          0.5
+        } else {
+          0.0
+        }
+        practice_score.update(fn(s) { s + 0.5 + release_score })
+      }
+    }
+  }
+  let on_loop_restart : () -> Unit = fn() {
+    let score = practice_score.peek()
+    practice_best_score.update(fn(best) {
+      if score > best {
+        score
+      } else {
+        best
+      }
+    })
+    practice_score.set(0.0)
+    practice_matched.val = []
   }
   // When recording stops, commit the buffer as a new RecordedLine
   let _ = @signals.effect(fn() {
@@ -317,8 +423,12 @@ pub fn AppState::new() -> AppState {
     imported_midi,
     is_recording,
     recorded_lines,
+    practice_score,
+    practice_best_score,
+    practice_max_score,
     on_note_on,
     on_note_off,
+    on_loop_restart,
     measures,
     sounds,
     drum_sounds,

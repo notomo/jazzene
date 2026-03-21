@@ -109,6 +109,9 @@ pub fn settings_panel(
   recorded_lines : @signals.Signal[Array[RecordedLine]],
   on_note_on : (@music.MidiNumber) -> Unit,
   on_note_off : (@music.MidiNumber) -> Unit,
+  practice_score : @signals.Signal[Double],
+  practice_best_score : @signals.Signal[Double],
+  practice_max_score : () -> Int,
 ) -> @luna_dom.DomNode {
   let midi_imported = fn() { imported_midi.get() is Some(_) }
   @luna_dom.div(
@@ -125,6 +128,7 @@ pub fn settings_panel(
           midi_export_button(get_midi_bytes),
         ]),
         midi_recording(is_recording, recorded_lines),
+        midi_practice(practice_score, practice_best_score, practice_max_score),
       ]),
       // Legend
       settings_section("Legend", [

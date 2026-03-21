@@ -20,6 +20,7 @@ fn main {
     bass_sounds=state.bass_sounds,
     drum_sounds=state.drum_sounds,
     recorded_sounds=state.recorded_sounds,
+    on_loop_restart=state.on_loop_restart,
   )
 
   let _ = @signals.effect(fn() {
