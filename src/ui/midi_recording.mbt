@@ -19,7 +19,7 @@ pub fn midi_recording(
     // Record toggle button
     @luna_dom.button(
       dyn_class=fn() {
-        let base = "flex items-center gap-1.5 w-full px-2 py-1 text-xs rounded border transition-colors"
+        let base = "flex items-center justify-center gap-1.5 w-full px-2 py-1 text-xs rounded border transition-colors"
         if is_recording.get() {
           base + " bg-cyan-900 border-cyan-500 text-cyan-300"
         } else {

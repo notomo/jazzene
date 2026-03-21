@@ -112,7 +112,7 @@ pub fn midi_device_select(
             (
               "class",
               @luna_dom.AttrValue::Static(
-                "flex-1 px-2 py-1 text-xs bg-slate-900 text-white rounded border border-slate-600 focus:border-blue-500 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed",
+                "flex-1 px-2 py-1 text-xs text-center bg-slate-900 text-white rounded border border-slate-600 focus:border-blue-500 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed",
               ),
             ),
             ("aria-label", @luna_dom.AttrValue::Static("MIDI input device")),
