@@ -8,7 +8,8 @@ pub struct RecordedLine {
 ///|
 pub struct AppState {
   bpm : @signals.Signal[Int]
-  raw_chord_progression : @signals.Signal[String]
+  degree_measures : @signals.Signal[Array[@music.DegreeMeasure]]
+  editing_chord : @signals.Signal[EditingChord?]
   seed : @signals.Signal[Int]
   measure_count : @signals.Signal[Int]
   key : @signals.Signal[@music.KeySignature]
@@ -39,13 +40,15 @@ pub struct AppState {
   recorded_sounds : () -> Array[@music.ScheduledSound]
   recorded_sounds_visual : () -> Array[@music.ScheduledSound]
   total_duration : () -> @music.Duration
-  chord_parse_error : () -> String?
 }
 
 ///|
 pub fn AppState::new() -> AppState {
   let bpm = @signals.signal(get_initial_bpm())
-  let raw_chord_progression = @signals.signal(get_initial_chords())
+  let degree_measures : @signals.Signal[Array[@music.DegreeMeasure]] = @signals.signal(
+    @music.parse_measure_progression(get_initial_chords()).unwrap_or([]),
+  )
+  let editing_chord : @signals.Signal[EditingChord?] = @signals.signal(None)
   let seed = @signals.signal(get_initial_seed())
   let measure_count = @signals.signal(get_initial_measures())
   let key = @signals.signal(get_initial_key())
@@ -68,23 +71,9 @@ pub fn AppState::new() -> AppState {
     None,
   )
 
-  let parsed_progression = @signals.memo(fn() {
-    @music.parse_measure_progression(raw_chord_progression.get())
-  })
   let measure_chords = @signals.memo(fn() {
-    match parsed_progression() {
-      Ok(degree_measures) => {
-        let key_root = key.get().root
-        degree_measures.map(fn(dm) { dm.resolve(key_root) })
-      }
-      Err(_) => []
-    }
-  })
-  let chord_parse_error : () -> String? = @signals.memo(fn() {
-    match parsed_progression() {
-      Ok(_) => None
-      Err(msg) => Some(msg)
-    }
+    let key_root = key.get().root
+    degree_measures.get().map(fn(dm) { dm.resolve(key_root) })
   })
 
   let full_measures : () -> Array[@music.Measure] = @signals.memo(fn() {
@@ -347,7 +336,7 @@ pub fn AppState::new() -> AppState {
   // When chords are entered, switch any Imported accompaniment style to generated
   // and clear imported MIDI so melody also falls back to generated
   let _ = @signals.effect(fn() {
-    if raw_chord_progression.get() != "" {
+    if not(degree_measures.get().is_empty()) {
       let style = jazz_style.peek()
       jazz_style.set(@music.JazzStyle::{
         ..style,
@@ -380,7 +369,7 @@ pub fn AppState::new() -> AppState {
     let volume_val = volume.get()
     let key_val = key.get()
     let ts_val = time_signature.get()
-    let chords_val = raw_chord_progression.get()
+    let chords_val = @music.serialize_measure_progression(degree_measures.get())
     let view_val = view_state.get()
     let jazz_val = jazz_style.get()
     let hints_val = show_technique_hints.get()
@@ -406,7 +395,8 @@ pub fn AppState::new() -> AppState {
 
   {
     bpm,
-    raw_chord_progression,
+    degree_measures,
+    editing_chord,
     seed,
     measure_count,
     key,
@@ -437,6 +427,5 @@ pub fn AppState::new() -> AppState {
     recorded_sounds,
     recorded_sounds_visual,
     total_duration,
-    chord_parse_error,
   }
 }

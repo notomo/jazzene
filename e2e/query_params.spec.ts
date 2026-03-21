@@ -22,7 +22,9 @@ test("should reflect query parameters in controls", async ({ page }) => {
   await expect(jazzene.getBpmInput()).toHaveText("140");
   await expect(jazzene.getSeedInput()).toHaveText("42");
   await expect(jazzene.getMeasuresInput()).toHaveText("16");
-  await expect(jazzene.getChordInput()).toHaveValue("IIIm7 | VIm7");
+  // IIIm7 in D = F#m7, VIm7 in D = Bm7
+  await expect(jazzene.getChordBadge("F#m7")).toBeVisible();
+  await expect(jazzene.getChordBadge("Bm7")).toBeVisible();
   await expect(jazzene.getLeadSheetContainer()).toBeVisible();
   await expect(jazzene.getFallingNotes()).not.toBeVisible();
   await expect(jazzene.getLoopAInput()).toHaveText("3");

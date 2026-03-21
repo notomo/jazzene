@@ -15,7 +15,7 @@ fn add_click_outside_listener(
 ///|
 /// Render song preset popup button that updates chord progression, key, BPM, measure count, and time signature
 fn song_preset_select(
-  raw_chord_progression : @signals.Signal[String],
+  degree_measures : @signals.Signal[Array[@music.DegreeMeasure]],
   key : @signals.Signal[@music.KeySignature],
   bpm : @signals.Signal[Int],
   measure_count : @signals.Signal[Int],
@@ -25,7 +25,9 @@ fn song_preset_select(
   let is_open = @signals.signal(false)
   let on_preset_select : (@music.SongPreset) -> Unit = fn(preset) {
     push_current_state()
-    raw_chord_progression.set(preset.chords)
+    degree_measures.set(
+      @music.parse_measure_progression(preset.chords).unwrap_or([]),
+    )
     match preset.key {
       None => ()
       Some(root) => key.set(@music.KeySignature::from_root(root))

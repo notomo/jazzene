@@ -133,7 +133,8 @@ pub fn setup_loop(
 pub fn render(state : AppState) -> Unit {
   let {
     bpm,
-    raw_chord_progression,
+    degree_measures,
+    editing_chord,
     seed,
     measure_count,
     key,
@@ -159,12 +160,20 @@ pub fn render(state : AppState) -> Unit {
     drum_sounds,
     recorded_sounds_visual,
     total_duration,
-    chord_parse_error,
     ..,
   } = state
+  let on_chord_click : (Int, Int) -> Unit = fn(mi, ci) {
+    let dm = degree_measures.peek()
+    guard not(dm.is_empty()) else { return }
+    // full_measures has a leading rest at index 0, so music measures start at 1
+    let degree_mi = (mi - 1 + dm.length()) % dm.length()
+    editing_chord.set(
+      Some(EditingChord::{ measure_idx: degree_mi, chord_idx: ci }),
+    )
+  }
   let get_midi_bytes = fn() {
     let text = "chords: " +
-      raw_chord_progression.get() +
+      @music.serialize_measure_progression(degree_measures.get()) +
       " seed: " +
       seed.get().to_string()
     @midi.encode_to_midi(
@@ -203,7 +212,7 @@ pub fn render(state : AppState) -> Unit {
           None => ()
         }
         playback_position.set(@music.Duration::from_milliseconds(0))
-        raw_chord_progression.set("")
+        degree_measures.set([])
         jazz_style.update(fn(style) {
           @music.JazzStyle::{
             ..style,
@@ -226,16 +235,14 @@ pub fn render(state : AppState) -> Unit {
         [
           @luna_dom.div(class="flex gap-2 lg:gap-4 items-center", [
             song_preset_select(
-              raw_chord_progression, key, bpm, measure_count, loop_b_measure, time_signature,
+              degree_measures, key, bpm, measure_count, loop_b_measure, time_signature,
             ),
             @luna_dom.div(
               class="flex gap-2 lg:gap-4 items-center min-w-0 flex-1",
               [
                 time_signature_select(time_signature),
                 key_select(key),
-                chord_progression_input(
-                  raw_chord_progression, chord_parse_error,
-                ),
+                chord_progression_display(degree_measures, key, editing_chord),
               ],
             ),
             @luna_dom.div(class="flex gap-2 lg:gap-4 items-center shrink-0", [
@@ -284,6 +291,7 @@ pub fn render(state : AppState) -> Unit {
                     loop_a_measure,
                     loop_b_measure,
                     fn() { show_technique_hints.get() },
+                    on_chord_click~,
                   ),
                 ],
               ),
@@ -310,6 +318,7 @@ pub fn render(state : AppState) -> Unit {
                 loop_a_measure,
                 loop_b_measure,
                 fn() { show_technique_hints.get() },
+                on_chord_click~,
               ),
               @piano_roll.keyboard(
                 sounds,
@@ -371,6 +380,7 @@ pub fn render(state : AppState) -> Unit {
           ),
         ],
       ),
+      chord_editor_dialog(editing_chord, degree_measures, key),
     ],
   )
 

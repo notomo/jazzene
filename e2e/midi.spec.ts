@@ -52,7 +52,7 @@ test("should clear chord progression after importing a MIDI file", async ({
   const jazzene = await openPage({ page, view: ["sheet", "pianoroll", "setting"] });
 
   // Default chord progression should be non-empty
-  await expect(jazzene.getChordInput()).not.toHaveValue("");
+  await expect(page.getByLabel(/^chord badge/)).not.toHaveCount(0);
 
   const [fileChooser] = await Promise.all([
     page.waitForEvent("filechooser"),
@@ -65,5 +65,5 @@ test("should clear chord progression after importing a MIDI file", async ({
     buffer: MINIMAL_MIDI_BYTES,
   });
 
-  await expect(jazzene.getChordInput()).toHaveValue("");
+  await expect(page.getByLabel(/^chord badge/)).toHaveCount(0);
 });

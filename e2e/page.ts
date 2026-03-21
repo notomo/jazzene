@@ -24,17 +24,16 @@ export async function openPage({
     getVisualization: () => page.getByLabel("visualization"),
     getFallingNotes: () => page.getByLabel("falling notes"),
 
-    getChordInput: () => page.getByPlaceholder(/Enter chord progression/),
+    getChordBadge: (label: string) =>
+      page.getByLabel(`chord badge ${label}`),
+    getChordEditorDialog: () => page.getByLabel("chord editor dialog"),
+    getAddChordButton: () => page.getByLabel("add chord"),
+    getDeleteChordButton: () =>
+      page.getByLabel("chord editor dialog").getByLabel("delete chord"),
 
     getPlayButton: () => page.getByRole("button", { name: "▶" }),
     getStopButton: () => page.getByRole("button", { name: "■" }),
     getPlayOrStopButton: () => page.getByRole("button", { name: /▶|■/ }),
-
-    setChordProgression: async (chords: string) => {
-      const input = jazzenePage.getChordInput();
-      await input.clear();
-      await input.fill(chords);
-    },
 
     play: async () => {
       const playButton = jazzenePage.getPlayButton();

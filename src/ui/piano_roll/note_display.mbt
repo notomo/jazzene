@@ -12,6 +12,7 @@ pub fn note_display(
   loop_a_measure : @signals.Signal[Int],
   loop_b_measure : @signals.Signal[Int],
   show_technique_hints : () -> Bool,
+  on_chord_click~ : (Int, Int) -> Unit,
 ) -> @luna_dom.DomNode {
   let { canvas, ctx } = create_canvas_context()
   let resize_trigger = create_resize_trigger(canvas)
@@ -99,9 +100,39 @@ pub fn note_display(
       show_technique_hints(),
     )
   })
+  let container_ref : Ref[@js_dom.Element?] = { val: None }
   @luna_dom.div(
     class="w-full flex-1 min-h-0 bg-slate-900",
     attrs=[("aria-label", @luna_dom.Attr::AttrString("falling notes"))],
+    ref_=fn(el) { container_ref.val = Some(el) },
+    on=@luna_dom.events().click(fn(e) {
+      match container_ref.val {
+        None => ()
+        Some(el) => {
+          let rect = el.as_any()._call("getBoundingClientRect", [])
+          let container_width : Double = rect._get("width").cast()
+          let container_height : Double = rect._get("height").cast()
+          let rect_top : Double = rect._get("top").cast()
+          let rect_left : Double = rect._get("left").cast()
+          let rel_x = e.clientX - rect_left
+          let rel_y = e.clientY - rect_top
+          let label_w = calc_label_width(container_width)
+          if rel_x > label_w {
+            return
+          }
+          let current_ms = playback_position.peek().to_milliseconds()
+          let percent = rel_y / container_height
+          let click_time = current_ms + (1.0 - percent) * NOTE_DISPLAY_WINDOW_MS
+          let labels = chord_labels()
+          for label in labels {
+            if click_time >= label.start_ms && click_time < label.end_ms {
+              on_chord_click(label.measure_idx, label.chord_idx)
+              break
+            }
+          }
+        }
+      }
+    }),
     [canvas_to_dom_node(canvas)],
   )
 }

@@ -11,6 +11,20 @@ pub(all) enum ScaleDegree {
 } derive(Eq, Show)
 
 ///|
+/// Convert scale degree to uppercase Roman numeral
+pub fn ScaleDegree::to_roman(self : ScaleDegree) -> String {
+  match self {
+    I => "I"
+    II => "II"
+    III => "III"
+    IV => "IV"
+    V => "V"
+    VI => "VI"
+    VII => "VII"
+  }
+}
+
+///|
 /// Semitone offset from the root for each scale degree in a major scale
 pub fn ScaleDegree::semitones(self : ScaleDegree) -> Int {
   match self {
@@ -177,6 +191,40 @@ pub fn DegreeMeasure::resolve(
   key_root : ChordRoot,
 ) -> Array[Chord] {
   self.chords.map(fn(dc) { dc.resolve(key_root) })
+}
+
+///|
+/// Serialize a degree chord back to its string representation (round-trips through parse_degree_chord)
+pub fn DegreeChord::to_string(self : DegreeChord) -> String {
+  let acc = match self.accidental {
+    -1 => "b"
+    1 => "#"
+    _ => ""
+  }
+  let bass_str = match self.bass {
+    None => ""
+    Some(b) => {
+      let b_acc = match b.accidental {
+        -1 => "b"
+        1 => "#"
+        _ => ""
+      }
+      "/" + b_acc + b.degree.to_roman()
+    }
+  }
+  acc + self.degree.to_roman() + self.quality.to_parse_string() + bass_str
+}
+
+///|
+/// Serialize a measure to space-separated chord strings
+pub fn DegreeMeasure::to_string(self : DegreeMeasure) -> String {
+  self.chords.map(fn(c) { c.to_string() }).join(" ")
+}
+
+///|
+/// Serialize all degree measures to a pipe-separated string
+pub fn serialize_measure_progression(measures : Array[DegreeMeasure]) -> String {
+  measures.map(fn(m) { m.to_string() }).join(" | ")
 }
 
 ///|

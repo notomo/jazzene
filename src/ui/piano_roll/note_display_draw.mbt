@@ -40,6 +40,8 @@ priv struct ChordLabel {
   start_ms : Double
   end_ms : Double
   chord : @music.Chord
+  measure_idx : Int
+  chord_idx : Int
 }
 
 ///|
@@ -49,9 +51,12 @@ fn compute_chord_labels(
   bpm : Int,
 ) -> Array[ChordLabel] {
   let beat_duration_ms = @music.ms_per_beat(bpm)
+  let mi_ref : Ref[Int] = { val: 0 }
   measures
   .iter()
   .flat_map(fn(measure) {
+    let mi = mi_ref.val
+    mi_ref.val = mi + 1
     let measure_start_ms = measure.start_time.to_milliseconds()
     let n_chords = measure.chords.length()
     if n_chords == 0 {
@@ -66,7 +71,13 @@ fn compute_chord_labels(
         i.to_double() * beats_per_chord * beat_duration_ms
       let chord_end_ms = measure_start_ms +
         (i + 1).to_double() * beats_per_chord * beat_duration_ms
-      ChordLabel::{ start_ms: chord_start_ms, end_ms: chord_end_ms, chord }
+      ChordLabel::{
+        start_ms: chord_start_ms,
+        end_ms: chord_end_ms,
+        chord,
+        measure_idx: mi,
+        chord_idx: i,
+      }
     })
   })
   .collect()

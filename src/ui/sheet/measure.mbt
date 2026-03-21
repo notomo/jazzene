@@ -136,6 +136,7 @@ fn render_measure(
   measure_width? : Double = @sheet_layout.MIN_MEASURE_WIDTH,
   is_outside_loop : () -> Bool,
   show_technique_hints : () -> Bool,
+  on_chord_click~ : (Int, Int) -> Unit,
 ) -> @luna_dom.DomNode {
   let (x, y) = @sheet_layout.measure_position(
     display_index,
@@ -152,7 +153,14 @@ fn render_measure(
       ..render_measure_clef(x, y, is_first_in_row, key),
       ..render_measure_key_signature(key, x, y, is_first_in_row),
       ..render_measure_time_signature(time_signature, x, y, is_first_measure),
-      ..render_chord_symbol(measure, x, y, measure_width~),
+      ..render_chord_symbol(
+        measure,
+        x,
+        y,
+        measure_width~,
+        measure_idx=display_index,
+        on_chord_click~,
+      ),
       ..render_measure_notes(
         measure,
         x,

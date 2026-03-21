@@ -257,6 +257,68 @@ test "resolve slash chord V7/II in C major" {
 }
 
 ///|
+test "DegreeChord to_string roundtrip IIm7" {
+  let dc = DegreeChord::{
+    accidental: 0,
+    degree: II,
+    quality: Minor7,
+    bass: None,
+  }
+  let s = dc.to_string()
+  assert_eq(s, "IIm7")
+  let parsed = @helper.unwrap_or_fail(parse_degree_chord(s))
+  assert_eq(parsed, dc)
+}
+
+///|
+test "DegreeChord to_string roundtrip bVIImaj7" {
+  let dc = DegreeChord::{
+    accidental: -1,
+    degree: VII,
+    quality: Major7,
+    bass: None,
+  }
+  let s = dc.to_string()
+  assert_eq(s, "bVIImaj7")
+  let parsed = @helper.unwrap_or_fail(parse_degree_chord(s))
+  assert_eq(parsed, dc)
+}
+
+///|
+test "DegreeChord to_string Major triad (empty quality)" {
+  let dc = DegreeChord::{ accidental: 0, degree: I, quality: Major, bass: None }
+  assert_eq(dc.to_string(), "I")
+}
+
+///|
+test "DegreeChord to_string with bass" {
+  let dc = DegreeChord::{
+    accidental: 0,
+    degree: V,
+    quality: Dominant7,
+    bass: Some(DegreeBass::{ accidental: 0, degree: II }),
+  }
+  assert_eq(dc.to_string(), "V7/II")
+}
+
+///|
+test "serialize_measure_progression" {
+  let measures = @helper.unwrap_or_fail(
+    parse_measure_progression("IIm7 V7 | Imaj7"),
+  )
+  let serialized = serialize_measure_progression(measures)
+  assert_eq(serialized, "IIm7 V7 | Imaj7")
+}
+
+///|
+test "serialize_measure_progression roundtrip" {
+  let original = "IIm7 | V7 | Imaj7 | IVmaj7"
+  let measures = @helper.unwrap_or_fail(parse_measure_progression(original))
+  let serialized = serialize_measure_progression(measures)
+  assert_eq(serialized, original)
+}
+
+///|
 test "parse measure progression with slash chord" {
   let measures = @helper.unwrap_or_fail(
     parse_measure_progression("IIm7 V7/II | Imaj7"),
