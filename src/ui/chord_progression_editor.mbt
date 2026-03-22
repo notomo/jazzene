@@ -134,7 +134,7 @@ fn delete_chord_at(
 
 ///|
 /// Chord progression display — shows badges for each chord in the header.
-/// Replaces the raw text input.
+/// No add buttons; always shows an Edit button. Truncates when long.
 pub fn chord_progression_display(
   degree_measures : @signals.Signal[Array[@music.DegreeMeasure]],
   key : @signals.Signal[@music.KeySignature],
@@ -145,120 +145,90 @@ pub fn chord_progression_display(
       class="hidden lg:inline text-sm text-slate-400 whitespace-nowrap",
       [@luna_dom.text("Chords:")],
     ),
-    @luna_dom.div(class="flex items-center gap-1 flex-wrap min-w-0 flex-1", [
-      @luna_dom.for_each(fn() { degree_measures.get() }, fn(measure, mi) {
-        let key_root = key.get().root
-        let chord_badges = measure.chords
-          .iter()
-          .mapi(fn(ci, chord) {
-            let label = @music.format_chord(chord.resolve(key_root))
-            @luna_dom.button(
-              dyn_class=fn() {
-                let is_editing = match editing_chord.get() {
-                  Some(ec) => ec.measure_idx == mi && ec.chord_idx == ci
-                  None => false
-                }
-                cn([
-                  "px-2 py-0.5 text-sm rounded cursor-pointer transition-colors",
-                  if is_editing {
-                    "bg-blue-600 text-white"
-                  } else {
-                    "bg-slate-700 text-white hover:bg-blue-700"
-                  },
-                ])
-              },
-              attrs=[
-                (
-                  "aria-label",
-                  @luna_dom.Attr::AttrString("chord badge \{label}"),
-                ),
-              ],
-              on=@luna_dom.events().click(fn(_) {
-                editing_chord.set(
-                  Some(EditingChord::{ measure_idx: mi, chord_idx: ci }),
-                )
-              }),
-              [@luna_dom.text(label)],
-            )
-          })
-          .collect()
-        @luna_dom.div(
-          class="flex items-center gap-1",
-          [
-            ..chord_badges,
-            @luna_dom.show(fn() { mi < degree_measures.get().length() - 1 }, fn() {
-              let merge_mi = mi
+    @luna_dom.div(
+      class="flex items-center gap-1 overflow-hidden flex-1 min-w-0",
+      [
+        @luna_dom.for_each(fn() { degree_measures.get() }, fn(measure, mi) {
+          let key_root = key.get().root
+          let chord_badges = measure.chords
+            .iter()
+            .mapi(fn(ci, chord) {
+              let label = @music.format_chord(chord.resolve(key_root))
               @luna_dom.button(
-                class="text-slate-400 px-0.5 select-none hover:text-white transition-colors cursor-pointer",
+                dyn_class=fn() {
+                  let is_editing = match editing_chord.get() {
+                    Some(ec) => ec.measure_idx == mi && ec.chord_idx == ci
+                    None => false
+                  }
+                  cn([
+                    "px-2 py-0.5 text-sm rounded cursor-pointer transition-colors shrink-0",
+                    if is_editing {
+                      "bg-blue-600 text-white"
+                    } else {
+                      "bg-slate-700 text-white hover:bg-blue-700"
+                    },
+                  ])
+                },
                 attrs=[
-                  ("aria-label", @luna_dom.Attr::AttrString("remove bar line")),
-                  ("title", @luna_dom.Attr::AttrString("Click to merge")),
+                  (
+                    "aria-label",
+                    @luna_dom.Attr::AttrString("chord badge \{label}"),
+                  ),
                 ],
                 on=@luna_dom.events().click(fn(_) {
-                  degree_measures.update(fn(measures) {
-                    merge_measures_at(measures, merge_mi)
-                  })
-                  editing_chord.set(None)
+                  editing_chord.set(
+                    Some(EditingChord::{ measure_idx: mi, chord_idx: ci }),
+                  )
                 }),
-                [@luna_dom.text("|")],
+                [@luna_dom.text(label)],
               )
-            }),
-          ],
-        )
-      }),
-      @luna_dom.button(
-        class="px-2 py-0.5 text-sm bg-slate-600 hover:bg-slate-500 text-white rounded cursor-pointer transition-colors",
-        attrs=[
-          ("aria-label", @luna_dom.Attr::AttrString("add chord")),
-          ("title", @luna_dom.Attr::AttrString("Add chord to last measure")),
-        ],
-        on=@luna_dom.events().click(fn(_) {
+            })
+            .collect()
+          @luna_dom.div(
+            class="flex items-center gap-1 shrink-0",
+            [
+              ..chord_badges,
+              @luna_dom.show(fn() { mi < degree_measures.get().length() - 1 }, fn() {
+                let merge_mi = mi
+                @luna_dom.button(
+                  class="text-slate-400 px-0.5 select-none hover:text-white transition-colors cursor-pointer shrink-0",
+                  attrs=[
+                    (
+                      "aria-label",
+                      @luna_dom.Attr::AttrString("remove bar line"),
+                    ),
+                    ("title", @luna_dom.Attr::AttrString("Click to merge")),
+                  ],
+                  on=@luna_dom.events().click(fn(_) {
+                    degree_measures.update(fn(measures) {
+                      merge_measures_at(measures, merge_mi)
+                    })
+                    editing_chord.set(None)
+                  }),
+                  [@luna_dom.text("|")],
+                )
+              }),
+            ],
+          )
+        }),
+      ],
+    ),
+    @luna_dom.button(
+      class="px-2 py-0.5 text-sm bg-slate-600 hover:bg-slate-500 text-white rounded cursor-pointer transition-colors shrink-0",
+      attrs=[("aria-label", @luna_dom.Attr::AttrString("edit chords"))],
+      on=@luna_dom.events().click(fn(_) {
+        if editing_chord.peek() is None {
           let measures = degree_measures.peek()
-          let (mi, ci) = if measures.is_empty() {
-            (0, 0)
+          let ec = if measures.is_empty() {
+            EditingChord::{ measure_idx: 0, chord_idx: 0 }
           } else {
-            let last_mi = measures.length() - 1
-            (last_mi, measures[last_mi].chords.length())
+            EditingChord::{ measure_idx: 0, chord_idx: 0 }
           }
-          degree_measures.update(fn(ms) {
-            if ms.is_empty() {
-              [@music.DegreeMeasure::{ chords: [default_degree_chord] }]
-            } else {
-              let new_ms = ms.copy()
-              let last_idx = new_ms.length() - 1
-              let last = new_ms[last_idx]
-              let new_chords = last.chords.copy()
-              new_chords.push(default_degree_chord)
-              new_ms[last_idx] = @music.DegreeMeasure::{ chords: new_chords }
-              new_ms
-            }
-          })
-          editing_chord.set(
-            Some(EditingChord::{ measure_idx: mi, chord_idx: ci }),
-          )
-        }),
-        [@luna_dom.text("+")],
-      ),
-      @luna_dom.button(
-        class="px-2 py-0.5 text-sm bg-slate-600 hover:bg-slate-500 text-white rounded cursor-pointer transition-colors",
-        attrs=[
-          ("aria-label", @luna_dom.Attr::AttrString("add measure")),
-          ("title", @luna_dom.Attr::AttrString("Add new measure")),
-        ],
-        on=@luna_dom.events().click(fn(_) {
-          let mi = degree_measures.peek().length()
-          degree_measures.update(fn(ms) {
-            let new_ms = ms.copy()
-            new_ms.push(@music.DegreeMeasure::{ chords: [default_degree_chord] })
-            new_ms
-          })
-          editing_chord.set(
-            Some(EditingChord::{ measure_idx: mi, chord_idx: 0 }),
-          )
-        }),
-        [@luna_dom.text("|+")],
-      ),
-    ]),
+          editing_chord.set(Some(ec))
+        }
+      }),
+      [@luna_dom.text("Edit")],
+    ),
   ])
 }
 
@@ -316,6 +286,18 @@ pub fn chord_editor_dialog(
           ("aria-label", @luna_dom.Attr::AttrString("chord editor dialog")),
         ],
         [
+          // Title row
+          @luna_dom.div(class="flex items-center justify-between", [
+            @luna_dom.span(class="text-sm font-semibold text-white", [
+              @luna_dom.text("Chords"),
+            ]),
+            @luna_dom.button(
+              class="px-2 py-0.5 text-sm text-slate-400 hover:text-white transition-colors rounded cursor-pointer",
+              attrs=[("aria-label", @luna_dom.Attr::AttrString("close dialog"))],
+              on=@luna_dom.events().click(fn(_) { editing_chord.set(None) }),
+              [@luna_dom.text("✕")],
+            ),
+          ]),
           // Upper: current progression preview with editing chord highlighted
           @luna_dom.div(class="flex items-center gap-1 flex-wrap", [
             @luna_dom.for_each(fn() { degree_measures.get() }, fn(measure, mi) {
@@ -476,7 +458,194 @@ pub fn chord_editor_dialog(
               }),
             ]),
           ]),
-          // Actions: Delete + Split + Close
+          // Bass selection (slash chord)
+          @luna_dom.div(class="flex flex-col gap-1", [
+            @luna_dom.div(
+              class="text-xs text-slate-400 uppercase tracking-wide",
+              [@luna_dom.text("Bass")],
+            ),
+            @luna_dom.div(class="flex gap-1 flex-wrap", [
+              // None button
+              @luna_dom.button(
+                dyn_class=fn() {
+                  let active = match
+                    get_chord_at(
+                      degree_measures.get(),
+                      match editing_chord.get() {
+                        Some(ec) => ec
+                        None => EditingChord::{ measure_idx: 0, chord_idx: 0 }
+                      },
+                    ) {
+                    Some(chord) => chord.bass is None
+                    None => true
+                  }
+                  cn([
+                    "px-2 py-1 rounded text-xs transition-colors",
+                    if active {
+                      "bg-blue-600 text-white"
+                    } else {
+                      "bg-slate-700 text-slate-300 hover:bg-slate-600"
+                    },
+                  ])
+                },
+                on=@luna_dom.events().click(fn(_) {
+                  match editing_chord.peek() {
+                    None => ()
+                    Some(ec) =>
+                      degree_measures.update(fn(measures) {
+                        match get_chord_at(measures, ec) {
+                          None => measures
+                          Some(chord) =>
+                            update_chord_at(measures, ec, @music.DegreeChord::{
+                              ..chord,
+                              bass: None,
+                            })
+                        }
+                      })
+                  }
+                }),
+                [@luna_dom.text("—")],
+              ),
+              // Degree buttons for bass
+              @luna_dom.for_each(fn() { all_degrees }, fn(bass_degree, _) {
+                let key_root = key.get().root
+                let pc = (key_root.midi() + bass_degree.semitones()) % 12
+                let note_name = @music.ChordRoot::from_pitch_class(pc).to_string()
+                @luna_dom.button(
+                  dyn_class=fn() {
+                    let active = match
+                      get_chord_at(
+                        degree_measures.get(),
+                        match editing_chord.get() {
+                          Some(ec) => ec
+                          None => EditingChord::{ measure_idx: 0, chord_idx: 0 }
+                        },
+                      ) {
+                      Some(chord) =>
+                        match chord.bass {
+                          Some(b) => b.degree == bass_degree
+                          None => false
+                        }
+                      None => false
+                    }
+                    cn([
+                      "flex flex-col items-center px-2 py-1 rounded text-xs transition-colors min-w-8",
+                      if active {
+                        "bg-blue-600 text-white"
+                      } else {
+                        "bg-slate-700 text-slate-300 hover:bg-slate-600"
+                      },
+                    ])
+                  },
+                  on=@luna_dom.events().click(fn(_) {
+                    match editing_chord.peek() {
+                      None => ()
+                      Some(ec) =>
+                        degree_measures.update(fn(measures) {
+                          match get_chord_at(measures, ec) {
+                            None => measures
+                            Some(chord) => {
+                              let new_accidental = match chord.bass {
+                                Some(b) if b.degree == bass_degree =>
+                                  b.accidental
+                                _ => 0
+                              }
+                              update_chord_at(measures, ec, @music.DegreeChord::{
+                                ..chord,
+                                bass: Some(@music.DegreeBass::{
+                                  accidental: new_accidental,
+                                  degree: bass_degree,
+                                }),
+                              })
+                            }
+                          }
+                        })
+                    }
+                  }),
+                  [
+                    @luna_dom.div(class="font-bold", [
+                      @luna_dom.text(bass_degree.to_roman()),
+                    ]),
+                    @luna_dom.div(class="text-slate-400 text-xs", [
+                      @luna_dom.text(note_name),
+                    ]),
+                  ],
+                )
+              }),
+            ]),
+            // Accidental row — shown when bass is Some
+            @luna_dom.show(
+              fn() {
+                match editing_chord.get() {
+                  Some(ec) =>
+                    match get_chord_at(degree_measures.get(), ec) {
+                      Some(chord) => chord.bass is Some(_)
+                      None => false
+                    }
+                  None => false
+                }
+              },
+              fn() {
+                @luna_dom.div(class="flex gap-1 mt-1", [
+                  @luna_dom.for_each(
+                    fn() { [(-1, "b"), (0, "♮"), (1, "#")] },
+                    fn(item, _) {
+                      let (acc_val, acc_label) = item
+                      @luna_dom.button(
+                        dyn_class=fn() {
+                          let active = match editing_chord.get() {
+                            Some(ec) =>
+                              match get_chord_at(degree_measures.get(), ec) {
+                                Some(chord) =>
+                                  match chord.bass {
+                                    Some(b) => b.accidental == acc_val
+                                    None => false
+                                  }
+                                None => false
+                              }
+                            None => false
+                          }
+                          cn([
+                            "px-3 py-1 rounded text-xs transition-colors",
+                            if active {
+                              "bg-blue-600 text-white"
+                            } else {
+                              "bg-slate-700 text-slate-300 hover:bg-slate-600"
+                            },
+                          ])
+                        },
+                        on=@luna_dom.events().click(fn(_) {
+                          match editing_chord.peek() {
+                            None => ()
+                            Some(ec) =>
+                              degree_measures.update(fn(measures) {
+                                match get_chord_at(measures, ec) {
+                                  None => measures
+                                  Some(chord) =>
+                                    match chord.bass {
+                                      None => measures
+                                      Some(b) =>
+                                        update_chord_at(measures, ec, @music.DegreeChord::{
+                                          ..chord,
+                                          bass: Some(@music.DegreeBass::{
+                                            ..b,
+                                            accidental: acc_val,
+                                          }),
+                                        })
+                                    }
+                                }
+                              })
+                          }
+                        }),
+                        [@luna_dom.text(acc_label)],
+                      )
+                    },
+                  ),
+                ])
+              },
+            ),
+          ]),
+          // Actions: Delete + Split + Add chord + Add measure
           @luna_dom.div(class="flex justify-between items-center", [
             @luna_dom.div(class="flex gap-2", [
               @luna_dom.button(
@@ -487,12 +656,10 @@ pub fn chord_editor_dialog(
                 on=@luna_dom.events().click(fn(_) {
                   match editing_chord.peek() {
                     None => ()
-                    Some(ec) => {
+                    Some(ec) =>
                       degree_measures.update(fn(measures) {
                         delete_chord_at(measures, ec)
                       })
-                      editing_chord.set(None)
-                    }
                   }
                 }),
                 [@luna_dom.text("Delete")],
@@ -534,11 +701,67 @@ pub fn chord_editor_dialog(
                 },
               ),
             ]),
-            @luna_dom.button(
-              class="px-3 py-1 text-sm bg-slate-600 hover:bg-slate-500 text-white rounded transition-colors",
-              on=@luna_dom.events().click(fn(_) { editing_chord.set(None) }),
-              [@luna_dom.text("✕")],
-            ),
+            @luna_dom.div(class="flex gap-2", [
+              @luna_dom.button(
+                class="px-3 py-1 text-sm bg-slate-600 hover:bg-slate-500 text-white rounded transition-colors",
+                attrs=[
+                  ("aria-label", @luna_dom.Attr::AttrString("add chord")),
+                  (
+                    "title",
+                    @luna_dom.Attr::AttrString("Add chord to last measure"),
+                  ),
+                ],
+                on=@luna_dom.events().click(fn(_) {
+                  let measures = degree_measures.peek()
+                  let (mi, ci) = if measures.is_empty() {
+                    (0, 0)
+                  } else {
+                    let last_mi = measures.length() - 1
+                    (last_mi, measures[last_mi].chords.length())
+                  }
+                  degree_measures.update(fn(ms) {
+                    if ms.is_empty() {
+                      [@music.DegreeMeasure::{ chords: [default_degree_chord] }]
+                    } else {
+                      let new_ms = ms.copy()
+                      let last_idx = new_ms.length() - 1
+                      let last = new_ms[last_idx]
+                      let new_chords = last.chords.copy()
+                      new_chords.push(default_degree_chord)
+                      new_ms[last_idx] = @music.DegreeMeasure::{
+                        chords: new_chords,
+                      }
+                      new_ms
+                    }
+                  })
+                  editing_chord.set(
+                    Some(EditingChord::{ measure_idx: mi, chord_idx: ci }),
+                  )
+                }),
+                [@luna_dom.text("+")],
+              ),
+              @luna_dom.button(
+                class="px-3 py-1 text-sm bg-slate-600 hover:bg-slate-500 text-white rounded transition-colors",
+                attrs=[
+                  ("aria-label", @luna_dom.Attr::AttrString("add measure")),
+                  ("title", @luna_dom.Attr::AttrString("Add new measure")),
+                ],
+                on=@luna_dom.events().click(fn(_) {
+                  let mi = degree_measures.peek().length()
+                  degree_measures.update(fn(ms) {
+                    let new_ms = ms.copy()
+                    new_ms.push(@music.DegreeMeasure::{
+                      chords: [default_degree_chord],
+                    })
+                    new_ms
+                  })
+                  editing_chord.set(
+                    Some(EditingChord::{ measure_idx: mi, chord_idx: 0 }),
+                  )
+                }),
+                [@luna_dom.text("|+")],
+              ),
+            ]),
           ]),
         ],
       ),
