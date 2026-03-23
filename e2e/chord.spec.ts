@@ -34,8 +34,9 @@ test("should add new chord via + button", async ({ page }) => {
   const jazzene = await openPage({ page });
 
   const initialCount = await page.getByLabel(/^chord badge/).count();
-  await jazzene.getAddChordButton().click();
+  await jazzene.getChordBadge("Dm7").click();
   await expect(jazzene.getChordEditorDialog()).toBeVisible();
+  await jazzene.getAddChordButton().click();
   await expect(page.getByLabel(/^chord badge/)).toHaveCount(initialCount + 1);
 });
 
