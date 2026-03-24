@@ -146,88 +146,99 @@ pub fn chord_progression_display(
       [@luna_dom.text("Chords:")],
     ),
     @luna_dom.div(
-      class="flex items-center gap-1 overflow-hidden flex-1 min-w-0",
+      class="flex items-center gap-1 flex-1 min-w-0 bg-slate-900 rounded px-2 py-1 lg:py-2",
       [
-        @luna_dom.for_each(fn() { degree_measures.get() }, fn(measure, mi) {
-          let key_root = key.get().root
-          let chord_badges = measure.chords
-            .iter()
-            .mapi(fn(ci, chord) {
-              let label = @music.format_chord(chord.resolve(key_root))
-              @luna_dom.button(
-                dyn_class=fn() {
-                  let is_editing = match editing_chord.get() {
-                    Some(ec) => ec.measure_idx == mi && ec.chord_idx == ci
-                    None => false
-                  }
-                  cn([
-                    "px-2 py-0.5 text-sm rounded cursor-pointer transition-colors shrink-0",
-                    if is_editing {
-                      "bg-blue-600 text-white"
-                    } else {
-                      "bg-slate-700 text-white hover:bg-blue-700"
+        @luna_dom.div(
+          class="flex items-center gap-1 overflow-hidden flex-1 min-w-0",
+          [
+            @luna_dom.for_each(fn() { degree_measures.get() }, fn(measure, mi) {
+              let key_root = key.get().root
+              let chord_badges = measure.chords
+                .iter()
+                .mapi(fn(ci, chord) {
+                  let label = @music.format_chord(chord.resolve(key_root))
+                  @luna_dom.button(
+                    dyn_class=fn() {
+                      let is_editing = match editing_chord.get() {
+                        Some(ec) => ec.measure_idx == mi && ec.chord_idx == ci
+                        None => false
+                      }
+                      cn([
+                        "px-2 py-0.5 text-sm rounded cursor-pointer transition-colors shrink-0",
+                        if is_editing {
+                          "bg-blue-600 text-white"
+                        } else {
+                          "bg-slate-700 text-white hover:bg-blue-700"
+                        },
+                      ])
                     },
-                  ])
-                },
-                attrs=[
-                  (
-                    "aria-label",
-                    @luna_dom.Attr::AttrString("chord badge \{label}"),
+                    attrs=[
+                      (
+                        "aria-label",
+                        @luna_dom.Attr::AttrString("chord badge \{label}"),
+                      ),
+                    ],
+                    on=@luna_dom.events().click(fn(_) {
+                      editing_chord.set(
+                        Some(EditingChord::{ measure_idx: mi, chord_idx: ci }),
+                      )
+                    }),
+                    [@luna_dom.text(label)],
+                  )
+                })
+                .collect()
+              @luna_dom.div(
+                class="flex items-center gap-1 shrink-0",
+                [
+                  ..chord_badges,
+                  @luna_dom.show(
+                    fn() { mi < degree_measures.get().length() - 1 },
+                    fn() {
+                      let merge_mi = mi
+                      @luna_dom.button(
+                        class="text-slate-400 px-0.5 select-none hover:text-white transition-colors cursor-pointer shrink-0",
+                        attrs=[
+                          (
+                            "aria-label",
+                            @luna_dom.Attr::AttrString("remove bar line"),
+                          ),
+                          (
+                            "title",
+                            @luna_dom.Attr::AttrString("Click to merge"),
+                          ),
+                        ],
+                        on=@luna_dom.events().click(fn(_) {
+                          degree_measures.update(fn(measures) {
+                            merge_measures_at(measures, merge_mi)
+                          })
+                          editing_chord.set(None)
+                        }),
+                        [@luna_dom.text("|")],
+                      )
+                    },
                   ),
                 ],
-                on=@luna_dom.events().click(fn(_) {
-                  editing_chord.set(
-                    Some(EditingChord::{ measure_idx: mi, chord_idx: ci }),
-                  )
-                }),
-                [@luna_dom.text(label)],
               )
-            })
-            .collect()
-          @luna_dom.div(
-            class="flex items-center gap-1 shrink-0",
-            [
-              ..chord_badges,
-              @luna_dom.show(fn() { mi < degree_measures.get().length() - 1 }, fn() {
-                let merge_mi = mi
-                @luna_dom.button(
-                  class="text-slate-400 px-0.5 select-none hover:text-white transition-colors cursor-pointer shrink-0",
-                  attrs=[
-                    (
-                      "aria-label",
-                      @luna_dom.Attr::AttrString("remove bar line"),
-                    ),
-                    ("title", @luna_dom.Attr::AttrString("Click to merge")),
-                  ],
-                  on=@luna_dom.events().click(fn(_) {
-                    degree_measures.update(fn(measures) {
-                      merge_measures_at(measures, merge_mi)
-                    })
-                    editing_chord.set(None)
-                  }),
-                  [@luna_dom.text("|")],
-                )
-              }),
-            ],
-          )
-        }),
+            }),
+          ],
+        ),
+        @luna_dom.button(
+          class="px-2 py-0.5 text-sm text-slate-400 hover:text-white rounded cursor-pointer transition-colors shrink-0 ml-1",
+          attrs=[("aria-label", @luna_dom.Attr::AttrString("edit chords"))],
+          on=@luna_dom.events().click(fn(_) {
+            if editing_chord.peek() is None {
+              let measures = degree_measures.peek()
+              let ec = if measures.is_empty() {
+                EditingChord::{ measure_idx: 0, chord_idx: 0 }
+              } else {
+                EditingChord::{ measure_idx: 0, chord_idx: 0 }
+              }
+              editing_chord.set(Some(ec))
+            }
+          }),
+          [@luna_dom.text("Edit")],
+        ),
       ],
-    ),
-    @luna_dom.button(
-      class="px-2 py-0.5 text-sm bg-slate-600 hover:bg-slate-500 text-white rounded cursor-pointer transition-colors shrink-0",
-      attrs=[("aria-label", @luna_dom.Attr::AttrString("edit chords"))],
-      on=@luna_dom.events().click(fn(_) {
-        if editing_chord.peek() is None {
-          let measures = degree_measures.peek()
-          let ec = if measures.is_empty() {
-            EditingChord::{ measure_idx: 0, chord_idx: 0 }
-          } else {
-            EditingChord::{ measure_idx: 0, chord_idx: 0 }
-          }
-          editing_chord.set(Some(ec))
-        }
-      }),
-      [@luna_dom.text("Edit")],
     ),
   ])
 }
