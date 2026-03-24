@@ -94,6 +94,9 @@ fn split_measure_at(
 }
 
 ///|
+let max_chords_per_measure : Int = 4
+
+///|
 let default_degree_chord : @music.DegreeChord = @music.DegreeChord::{
   accidental: 0,
   degree: @music.I,
@@ -714,7 +717,19 @@ pub fn chord_editor_dialog(
             ]),
             @luna_dom.div(class="flex gap-2", [
               @luna_dom.button(
-                class="px-3 py-1 text-sm bg-slate-600 hover:bg-slate-500 text-white rounded transition-colors",
+                dyn_class=fn() {
+                  let at_limit = match degree_measures.get() {
+                    ms if ms.is_empty() => false
+                    ms =>
+                      ms[ms.length() - 1].chords.length() >=
+                      max_chords_per_measure
+                  }
+                  if at_limit {
+                    "px-3 py-1 text-sm bg-slate-700 text-slate-500 rounded cursor-not-allowed"
+                  } else {
+                    "px-3 py-1 text-sm bg-slate-600 hover:bg-slate-500 text-white rounded transition-colors"
+                  }
+                },
                 attrs=[
                   ("aria-label", @luna_dom.Attr::AttrString("add chord")),
                   (
@@ -724,6 +739,13 @@ pub fn chord_editor_dialog(
                 ],
                 on=@luna_dom.events().click(fn(_) {
                   let measures = degree_measures.peek()
+                  let at_limit = match measures {
+                    ms if ms.is_empty() => false
+                    ms =>
+                      ms[ms.length() - 1].chords.length() >=
+                      max_chords_per_measure
+                  }
+                  guard not(at_limit) else { return }
                   let (mi, ci) = if measures.is_empty() {
                     (0, 0)
                   } else {
