@@ -136,6 +136,43 @@ fn delete_chord_at(
 }
 
 ///|
+/// Compute the next editing position after deleting the chord at ec.
+/// Prefers the chord to the right; falls back to the chord to the left.
+fn next_editing_chord_after_delete(
+  measures : Array[@music.DegreeMeasure],
+  ec : EditingChord,
+) -> EditingChord? {
+  guard ec.measure_idx < measures.length() else { return None }
+  let measure = measures[ec.measure_idx]
+  if measure.chords.length() <= 1 {
+    // Whole measure is removed — try right first, then left
+    let new_len = measures.length() - 1
+    if ec.measure_idx < new_len {
+      Some(EditingChord::{ measure_idx: ec.measure_idx, chord_idx: 0 })
+    } else if ec.measure_idx > 0 {
+      let left_mi = ec.measure_idx - 1
+      Some(EditingChord::{
+        measure_idx: left_mi,
+        chord_idx: measures[left_mi].chords.length() - 1,
+      })
+    } else {
+      None
+    }
+  } else {
+    // Chord removed within the same measure
+    let new_chord_len = measure.chords.length() - 1
+    if ec.chord_idx < new_chord_len {
+      Some(ec)
+    } else {
+      Some(EditingChord::{
+        measure_idx: ec.measure_idx,
+        chord_idx: ec.chord_idx - 1,
+      })
+    }
+  }
+}
+
+///|
 /// Chord progression display — shows badges for each chord in the header.
 /// No add buttons; always shows an Edit button. Truncates when long.
 pub fn chord_progression_display(
@@ -641,10 +678,16 @@ pub fn chord_editor_dialog(
                 on=@luna_dom.events().click(fn(_) {
                   match editing_chord.peek() {
                     None => ()
-                    Some(ec) =>
+                    Some(ec) => {
+                      let new_ec = next_editing_chord_after_delete(
+                        degree_measures.peek(),
+                        ec,
+                      )
                       degree_measures.update(fn(measures) {
                         delete_chord_at(measures, ec)
                       })
+                      editing_chord.set(new_ec)
+                    }
                   }
                 }),
                 [@luna_dom.text("Delete")],
