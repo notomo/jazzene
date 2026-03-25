@@ -216,6 +216,7 @@ pub fn render(state : AppState) -> Unit {
         jazz_style.update(fn(style) {
           @music.JazzStyle::{
             ..style,
+            swing: @music.SwingConfig::straight(),
             melody_mode: @music.On,
             comping_style: @music.Imported,
             bass_style: @music.Imported,
