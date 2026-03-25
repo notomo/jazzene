@@ -179,6 +179,9 @@ pub fn DegreeChord::resolve(self : DegreeChord, key_root : ChordRoot) -> Chord {
 }
 
 ///|
+pub let all_degrees : Array[ScaleDegree] = [I, II, III, IV, V, VI, VII]
+
+///|
 /// A single measure containing one or more degree chords
 pub(all) struct DegreeMeasure {
   chords : Array[DegreeChord]

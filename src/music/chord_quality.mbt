@@ -21,6 +21,27 @@ pub(all) enum ChordQuality {
 } derive(Eq, Show)
 
 ///|
+pub let all_qualities : Array[ChordQuality] = [
+  Major7,
+  Minor7,
+  Dominant7,
+  HalfDiminished,
+  Diminished7,
+  MinorMajor7,
+  Augmented,
+  AugmentedMajor7,
+  Augmented7,
+  Dominant7sus4,
+  Sus4,
+  Sus2,
+  Major6,
+  Minor6,
+  Major,
+  Minor,
+  Diminished,
+]
+
+///|
 /// Get chord tone intervals for a quality
 pub fn ChordQuality::intervals(self : ChordQuality) -> Array[Int] {
   match self {

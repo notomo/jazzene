@@ -247,38 +247,6 @@ pub fn chord_progression_display(
 }
 
 ///|
-let all_degrees : Array[@music.ScaleDegree] = [
-  @music.I,
-  @music.II,
-  @music.III,
-  @music.IV,
-  @music.V,
-  @music.VI,
-  @music.VII,
-]
-
-///|
-let all_qualities : Array[@music.ChordQuality] = [
-  @music.Major7,
-  @music.Minor7,
-  @music.Dominant7,
-  @music.HalfDiminished,
-  @music.Diminished7,
-  @music.MinorMajor7,
-  @music.Augmented,
-  @music.AugmentedMajor7,
-  @music.Augmented7,
-  @music.Dominant7sus4,
-  @music.Sus4,
-  @music.Sus2,
-  @music.Major6,
-  @music.Minor6,
-  @music.Major,
-  @music.Minor,
-  @music.Diminished,
-]
-
-///|
 /// Chord editor dialog — shown when editing_chord is Some(...)
 pub fn chord_editor_dialog(
   editing_chord : @signals.Signal[EditingChord?],
@@ -366,7 +334,7 @@ pub fn chord_editor_dialog(
               [@luna_dom.text("Degree")],
             ),
             @luna_dom.div(class="flex gap-1 flex-wrap", [
-              @luna_dom.for_each(fn() { all_degrees }, fn(degree, _) {
+              @luna_dom.for_each(fn() { @music.all_degrees }, fn(degree, _) {
                 let key_root = key.get().root
                 let pc = (key_root.midi() + degree.semitones()) % 12
                 let note_name = @music.ChordRoot::from_pitch_class(pc).to_string()
@@ -428,7 +396,7 @@ pub fn chord_editor_dialog(
               [@luna_dom.text("Quality")],
             ),
             @luna_dom.div(class="flex flex-wrap gap-1", [
-              @luna_dom.for_each(fn() { all_qualities }, fn(quality, _) {
+              @luna_dom.for_each(fn() { @music.all_qualities }, fn(quality, _) {
                 @luna_dom.button(
                   dyn_class=fn() {
                     let active = match
@@ -521,7 +489,10 @@ pub fn chord_editor_dialog(
                 [@luna_dom.text("—")],
               ),
               // Degree buttons for bass
-              @luna_dom.for_each(fn() { all_degrees }, fn(bass_degree, _) {
+              @luna_dom.for_each(fn() { @music.all_degrees }, fn(
+                bass_degree,
+                _,
+              ) {
                 let key_root = key.get().root
                 let pc = (key_root.midi() + bass_degree.semitones()) % 12
                 let note_name = @music.ChordRoot::from_pitch_class(pc).to_string()
