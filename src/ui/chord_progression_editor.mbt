@@ -149,7 +149,7 @@ pub fn chord_progression_display(
       [@luna_dom.text("Chords:")],
     ),
     @luna_dom.div(
-      class="flex items-center gap-1 flex-1 min-w-0 bg-slate-900 rounded px-2 py-1 lg:py-2",
+      class="flex items-center gap-1 flex-1 min-w-0 bg-slate-900 rounded px-2 py-1 lg:py-2 border border-slate-600",
       [
         @luna_dom.div(
           class="flex items-center gap-1 overflow-hidden flex-1 min-w-0",
