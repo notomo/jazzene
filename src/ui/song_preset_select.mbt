@@ -13,7 +13,7 @@ fn add_click_outside_listener(
 }
 
 ///|
-/// Render song preset popup button that updates chord progression, key, BPM, measure count, and time signature
+/// Render song preset popup button that updates chord progression, key, BPM, measure count, time signature, and resets jazz style to default
 fn song_preset_select(
   degree_measures : @signals.Signal[Array[@music.DegreeMeasure]],
   key : @signals.Signal[@music.KeySignature],
@@ -21,10 +21,12 @@ fn song_preset_select(
   measure_count : @signals.Signal[Int],
   loop_b_measure : @signals.Signal[Int],
   time_signature : @signals.Signal[@music.TimeSignature],
+  jazz_style : @signals.Signal[@music.JazzStyle],
 ) -> @luna_dom.DomNode {
   let is_open = @signals.signal(false)
   let on_preset_select : (@music.SongPreset) -> Unit = fn(preset) {
     push_current_state()
+    jazz_style.set(@music.JazzStyle::default())
     degree_measures.set(
       @music.parse_measure_progression(preset.chords).unwrap_or([]),
     )
