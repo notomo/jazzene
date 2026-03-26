@@ -370,7 +370,7 @@ pub fn chord_editor_dialog(
               class="text-xs text-slate-400 uppercase tracking-wide",
               [@luna_dom.text("Degree")],
             ),
-            @luna_dom.div(class="flex gap-1 flex-wrap", [
+            @luna_dom.div(class="grid grid-cols-7 gap-1 w-full", [
               @luna_dom.for_each(fn() { @music.all_degrees }, fn(degree, _) {
                 let key_root = key.get().root
                 let pc = (key_root.midi() + degree.semitones()) % 12
@@ -389,7 +389,7 @@ pub fn chord_editor_dialog(
                       None => false
                     }
                     cn([
-                      "flex flex-col items-center px-2 py-1 rounded text-xs transition-colors min-w-8",
+                      "flex flex-col items-center px-2 py-1 rounded text-xs transition-colors w-full",
                       if active {
                         "bg-blue-600 text-white"
                       } else {
@@ -432,7 +432,7 @@ pub fn chord_editor_dialog(
               class="text-xs text-slate-400 uppercase tracking-wide",
               [@luna_dom.text("Quality")],
             ),
-            @luna_dom.div(class="flex flex-wrap gap-1", [
+            @luna_dom.div(class="grid grid-cols-4 gap-1", [
               @luna_dom.for_each(fn() { @music.all_qualities }, fn(quality, _) {
                 @luna_dom.button(
                   dyn_class=fn() {
@@ -483,7 +483,7 @@ pub fn chord_editor_dialog(
               class="text-xs text-slate-400 uppercase tracking-wide",
               [@luna_dom.text("Bass")],
             ),
-            @luna_dom.div(class="flex gap-1 flex-wrap", [
+            @luna_dom.div(class="grid grid-cols-8 gap-1 w-full", [
               // None button
               @luna_dom.button(
                 dyn_class=fn() {
@@ -499,7 +499,7 @@ pub fn chord_editor_dialog(
                     None => true
                   }
                   cn([
-                    "px-2 py-1 rounded text-xs transition-colors",
+                    "px-2 py-1 rounded text-xs transition-colors w-full",
                     if active {
                       "bg-blue-600 text-white"
                     } else {
@@ -551,7 +551,7 @@ pub fn chord_editor_dialog(
                       None => false
                     }
                     cn([
-                      "flex flex-col items-center px-2 py-1 rounded text-xs transition-colors min-w-8",
+                      "flex flex-col items-center px-2 py-1 rounded text-xs transition-colors w-full",
                       if active {
                         "bg-blue-600 text-white"
                       } else {
