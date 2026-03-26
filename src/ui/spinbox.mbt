@@ -92,7 +92,17 @@ fn spinbox(
   }
 
   let aria = if aria_label == "" { label } else { aria_label }
-  let btn_class = "bg-blue-900/60 hover:bg-blue-800/70 border border-blue-700/50 rounded-lg w-7 lg:w-9 py-1 text-base lg:text-lg text-blue-200 text-center cursor-pointer select-none"
+  let btn_class = "bg-blue-900/60 hover:bg-blue-800/70 border border-blue-700/50 rounded-lg w-7 h-7 lg:w-9 lg:h-9 flex items-center justify-center cursor-pointer select-none"
+  let icon_attrs = [
+    ("stroke-linecap", @luna_dom.Attr::AttrString("round")),
+    ("stroke-width", @luna_dom.Attr::AttrString("2.5")),
+  ]
+  let svg_attrs = [
+    ("viewBox", @luna_dom.Attr::AttrString("0 0 24 24")),
+    ("width", @luna_dom.Attr::AttrString("18")),
+    ("height", @luna_dom.Attr::AttrString("18")),
+    ("aria-hidden", @luna_dom.Attr::AttrString("true")),
+  ]
   let container_attrs : Array[(String, @luna_dom.Attr)] = if container_aria_label ==
     "" {
     []
@@ -120,12 +130,38 @@ fn spinbox(
       @luna_dom.button(
         class=btn_class,
         on=@luna_dom.events().click(on_decrement),
-        [@luna_dom.text("-")],
+        attrs=[("aria-label", @luna_dom.Attr::AttrString("-"))],
+        [
+          @luna_dom.svg(
+            [
+              @luna_dom.svg_path(
+                d="M5 12h14",
+                fill="none",
+                stroke="#93c5fd",
+                attrs=icon_attrs,
+              ),
+            ],
+            attrs=svg_attrs,
+          ),
+        ],
       ),
       @luna_dom.button(
         class=btn_class,
         on=@luna_dom.events().click(on_increment),
-        [@luna_dom.text("+")],
+        attrs=[("aria-label", @luna_dom.Attr::AttrString("+"))],
+        [
+          @luna_dom.svg(
+            [
+              @luna_dom.svg_path(
+                d="M12 5v14M5 12h14",
+                fill="none",
+                stroke="#93c5fd",
+                attrs=icon_attrs,
+              ),
+            ],
+            attrs=svg_attrs,
+          ),
+        ],
       ),
     ],
   )
