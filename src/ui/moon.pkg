@@ -20,6 +20,7 @@ import {
   "internal/jazzene/audio/web_midi_api" @web_midi,
   "internal/jazzene/music/midi" @midi,
   "moonbitlang/core/strconv",
+  "internal/jazzene/ui/icon" @icon,
 }
 
 options(
