@@ -345,7 +345,7 @@ pub fn render(state : AppState) -> Unit {
               }
             },
             [
-              settings_panel(
+              @settings.settings_panel(
                 jazz_style,
                 show_technique_hints,
                 midi_active_notes,

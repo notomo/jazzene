@@ -136,7 +136,7 @@ pub fn midi_device_select(
             (
               "change",
               @luna_dom.AttrValue::Handler(fn(e) {
-                let idx = get_event_target_selected_index(e)
+                let idx : Int = e._get("target")._get("selectedIndex").cast()
                 let inputs = available_inputs.get()
                 let prev_id = selected_id.get()
                 if prev_id != "" {

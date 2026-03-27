@@ -1,4 +1,12 @@
 ///|
+/// A recorded MIDI input line with playback mode control.
+pub(all) struct RecordedLine {
+  id : Int
+  sounds : Array[@music.ScheduledSound]
+  mode : @signals.Signal[@music.MelodyMode]
+}
+
+///|
 /// MIDI input recording controls.
 /// Shows a record toggle button and a list of completed recorded lines,
 /// each with Off/Silent/On mode buttons and a delete button.

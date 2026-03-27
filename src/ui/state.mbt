@@ -1,11 +1,4 @@
 ///|
-pub struct RecordedLine {
-  id : Int
-  sounds : Array[@music.ScheduledSound]
-  mode : @signals.Signal[@music.MelodyMode]
-}
-
-///|
 pub struct AppState {
   bpm : @signals.Signal[Int]
   degree_measures : @signals.Signal[Array[@music.DegreeMeasure]]
@@ -25,7 +18,7 @@ pub struct AppState {
   midi_active_notes : @signals.Signal[Array[@music.MidiNumber]]
   imported_midi : @signals.Signal[@midi.ImportedMidi?]
   is_recording : @signals.Signal[Bool]
-  recorded_lines : @signals.Signal[Array[RecordedLine]]
+  recorded_lines : @signals.Signal[Array[@settings.RecordedLine]]
   practice_score : @signals.Signal[Double]
   practice_best_score : @signals.Signal[Double]
   practice_max_score : () -> Int
@@ -153,7 +146,8 @@ pub fn AppState::new() -> AppState {
 
   // Recording state
   let is_recording : @signals.Signal[Bool] = @signals.signal(false)
-  let recorded_lines : @signals.Signal[Array[RecordedLine]] = @signals.signal([])
+  let recorded_lines : @signals.Signal[Array[@settings.RecordedLine]] = @signals.signal([],
+  )
   let next_line_id : Ref[Int] = { val: 0 }
   // Per-note start times indexed by MIDI note value (0-127); None = not active
   let recording_note_starts : Ref[Array[@music.Duration?]] = {
@@ -303,10 +297,10 @@ pub fn AppState::new() -> AppState {
         next_line_id.val = id + 1
         recorded_lines.update(fn(lines) {
           let new_lines = lines.copy()
-          new_lines.push(RecordedLine::{
+          new_lines.push(@settings.RecordedLine::{
             id,
             sounds,
-            mode: @signals.signal(@music.On),
+            mode: @signals.signal(@music.MelodyMode::On),
           })
           new_lines
         })
