@@ -47,10 +47,10 @@ pub const COLOR_MIDI_ACTIVE = "#22d3ee"
 pub const PLAYING_COLOR_MIDI_ACTIVE = "#06b6d4"
 
 ///|
-pub const COLOR_MIDI_IMPORTED = "#2dd4bf" // teal-400
+pub const COLOR_MIDI_IMPORTED = "#e879f9" // fuchsia-400
 
 ///|
-pub const PLAYING_COLOR_MIDI_IMPORTED = "#0d9488" // teal-600
+pub const PLAYING_COLOR_MIDI_IMPORTED = "#d946ef" // fuchsia-500
 
 ///|
 pub fn tone_origin_color(origin : @music.ToneOrigin) -> String {
