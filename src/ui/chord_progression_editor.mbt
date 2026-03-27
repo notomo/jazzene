@@ -190,7 +190,6 @@ fn next_editing_chord_after_delete(
 /// No add buttons; always shows an Edit button. Truncates when long.
 pub fn chord_progression_display(
   degree_measures : @signals.Signal[Array[@music.DegreeMeasure]],
-  key : @signals.Signal[@music.KeySignature],
   editing_chord : @signals.Signal[EditingChord?],
 ) -> @luna_dom.DomNode {
   @luna_dom.div(class="flex items-center gap-1 min-w-0 flex-1", [
@@ -205,11 +204,10 @@ pub fn chord_progression_display(
           class="flex items-center gap-1 overflow-hidden flex-1 min-w-0",
           [
             @luna_dom.for_each(fn() { degree_measures.get() }, fn(measure, mi) {
-              let key_root = key.get().root
               let chord_badges = measure.chords
                 .iter()
                 .mapi(fn(ci, chord) {
-                  let label = @music.format_chord(chord.resolve(key_root))
+                  let label = chord.to_string()
                   @luna_dom.button(
                     dyn_class=fn() {
                       let is_editing = match editing_chord.get() {
@@ -333,11 +331,10 @@ pub fn chord_editor_dialog(
           // Chord progression preview with editing chord highlighted
           @luna_dom.div(class="flex items-center gap-1 flex-wrap", [
             @luna_dom.for_each(fn() { degree_measures.get() }, fn(measure, mi) {
-              let key_root = key.get().root
               let chord_spans = measure.chords
                 .iter()
                 .mapi(fn(ci, chord) {
-                  let label = @music.format_chord(chord.resolve(key_root))
+                  let label = chord.to_string()
                   @luna_dom.button(
                     dyn_class=fn() {
                       let is_editing = match editing_chord.get() {

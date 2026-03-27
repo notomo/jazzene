@@ -244,7 +244,7 @@ pub fn render(state : AppState) -> Unit {
               [
                 time_signature_select(time_signature),
                 key_select(key),
-                chord_progression_display(degree_measures, key, editing_chord),
+                chord_progression_display(degree_measures, editing_chord),
               ],
             ),
             @luna_dom.div(class="flex gap-2 lg:gap-4 items-center shrink-0", [
