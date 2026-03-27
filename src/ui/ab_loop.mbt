@@ -42,7 +42,7 @@ fn ab_loop_spinbox(
       start_drag(e.touches[0].clientX)
     }
   }
-  let btn_base = "w-7 lg:w-9 flex items-center justify-center bg-blue-900/60 hover:bg-blue-800/70 text-blue-200 transition-colors text-base lg:text-lg font-mono select-none cursor-pointer"
+  let btn_base = "w-7 h-7 lg:w-9 lg:h-9 flex items-center justify-center bg-blue-900/60 hover:bg-blue-800/70 select-none cursor-pointer"
   let btn_left = btn_base + " rounded-l-lg"
   let btn_right = btn_base + " rounded-r-lg"
   let value_class = "w-7 lg:w-9 flex items-center justify-center bg-slate-800 text-slate-100 text-sm lg:text-base tabular-nums select-none cursor-ew-resize"
@@ -57,7 +57,8 @@ fn ab_loop_spinbox(
       @luna_dom.button(
         class=btn_left,
         on=@luna_dom.events().click(fn(_) { on_change(-1) }),
-        [@luna_dom.text("\u{2212}")],
+        attrs=[("aria-label", @luna_dom.Attr::AttrString("-"))],
+        [@icon.minus_icon()],
       ),
       @luna_dom.span(
         class=value_class,
@@ -67,7 +68,8 @@ fn ab_loop_spinbox(
       @luna_dom.button(
         class=btn_right,
         on=@luna_dom.events().click(fn(_) { on_change(1) }),
-        [@luna_dom.text("+")],
+        attrs=[("aria-label", @luna_dom.Attr::AttrString("+"))],
+        [@icon.plus_icon()],
       ),
     ],
   )
