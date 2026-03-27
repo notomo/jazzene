@@ -15,7 +15,7 @@ pub fn midi_practice(
           @luna_dom.text("Current"),
         ]),
         @luna_dom.span(
-          class="text-base font-mono text-white",
+          class="text-base font-mono text-white whitespace-nowrap",
           attrs=[
             ("aria-label", @luna_dom.Attr::AttrString("practice current score")),
           ],
@@ -32,7 +32,7 @@ pub fn midi_practice(
       [
         @luna_dom.span(class="text-xs text-slate-200", [@luna_dom.text("Best")]),
         @luna_dom.span(
-          class="text-base font-mono text-white",
+          class="text-base font-mono text-white whitespace-nowrap",
           attrs=[
             ("aria-label", @luna_dom.Attr::AttrString("practice best score")),
           ],
