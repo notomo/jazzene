@@ -47,6 +47,29 @@ fn set_query_param(name : String, value : String, default~ : String) -> Unit {
 }
 
 ///|
+/// Apply a single param change to an existing URLSearchParams object (no replace_state)
+fn apply_param(
+  params : @js_url.URLSearchParams,
+  name : String,
+  value : String,
+  default~ : String,
+) -> Unit {
+  if value == default {
+    params.delete(name)
+  } else {
+    params.set(name, value)
+  }
+}
+
+///|
+/// Commit all URL params with a single replace_state call
+fn commit_params(params : @js_url.URLSearchParams) -> Unit {
+  let qs = params.to_string()
+  let url = if qs == "" { @js_location.location().pathname } else { "?" + qs }
+  @js_history.history().replace_state(@js.null(), "", url~)
+}
+
+///|
 fn get_initial_int(name : String, default : Int) -> Int {
   match get_query_param(name) {
     Some(value) => (try? @strconv.parse_int(value)).unwrap_or(default)
@@ -469,6 +492,137 @@ pub fn save_chords(chords : String) -> Unit {
 ///|
 pub fn save_view_state(vs : ViewState) -> Unit {
   set_query_param("view", vs.to_view_query_string(), default="sheet,pianoroll")
+}
+
+///|
+/// Save all application state to URL in a single replace_state call.
+/// Use this instead of calling individual save_* functions to avoid exceeding
+/// the browser's history.replaceState rate limit (100 calls / 10 seconds).
+pub fn save_all_state(
+  bpm : Int,
+  seed : Int,
+  measure_count : Int,
+  loop_a : Int,
+  loop_b : Int,
+  volume : Int,
+  key : @music.KeySignature,
+  ts : @music.TimeSignature,
+  chords : String,
+  view : ViewState,
+  jazz : @music.JazzStyle,
+  hints : Bool,
+) -> Unit {
+  let params = (try! @js_url.URL::new(@js_location.location().href)).searchParams()
+  let default_jazz = @music.JazzStyle::default()
+  apply_param(params, "bpm", bpm.to_string(), default=default_bpm.to_string())
+  apply_param(
+    params,
+    "seed",
+    seed.to_string(),
+    default=default_seed.to_string(),
+  )
+  apply_param(
+    params,
+    "measures",
+    measure_count.to_string(),
+    default=default_measures.to_string(),
+  )
+  apply_param(
+    params,
+    "loop_a",
+    loop_a.to_string(),
+    default=default_loop_a.to_string(),
+  )
+  apply_param(
+    params,
+    "loop_b",
+    loop_b.to_string(),
+    default=measure_count.to_string(),
+  )
+  apply_param(
+    params,
+    "volume",
+    volume.to_string(),
+    default=default_volume.to_string(),
+  )
+  apply_param(
+    params,
+    "key",
+    key.root.to_string(),
+    default=@music.KeySignature::c_major().root.to_string(),
+  )
+  apply_param(
+    params,
+    "time",
+    ts.to_string(),
+    default=@music.TimeSignature::default().to_string(),
+  )
+  apply_param(params, "chords", chords, default=default_chords)
+  apply_param(
+    params,
+    "view",
+    view.to_view_query_string(),
+    default="sheet,pianoroll",
+  )
+  apply_param(
+    params,
+    "swing",
+    swing_to_string(jazz.swing),
+    default=swing_to_string(default_jazz.swing),
+  )
+  apply_param(
+    params,
+    "techniques",
+    techniques_to_string(jazz.techniques),
+    default=techniques_to_string(@music.Techniques::default()),
+  )
+  apply_param(
+    params,
+    "comping",
+    comping_mode_to_string(jazz.comping_mode),
+    default=comping_mode_to_string(default_jazz.comping_mode),
+  )
+  apply_param(
+    params,
+    "comping_style",
+    comping_style_to_string(jazz.comping_style),
+    default=comping_style_to_string(default_jazz.comping_style),
+  )
+  apply_param(
+    params,
+    "drums",
+    drums_to_string(jazz.drums_enabled, jazz.drum_pattern),
+    default=drums_to_string(
+      default_jazz.drums_enabled,
+      default_jazz.drum_pattern,
+    ),
+  )
+  apply_param(
+    params,
+    "bass",
+    bass_to_string(jazz.bass_enabled, jazz.bass_style),
+    default=bass_to_string(default_jazz.bass_enabled, default_jazz.bass_style),
+  )
+  apply_param(
+    params,
+    "melody",
+    melody_mode_to_string(jazz.melody_mode),
+    default=melody_mode_to_string(default_jazz.melody_mode),
+  )
+  apply_param(
+    params,
+    "pitch_min",
+    jazz.pitch_min.to_string(),
+    default=default_pitch_min.to_string(),
+  )
+  apply_param(
+    params,
+    "pitch_max",
+    jazz.pitch_max.to_string(),
+    default=default_pitch_max.to_string(),
+  )
+  apply_param(params, "hint", if hints { "" } else { "off" }, default="")
+  commit_params(params)
 }
 
 ///|

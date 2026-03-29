@@ -370,18 +370,10 @@ pub fn AppState::new() -> AppState {
     clear_timeout(url_save_timer.val)
     url_save_timer.val = set_timeout(
       fn() {
-        save_bpm(bpm_val)
-        save_seed(seed_val)
-        save_measure_count(measure_count_val)
-        save_loop_a(loop_a_val)
-        save_loop_b(loop_b_val, measure_count_val)
-        save_volume(volume_val)
-        save_key(key_val)
-        save_time_signature(ts_val)
-        save_chords(chords_val)
-        save_view_state(view_val)
-        save_jazz_style(jazz_val)
-        save_show_technique_hints(hints_val)
+        save_all_state(
+          bpm_val, seed_val, measure_count_val, loop_a_val, loop_b_val, volume_val,
+          key_val, ts_val, chords_val, view_val, jazz_val, hints_val,
+        )
       },
       400,
     )
