@@ -95,13 +95,16 @@ fn insert_measure_after(
   mi : Int,
   measure : @music.DegreeMeasure,
 ) -> Array[@music.DegreeMeasure] {
+  // Measures after the insertion point get new object references so that
+  // for_each (which uses reference-based reconciliation) re-renders them
+  // with correct updated indices instead of reusing stale index values.
   Array::makei(measures.length() + 1, fn(i) {
     if i <= mi {
       measures[i]
     } else if i == mi + 1 {
       measure
     } else {
-      measures[i - 1]
+      @music.DegreeMeasure::{ chords: measures[i - 1].chords }
     }
   })
 }
@@ -447,21 +450,7 @@ pub fn chord_editor_dialog(
                 [@luna_dom.text("+")],
               ),
               @luna_dom.button(
-                dyn_class=fn() {
-                  let has_bar_right = match editing_chord.get() {
-                    Some(ec) => {
-                      let ms = degree_measures.get()
-                      ec.measure_idx < ms.length() - 1 &&
-                      ec.chord_idx == ms[ec.measure_idx].chords.length() - 1
-                    }
-                    None => false
-                  }
-                  if has_bar_right {
-                    "px-3 py-1 text-sm bg-slate-700 text-slate-500 rounded cursor-not-allowed"
-                  } else {
-                    "px-3 py-1 text-sm bg-slate-600 hover:bg-slate-500 text-white rounded transition-colors"
-                  }
-                },
+                class="px-3 py-1 text-sm bg-slate-600 hover:bg-slate-500 text-white rounded transition-colors",
                 attrs=[
                   ("aria-label", @luna_dom.Attr::AttrString("add measure")),
                   (
@@ -489,9 +478,6 @@ pub fn chord_editor_dialog(
                         )
                         return
                       }
-                      let has_bar_right = ec.measure_idx < ms.length() - 1 &&
-                        ec.chord_idx == ms[ec.measure_idx].chords.length() - 1
-                      guard not(has_bar_right) else { return }
                       let measure = ms[ec.measure_idx]
                       let new_mi = ec.measure_idx + 1
                       if ec.chord_idx < measure.chords.length() - 1 {
