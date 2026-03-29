@@ -53,13 +53,15 @@ fn merge_measures_at(
   let left = measures[mi]
   let right = measures[mi + 1]
   let merged_chords = left.chords + right.chords
+  // Items after mi+1 shift down by 1; give them new references so that
+  // for_each (reference-based reconciliation) re-renders with correct indices.
   Array::makei(measures.length() - 1, fn(i) {
     if i < mi {
       measures[i]
     } else if i == mi {
       @music.DegreeMeasure::{ chords: merged_chords }
     } else {
-      measures[i + 1]
+      @music.DegreeMeasure::{ chords: measures[i + 1].chords }
     }
   })
 }
@@ -130,11 +132,13 @@ fn delete_chord_at(
   guard ec.measure_idx < measures.length() else { return measures }
   let measure = measures[ec.measure_idx]
   if measure.chords.length() <= 1 {
+    // Items after ec.measure_idx shift down by 1; give them new references so
+    // that for_each (reference-based reconciliation) re-renders with correct indices.
     Array::makei(measures.length() - 1, fn(i) {
       if i < ec.measure_idx {
         measures[i]
       } else {
-        measures[i + 1]
+        @music.DegreeMeasure::{ chords: measures[i + 1].chords }
       }
     })
   } else {
@@ -148,6 +152,36 @@ fn delete_chord_at(
     })
     new_measures[ec.measure_idx] = @music.DegreeMeasure::{ chords: new_chords }
     new_measures
+  }
+}
+
+///|
+/// Compute the next editing position after merging measures at merge_mi.
+/// Preserves the current selection, adjusting indices as needed.
+fn next_editing_chord_after_merge(
+  measures : Array[@music.DegreeMeasure],
+  merge_mi : Int,
+  current_ec : EditingChord?,
+) -> EditingChord? {
+  match current_ec {
+    None => Some(EditingChord::{ measure_idx: merge_mi, chord_idx: 0 })
+    Some(ec) =>
+      if ec.measure_idx < merge_mi {
+        Some(ec)
+      } else if ec.measure_idx == merge_mi {
+        Some(ec)
+      } else if ec.measure_idx == merge_mi + 1 {
+        let left_len = measures[merge_mi].chords.length()
+        Some(EditingChord::{
+          measure_idx: merge_mi,
+          chord_idx: left_len + ec.chord_idx,
+        })
+      } else {
+        Some(EditingChord::{
+          measure_idx: ec.measure_idx - 1,
+          chord_idx: ec.chord_idx,
+        })
+      }
   }
 }
 
@@ -262,10 +296,15 @@ pub fn chord_progression_display(
                           ),
                         ],
                         on=@luna_dom.events().click(fn(_) {
+                          let new_ec = next_editing_chord_after_merge(
+                            degree_measures.peek(),
+                            merge_mi,
+                            editing_chord.peek(),
+                          )
                           degree_measures.update(fn(measures) {
                             merge_measures_at(measures, merge_mi)
                           })
-                          editing_chord.set(None)
+                          editing_chord.set(new_ec)
                         }),
                         [@luna_dom.text("|")],
                       )
