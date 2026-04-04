@@ -223,6 +223,10 @@ fn next_editing_chord_after_delete(
 }
 
 ///|
+extern "js" fn focus_next_tick(el : @js.Any) -> Unit =
+  #|(el) => setTimeout(() => el.focus(), 0)
+
+///|
 /// Chord progression display — shows badges for each chord in the header.
 /// No add buttons; always shows an Edit button. Truncates when long.
 pub fn chord_progression_display(
@@ -353,10 +357,30 @@ pub fn chord_editor_dialog(
       ),
       // Dialog panel
       @luna_dom.div(
-        class="relative z-10 bg-slate-800 rounded-xl p-4 max-w-md w-full mx-4 flex flex-col gap-4 shadow-2xl",
+        class="relative z-10 bg-slate-800 rounded-xl p-4 max-w-md w-full mx-4 flex flex-col gap-4 shadow-2xl outline-none",
         attrs=[
           ("aria-label", @luna_dom.Attr::AttrString("chord editor dialog")),
+          ("tabindex", @luna_dom.Attr::AttrString("-1")),
         ],
+        ref_=fn(el) { focus_next_tick(el.as_any()) },
+        on=@luna_dom.events().keydown(fn(e) {
+          if e.key == "Backspace" {
+            match editing_chord.peek() {
+              None => ()
+              Some(ec) => {
+                let new_ec = next_editing_chord_after_delete(
+                  degree_measures.peek(),
+                  ec,
+                )
+                degree_measures.update(fn(measures) {
+                  delete_chord_at(measures, ec)
+                })
+                editing_chord.set(new_ec)
+                e.currentTarget().as_any()._call("focus", []) |> ignore
+              }
+            }
+          }
+        }),
         [
           // Title row
           @luna_dom.div(class="flex items-center justify-between", [

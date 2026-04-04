@@ -48,3 +48,30 @@ test("should delete chord via editor", async ({ page }) => {
   await jazzene.getDeleteChordButton().click();
   await expect(page.getByLabel(/^chord badge/)).toHaveCount(initialCount - 1);
 });
+
+test("should delete chord via Backspace key immediately after opening dialog", async ({
+  page,
+}) => {
+  const jazzene = await openPage({ page });
+
+  const initialCount = await page.getByLabel(/^chord badge/).count();
+  await jazzene.getChordBadge("IIm7").click();
+  await expect(jazzene.getChordEditorDialog()).toBeVisible();
+
+  await page.keyboard.press("Backspace");
+  await expect(page.getByLabel(/^chord badge/)).toHaveCount(initialCount - 1);
+});
+
+test("should delete multiple chords consecutively via Backspace key", async ({
+  page,
+}) => {
+  const jazzene = await openPage({ page });
+
+  const initialCount = await page.getByLabel(/^chord badge/).count();
+  await jazzene.getChordBadge("IIm7").click();
+  await expect(jazzene.getChordEditorDialog()).toBeVisible();
+
+  await page.keyboard.press("Backspace");
+  await page.keyboard.press("Backspace");
+  await expect(page.getByLabel(/^chord badge/)).toHaveCount(initialCount - 2);
+});
