@@ -27,7 +27,7 @@ fn weighted_random_select_tagged(
   weighted : Array[(Int, @music.MidiNumber, @music.ToneOrigin)],
   random_int : (Int) -> Int,
 ) -> (@music.MidiNumber, @music.ToneOrigin)? {
-  guard not(weighted.is_empty()) else { return None }
+  guard !weighted.is_empty() else { return None }
   let total = weighted.iter().fold(init=0, fn(acc, tuple) { acc + tuple.0 })
   let r = random_int(total)
   let mut cumulative = 0

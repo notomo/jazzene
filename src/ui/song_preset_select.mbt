@@ -6,7 +6,7 @@ fn add_click_outside_listener(
   @js_dom.document()
   .as_event_target()
   .addEventListener("click", fn(e) {
-    if not(container.as_any()._call("contains", [e._get("target")]).cast()) {
+    if !container.as_any()._call("contains", [e._get("target")]).cast() {
       callback()
     }
   })
@@ -60,7 +60,7 @@ fn song_preset_select(
     [
       @luna_dom.button(
         class="px-2 py-1 bg-slate-700 hover:bg-slate-600 text-white text-xs lg:text-sm rounded-lg border border-slate-600 transition-colors",
-        on=@luna_dom.events().click(fn(_) { is_open.update(fn(v) { not(v) }) }),
+        on=@luna_dom.events().click(fn(_) { is_open.update(fn(v) { !v }) }),
         [@luna_dom.text("Preset")],
       ),
       @luna_dom.show(fn() { is_open.get() }, fn() {

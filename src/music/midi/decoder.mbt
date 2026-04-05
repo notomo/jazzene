@@ -205,7 +205,7 @@ pub fn decode_midi(bytes : Array[Int]) -> ImportedMidi? {
             }
           }
           (0x58, 4) =>
-            if not(found_time) {
+            if !found_time {
               found_time = true
               let nn = bytes[mstart]
               let dd = bytes[mstart + 1]
@@ -215,7 +215,7 @@ pub fn decode_midi(bytes : Array[Int]) -> ImportedMidi? {
               })
             }
           (0x59, 2) =>
-            if not(found_key) {
+            if !found_key {
               found_key = true
               key_sig = sf_to_key(bytes[mstart])
             }

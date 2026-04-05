@@ -92,7 +92,7 @@ pub fn generate_walking_bass_sounds(
     let beats_per_chord = beats_in_measure.to_double() / n_chords.to_double()
     // Find next measure's first chord root for chromatic approach
     let next_root_pc : Int? = if mi + 1 < measures.length() &&
-      not(measures[mi + 1].chords.is_empty()) {
+      !measures[mi + 1].chords.is_empty() {
       Some(measures[mi + 1].chords[0].root.midi() % 12)
     } else {
       None

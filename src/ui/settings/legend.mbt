@@ -20,7 +20,7 @@ fn legend_section(
     toggle_switch(
       label="Technique Hints",
       value=fn() { show_technique_hints.get() },
-      on_toggle=fn() { show_technique_hints.update(not) },
+      on_toggle=fn() { show_technique_hints.update(fn(v) { !v }) },
     ),
     @luna_dom.div(
       class="flex flex-col gap-1",

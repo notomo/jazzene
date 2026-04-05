@@ -10,7 +10,7 @@ pub fn select_melody_sounds(
     @music.Off => []
     @music.On | @music.Silent =>
       match imported_midi {
-        Some(data) if not(data.melody_sounds.is_empty()) =>
+        Some(data) if !data.melody_sounds.is_empty() =>
           adapt_pitched(data, bpm, key, data.melody_sounds)
         _ => full_sounds
       }
@@ -30,7 +30,7 @@ pub fn select_measures(
   match melody_mode {
     @music.On | @music.Silent =>
       match imported_midi {
-        Some(data) if not(data.melody_sounds.is_empty()) => {
+        Some(data) if !data.melody_sounds.is_empty() => {
           let adapted = adapt_pitched(data, bpm, key, data.melody_sounds)
           @music.sounds_to_measures(
             adapted, bpm, time_signature, measure_count, key,
@@ -56,7 +56,7 @@ pub fn select_drum_sounds(
   measure_count : Int,
   time_signature : @music.TimeSignature,
 ) -> Array[@music.ScheduledSound] {
-  if not(style.drums_enabled) {
+  if !style.drums_enabled {
     return []
   }
   match style.drum_pattern {
@@ -116,7 +116,7 @@ pub fn select_bass_sounds(
   bpm : Int,
   key : @music.KeySignature,
 ) -> Array[@music.ScheduledSound] {
-  if not(style.bass_enabled) {
+  if !style.bass_enabled {
     return []
   }
   match style.bass_style {

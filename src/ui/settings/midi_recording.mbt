@@ -35,7 +35,7 @@ pub fn midi_recording(
           " bg-slate-900 border-slate-600 text-slate-300 hover:bg-slate-700"
         }
       },
-      on=@luna_dom.events().click(fn(_) { is_recording.update(not) }),
+      on=@luna_dom.events().click(fn(_) { is_recording.update(fn(v) { !v }) }),
       attrs=[("aria-label", @luna_dom.Attr::AttrString("toggle recording"))],
       [
         @luna_dom.span(

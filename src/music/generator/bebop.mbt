@@ -25,7 +25,7 @@ fn select_bebop_approach_midi(
   pitch_max : Int,
 ) -> @music.MidiNumber? {
   let bebop_pcs = chord.bebop_passing_tones().map(fn(t) { t.pitch_class() })
-  guard not(bebop_pcs.is_empty()) else { return None }
+  guard !bebop_pcs.is_empty() else { return None }
   let candidates = [-1, 1]
     .iter()
     .filter_map(fn(offset) {
@@ -37,7 +37,7 @@ fn select_bebop_approach_midi(
       bebop_pcs.contains(m.pitch_class())
     })
     .collect()
-  guard not(candidates.is_empty()) else { return None }
+  guard !candidates.is_empty() else { return None }
   Some(candidates[0])
 }
 

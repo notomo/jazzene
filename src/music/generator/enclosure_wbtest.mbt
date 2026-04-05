@@ -230,9 +230,9 @@ test "select_enclosure_midis excludes chord tones when alternatives exist" {
     let upper_pc = upper.value % 12
     let lower_pc = lower.value % 12
     // Upper (+1 or +2): Db(1) and D(2) are not chord tones → must be non-chord
-    assert_true(not(chord_tone_pcs.contains(upper_pc)))
+    assert_true(!chord_tone_pcs.contains(upper_pc))
     // Lower (-1 = B(11) is chord tone, -2 = Bb(10) is not) → falls back to Bb
-    assert_true(not(chord_tone_pcs.contains(lower_pc)))
+    assert_true(!chord_tone_pcs.contains(lower_pc))
   }
 }
 

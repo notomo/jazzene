@@ -151,7 +151,7 @@ test "generate_neighbor_ornament neighbor is not a chord tone pitch class" {
     // Neighbor should not be a chord tone pitch class (when alternatives exist)
     // For C4 (±1,±2) = B3(11), Db4(1), D4(2), Eb4(3) — B(11) is chord tone,
     // but Db(1), D(2), Eb(3) are not, so neighbor should be one of those
-    let is_non_chord = not(chord_tone_pcs.contains(neighbor_pc))
+    let is_non_chord = !chord_tone_pcs.contains(neighbor_pc)
     assert_true(is_non_chord)
   }
 }

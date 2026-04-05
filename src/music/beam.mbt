@@ -27,7 +27,7 @@ pub fn find_beam_groups(
     let beat_index = start_beat.to_int()
     let same_group = if current_group.is_empty() {
       true
-    } else if not(same_triplet_kind) {
+    } else if !same_triplet_kind {
       false
     } else if is_triplet {
       beat_index == current_beat_index

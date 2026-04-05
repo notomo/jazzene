@@ -13,11 +13,10 @@ import {
   "internal/jazzene/ui/sheet",
   "internal/jazzene/ui/piano_roll",
   "internal/jazzene/music/midi" @midi,
+  "moonbitlang/core/string",
   "moonbitlang/core/strconv",
   "internal/jazzene/ui/icon" @icon,
   "internal/jazzene/ui/settings" @settings,
 }
 
-options(
-  "supported-targets": "js",
-)
+supported_targets = "js"

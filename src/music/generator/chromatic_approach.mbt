@@ -33,10 +33,10 @@ fn select_chromatic_approach_midi(
     })
     .filter(fn(m) { m.value >= pitch_min && m.value <= pitch_max })
     .collect()
-  guard not(all_candidates.is_empty()) else { return anchor_midi }
+  guard !all_candidates.is_empty() else { return anchor_midi }
   let non_chord_candidates : Array[@music.MidiNumber] = all_candidates
     .iter()
-    .filter(fn(m) { not(chord_tone_pcs.contains(m.pitch_class())) })
+    .filter(fn(m) { !chord_tone_pcs.contains(m.pitch_class()) })
     .collect()
   let pool = if non_chord_candidates.is_empty() {
     all_candidates

@@ -5,7 +5,8 @@ import {
   "mizchi/js/web/http" @http,
 }
 
+supported_targets = "js"
+
 options(
   "is-main": false,
-  "supported-targets": "js",
 )

@@ -12,6 +12,4 @@ import {
   "mizchi/js/browser/observer" @js_observer,
 }
 
-options(
-  "supported-targets": "js",
-)
+supported_targets = "js"

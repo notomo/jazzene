@@ -131,8 +131,8 @@ pub fn Chord::scale_tones(self : Chord) -> Array[MidiNumber] {
   .filter_map(fn(interval) {
     let midi_value = root_midi + interval
     let pitch_class = midi_value % 12
-    guard not(chord_pitch_classes.contains(pitch_class)) else { return None }
-    guard not(tension_pitch_classes.contains(pitch_class)) else { return None }
+    guard !chord_pitch_classes.contains(pitch_class) else { return None }
+    guard !tension_pitch_classes.contains(pitch_class) else { return None }
     MidiNumber::new(midi_value)
   })
   .collect()

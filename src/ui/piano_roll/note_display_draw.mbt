@@ -200,7 +200,7 @@ fn draw_approach_arrows(
       Some(ChromaticApproach | Enclosure) => true
       _ => false
     }
-    if not(is_approach) {
+    if !is_approach {
       continue
     }
     let start_offset = note.start_ms - current_pos
@@ -383,7 +383,7 @@ fn draw_key_grid_lines(
 ) -> Unit {
   key_areas
   .iter()
-  .filter(fn(a) { not(a.is_black) })
+  .filter(fn(a) { !a.is_black })
   .each(fn(area) {
     ctx.fillStyle = match area.midi % 12 {
       0 => OCTAVE_LINE_COLOR

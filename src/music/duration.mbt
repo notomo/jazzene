@@ -77,8 +77,8 @@ pub fn Duration::parse(input : String) -> Duration? {
   }
 
   try {
-    let minutes = @strconv.parse_int(parts[0])
-    let seconds = @strconv.parse_int(parts[1])
+    let minutes = @string.parse_int(parts[0])
+    let seconds = @string.parse_int(parts[1])
     if minutes >= 0 && seconds >= 0 && seconds < 60 {
       let total_ms = (minutes * 60 + seconds).to_double() * 1000.0
       Some(Duration::from_milliseconds(total_ms))

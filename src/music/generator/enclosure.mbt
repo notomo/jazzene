@@ -44,7 +44,7 @@ fn select_enclosure_midis(
   } else {
     let upper_non_chord : Array[@music.MidiNumber] = upper_all
       .iter()
-      .filter(fn(m) { not(chord_tone_pcs.contains(m.pitch_class())) })
+      .filter(fn(m) { !chord_tone_pcs.contains(m.pitch_class()) })
       .collect()
     if upper_non_chord.is_empty() {
       upper_all
@@ -66,7 +66,7 @@ fn select_enclosure_midis(
   } else {
     let lower_non_chord : Array[@music.MidiNumber] = lower_all
       .iter()
-      .filter(fn(m) { not(chord_tone_pcs.contains(m.pitch_class())) })
+      .filter(fn(m) { !chord_tone_pcs.contains(m.pitch_class()) })
       .collect()
     if lower_non_chord.is_empty() {
       lower_all

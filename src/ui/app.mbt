@@ -43,7 +43,7 @@ pub fn setup_error_overlay() -> Unit {
   .as_event_target()
   .addEventListener("error", fn(ev) {
     let error = ev._get("error")
-    let detail = if not(@js.is_nullish(error)) {
+    let detail = if !@js.is_nullish(error) {
       let msg : String = error._get("message").cast()
       let stack = error._get("stack")
       if @js.is_nullish(stack) {
@@ -108,7 +108,7 @@ pub fn setup_loop(
   }
 
   let _ = @signals.effect(fn() {
-    if not(is_playing.get()) {
+    if !is_playing.get() {
       cancel()
       return
     }
@@ -164,7 +164,7 @@ pub fn render(state : AppState) -> Unit {
   } = state
   let on_chord_click : (Int, Int) -> Unit = fn(mi, ci) {
     let dm = degree_measures.peek()
-    guard not(dm.is_empty()) else { return }
+    guard !dm.is_empty() else { return }
     // full_measures has a leading rest at index 0, so music measures start at 1
     let degree_mi = (mi - 1 + dm.length()) % dm.length()
     editing_chord.set(
@@ -462,18 +462,16 @@ fn lock_landscape() -> Unit {
         |> ignore
       }
       let go_fullscreen_and_lock : () -> Unit = fn() {
-        if not(
-            @js.is_nullish(
-              @js_dom.document().as_any()._get("fullscreenElement"),
-            ),
+        if !@js.is_nullish(
+            @js_dom.document().as_any()._get("fullscreenElement"),
           ) {
           lock()
           return
         }
         let el = @js_dom.document().as_any()._get("documentElement")
-        let req_method = if not(@js.is_nullish(el._get("requestFullscreen"))) {
+        let req_method = if !@js.is_nullish(el._get("requestFullscreen")) {
           Some("requestFullscreen")
-        } else if not(@js.is_nullish(el._get("webkitRequestFullscreen"))) {
+        } else if !@js.is_nullish(el._get("webkitRequestFullscreen")) {
           Some("webkitRequestFullscreen")
         } else {
           None
@@ -502,10 +500,8 @@ fn lock_landscape() -> Unit {
       @js_dom.document()
       .as_event_target()
       .addEventListener("fullscreenchange", fn(_) {
-        if not(
-            @js.is_nullish(
-              @js_dom.document().as_any()._get("fullscreenElement"),
-            ),
+        if !@js.is_nullish(
+            @js_dom.document().as_any()._get("fullscreenElement"),
           ) {
           lock()
         }

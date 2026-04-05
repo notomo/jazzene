@@ -290,9 +290,9 @@ pub fn AppState::new() -> AppState {
   }
   // When recording stops, commit the buffer as a new RecordedLine
   let _ = @signals.effect(fn() {
-    if not(is_recording.get()) {
+    if !is_recording.get() {
       let sounds = recording_buffer.val
-      if not(sounds.is_empty()) {
+      if !sounds.is_empty() {
         let id = next_line_id.val
         next_line_id.val = id + 1
         recorded_lines.update(fn(lines) {
@@ -330,7 +330,7 @@ pub fn AppState::new() -> AppState {
   // When chords are entered, switch any Imported accompaniment style to generated
   // and clear imported MIDI so melody also falls back to generated
   let _ = @signals.effect(fn() {
-    if not(degree_measures.get().is_empty()) {
+    if !degree_measures.get().is_empty() {
       let style = jazz_style.peek()
       jazz_style.set(@music.JazzStyle::{
         ..style,

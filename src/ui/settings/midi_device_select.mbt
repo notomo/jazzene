@@ -8,7 +8,7 @@ pub fn midi_device_select(
   on_note_on? : (@music.MidiNumber) -> Unit = fn(_) {  },
   on_note_off? : (@music.MidiNumber) -> Unit = fn(_) {  },
 ) -> @luna_dom.DomNode {
-  if not(@web_midi.is_midi_supported()) {
+  if !@web_midi.is_midi_supported() {
     @luna_dom.create_element(
       "select",
       [

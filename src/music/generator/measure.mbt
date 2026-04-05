@@ -517,18 +517,16 @@ fn handle_playing(
       )
       random_int(100) < prob
     })
-  guard not(should_end_early) else {
+  guard !should_end_early else {
     return Continue(MeasureState::{ ..state, phrase: Resting })
   }
   // Try to generate a triplet group (3 eighth triplets = 1 beat)
-  guard not(
-    should_generate_triplet(
-      state.measure_pos,
-      notes_left,
-      remaining,
-      settings.triplet_probability,
-      random_int,
-    ),
+  guard !should_generate_triplet(
+    state.measure_pos,
+    notes_left,
+    remaining,
+    settings.triplet_probability,
+    random_int,
   ) else {
     return Continue(
       generate_triplet_group(
@@ -553,16 +551,14 @@ fn handle_playing(
   match midi_opt {
     Some(midi) => {
       // Try to generate a sixteenth-note run ornament (P1 P2 P3 CT) when we have a chord tone
-      guard not(
-        tone_origin is Some(@music.ChordTone) &&
+      guard !(tone_origin is Some(@music.ChordTone) &&
         should_generate_sixteenth_run(
           state.measure_pos,
           notes_left,
           remaining,
           settings.sixteenth_run_probability,
           random_int,
-        ),
-      ) else {
+        )) else {
         return Continue(
           generate_sixteenth_run(
             state, midi, settings, update_accidental, random_int, notes_left,
@@ -570,15 +566,13 @@ fn handle_playing(
         )
       }
       // Try to generate a neighbor ornament (CT→N→CT) when we have a chord tone
-      guard not(
-        tone_origin is Some(@music.ChordTone) &&
+      guard !(tone_origin is Some(@music.ChordTone) &&
         should_generate_neighbor_ornament(
           notes_left,
           remaining,
           settings.neighbor_ornament_probability,
           random_int,
-        ),
-      ) else {
+        )) else {
         return Continue(
           generate_neighbor_ornament(
             state, midi, chord, remaining, settings, update_accidental, random_int,
@@ -588,15 +582,13 @@ fn handle_playing(
       }
       // Try to generate an enclosure ornament (EN→EN→CT) when we have a chord tone
       // Only fires if neighbor ornament did not fire
-      guard not(
-        tone_origin is Some(@music.ChordTone) &&
+      guard !(tone_origin is Some(@music.ChordTone) &&
         should_generate_enclosure_ornament(
           notes_left,
           remaining,
           settings.enclosure_ornament_probability,
           random_int,
-        ),
-      ) else {
+        )) else {
         return Continue(
           generate_enclosure_ornament(
             state, midi, chord, remaining, settings, update_accidental, random_int,
@@ -606,8 +598,7 @@ fn handle_playing(
       }
       // Try to generate a bebop passing tone ornament (PT→CT)
       // Only fires if chord has a bebop passing tone adjacent to the selected note
-      guard not(
-        tone_origin is Some(@music.ChordTone) &&
+      guard !(tone_origin is Some(@music.ChordTone) &&
         select_bebop_approach_midi(
           midi,
           chord,
@@ -620,8 +611,7 @@ fn handle_playing(
           remaining,
           settings.bebop_ornament_probability,
           random_int,
-        ),
-      ) else {
+        )) else {
         return Continue(
           generate_bebop_ornament(
             state, midi, chord, remaining, settings, update_accidental, random_int,
@@ -631,15 +621,13 @@ fn handle_playing(
       }
       // Try to generate a chromatic approach ornament (AT→CT) when we have a chord tone
       // Only fires if neither neighbor, enclosure nor bebop ornament fired
-      guard not(
-        tone_origin is Some(@music.ChordTone) &&
+      guard !(tone_origin is Some(@music.ChordTone) &&
         should_generate_chromatic_approach_ornament(
           notes_left,
           remaining,
           settings.chromatic_approach_ornament_probability,
           random_int,
-        ),
-      ) else {
+        )) else {
         return Continue(
           generate_chromatic_approach_ornament(
             state, midi, chord, remaining, settings, update_accidental, random_int,
@@ -762,7 +750,7 @@ fn tones_in_pitch_range(
   guard in_range.is_empty() else { return in_range }
   // Fallback: pick the closest tone to the range midpoint
   let all = extend_across_octaves(tones)
-  guard not(all.is_empty()) else { return [] }
+  guard !all.is_empty() else { return [] }
   let mid = (pitch_min + pitch_max) / 2
   let closest = all
     .iter()
@@ -817,7 +805,7 @@ fn filter_by_interval(
   prev : @music.MidiNumber,
   max_interval : Int,
 ) -> Array[@music.MidiNumber] {
-  guard not(tones.is_empty()) else { return [] }
+  guard !tones.is_empty() else { return [] }
   let filtered : Array[@music.MidiNumber] = tones
     .iter()
     .filter(fn(tone) { prev.distance(tone) <= max_interval })

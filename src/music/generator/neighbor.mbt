@@ -36,11 +36,11 @@ fn select_neighbor_midi(
     })
     .filter(fn(m) { m.value >= pitch_min && m.value <= pitch_max })
     .collect()
-  guard not(chromatic_candidates.is_empty()) else { return anchor_midi }
+  guard !chromatic_candidates.is_empty() else { return anchor_midi }
   // Exclude chord tones (they would defeat the ornament purpose)
   let non_chord_candidates : Array[@music.MidiNumber] = chromatic_candidates
     .iter()
-    .filter(fn(m) { not(chord_tone_pcs.contains(m.pitch_class())) })
+    .filter(fn(m) { !chord_tone_pcs.contains(m.pitch_class()) })
     .collect()
   let pool = if non_chord_candidates.is_empty() {
     chromatic_candidates

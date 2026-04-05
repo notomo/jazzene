@@ -18,10 +18,7 @@ fn drums_section(
         value=fn() { jazz_style.get().drums_enabled },
         on_toggle=fn() {
           jazz_style.update(fn(style) {
-            @music.JazzStyle::{
-              ..style,
-              drums_enabled: not(style.drums_enabled),
-            }
+            @music.JazzStyle::{ ..style, drums_enabled: !style.drums_enabled }
           })
         },
       ),

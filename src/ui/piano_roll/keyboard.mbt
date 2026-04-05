@@ -158,7 +158,7 @@ fn draw_keyboard(
   // Draw white keys first (background layer)
   key_areas
   .iter()
-  .filter(fn(a) { not(a.is_black) })
+  .filter(fn(a) { !a.is_black })
   .each(fn(area) {
     ctx.fillStyle = match
       (playing_notes[area.midi], backing_playing_notes[area.midi]) {

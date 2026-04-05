@@ -72,7 +72,7 @@ fn commit_params(params : @js_url.URLSearchParams) -> Unit {
 ///|
 fn get_initial_int(name : String, default : Int) -> Int {
   match get_query_param(name) {
-    Some(value) => (try? @strconv.parse_int(value)).unwrap_or(default)
+    Some(value) => (try? @string.parse_int(value)).unwrap_or(default)
     None => default
   }
 }
@@ -171,7 +171,7 @@ pub fn get_initial_loop_a_measure() -> Int {
 ///|
 pub fn get_initial_loop_b_measure(measure_count : Int) -> Int {
   match get_query_param("loop_b") {
-    Some(value) => (try? @strconv.parse_int(value)).unwrap_or(measure_count)
+    Some(value) => (try? @string.parse_int(value)).unwrap_or(measure_count)
     None => measure_count
   }
 }
@@ -306,7 +306,7 @@ fn comping_style_from_string(s : String) -> @music.CompingStyle {
 ///|
 /// Serialize DrumPatternStyle (with enabled flag) to a token.
 fn drums_to_string(enabled : Bool, style : @music.DrumPatternStyle) -> String {
-  if not(enabled) {
+  if !enabled {
     "off"
   } else {
     match style {
@@ -330,7 +330,7 @@ fn drums_from_string(s : String) -> (Bool, @music.DrumPatternStyle) {
 ///|
 /// Serialize BassStyle (with enabled flag) to a token.
 fn bass_to_string(enabled : Bool, style : @music.BassStyle) -> String {
-  if not(enabled) {
+  if !enabled {
     "off"
   } else {
     match style {

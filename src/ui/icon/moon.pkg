@@ -2,6 +2,4 @@ import {
   "mizchi/luna/dom" @luna_dom,
 }
 
-options(
-  "supported-targets": "js",
-)
+supported_targets = "js"

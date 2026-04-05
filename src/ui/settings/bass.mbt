@@ -19,7 +19,7 @@ fn bass_section(
         value=fn() { jazz_style.get().bass_enabled },
         on_toggle=fn() {
           jazz_style.update(fn(style) {
-            @music.JazzStyle::{ ..style, bass_enabled: not(style.bass_enabled) }
+            @music.JazzStyle::{ ..style, bass_enabled: !style.bass_enabled }
           })
         },
       ),

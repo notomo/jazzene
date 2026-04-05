@@ -32,7 +32,7 @@ fn ViewState::from_query_string(s : String) -> ViewState {
   let show_sheet = parts.contains("sheet")
   let show_piano_roll = parts.contains("pianoroll")
   let show_settings = parts.contains("setting")
-  if not(show_sheet) && not(show_piano_roll) {
+  if !show_sheet && !show_piano_roll {
     { ..ViewState::default(), show_settings, }
   } else {
     { show_sheet, show_piano_roll, show_settings }
@@ -115,7 +115,7 @@ fn view_mode_select(
     on=@luna_dom.events().click(fn(_) {
       view_state.set({
         ..view_state.get(),
-        show_settings: not(view_state.get().show_settings),
+        show_settings: !view_state.get().show_settings,
       })
     }),
     [@icon.settings_icon(view_state.get().show_settings)],

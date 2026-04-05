@@ -102,7 +102,7 @@ fn beam_endpoints(
   } else {
     let is_extreme_at_edge = (min_y == first_note_y || min_y == last_note_y) &&
       (max_y == first_note_y || max_y == last_note_y)
-    not(is_extreme_at_edge)
+    !is_extreme_at_edge
   }
   if should_be_horizontal {
     slope = 0.0
@@ -176,7 +176,7 @@ fn find_beam_x_range(
     match positioned[idx].1.midi {
       Some(_) => {
         let stem_x = note_positions[idx] + offset
-        if not(found_first) {
+        if !found_first {
           first_x = stem_x
           found_first = true
         }

@@ -22,7 +22,7 @@ fn melody_techniques_section(
             ..style,
             techniques: @music.Techniques::{
               ..t,
-              tension_tones: not(t.tension_tones),
+              tension_tones: !t.tension_tones,
             },
           }
         })
@@ -38,7 +38,7 @@ fn melody_techniques_section(
             ..style,
             techniques: @music.Techniques::{
               ..t,
-              chromatic_approach: not(t.chromatic_approach),
+              chromatic_approach: !t.chromatic_approach,
             },
           }
         })
@@ -52,7 +52,7 @@ fn melody_techniques_section(
           let t = style.techniques
           @music.JazzStyle::{
             ..style,
-            techniques: @music.Techniques::{ ..t, enclosure: not(t.enclosure) },
+            techniques: @music.Techniques::{ ..t, enclosure: !t.enclosure },
           }
         })
       },
@@ -65,10 +65,7 @@ fn melody_techniques_section(
           let t = style.techniques
           @music.JazzStyle::{
             ..style,
-            techniques: @music.Techniques::{
-              ..t,
-              syncopation: not(t.syncopation),
-            },
+            techniques: @music.Techniques::{ ..t, syncopation: !t.syncopation },
           }
         })
       },
@@ -81,7 +78,7 @@ fn melody_techniques_section(
           let t = style.techniques
           @music.JazzStyle::{
             ..style,
-            techniques: @music.Techniques::{ ..t, triplets: not(t.triplets) },
+            techniques: @music.Techniques::{ ..t, triplets: !t.triplets },
           }
         })
       },
@@ -96,7 +93,7 @@ fn melody_techniques_section(
             ..style,
             techniques: @music.Techniques::{
               ..t,
-              bebop_scales: not(t.bebop_scales),
+              bebop_scales: !t.bebop_scales,
             },
           }
         })
@@ -112,7 +109,7 @@ fn melody_techniques_section(
             ..style,
             techniques: @music.Techniques::{
               ..t,
-              neighbor_tones: not(t.neighbor_tones),
+              neighbor_tones: !t.neighbor_tones,
             },
           }
         })
@@ -128,7 +125,7 @@ fn melody_techniques_section(
             ..style,
             techniques: @music.Techniques::{
               ..t,
-              sixteenth_runs: not(t.sixteenth_runs),
+              sixteenth_runs: !t.sixteenth_runs,
             },
           }
         })

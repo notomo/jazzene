@@ -35,7 +35,7 @@ pub fn compute_sheet_measure(
   // Get positioned notes and apply ottava
   let positioned = measure.positioned_notes()
   let apply_8va = should_apply_8va(positioned)
-  let apply_8vb = not(apply_8va) && should_apply_8vb(positioned, key)
+  let apply_8vb = !apply_8va && should_apply_8vb(positioned, key)
   let ottava = if apply_8va {
     OttavaAlta
   } else if apply_8vb {

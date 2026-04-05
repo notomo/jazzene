@@ -30,7 +30,7 @@ pub fn[T : Eq] segmented_buttons(
           ])
         },
         on=@luna_dom.events().click(fn(_) {
-          if not(is_disabled(value)) {
+          if !is_disabled(value) {
             on_select(value)
           }
         }),
