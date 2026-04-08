@@ -75,3 +75,13 @@ test("should delete multiple chords consecutively via Backspace key", async ({
   await page.keyboard.press("Backspace");
   await expect(page.getByLabel(/^chord badge/)).toHaveCount(initialCount - 2);
 });
+
+test("should change chord via diatonic shortcut button", async ({ page }) => {
+  const jazzene = await openPage({ page });
+
+  await jazzene.getChordBadge("IIm7").click();
+  await expect(jazzene.getChordEditorDialog()).toBeVisible();
+
+  await jazzene.getDiatonicShortcutButton("VIm7").click();
+  await expect(jazzene.getChordBadge("VIm7")).toBeVisible();
+});

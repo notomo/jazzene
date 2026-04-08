@@ -30,6 +30,10 @@ export async function openPage({
     getAddChordButton: () => page.getByLabel("add chord"),
     getDeleteChordButton: () =>
       page.getByLabel("chord editor dialog").getByLabel("delete chord"),
+    getDiatonicShortcutButton: (label: string) =>
+      page
+        .getByLabel("chord editor dialog")
+        .getByTitle(`Set to ${label}`),
 
     getPlayButton: () => page.getByRole("button", { name: "▶" }),
     getStopButton: () => page.getByRole("button", { name: "■" }),

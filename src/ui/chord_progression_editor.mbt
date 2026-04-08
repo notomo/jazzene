@@ -601,6 +601,62 @@ pub fn chord_editor_dialog(
           ]),
           // Divider
           @luna_dom.div(class="border-t border-slate-600", []),
+          // Diatonic chord shortcuts
+          @luna_dom.div(class="flex flex-col gap-1", [
+            @luna_dom.div(
+              class="text-xs text-slate-400 uppercase tracking-wide",
+              [@luna_dom.text("Diatonic")],
+            ),
+            @luna_dom.div(class="grid grid-cols-7 gap-1 w-full", [
+              @luna_dom.for_each(
+                fn() {
+                  [
+                    (@music.I, @music.Major7),
+                    (@music.II, @music.Minor7),
+                    (@music.III, @music.Minor7),
+                    (@music.IV, @music.Major7),
+                    (@music.V, @music.Dominant7),
+                    (@music.VI, @music.Minor7),
+                    (@music.VII, @music.HalfDiminished),
+                  ]
+                },
+                fn(item, _) {
+                  let (degree, quality) = item
+                  let label = degree.to_roman() + quality.to_string()
+                  @luna_dom.button(
+                    class="px-1 py-1 rounded text-xs transition-colors border border-slate-600 text-slate-400 hover:border-amber-400 hover:text-amber-200 cursor-pointer w-full",
+                    attrs=[
+                      (
+                        "title",
+                        @luna_dom.Attr::AttrString(
+                          "Set to \{degree.to_roman()}\{quality.to_parse_string()}",
+                        ),
+                      ),
+                    ],
+                    on=@luna_dom.events().click(fn(_) {
+                      match editing_chord.peek() {
+                        None => ()
+                        Some(ec) =>
+                          degree_measures.update(fn(measures) {
+                            match get_chord_at(measures, ec) {
+                              None => measures
+                              Some(chord) =>
+                                update_chord_at(measures, ec, @music.DegreeChord::{
+                                  ..chord,
+                                  accidental: 0,
+                                  degree,
+                                  quality,
+                                })
+                            }
+                          })
+                      }
+                    }),
+                    [@luna_dom.text(label)],
+                  )
+                },
+              ),
+            ]),
+          ]),
           // Degree selection
           @luna_dom.div(class="flex flex-col gap-1", [
             @luna_dom.div(
