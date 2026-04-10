@@ -364,7 +364,7 @@ pub fn render(state : AppState) -> Unit {
         ],
       ),
       @luna_dom.div(
-        class="grid grid-cols-[1fr_auto_1fr] items-stretch px-3 py-1.5 bg-slate-800 border-t-2 border-slate-700",
+        class="grid grid-cols-[1fr_auto_1fr] items-stretch px-3 pt-1.5 pb-4 bg-slate-800 border-t-2 border-slate-700",
         [
           @luna_dom.div(class="justify-self-start flex items-center gap-2", [
             volume_input(volume),
