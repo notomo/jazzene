@@ -250,7 +250,6 @@ pub fn render(state : AppState) -> Unit {
             @luna_dom.div(class="flex gap-2 lg:gap-4 items-center shrink-0", [
               seed_input(seed),
               measure_count_input(measure_count, loop_b_measure),
-              bpm_input(bpm),
             ]),
           ]),
         ],
@@ -367,8 +366,9 @@ pub fn render(state : AppState) -> Unit {
       @luna_dom.div(
         class="grid grid-cols-[1fr_auto_1fr] items-stretch px-3 py-1.5 bg-slate-800 border-t-2 border-slate-700",
         [
-          @luna_dom.div(class="justify-self-start flex items-center", [
+          @luna_dom.div(class="justify-self-start flex items-center gap-2", [
             volume_input(volume),
+            bpm_input(bpm),
           ]),
           play_pause_button(is_playing),
           @luna_dom.div(
