@@ -2,7 +2,12 @@
 /// Duration type that stores time as seconds (Double)
 pub struct Duration {
   seconds : Double
-} derive(Eq, Show)
+} derive(Eq, Debug)
+
+///|
+pub impl Show for Duration with output(self, logger) {
+  self.to_repr().output(logger)
+}
 
 ///|
 /// Create a Duration from milliseconds (as Double)

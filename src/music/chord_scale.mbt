@@ -18,7 +18,12 @@ pub(all) enum ChordScale {
   BebopMajor // Ionian + #5 passing tone (Imaj7 bebop)
   HarmonicMinor // Harmonic minor (m(maj7))
   MelodicMinor // Melodic minor ascending (mMaj7, m6)
-} derive(Eq, Show)
+} derive(Eq, Debug)
+
+///|
+pub impl Show for ChordScale with output(self, logger) {
+  self.to_repr().output(logger)
+}
 
 ///|
 /// Scale intervals (semitones from root) for each ChordScale.

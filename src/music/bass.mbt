@@ -13,7 +13,12 @@ pub(all) enum BassStyle {
   RootFifth // Root on beat 1, 5th on beat 3; rests on beats 2 and 4
   WalkingBass // Full walking bass: chord tones + approach tones, one note per beat
   Imported // Imported from MIDI file; caller provides sounds directly
-} derive(Eq, Show)
+} derive(Eq, Debug)
+
+///|
+pub impl Show for BassStyle with output(self, logger) {
+  self.to_repr().output(logger)
+}
 
 ///|
 /// Comfortable MIDI range for bass (E1 to E3)

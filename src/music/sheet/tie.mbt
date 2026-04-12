@@ -5,7 +5,12 @@ pub struct SheetTieArc {
   end_x : Double
   note_y : Double
   stem_up : Bool
-} derive(Show)
+} derive(Debug)
+
+///|
+pub impl Show for SheetTieArc with output(self, logger) {
+  self.to_repr().output(logger)
+}
 
 ///|
 pub fn compute_tie_arcs(

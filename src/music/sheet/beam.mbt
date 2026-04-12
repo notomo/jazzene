@@ -13,7 +13,12 @@ pub struct SheetBeamStem {
   x : Double
   y1 : Double
   y2 : Double
-} derive(Show)
+} derive(Debug)
+
+///|
+pub impl Show for SheetBeamStem with output(self, logger) {
+  self.to_repr().output(logger)
+}
 
 ///|
 /// Pre-computed beam rest data
@@ -21,7 +26,12 @@ pub struct SheetBeamRest {
   x : Double
   y : Double
   duration : @music.NoteDuration
-} derive(Show)
+} derive(Debug)
+
+///|
+pub impl Show for SheetBeamRest with output(self, logger) {
+  self.to_repr().output(logger)
+}
 
 ///|
 /// Pre-computed beam group layout data
@@ -37,7 +47,12 @@ pub struct SheetBeamGroup {
   triplet_label_x : Double
   triplet_label_y : Double
   secondary_beams : Array[(Double, Double, Double, Double)]
-} derive(Show)
+} derive(Debug)
+
+///|
+pub impl Show for SheetBeamGroup with output(self, logger) {
+  self.to_repr().output(logger)
+}
 
 ///|
 /// Determine stem direction for a beam group.

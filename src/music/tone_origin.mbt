@@ -10,7 +10,12 @@ pub(all) enum ToneOrigin {
   PassingTone // Passing tone (connecting scale tone)
   Imported // Note imported from a MIDI file
   Recorded // Note captured from live MIDI input recording
-} derive(Eq, Show)
+} derive(Eq, Debug)
+
+///|
+pub impl Show for ToneOrigin with output(self, logger) {
+  self.to_repr().output(logger)
+}
 
 ///|
 /// Relative dynamic intensity (0.0–1.0).

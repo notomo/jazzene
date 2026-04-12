@@ -6,7 +6,12 @@
 pub(all) struct EditingChord {
   measure_idx : Int
   chord_idx : Int
-} derive(Eq, Show)
+} derive(Eq, Debug)
+
+///|
+pub impl Show for EditingChord with output(self, logger) {
+  self.to_repr().output(logger)
+}
 
 ///|
 /// Get the DegreeChord at the given indices from the measures array

@@ -4,7 +4,12 @@ struct ChordSegment {
   chord : @music.Chord
   start_beat : Double
   end_beat : Double
-} derive(Eq, Show)
+} derive(Eq, Debug)
+
+///|
+pub impl Show for ChordSegment with output(self, logger) {
+  self.to_repr().output(logger)
+}
 
 ///|
 /// Phrase state for phrase-based note generation
@@ -109,7 +114,12 @@ struct ImprovisationConfig {
   sixteenth_run_probability : Int // 0-100, chance of generating 4-note sixteenth run (P1 P2 P3 CT) ornament (default: 15)
   pitch_min : Int // Minimum MIDI note, inclusive (default 48 = C3)
   pitch_max : Int // Maximum MIDI note, inclusive (default 84 = C6)
-} derive(Eq, Show)
+} derive(Eq, Debug)
+
+///|
+pub impl Show for ImprovisationConfig with output(self, logger) {
+  self.to_repr().output(logger)
+}
 
 ///|
 /// Create default settings with given seed

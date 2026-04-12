@@ -3,7 +3,12 @@
 pub(all) enum SoundEvent {
   Note(midi~ : MidiNumber, duration~ : NoteDuration)
   Rest(duration~ : NoteDuration)
-} derive(Eq, Show)
+} derive(Eq, Debug)
+
+///|
+pub impl Show for SoundEvent with output(self, logger) {
+  self.to_repr().output(logger)
+}
 
 ///|
 /// Get note duration from either Note or Rest

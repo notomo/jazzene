@@ -4,7 +4,7 @@ pub struct SwingConfig {
   /// Ratio for eighth note division within a beat
   /// 0.5 = straight (equal 8ths), 0.67 = triplet feel, 0.75 = heavy swing
   ratio : Double
-} derive(Eq, Show)
+} derive(Eq, Debug)
 
 ///|
 /// Create a straight feel (no swing)

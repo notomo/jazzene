@@ -2,7 +2,12 @@
 /// MIDI number newtype with validation (0-127)
 pub struct MidiNumber {
   value : Int
-} derive(Eq, Show)
+} derive(Eq, Debug)
+
+///|
+pub impl Show for MidiNumber with output(self, logger) {
+  self.to_repr().output(logger)
+}
 
 ///|
 /// Create MidiNumber with validation

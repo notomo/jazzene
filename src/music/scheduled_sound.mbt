@@ -6,7 +6,12 @@ pub(all) struct ScheduledSound {
   start_time : Duration
   tone_origin : ToneOrigin?
   beat_position : Double // beat within measure (0.0 = beat 1, 1.0 = beat 2, ...)
-} derive(Eq, Show)
+} derive(Eq, Debug)
+
+///|
+pub impl Show for ScheduledSound with output(self, logger) {
+  self.to_repr().output(logger)
+}
 
 ///|
 /// Get MIDI value if this is a Note sound

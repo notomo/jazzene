@@ -13,7 +13,12 @@ pub(all) enum ChordRoot {
   A
   ASharp // A# / Bb
   B
-} derive(Eq, Show)
+} derive(Eq, Debug)
+
+///|
+pub impl Show for ChordRoot with output(self, logger) {
+  self.to_repr().output(logger)
+}
 
 ///|
 /// Parse string to note name

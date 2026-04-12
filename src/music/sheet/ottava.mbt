@@ -13,7 +13,12 @@ pub(all) enum OttavaMarking {
   OttavaNone
   OttavaAlta
   OttavaBassa
-} derive(Eq, Show)
+} derive(Eq, Debug)
+
+///|
+pub impl Show for OttavaMarking with output(self, logger) {
+  self.to_repr().output(logger)
+}
 
 ///|
 /// Returns true if any pitched note in the measure has MIDI >= threshold

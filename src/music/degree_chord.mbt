@@ -8,7 +8,12 @@ pub(all) enum ScaleDegree {
   V
   VI
   VII
-} derive(Eq, Show)
+} derive(Eq, Debug)
+
+///|
+pub impl Show for ScaleDegree with output(self, logger) {
+  self.to_repr().output(logger)
+}
 
 ///|
 /// Convert scale degree to uppercase Roman numeral
@@ -43,7 +48,12 @@ pub fn ScaleDegree::semitones(self : ScaleDegree) -> Int {
 pub(all) struct DegreeBass {
   accidental : Int // -1 for flat, 0 for natural, +1 for sharp
   degree : ScaleDegree
-} derive(Eq, Show)
+} derive(Eq, Debug)
+
+///|
+pub impl Show for DegreeBass with output(self, logger) {
+  self.to_repr().output(logger)
+}
 
 ///|
 /// A chord expressed as a scale degree with optional accidental
@@ -52,7 +62,12 @@ pub(all) struct DegreeChord {
   degree : ScaleDegree
   quality : ChordQuality
   bass : DegreeBass?
-} derive(Eq, Show)
+} derive(Eq, Debug)
+
+///|
+pub impl Show for DegreeChord with output(self, logger) {
+  self.to_repr().output(logger)
+}
 
 ///|
 /// Parse a Roman numeral from the beginning of a string.
@@ -185,7 +200,12 @@ pub let all_degrees : Array[ScaleDegree] = [I, II, III, IV, V, VI, VII]
 /// A single measure containing one or more degree chords
 pub(all) struct DegreeMeasure {
   chords : Array[DegreeChord]
-} derive(Eq, Show)
+} derive(Eq, Debug)
+
+///|
+pub impl Show for DegreeMeasure with output(self, logger) {
+  self.to_repr().output(logger)
+}
 
 ///|
 /// Resolve all chords in a measure to absolute chords

@@ -4,7 +4,12 @@ pub(all) enum MelodyMode {
   On // Generate melody and play sound
   Silent // Generate melody (visible in score) but no audio
   Off // No melody generated or displayed
-} derive(Eq, Show)
+} derive(Eq, Debug)
+
+///|
+pub impl Show for MelodyMode with output(self, logger) {
+  self.to_repr().output(logger)
+}
 
 ///|
 /// Controls whether comping is generated and played.
@@ -12,7 +17,12 @@ pub(all) enum CompingMode {
   On // Generate comping and play sound
   Silent // Generate comping (visible in piano roll) but no audio
   Off // No comping generated or displayed
-} derive(Eq, Show)
+} derive(Eq, Debug)
+
+///|
+pub impl Show for CompingMode with output(self, logger) {
+  self.to_repr().output(logger)
+}
 
 ///|
 /// Unified jazz style configuration for a performance session.
@@ -29,7 +39,12 @@ pub(all) struct JazzStyle {
   bass_style : BassStyle
   pitch_min : Int
   pitch_max : Int
-} derive(Eq, Show)
+} derive(Eq, Debug)
+
+///|
+pub impl Show for JazzStyle with output(self, logger) {
+  self.to_repr().output(logger)
+}
 
 ///|
 /// Default JazzStyle: hard swing, all techniques on, full accompaniment.

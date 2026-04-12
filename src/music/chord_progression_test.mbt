@@ -20,7 +20,7 @@ test "Chord tones" {
   // C E G B
   inspect(
     cmaj7.tones(),
-    content="[{value: 60}, {value: 64}, {value: 67}, {value: 71}]",
+    content="[{ value: 60 }, { value: 64 }, { value: 67 }, { value: 71 }]",
   )
 }
 
@@ -30,7 +30,7 @@ test "Chord tension tones - Major7" {
   // 9th(D=62), #11th(F#=66), 13th(A=69)
   inspect(
     cmaj7.tension_tones(),
-    content="[{value: 62}, {value: 66}, {value: 69}]",
+    content="[{ value: 62 }, { value: 66 }, { value: 69 }]",
   )
 }
 
@@ -40,7 +40,7 @@ test "Chord tension tones - Minor7" {
   // 9th(E=64), 11th(G=67), 13th(B=71)
   inspect(
     dm7.tension_tones(),
-    content="[{value: 64}, {value: 67}, {value: 71}]",
+    content="[{ value: 64 }, { value: 67 }, { value: 71 }]",
   )
 }
 
@@ -50,7 +50,7 @@ test "Chord tension tones - Dominant7" {
   // b9(Ab=68), 9(A=69), #9(Bb=70), #11(C#=73), b13(Eb=75), 13(E=76)
   inspect(
     g7.tension_tones(),
-    content="[{value: 68}, {value: 69}, {value: 70}, {value: 73}, {value: 75}, {value: 76}]",
+    content="[{ value: 68 }, { value: 69 }, { value: 70 }, { value: 73 }, { value: 75 }, { value: 76 }]",
   )
 }
 
@@ -66,7 +66,7 @@ test "Chord tension tones - HalfDiminished" {
   // 9th(C#=73), 11th(E=76), b13th(G=79)
   inspect(
     bm7b5.tension_tones(),
-    content="[{value: 73}, {value: 76}, {value: 79}]",
+    content="[{ value: 73 }, { value: 76 }, { value: 79 }]",
   )
 }
 

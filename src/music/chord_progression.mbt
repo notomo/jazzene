@@ -4,7 +4,12 @@ pub(all) struct Chord {
   root : ChordRoot
   quality : ChordQuality
   bass : ChordRoot?
-} derive(Eq, Show)
+} derive(Eq, Debug)
+
+///|
+pub impl Show for Chord with output(self, logger) {
+  self.to_repr().output(logger)
+}
 
 ///|
 /// Get MIDI numbers for chord tones

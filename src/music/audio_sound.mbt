@@ -5,7 +5,12 @@ pub(all) struct AudioSound {
   duration : Duration
   midi : MidiNumber
   volume : Double
-} derive(Eq, Show)
+} derive(Eq, Debug)
+
+///|
+pub impl Show for AudioSound with output(self, logger) {
+  self.to_repr().output(logger)
+}
 
 ///|
 /// Create AudioSound array from ScheduledSound array within lookahead window

@@ -11,7 +11,12 @@ pub(all) struct Techniques {
   bebop_scales : Bool // Bebop passing tones (major 7th for dom7, #5 for maj7)
   neighbor_tones : Bool // Neighbor tone ornaments (CT→N→CT pattern)
   sixteenth_runs : Bool // Sixteenth-note run ornaments (P1 P2 P3 CT pattern)
-} derive(Eq, Show)
+} derive(Eq, Debug)
+
+///|
+pub impl Show for Techniques with output(self, logger) {
+  self.to_repr().output(logger)
+}
 
 ///|
 /// Default techniques: all enabled

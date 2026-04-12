@@ -47,7 +47,12 @@ pub struct SheetNote {
   tie_arcs : Array[SheetTieArc]
   midi : Int?
   tone_origin : @music.ToneOrigin?
-} derive(Show)
+} derive(Debug)
+
+///|
+pub impl Show for SheetNote with output(self, logger) {
+  self.to_repr().output(logger)
+}
 
 ///|
 /// Calculate stem x offset from note center

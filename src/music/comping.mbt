@@ -25,7 +25,12 @@ pub(all) enum CompingStyle {
   FullVoicing // All chord tones: root, 3rd, 5th, 7th
   WithTensions // Guide tones + one available tension (9th/11th/13th etc.)
   Imported // Imported from MIDI file; caller provides sounds directly
-} derive(Eq, Show)
+} derive(Eq, Debug)
+
+///|
+pub impl Show for CompingStyle with output(self, logger) {
+  self.to_repr().output(logger)
+}
 
 ///|
 /// Rhythm pattern for jazz comping, cycled per measure.
@@ -35,7 +40,12 @@ pub(all) enum CompingPattern {
   Standard // Beat 1, and-of-2, beat 4 (jazz standard comping)
   TwoFour // Beats 2 and 4 only (Freddie Green style)
   Dense // Beat 1, and-of-2, beat 3, and-of-4 (active comping)
-} derive(Eq, Show)
+} derive(Eq, Debug)
+
+///|
+pub impl Show for CompingPattern with output(self, logger) {
+  self.to_repr().output(logger)
+}
 
 ///|
 pub fn CompingPattern::from_measure_index(idx : Int) -> CompingPattern {

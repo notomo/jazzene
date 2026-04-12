@@ -10,7 +10,12 @@ struct DurationWeights {
   dotted_half : Int
   whole : Int
   eighth_triplet : Int
-} derive(Eq, Show)
+} derive(Eq, Debug)
+
+///|
+pub impl Show for DurationWeights with output(self, logger) {
+  self.to_repr().output(logger)
+}
 
 ///|
 /// Default weights for notes, favoring eighth notes for jazz phrasing

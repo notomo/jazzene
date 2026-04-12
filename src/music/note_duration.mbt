@@ -10,7 +10,12 @@ pub(all) enum NoteDuration {
   DottedQuarter // 1.5 beats
   DottedHalf // 3.0 beats
   EighthTriplet // 1/3 beat (three per beat)
-} derive(Eq, Show)
+} derive(Eq, Debug)
+
+///|
+pub impl Show for NoteDuration with output(self, logger) {
+  self.to_repr().output(logger)
+}
 
 ///|
 /// Convert note duration to beats

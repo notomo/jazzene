@@ -29,7 +29,12 @@ pub struct SheetMeasure {
   beam_groups : Array[SheetBeamGroup]
   ottava : OttavaMarking
   is_first_in_row : Bool
-} derive(Show)
+} derive(Debug)
+
+///|
+pub impl Show for SheetMeasure with output(self, logger) {
+  self.to_repr().output(logger)
+}
 
 ///|
 /// Calculate the width of the key signature rendering area

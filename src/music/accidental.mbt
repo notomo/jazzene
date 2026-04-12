@@ -4,7 +4,12 @@ pub enum Accidental {
   Sharp
   Flat
   Natural
-} derive(Eq, Show)
+} derive(Eq, Debug)
+
+///|
+pub impl Show for Accidental with output(self, logger) {
+  self.to_repr().output(logger)
+}
 
 ///|
 /// Create an accidental calculator that tracks pitch states internally

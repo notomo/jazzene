@@ -6,7 +6,12 @@ pub(all) enum DrumVoice {
   HiHat
   Ride
   Brush
-} derive(Eq, Show)
+} derive(Eq, Debug)
+
+///|
+pub impl Show for DrumVoice with output(self, logger) {
+  self.to_repr().output(logger)
+}
 
 ///|
 /// GM standard MIDI number for drum voice
@@ -41,7 +46,12 @@ pub(all) enum DrumPatternStyle {
   SwingRide // Swing ride pattern (ride spang-a-lang, hi-hat foot 2&4)
   Brushes // Brush pattern for ballads
   Imported // Imported from MIDI file; caller provides sounds directly
-} derive(Eq, Show)
+} derive(Eq, Debug)
+
+///|
+pub impl Show for DrumPatternStyle with output(self, logger) {
+  self.to_repr().output(logger)
+}
 
 ///|
 /// A single drum hit within a pattern

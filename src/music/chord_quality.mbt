@@ -18,7 +18,12 @@ pub(all) enum ChordQuality {
   Major
   Minor
   Diminished // triad
-} derive(Eq, Show)
+} derive(Eq, Debug)
+
+///|
+pub impl Show for ChordQuality with output(self, logger) {
+  self.to_repr().output(logger)
+}
 
 ///|
 pub let all_qualities : Array[ChordQuality] = [
