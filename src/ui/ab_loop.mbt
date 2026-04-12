@@ -53,26 +53,28 @@ fn ab_loop_spinbox(
       .wheel(on_wheel)
       .mousedown(on_mousedown)
       .touchstart(on_touchstart),
-    [
-      @luna_dom.button(
-        class=btn_left,
-        on=@luna_dom.events().click(fn(_) { on_change(-1) }),
-        attrs=[("aria-label", @luna_dom.Attr::AttrString("-"))],
-        [@icon.minus_icon()],
-      ),
-      @luna_dom.span(
-        class=value_class,
-        attrs=[("aria-label", @luna_dom.Attr::AttrString(aria_label))],
-        [@luna_dom.text_dyn(fn() { get_value().to_string() })],
-      ),
-      @luna_dom.button(
-        class=btn_right,
-        on=@luna_dom.events().click(fn(_) { on_change(1) }),
-        attrs=[("aria-label", @luna_dom.Attr::AttrString("+"))],
-        [@icon.plus_icon()],
-      ),
+  ) <| [
+    @luna_dom.button(
+      class=btn_left,
+      on=@luna_dom.events().click(fn(_) { on_change(-1) }),
+      attrs=[("aria-label", @luna_dom.Attr::AttrString("-"))],
+    ) <| [
+      @icon.minus_icon(),
     ],
-  )
+    @luna_dom.span(
+      class=value_class,
+      attrs=[("aria-label", @luna_dom.Attr::AttrString(aria_label))],
+    ) <| [
+      @luna_dom.text_dyn(fn() { get_value().to_string() }),
+    ],
+    @luna_dom.button(
+      class=btn_right,
+      on=@luna_dom.events().click(fn(_) { on_change(1) }),
+      attrs=[("aria-label", @luna_dom.Attr::AttrString("+"))],
+    ) <| [
+      @icon.plus_icon(),
+    ],
+  ]
 }
 
 ///|
@@ -102,16 +104,16 @@ fn ab_loop(
 
   @luna_dom.div(
     class="flex items-center gap-1 lg:gap-3 text-sm lg:text-base text-slate-400 shrink min-w-0",
-    [
-      @luna_dom.span(
-        class="text-slate-400 text-sm lg:text-base select-none whitespace-nowrap",
-        [@luna_dom.text("Loop:")],
-      ),
-      ab_loop_spinbox(on_a_change, fn() { loop_a_measure.get() }, "loop_a"),
-      @luna_dom.span(class="text-base lg:text-xl text-slate-200", [
-        @luna_dom.text("~"),
-      ]),
-      ab_loop_spinbox(on_b_change, fn() { loop_b_measure.get() }, "loop_b"),
+  ) <| [
+    @luna_dom.span(
+      class="text-slate-400 text-sm lg:text-base select-none whitespace-nowrap",
+    ) <| [
+      @luna_dom.text("Loop:"),
     ],
-  )
+    ab_loop_spinbox(on_a_change, fn() { loop_a_measure.get() }, "loop_a"),
+    @luna_dom.span(class="text-base lg:text-xl text-slate-200") <| [
+      @luna_dom.text("~"),
+    ],
+    ab_loop_spinbox(on_b_change, fn() { loop_b_measure.get() }, "loop_b"),
+  ]
 }

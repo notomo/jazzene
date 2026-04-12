@@ -34,25 +34,24 @@ fn bass_section(
             },
           ])
         },
-        [
-          segmented_buttons(
-            bass_style_options,
-            fn() { jazz_style.get().bass_style },
-            fn(v) {
-              jazz_style.update(fn(style) {
-                @music.JazzStyle::{ ..style, bass_style: v }
-              })
-            },
-            is_disabled=fn(v) {
-              if midi_imported() {
-                v != @music.BassStyle::Imported
-              } else {
-                v == @music.BassStyle::Imported
-              }
-            },
-          ),
-        ],
-      ),
+      ) <| [
+        segmented_buttons(
+          bass_style_options,
+          fn() { jazz_style.get().bass_style },
+          fn(v) {
+            jazz_style.update(fn(style) {
+              @music.JazzStyle::{ ..style, bass_style: v }
+            })
+          },
+          is_disabled=fn(v) {
+            if midi_imported() {
+              v != @music.BassStyle::Imported
+            } else {
+              v == @music.BassStyle::Imported
+            }
+          },
+        ),
+      ],
     ],
     aria_label="bass",
   )

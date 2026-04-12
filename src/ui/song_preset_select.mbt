@@ -57,24 +57,25 @@ fn song_preset_select(
   @luna_dom.div(
     class="relative shrink-0",
     ref_=fn(el) { add_click_outside_listener(el, fn() { is_open.set(false) }) },
-    [
-      @luna_dom.button(
-        class="px-2 py-1 bg-slate-700 hover:bg-slate-600 text-white text-xs lg:text-sm rounded-lg border border-slate-600 transition-colors",
-        on=@luna_dom.events().click(fn(_) { is_open.update(fn(v) { !v }) }),
-        [@luna_dom.text("Preset")],
-      ),
-      @luna_dom.show(fn() { is_open.get() }, fn() {
-        @luna_dom.div(
-          class="absolute top-full left-0 mt-1 z-50 bg-slate-800 border border-slate-600 rounded-xl p-2 flex flex-wrap gap-2 shadow-xl min-w-max",
-          @music.song_presets.map(fn(preset) {
-            @luna_dom.button(
-              class="px-3 py-1 bg-slate-700 hover:bg-slate-500 text-white text-xs lg:text-sm rounded-full border border-slate-500 transition-colors whitespace-nowrap",
-              on=@luna_dom.events().click(fn(_) { on_preset_select(preset) }),
-              [@luna_dom.text(preset.name)],
-            )
-          }),
-        )
-      }),
+  ) <| [
+    @luna_dom.button(
+      class="px-2 py-1 bg-slate-700 hover:bg-slate-600 text-white text-xs lg:text-sm rounded-lg border border-slate-600 transition-colors",
+      on=@luna_dom.events().click(fn(_) { is_open.update(fn(v) { !v }) }),
+    ) <| [
+      @luna_dom.text("Preset"),
     ],
-  )
+    @luna_dom.show(fn() { is_open.get() }, fn() {
+      @luna_dom.div(
+        class="absolute top-full left-0 mt-1 z-50 bg-slate-800 border border-slate-600 rounded-xl p-2 flex flex-wrap gap-2 shadow-xl min-w-max",
+        @music.song_presets.map(fn(preset) {
+          @luna_dom.button(
+            class="px-3 py-1 bg-slate-700 hover:bg-slate-500 text-white text-xs lg:text-sm rounded-full border border-slate-500 transition-colors whitespace-nowrap",
+            on=@luna_dom.events().click(fn(_) { on_preset_select(preset) }),
+          ) <| [
+            @luna_dom.text(preset.name),
+          ]
+        }),
+      )
+    }),
+  ]
 }

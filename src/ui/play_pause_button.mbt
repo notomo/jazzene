@@ -33,6 +33,7 @@ fn play_pause_button(is_playing : @signals.Signal[Bool]) -> @luna_dom.DomNode {
   @luna_dom.button(
     class="w-8 lg:w-10 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-semibold transition-colors shadow-lg flex items-center justify-center text-sm shrink-0",
     on=@luna_dom.events().click(fn(_) { toggle() }),
-    [@luna_dom.text_dyn(fn() { if is_playing.get() { "■" } else { "▶" } })],
-  )
+  ) <| [
+    @luna_dom.text_dyn(fn() { if is_playing.get() { "■" } else { "▶" } }),
+  ]
 }

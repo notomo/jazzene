@@ -40,25 +40,24 @@ fn comping_section(
             },
           ])
         },
-        [
-          segmented_buttons(
-            comping_style_options,
-            fn() { jazz_style.get().comping_style },
-            fn(v) {
-              jazz_style.update(fn(style) {
-                @music.JazzStyle::{ ..style, comping_style: v }
-              })
-            },
-            is_disabled=fn(v) {
-              if midi_imported() {
-                v != @music.CompingStyle::Imported
-              } else {
-                v == @music.CompingStyle::Imported
-              }
-            },
-          ),
-        ],
-      ),
+      ) <| [
+        segmented_buttons(
+          comping_style_options,
+          fn() { jazz_style.get().comping_style },
+          fn(v) {
+            jazz_style.update(fn(style) {
+              @music.JazzStyle::{ ..style, comping_style: v }
+            })
+          },
+          is_disabled=fn(v) {
+            if midi_imported() {
+              v != @music.CompingStyle::Imported
+            } else {
+              v == @music.CompingStyle::Imported
+            }
+          },
+        ),
+      ],
     ],
     aria_label="comping",
   )

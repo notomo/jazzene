@@ -9,11 +9,12 @@ fn settings_section(
     Some(l) => [("aria-label", @luna_dom.Attr::AttrString(l))]
     None => []
   }
-  @luna_dom.div(class="flex flex-col gap-1.5", attrs~, [
+  @luna_dom.div(class="flex flex-col gap-1.5", attrs~) <| [
     @luna_dom.div(
       class="text-xs font-semibold text-slate-400 uppercase tracking-wide",
-      [@luna_dom.text(title)],
-    ),
+    ) <| [
+      @luna_dom.text(title),
+    ],
     @luna_dom.div(class="flex flex-col gap-2", children),
-  ])
+  ]
 }

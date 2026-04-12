@@ -66,64 +66,68 @@ fn view_mode_select(
   let active_class = "bg-blue-900 text-blue-200"
   let inactive_class = "bg-slate-800 text-slate-400 hover:bg-slate-700"
   let sheet_button = @luna_dom.button(
-    dyn_class=fn() {
-      cn([
-        base,
-        "rounded-l-lg",
-        if view_state.get().show_sheet {
-          active_class
-        } else {
-          inactive_class
-        },
-      ])
-    },
-    on=@luna_dom.events().click(fn(_) {
-      view_state.set(toggle_sheet(view_state.get()))
-    }),
-    [@icon.eighth_note_icon(view_state.get().show_sheet)],
-    attrs=[("title", @luna_dom.Attr::AttrString("Sheet"))],
-  )
+      dyn_class=fn() {
+        cn([
+          base,
+          "rounded-l-lg",
+          if view_state.get().show_sheet {
+            active_class
+          } else {
+            inactive_class
+          },
+        ])
+      },
+      on=@luna_dom.events().click(fn(_) {
+        view_state.set(toggle_sheet(view_state.get()))
+      }),
+      attrs=[("title", @luna_dom.Attr::AttrString("Sheet"))],
+    ) <| [
+      @icon.eighth_note_icon(view_state.get().show_sheet),
+    ]
   let piano_button = @luna_dom.button(
-    dyn_class=fn() {
-      cn([
-        base,
-        if view_state.get().show_piano_roll {
-          active_class
-        } else {
-          inactive_class
-        },
-      ])
-    },
-    on=@luna_dom.events().click(fn(_) {
-      view_state.set(toggle_piano(view_state.get()))
-    }),
-    [@icon.piano_icon(view_state.get().show_piano_roll)],
-    attrs=[("title", @luna_dom.Attr::AttrString("Piano"))],
-  )
+      dyn_class=fn() {
+        cn([
+          base,
+          if view_state.get().show_piano_roll {
+            active_class
+          } else {
+            inactive_class
+          },
+        ])
+      },
+      on=@luna_dom.events().click(fn(_) {
+        view_state.set(toggle_piano(view_state.get()))
+      }),
+      attrs=[("title", @luna_dom.Attr::AttrString("Piano"))],
+    ) <| [
+      @icon.piano_icon(view_state.get().show_piano_roll),
+    ]
   let settings_button = @luna_dom.button(
-    dyn_class=fn() {
-      cn([
-        base,
-        "rounded-r-lg",
-        if view_state.get().show_settings {
-          active_class
-        } else {
-          inactive_class
-        },
-      ])
-    },
-    on=@luna_dom.events().click(fn(_) {
-      view_state.set({
-        ..view_state.get(),
-        show_settings: !view_state.get().show_settings,
-      })
-    }),
-    [@icon.settings_icon(view_state.get().show_settings)],
-    attrs=[("title", @luna_dom.Attr::AttrString("Settings"))],
-  )
+      dyn_class=fn() {
+        cn([
+          base,
+          "rounded-r-lg",
+          if view_state.get().show_settings {
+            active_class
+          } else {
+            inactive_class
+          },
+        ])
+      },
+      on=@luna_dom.events().click(fn(_) {
+        view_state.set({
+          ..view_state.get(),
+          show_settings: !view_state.get().show_settings,
+        })
+      }),
+      attrs=[("title", @luna_dom.Attr::AttrString("Settings"))],
+    ) <| [
+      @icon.settings_icon(view_state.get().show_settings),
+    ]
   @luna_dom.div(
-    [sheet_button, piano_button, settings_button],
     class="flex items-center rounded-lg border border-slate-600",
     attrs=[("aria-label", @luna_dom.Attr::AttrString("view mode"))],
-  )
+  ) <| [
+    sheet_button, piano_button, settings_button,
+  ]
 }

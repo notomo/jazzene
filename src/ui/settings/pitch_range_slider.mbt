@@ -162,7 +162,7 @@ pub fn pitch_range_slider(
     )
   }
 
-  @luna_dom.div(class="flex flex-col gap-1", [
+  @luna_dom.div(class="flex flex-col gap-1") <| [
     @luna_dom.div(
       class="relative w-full h-5 flex items-center select-none cursor-pointer",
       on=@luna_dom.events()
@@ -182,67 +182,63 @@ pub fn pitch_range_slider(
             )
           }
         }),
-      [
-        // Track background
-        @luna_dom.div(class="absolute w-full h-1 rounded-full bg-slate-600", []),
-        // Filled range between handles
-        @luna_dom.div(
-          class="absolute h-1 rounded-full bg-blue-500",
-          dyn_attrs=[
-            (
-              "style",
-              @luna_dom.AttrValue::Dynamic(fn() {
-                let s = jazz_style.get()
-                let min_pct = midi_to_pct(s.pitch_min)
-                let max_pct = midi_to_pct(s.pitch_max)
-                "left: " +
-                min_pct.to_string() +
-                "%; width: " +
-                (max_pct - min_pct).to_string() +
-                "%"
-              }),
-            ),
-          ],
-          [],
-        ),
-        // Min handle
-        @luna_dom.div(
-          class="absolute w-3 h-3 rounded-full bg-white border border-slate-400 shadow",
-          dyn_attrs=[
-            (
-              "style",
-              @luna_dom.AttrValue::Dynamic(fn() {
-                let pct = midi_to_pct(jazz_style.get().pitch_min)
-                "left: " + pct.to_string() + "%; transform: translateX(-50%)"
-              }),
-            ),
-          ],
-          [],
-        ),
-        // Max handle
-        @luna_dom.div(
-          class="absolute w-3 h-3 rounded-full bg-white border border-slate-400 shadow",
-          dyn_attrs=[
-            (
-              "style",
-              @luna_dom.AttrValue::Dynamic(fn() {
-                let pct = midi_to_pct(jazz_style.get().pitch_max)
-                "left: " + pct.to_string() + "%; transform: translateX(-50%)"
-              }),
-            ),
-          ],
-          [],
-        ),
-      ],
-    ),
+    ) <| [
+      // Track background
+      @luna_dom.div(class="absolute w-full h-1 rounded-full bg-slate-600") <| [],
+      // Filled range between handles
+      @luna_dom.div(
+        class="absolute h-1 rounded-full bg-blue-500",
+        dyn_attrs=[
+          (
+            "style",
+            @luna_dom.AttrValue::Dynamic(fn() {
+              let s = jazz_style.get()
+              let min_pct = midi_to_pct(s.pitch_min)
+              let max_pct = midi_to_pct(s.pitch_max)
+              "left: " +
+              min_pct.to_string() +
+              "%; width: " +
+              (max_pct - min_pct).to_string() +
+              "%"
+            }),
+          ),
+        ],
+      ) <| [],
+      // Min handle
+      @luna_dom.div(
+        class="absolute w-3 h-3 rounded-full bg-white border border-slate-400 shadow",
+        dyn_attrs=[
+          (
+            "style",
+            @luna_dom.AttrValue::Dynamic(fn() {
+              let pct = midi_to_pct(jazz_style.get().pitch_min)
+              "left: " + pct.to_string() + "%; transform: translateX(-50%)"
+            }),
+          ),
+        ],
+      ) <| [],
+      // Max handle
+      @luna_dom.div(
+        class="absolute w-3 h-3 rounded-full bg-white border border-slate-400 shadow",
+        dyn_attrs=[
+          (
+            "style",
+            @luna_dom.AttrValue::Dynamic(fn() {
+              let pct = midi_to_pct(jazz_style.get().pitch_max)
+              "left: " + pct.to_string() + "%; transform: translateX(-50%)"
+            }),
+          ),
+        ],
+      ) <| [],
+    ],
     // Range label
-    @luna_dom.div(class="text-center text-sm text-slate-200", [
+    @luna_dom.div(class="text-center text-sm text-slate-200") <| [
       @luna_dom.text_dyn(fn() {
         let s = jazz_style.get()
         midi_to_note_label(s.pitch_min) +
         " ~ " +
         midi_to_note_label(s.pitch_max)
       }),
-    ]),
-  ])
+    ],
+  ]
 }

@@ -26,7 +26,7 @@ fn legend_section(
       class="flex flex-col gap-1",
       legend_entries.map(fn(entry) {
         let (dot, color, label) = entry
-        @luna_dom.div(class="flex items-center gap-1.5", [
+        @luna_dom.div(class="flex items-center gap-1.5") <| [
           @luna_dom.span(
             dyn_class=fn() { "text-xs leading-none" },
             dyn_attrs=[
@@ -45,10 +45,13 @@ fn legend_section(
                 }),
               ),
             ],
-            [@luna_dom.text(dot)],
-          ),
-          @luna_dom.span(class="text-xs text-slate-200", [@luna_dom.text(label)]),
-        ])
+          ) <| [
+            @luna_dom.text(dot),
+          ],
+          @luna_dom.span(class="text-xs text-slate-200") <| [
+            @luna_dom.text(label),
+          ],
+        ]
       }),
     ),
   ])

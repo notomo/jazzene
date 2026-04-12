@@ -8,11 +8,12 @@ fn select_input(
   on_change~ : (String) -> Unit,
   value~ : () -> String,
 ) -> @luna_dom.DomNode {
-  @luna_dom.div(class="flex items-center gap-1 lg:gap-2 shrink-0", [
+  @luna_dom.div(class="flex items-center gap-1 lg:gap-2 shrink-0") <| [
     @luna_dom.label(
       class="hidden lg:inline text-sm text-slate-400 whitespace-nowrap",
-      [@luna_dom.text(label)],
-    ),
+    ) <| [
+      @luna_dom.text(label),
+    ],
     @luna_dom.create_element(
       "select",
       [
@@ -41,5 +42,5 @@ fn select_input(
         @luna_dom.create_element("option", attrs, [@luna_dom.text(name)])
       }),
     ),
-  ])
+  ]
 }

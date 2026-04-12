@@ -17,8 +17,9 @@ fn preset_section(
         @luna_dom.button(
           class="flex-1 text-center px-2 py-0.5 text-xs rounded border bg-slate-900 border-slate-600 text-slate-300 hover:bg-slate-700 hover:border-slate-400 transition-colors",
           on=@luna_dom.events().click(fn(_) { jazz_style.set(make_preset()) }),
-          [@luna_dom.text(label)],
-        )
+        ) <| [
+          @luna_dom.text(label),
+        ]
       }),
     ),
   ])

@@ -133,6 +133,7 @@ pub fn note_display(
         }
       }
     }),
-    [canvas_to_dom_node(canvas)],
-  )
+  ) <| [
+    canvas_to_dom_node(canvas),
+  ]
 }

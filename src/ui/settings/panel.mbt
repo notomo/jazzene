@@ -26,25 +26,24 @@ pub fn settings_panel(
       ("id", @luna_dom.Attr::AttrString("settings-panel")),
       ("aria-label", @luna_dom.Attr::AttrString("jazz settings panel")),
     ],
-    [
-      settings_section("MIDI", [
-        midi_device_select(midi_active_notes, on_note_on~, on_note_off~),
-        @luna_dom.div(class="flex gap-1", [
-          midi_import_button(on_import),
-          midi_export_button(get_midi_bytes),
-        ]),
-        midi_recording(is_recording, recorded_lines),
-        midi_practice(practice_score, practice_best_score, practice_max_score),
-      ]),
-      legend_section(show_technique_hints),
-      preset_section(jazz_style),
-      melody_section(jazz_style),
-      settings_section("Pitch Range", [pitch_range_slider(jazz_style)]),
-      swing_section(jazz_style),
-      melody_techniques_section(jazz_style),
-      comping_section(jazz_style, midi_imported),
-      bass_section(jazz_style, midi_imported),
-      drums_section(jazz_style, midi_imported),
-    ],
-  )
+  ) <| [
+    settings_section("MIDI", [
+      midi_device_select(midi_active_notes, on_note_on~, on_note_off~),
+      @luna_dom.div(class="flex gap-1") <| [
+        midi_import_button(on_import),
+        midi_export_button(get_midi_bytes),
+      ],
+      midi_recording(is_recording, recorded_lines),
+      midi_practice(practice_score, practice_best_score, practice_max_score),
+    ]),
+    legend_section(show_technique_hints),
+    preset_section(jazz_style),
+    melody_section(jazz_style),
+    settings_section("Pitch Range", [pitch_range_slider(jazz_style)]),
+    swing_section(jazz_style),
+    melody_techniques_section(jazz_style),
+    comping_section(jazz_style, midi_imported),
+    bass_section(jazz_style, midi_imported),
+    drums_section(jazz_style, midi_imported),
+  ]
 }

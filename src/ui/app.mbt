@@ -228,32 +228,28 @@ pub fn render(state : AppState) -> Unit {
     }
   }
   let app = @luna_dom.div(
-    class="flex flex-col h-dvh overflow-hidden w-dvw bg-gradient-to-br from-slate-950 to-slate-900 text-white touch-manipulation",
-    [
+      class="flex flex-col h-dvh overflow-hidden w-dvw bg-gradient-to-br from-slate-950 to-slate-900 text-white touch-manipulation",
+    ) <| [
       @luna_dom.div(
         class="px-3 py-1.5 bg-slate-800 border-b-2 border-slate-700",
         attrs=[("aria-label", @luna_dom.Attr::AttrString("lead sheet"))],
-        [
-          @luna_dom.div(class="flex gap-2 lg:gap-4 items-center", [
-            song_preset_select(
-              degree_measures, key, bpm, measure_count, loop_b_measure, time_signature,
-              jazz_style,
-            ),
-            @luna_dom.div(
-              class="flex gap-2 lg:gap-4 items-center min-w-0 flex-1",
-              [
-                time_signature_select(time_signature),
-                key_select(key),
-                chord_progression_display(degree_measures, editing_chord),
-              ],
-            ),
-            @luna_dom.div(class="flex gap-2 lg:gap-4 items-center shrink-0", [
-              seed_input(seed),
-              measure_count_input(measure_count, loop_b_measure),
-            ]),
-          ]),
+      ) <| [
+        @luna_dom.div(class="flex gap-2 lg:gap-4 items-center") <| [
+          song_preset_select(
+            degree_measures, key, bpm, measure_count, loop_b_measure, time_signature,
+            jazz_style,
+          ),
+          @luna_dom.div(class="flex gap-2 lg:gap-4 items-center min-w-0 flex-1") <| [
+            time_signature_select(time_signature),
+            key_select(key),
+            chord_progression_display(degree_measures, editing_chord),
+          ],
+          @luna_dom.div(class="flex gap-2 lg:gap-4 items-center shrink-0") <| [
+            seed_input(seed),
+            measure_count_input(measure_count, loop_b_measure),
+          ],
         ],
-      ),
+      ],
       @luna_dom.div(
         dyn_class=fn() {
           match view_state.get() {
@@ -263,128 +259,118 @@ pub fn render(state : AppState) -> Unit {
           }
         },
         attrs=[("aria-label", @luna_dom.Attr::AttrString("visualization"))],
-        [
+      ) <| [
+        @luna_dom.div(
+          dyn_class=fn() {
+            match view_state.get() {
+              { show_sheet: false, .. } => "hidden"
+              { show_piano_roll: true, .. } => "flex-1 min-h-0 overflow-auto"
+              _ => "w-full min-h-0 overflow-auto"
+            }
+          },
+          attrs=[("id", @luna_dom.Attr::AttrString("lead-sheet-container"))],
+        ) <| [
           @luna_dom.div(
             dyn_class=fn() {
               match view_state.get() {
-                { show_sheet: false, .. } => "hidden"
-                { show_piano_roll: true, .. } => "flex-1 min-h-0 overflow-auto"
-                _ => "w-full min-h-0 overflow-auto"
+                { show_sheet: true, show_piano_roll: false, .. } =>
+                  "w-4/5 mx-auto"
+                _ => ""
               }
             },
-            attrs=[("id", @luna_dom.Attr::AttrString("lead-sheet-container"))],
-            [
-              @luna_dom.div(
-                dyn_class=fn() {
-                  match view_state.get() {
-                    { show_sheet: true, show_piano_roll: false, .. } =>
-                      "w-4/5 mx-auto"
-                    _ => ""
-                  }
-                },
-                [
-                  @sheet.lead_sheet(
-                    measures,
-                    playback_position,
-                    bpm,
-                    key,
-                    time_signature,
-                    loop_a_measure,
-                    loop_b_measure,
-                    fn() { show_technique_hints.get() },
-                    on_chord_click~,
-                  ),
-                ],
-              ),
-            ],
+          ) <| [
+            @sheet.lead_sheet(
+              measures,
+              playback_position,
+              bpm,
+              key,
+              time_signature,
+              loop_a_measure,
+              loop_b_measure,
+              fn() { show_technique_hints.get() },
+              on_chord_click~,
+            ),
+          ],
+        ],
+        @luna_dom.div(
+          dyn_class=fn() {
+            match view_state.get().show_piano_roll {
+              true => "flex flex-col flex-1 min-h-0"
+              false => "hidden"
+            }
+          },
+          attrs=[("aria-label", @luna_dom.Attr::AttrString("visualization"))],
+        ) <| [
+          @piano_roll.note_display(
+            sounds,
+            comping_sounds,
+            recorded_sounds_visual,
+            measures,
+            playback_position,
+            bpm,
+            total_duration,
+            time_signature,
+            loop_a_measure,
+            loop_b_measure,
+            fn() { show_technique_hints.get() },
+            on_chord_click~,
           ),
-          @luna_dom.div(
-            dyn_class=fn() {
-              match view_state.get().show_piano_roll {
-                true => "flex flex-col flex-1 min-h-0"
-                false => "hidden"
-              }
-            },
-            attrs=[("aria-label", @luna_dom.Attr::AttrString("visualization"))],
-            [
-              @piano_roll.note_display(
-                sounds,
-                comping_sounds,
-                recorded_sounds_visual,
-                measures,
-                playback_position,
-                bpm,
-                total_duration,
-                time_signature,
-                loop_a_measure,
-                loop_b_measure,
-                fn() { show_technique_hints.get() },
-                on_chord_click~,
-              ),
-              @piano_roll.keyboard(
-                sounds,
-                comping_sounds,
-                recorded_sounds_visual,
-                measures,
-                bpm,
-                playback_position,
-                fn() { show_technique_hints.get() },
-                midi_active_notes,
-                fn() { jazz_style.get().pitch_min },
-                fn() { jazz_style.get().pitch_max },
-              ),
-            ],
-          ),
-          @luna_dom.div(
-            dyn_class=fn() {
-              if view_state.get().show_settings {
-                "contents"
-              } else {
-                "hidden"
-              }
-            },
-            [
-              @settings.settings_panel(
-                jazz_style,
-                show_technique_hints,
-                midi_active_notes,
-                get_midi_bytes,
-                on_import,
-                imported_midi,
-                is_recording,
-                recorded_lines,
-                on_note_on,
-                on_note_off,
-                state.practice_score,
-                state.practice_best_score,
-                state.practice_max_score,
-              ),
-            ],
+          @piano_roll.keyboard(
+            sounds,
+            comping_sounds,
+            recorded_sounds_visual,
+            measures,
+            bpm,
+            playback_position,
+            fn() { show_technique_hints.get() },
+            midi_active_notes,
+            fn() { jazz_style.get().pitch_min },
+            fn() { jazz_style.get().pitch_max },
           ),
         ],
-      ),
+        @luna_dom.div(
+          dyn_class=fn() {
+            if view_state.get().show_settings {
+              "contents"
+            } else {
+              "hidden"
+            }
+          },
+        ) <| [
+          @settings.settings_panel(
+            jazz_style,
+            show_technique_hints,
+            midi_active_notes,
+            get_midi_bytes,
+            on_import,
+            imported_midi,
+            is_recording,
+            recorded_lines,
+            on_note_on,
+            on_note_off,
+            state.practice_score,
+            state.practice_best_score,
+            state.practice_max_score,
+          ),
+        ],
+      ],
       @luna_dom.div(
         class="grid grid-cols-[1fr_auto_1fr] items-stretch px-3 pt-1.5 pb-4 bg-slate-800 border-t-2 border-slate-700",
-        [
-          @luna_dom.div(class="justify-self-start flex items-center gap-2", [
-            volume_input(volume),
-            bpm_input(bpm),
-          ]),
-          play_pause_button(is_playing),
-          @luna_dom.div(
-            class="flex items-center justify-between pl-2 lg:pl-4 gap-2",
-            [
-              ab_loop(loop_a_measure, loop_b_measure, fn() {
-                measure_count.get()
-              }),
-              view_mode_select(view_state),
-            ],
-          ),
+      ) <| [
+        @luna_dom.div(class="justify-self-start flex items-center gap-2") <| [
+          volume_input(volume),
+          bpm_input(bpm),
         ],
-      ),
+        play_pause_button(is_playing),
+        @luna_dom.div(
+          class="flex items-center justify-between pl-2 lg:pl-4 gap-2",
+        ) <| [
+          ab_loop(loop_a_measure, loop_b_measure, fn() { measure_count.get() }),
+          view_mode_select(view_state),
+        ],
+      ],
       chord_editor_dialog(editing_chord, degree_measures, key),
-    ],
-  )
+    ]
 
   disable_pinch_zoom()
   request_wake_lock()

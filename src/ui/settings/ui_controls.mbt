@@ -42,8 +42,9 @@ pub fn[T : Eq] segmented_buttons(
             }),
           ),
         ],
-        [@luna_dom.text(label)],
-      )
+      ) <| [
+        @luna_dom.text(label),
+      ]
     }),
   )
 }
@@ -55,7 +56,7 @@ pub fn toggle_switch(
   value~ : () -> Bool,
   on_toggle~ : () -> Unit,
 ) -> @luna_dom.DomNode {
-  @luna_dom.label(class="flex items-center gap-1.5 cursor-pointer", [
+  @luna_dom.label(class="flex items-center gap-1.5 cursor-pointer") <| [
     @luna_dom.div(
       dyn_class=fn() {
         cn([
@@ -67,35 +68,35 @@ pub fn toggle_switch(
           },
         ])
       },
-      [
-        @luna_dom.div(
-          dyn_class=fn() {
-            cn([
-              "absolute top-0.5 w-3 h-3 rounded-full bg-white transition-transform",
-              if value() {
-                "translate-x-3.5"
-              } else {
-                "translate-x-0.5"
-              },
-            ])
-          },
-          [],
-        ),
-        @luna_dom.create_element(
-          "input",
-          [
-            ("type", @luna_dom.AttrValue::Static("checkbox")),
-            ("class", @luna_dom.AttrValue::Static("sr-only")),
-            (
-              "checked",
-              @luna_dom.AttrValue::Dynamic(fn() { value().to_string() }),
-            ),
-            ("change", @luna_dom.AttrValue::Handler(fn(_) { on_toggle() })),
-          ],
-          [],
-        ),
-      ],
-    ),
-    @luna_dom.span(class="text-xs text-slate-300", [@luna_dom.text(label)]),
-  ])
+    ) <| [
+      @luna_dom.div(
+        dyn_class=fn() {
+          cn([
+            "absolute top-0.5 w-3 h-3 rounded-full bg-white transition-transform",
+            if value() {
+              "translate-x-3.5"
+            } else {
+              "translate-x-0.5"
+            },
+          ])
+        },
+      ) <| [],
+      @luna_dom.create_element(
+        "input",
+        [
+          ("type", @luna_dom.AttrValue::Static("checkbox")),
+          ("class", @luna_dom.AttrValue::Static("sr-only")),
+          (
+            "checked",
+            @luna_dom.AttrValue::Dynamic(fn() { value().to_string() }),
+          ),
+          ("change", @luna_dom.AttrValue::Handler(fn(_) { on_toggle() })),
+        ],
+        [],
+      ),
+    ],
+    @luna_dom.span(class="text-xs text-slate-300") <| [
+      @luna_dom.text(label),
+    ],
+  ]
 }

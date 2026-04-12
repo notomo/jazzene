@@ -108,8 +108,9 @@ pub fn keyboard(
   @luna_dom.div(
     class="w-full h-[15%] min-h-10 shrink",
     attrs=[("aria-label", @luna_dom.Attr::AttrString("keyboard canvas"))],
-    [canvas_to_dom_node(canvas)],
-  )
+  ) <| [
+    canvas_to_dom_node(canvas),
+  ]
 }
 
 ///|

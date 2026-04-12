@@ -107,28 +107,31 @@ fn spinbox(
       .wheel(on_wheel)
       .mousedown(on_mousedown)
       .touchstart(on_touchstart),
-    [
-      @luna_dom.span(
-        class="text-sm lg:text-base text-slate-400 select-none cursor-ew-resize whitespace-nowrap",
-        [@luna_dom.text(label + ":")],
-      ),
-      @luna_dom.span(
-        class="text-white text-sm lg:text-base select-none cursor-ew-resize min-w-[2ch] lg:min-w-[3ch] text-center",
-        attrs=[("aria-label", @luna_dom.Attr::AttrString(aria))],
-        [@luna_dom.text_dyn(fn() { get_value().to_string() })],
-      ),
-      @luna_dom.button(
-        class=btn_class,
-        on=@luna_dom.events().click(on_decrement),
-        attrs=[("aria-label", @luna_dom.Attr::AttrString("-"))],
-        [@icon.minus_icon()],
-      ),
-      @luna_dom.button(
-        class=btn_class,
-        on=@luna_dom.events().click(on_increment),
-        attrs=[("aria-label", @luna_dom.Attr::AttrString("+"))],
-        [@icon.plus_icon()],
-      ),
+  ) <| [
+    @luna_dom.span(
+      class="text-sm lg:text-base text-slate-400 select-none cursor-ew-resize whitespace-nowrap",
+    ) <| [
+      @luna_dom.text(label + ":"),
     ],
-  )
+    @luna_dom.span(
+      class="text-white text-sm lg:text-base select-none cursor-ew-resize min-w-[2ch] lg:min-w-[3ch] text-center",
+      attrs=[("aria-label", @luna_dom.Attr::AttrString(aria))],
+    ) <| [
+      @luna_dom.text_dyn(fn() { get_value().to_string() }),
+    ],
+    @luna_dom.button(
+      class=btn_class,
+      on=@luna_dom.events().click(on_decrement),
+      attrs=[("aria-label", @luna_dom.Attr::AttrString("-"))],
+    ) <| [
+      @icon.minus_icon(),
+    ],
+    @luna_dom.button(
+      class=btn_class,
+      on=@luna_dom.events().click(on_increment),
+      attrs=[("aria-label", @luna_dom.Attr::AttrString("+"))],
+    ) <| [
+      @icon.plus_icon(),
+    ],
+  ]
 }
