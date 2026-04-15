@@ -126,6 +126,11 @@ pub fn lead_sheet(
     )
   })
 
+  // Pre-compute ottava spans across all measures to enable cross-measure grouping
+  let ottava_spans = @signals.memo(fn() {
+    @sheet_layout.compute_ottava_spans(measures(), key.get())
+  })
+
   // Return container with SVG
   @luna_dom.div(class="w-full p-4", [
     @luna_dom.svg(
@@ -163,6 +168,12 @@ pub fn lead_sheet(
           let ts = time_signature.get()
           let k = key.get()
           let mw = measure_width()
+          let spans = ottava_spans()
+          let span = if idx < spans.length() {
+            spans[idx]
+          } else {
+            @sheet_layout.ottava_span_none
+          }
           render_measure(
             m,
             idx,
@@ -170,6 +181,7 @@ pub fn lead_sheet(
             k,
             ts,
             measure_width=mw,
+            ottava_span=span,
             fn() {
               let measure_number = idx + 1
               measure_number < loop_a_measure.get() ||

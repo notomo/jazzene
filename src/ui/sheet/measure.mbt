@@ -95,6 +95,7 @@ fn render_measure_notes(
   time_signature : @music.TimeSignature,
   display_index : Int,
   measure_width~ : Double,
+  ottava_span~ : @sheet_layout.OttavaSpan,
   show_technique_hints : () -> Bool,
 ) -> Array[@luna_dom.DomNode] {
   let sheet = @sheet_layout.compute_sheet_measure(
@@ -103,6 +104,7 @@ fn render_measure_notes(
     key,
     time_signature,
     measure_width~,
+    ottava=ottava_span,
   )
 
   let note_nodes : Array[@luna_dom.DomNode] = sheet.notes
@@ -111,9 +113,9 @@ fn render_measure_notes(
     .collect()
 
   let beam_nodes = render_beams_from_sheet(sheet.beam_groups)
-  let ottava_nodes = match sheet.ottava {
-    OttavaAlta => render_8va_marking(x, y, measure_width)
-    OttavaBassa => render_8vb_marking(x, y, measure_width)
+  let ottava_nodes = match sheet.ottava.kind {
+    OttavaAlta => render_8va_marking(x, y, measure_width, sheet.ottava.role)
+    OttavaBassa => render_8vb_marking(x, y, measure_width, sheet.ottava.role)
     OttavaNone => []
   }
   let tension_label_nodes : Array[@luna_dom.DomNode] = sheet.notes
@@ -134,6 +136,7 @@ fn render_measure(
   key : @music.KeySignature,
   time_signature : @music.TimeSignature,
   measure_width? : Double = @sheet_layout.MIN_MEASURE_WIDTH,
+  ottava_span~ : @sheet_layout.OttavaSpan,
   is_outside_loop : () -> Bool,
   show_technique_hints : () -> Bool,
   on_chord_click~ : (Int, Int) -> Unit,
@@ -169,6 +172,7 @@ fn render_measure(
         time_signature,
         display_index,
         measure_width~,
+        ottava_span~,
         show_technique_hints,
       ),
       render_bar_line(x + measure_width, y),

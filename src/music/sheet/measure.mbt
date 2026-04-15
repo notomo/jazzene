@@ -27,7 +27,7 @@ pub struct SheetMeasure {
   width : Double
   notes : Array[SheetNote]
   beam_groups : Array[SheetBeamGroup]
-  ottava : OttavaMarking
+  ottava : OttavaSpan
   is_first_in_row : Bool
 } derive(Debug)
 

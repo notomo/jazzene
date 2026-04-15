@@ -28,22 +28,14 @@ pub fn compute_sheet_measure(
   key : @music.KeySignature,
   time_signature : @music.TimeSignature,
   measure_width? : Double = MIN_MEASURE_WIDTH,
+  ottava? : OttavaSpan = ottava_span_none,
 ) -> SheetMeasure {
   let (x, y) = measure_position(measure_index, key, measure_width~)
   let is_first_in_row = measure_index % MEASURES_PER_ROW == 0
 
-  // Get positioned notes and apply ottava
+  // Get positioned notes and apply ottava shift
   let positioned = measure.positioned_notes()
-  let apply_8va = should_apply_8va(positioned)
-  let apply_8vb = !apply_8va && should_apply_8vb(positioned, key)
-  let ottava = if apply_8va {
-    OttavaAlta
-  } else if apply_8vb {
-    OttavaBassa
-  } else {
-    OttavaNone
-  }
-  let display = match ottava {
+  let display = match ottava.kind {
     OttavaAlta => shift_for_8va(positioned)
     OttavaBassa => shift_for_8vb(positioned)
     OttavaNone => positioned
