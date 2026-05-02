@@ -74,13 +74,13 @@ pub impl Show for DegreeChord with output(self, logger) {
 /// Returns the ScaleDegree and the remaining string.
 fn parse_roman_numeral(input : String) -> Result[(ScaleDegree, String), String] {
   match input {
-    ['V' | 'v', 'I' | 'i', 'I' | 'i', .. rest] => Ok((VII, rest.to_string()))
-    ['V' | 'v', 'I' | 'i', .. rest] => Ok((VI, rest.to_string()))
-    ['I' | 'i', 'V' | 'v', .. rest] => Ok((IV, rest.to_string()))
-    ['V' | 'v', .. rest] => Ok((V, rest.to_string()))
-    ['I' | 'i', 'I' | 'i', 'I' | 'i', .. rest] => Ok((III, rest.to_string()))
-    ['I' | 'i', 'I' | 'i', .. rest] => Ok((II, rest.to_string()))
-    ['I' | 'i', .. rest] => Ok((I, rest.to_string()))
+    ['V' | 'v', 'I' | 'i', 'I' | 'i', .. rest] => Ok((VII, rest.to_owned()))
+    ['V' | 'v', 'I' | 'i', .. rest] => Ok((VI, rest.to_owned()))
+    ['I' | 'i', 'V' | 'v', .. rest] => Ok((IV, rest.to_owned()))
+    ['V' | 'v', .. rest] => Ok((V, rest.to_owned()))
+    ['I' | 'i', 'I' | 'i', 'I' | 'i', .. rest] => Ok((III, rest.to_owned()))
+    ['I' | 'i', 'I' | 'i', .. rest] => Ok((II, rest.to_owned()))
+    ['I' | 'i', .. rest] => Ok((I, rest.to_owned()))
     _ => Err("Invalid Roman numeral in: " + input)
   }
 }
@@ -92,8 +92,8 @@ fn parse_degree_bass(input : String) -> Result[DegreeBass, String] {
     return Err("Empty bass degree string")
   }
   let (accidental, rest) = match input {
-    ['b', .. tail] => (-1, tail.to_string())
-    ['#', .. tail] => (1, tail.to_string())
+    ['b', .. tail] => (-1, tail.to_owned())
+    ['#', .. tail] => (1, tail.to_owned())
     _ => (0, input)
   }
   let (degree, remainder) = match parse_roman_numeral(rest) {
@@ -114,7 +114,7 @@ pub fn parse_degree_chord(input : String) -> Result[DegreeChord, String] {
   }
   let parts : Array[String] = input
     .split("/")
-    .map(fn(s) { s.to_string() })
+    .map(fn(s) { s.to_owned() })
     .collect()
   let (chord_part, bass) = match parts {
     [chord_str] => (chord_str, None)
@@ -128,8 +128,8 @@ pub fn parse_degree_chord(input : String) -> Result[DegreeChord, String] {
 
   // Parse optional accidental prefix
   let (accidental, rest) = match chord_part {
-    ['b', .. tail] => (-1, tail.to_string())
-    ['#', .. tail] => (1, tail.to_string())
+    ['b', .. tail] => (-1, tail.to_owned())
+    ['#', .. tail] => (1, tail.to_owned())
     _ => (0, chord_part)
   }
 
@@ -155,7 +155,7 @@ pub fn parse_degree_progression(
   let results = input
     .trim()
     .split(" ")
-    .map(fn(token) { token.to_string().trim().to_string() })
+    .map(fn(token) { token.to_owned().trim().to_owned() })
     .filter(fn(token) { token != "" })
     .map(fn(token) {
       parse_degree_chord(token).map_err(fn(e) {
@@ -256,13 +256,13 @@ pub fn serialize_measure_progression(measures : Array[DegreeMeasure]) -> String 
 pub fn parse_measure_progression(
   input : String,
 ) -> Result[Array[DegreeMeasure], String] {
-  let trimmed = input.trim().to_string()
+  let trimmed = input.trim().to_owned()
   if trimmed == "" {
     return Ok([])
   }
   let measure_strs = trimmed
     .split("|")
-    .map(fn(s) { s.to_string().trim().to_string() })
+    .map(fn(s) { s.to_owned().trim().to_owned() })
     .collect()
 
   let results : Array[Result[DegreeMeasure, String]] = measure_strs

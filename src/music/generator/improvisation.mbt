@@ -205,7 +205,7 @@ fn remove_trailing_tied_notes(beats : Array[@music.Beat]) -> Array[@music.Beat] 
         // Remove the last note and continue removing backwards
         let new_beat = @music.Beat::{
           count: beat.count,
-          notes: rest.to_array(),
+          notes: rest.to_owned(),
         }
         ([new_beat, ..result_beats], true)
       }
