@@ -23,9 +23,9 @@ fn spinbox(
   aria_label? : String = "",
   container_aria_label? : String = "",
 ) -> @luna_dom.DomNode {
-  let drag_start_x : Ref[Double?] = Ref::new(None)
-  let drag_start_value : Ref[Int] = Ref::new(0)
-  let wheel_timer : Ref[Int] = Ref::new(-1)
+  let drag_start_x : Ref[Double?] = Ref(None)
+  let drag_start_value : Ref[Int] = Ref(0)
+  let wheel_timer : Ref[Int] = Ref(-1)
 
   fn clamp(value : Int) -> Int {
     @cmp.maximum(min, @cmp.minimum(max, value))

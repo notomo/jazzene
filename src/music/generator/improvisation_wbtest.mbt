@@ -199,7 +199,7 @@ test "improvisation removes dangling tie at last measure" {
 ///|
 test "improvisation preserves tie when not at last measure" {
   // Generator that produces TieStart, then subsequent measures handle it
-  let call_count = Ref::new(0)
+  let call_count = Ref(0)
   let generator : MeasureGenerator = fn(ctx) {
     let midi60 = @music.MidiNumber::new(60).unwrap()
     let midi62 = @music.MidiNumber::new(62).unwrap()

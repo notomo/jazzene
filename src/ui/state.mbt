@@ -353,7 +353,7 @@ pub fn AppState::new() -> AppState {
 
   // Persist all state changes to URL query parameters (debounced to avoid
   // exceeding browser replaceState rate limits during rapid input like scroll)
-  let url_save_timer : Ref[Int] = Ref::new(-1)
+  let url_save_timer : Ref[Int] = Ref(-1)
   let _ = @signals.effect(fn() {
     let bpm_val = bpm.get()
     let seed_val = seed.get()

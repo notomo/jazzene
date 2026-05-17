@@ -48,7 +48,7 @@ fn setup_auto_scroll(
   bpm : @signals.Signal[Int],
   time_signature : @signals.Signal[@music.TimeSignature],
 ) -> Unit {
-  let last_scrolled_row : Ref[Int] = Ref::new(-1)
+  let last_scrolled_row : Ref[Int] = Ref(-1)
   let _ = @signals.effect(fn() {
     let measure_count = measures().length()
     let beats_per_measure = time_signature.get().beats_per_measure()

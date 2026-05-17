@@ -107,9 +107,9 @@ fn pct_to_midi(pct : Double) -> Int {
 pub fn pitch_range_slider(
   jazz_style : @signals.Signal[@music.JazzStyle],
 ) -> @luna_dom.DomNode {
-  let track_left : Ref[Double] = Ref::new(0.0)
-  let track_width : Ref[Double] = Ref::new(1.0)
-  let dragging_min : Ref[Bool] = Ref::new(false)
+  let track_left : Ref[Double] = Ref(0.0)
+  let track_width : Ref[Double] = Ref(1.0)
+  let dragging_min : Ref[Bool] = Ref(false)
 
   fn start_drag(left : Double, width : Double, client_x : Double) -> Unit {
     track_left.val = left

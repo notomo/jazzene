@@ -9,8 +9,8 @@ fn ab_loop_spinbox(
   get_value : () -> Int,
   aria_label : String,
 ) -> @luna_dom.DomNode {
-  let drag_start_x : Ref[Double?] = Ref::new(None)
-  let drag_start_value : Ref[Int] = Ref::new(0)
+  let drag_start_x : Ref[Double?] = Ref(None)
+  let drag_start_value : Ref[Int] = Ref(0)
   let on_drag_move : (Double) -> Unit = fn(client_x) {
     match drag_start_x.val {
       Some(start_x) => {
