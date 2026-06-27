@@ -7,6 +7,6 @@ pub(all) enum Tie {
 } derive(Eq, Debug)
 
 ///|
-pub impl Show for Tie with output(self, logger) {
+pub impl Show for Tie with fn output(self, logger) {
   self.to_repr().output(logger)
 }

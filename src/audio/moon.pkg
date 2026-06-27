@@ -2,7 +2,7 @@ import {
   "internal/jazzene/music",
   "internal/jazzene/audio/web_audio_api" @web_audio,
   "mizchi/js/core" @js,
-  "mizchi/js/web/http" @http,
+  "mizchi/js/web/http",
 }
 
 supported_targets = "js"

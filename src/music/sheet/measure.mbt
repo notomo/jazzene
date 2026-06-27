@@ -32,7 +32,7 @@ pub struct SheetMeasure {
 } derive(Debug)
 
 ///|
-pub impl Show for SheetMeasure with output(self, logger) {
+pub impl Show for SheetMeasure with fn output(self, logger) {
   self.to_repr().output(logger)
 }
 

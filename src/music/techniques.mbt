@@ -14,7 +14,7 @@ pub(all) struct Techniques {
 } derive(Eq, Debug)
 
 ///|
-pub impl Show for Techniques with output(self, logger) {
+pub impl Show for Techniques with fn output(self, logger) {
   self.to_repr().output(logger)
 }
 

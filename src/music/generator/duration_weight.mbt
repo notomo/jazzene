@@ -13,7 +13,7 @@ struct DurationWeights {
 } derive(Eq, Debug)
 
 ///|
-pub impl Show for DurationWeights with output(self, logger) {
+pub impl Show for DurationWeights with fn output(self, logger) {
   self.to_repr().output(logger)
 }
 

@@ -9,7 +9,7 @@ pub(all) struct ScheduledSound {
 } derive(Eq, Debug)
 
 ///|
-pub impl Show for ScheduledSound with output(self, logger) {
+pub impl Show for ScheduledSound with fn output(self, logger) {
   self.to_repr().output(logger)
 }
 

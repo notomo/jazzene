@@ -8,7 +8,7 @@ pub struct SheetTieArc {
 } derive(Debug)
 
 ///|
-pub impl Show for SheetTieArc with output(self, logger) {
+pub impl Show for SheetTieArc with fn output(self, logger) {
   self.to_repr().output(logger)
 }
 

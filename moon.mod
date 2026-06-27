@@ -1,0 +1,16 @@
+name = "internal/jazzene"
+
+version = "0.0.1"
+
+import {
+  "mizchi/luna@0.19.0",
+  "mizchi/js@0.10.14",
+  "mizchi/signals@0.6.4",
+  "moonbitlang/async@0.20.0",
+}
+
+preferred_target = "js"
+
+options(
+  source: "src",
+)

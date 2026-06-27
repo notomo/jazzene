@@ -16,7 +16,7 @@ pub(all) enum BassStyle {
 } derive(Eq, Debug)
 
 ///|
-pub impl Show for BassStyle with output(self, logger) {
+pub impl Show for BassStyle with fn output(self, logger) {
   self.to_repr().output(logger)
 }
 

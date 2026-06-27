@@ -5,7 +5,7 @@ pub struct Duration {
 } derive(Eq, Debug)
 
 ///|
-pub impl Show for Duration with output(self, logger) {
+pub impl Show for Duration with fn output(self, logger) {
   self.to_repr().output(logger)
 }
 
@@ -37,7 +37,7 @@ pub fn Duration::to_milliseconds(self : Duration) -> Double {
 
 ///|
 /// Implement Compare trait for Duration
-pub impl Compare for Duration with compare(self, other) {
+pub impl Compare for Duration with fn compare(self, other) {
   if self.seconds < other.seconds {
     -1
   } else if self.seconds > other.seconds {
@@ -49,13 +49,13 @@ pub impl Compare for Duration with compare(self, other) {
 
 ///|
 /// Implement Add trait for Duration
-pub impl Add for Duration with add(self, other) {
+pub impl Add for Duration with fn add(self, other) {
   { seconds: self.seconds + other.seconds }
 }
 
 ///|
 /// Implement Sub trait for Duration
-pub impl Sub for Duration with sub(self, other) {
+pub impl Sub for Duration with fn sub(self, other) {
   { seconds: self.seconds - other.seconds }
 }
 

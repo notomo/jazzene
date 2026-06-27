@@ -11,7 +11,7 @@ pub(all) enum ScaleDegree {
 } derive(Eq, Debug)
 
 ///|
-pub impl Show for ScaleDegree with output(self, logger) {
+pub impl Show for ScaleDegree with fn output(self, logger) {
   self.to_repr().output(logger)
 }
 
@@ -51,7 +51,7 @@ pub(all) struct DegreeBass {
 } derive(Eq, Debug)
 
 ///|
-pub impl Show for DegreeBass with output(self, logger) {
+pub impl Show for DegreeBass with fn output(self, logger) {
   self.to_repr().output(logger)
 }
 
@@ -65,7 +65,7 @@ pub(all) struct DegreeChord {
 } derive(Eq, Debug)
 
 ///|
-pub impl Show for DegreeChord with output(self, logger) {
+pub impl Show for DegreeChord with fn output(self, logger) {
   self.to_repr().output(logger)
 }
 
@@ -203,7 +203,7 @@ pub(all) struct DegreeMeasure {
 } derive(Eq, Debug)
 
 ///|
-pub impl Show for DegreeMeasure with output(self, logger) {
+pub impl Show for DegreeMeasure with fn output(self, logger) {
   self.to_repr().output(logger)
 }
 

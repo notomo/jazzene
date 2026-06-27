@@ -16,7 +16,7 @@ pub(all) enum ChordRoot {
 } derive(Eq, Debug)
 
 ///|
-pub impl Show for ChordRoot with output(self, logger) {
+pub impl Show for ChordRoot with fn output(self, logger) {
   self.to_repr().output(logger)
 }
 

@@ -37,7 +37,7 @@ pub fn Synthesizer::set_master_volume(
 }
 
 ///|
-pub impl @music.AudioOutput for Synthesizer with schedule_sounds(
+pub impl @music.AudioOutput for Synthesizer with fn schedule_sounds(
   self,
   scheduled,
 ) {

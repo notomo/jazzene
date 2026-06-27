@@ -7,7 +7,7 @@ pub(all) struct Chord {
 } derive(Eq, Debug)
 
 ///|
-pub impl Show for Chord with output(self, logger) {
+pub impl Show for Chord with fn output(self, logger) {
   self.to_repr().output(logger)
 }
 

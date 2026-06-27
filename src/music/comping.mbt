@@ -28,7 +28,7 @@ pub(all) enum CompingStyle {
 } derive(Eq, Debug)
 
 ///|
-pub impl Show for CompingStyle with output(self, logger) {
+pub impl Show for CompingStyle with fn output(self, logger) {
   self.to_repr().output(logger)
 }
 
@@ -43,7 +43,7 @@ pub(all) enum CompingPattern {
 } derive(Eq, Debug)
 
 ///|
-pub impl Show for CompingPattern with output(self, logger) {
+pub impl Show for CompingPattern with fn output(self, logger) {
   self.to_repr().output(logger)
 }
 

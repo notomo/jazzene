@@ -21,7 +21,7 @@ pub(all) enum ChordScale {
 } derive(Eq, Debug)
 
 ///|
-pub impl Show for ChordScale with output(self, logger) {
+pub impl Show for ChordScale with fn output(self, logger) {
   self.to_repr().output(logger)
 }
 

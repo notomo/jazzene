@@ -13,7 +13,7 @@ pub(all) enum NoteDuration {
 } derive(Eq, Debug)
 
 ///|
-pub impl Show for NoteDuration with output(self, logger) {
+pub impl Show for NoteDuration with fn output(self, logger) {
   self.to_repr().output(logger)
 }
 

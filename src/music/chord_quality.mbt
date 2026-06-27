@@ -21,7 +21,7 @@ pub(all) enum ChordQuality {
 } derive(Eq, Debug)
 
 ///|
-pub impl Show for ChordQuality with output(self, logger) {
+pub impl Show for ChordQuality with fn output(self, logger) {
   self.to_repr().output(logger)
 }
 

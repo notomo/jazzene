@@ -11,7 +11,7 @@ pub struct ScheduledSounds {
 ///|
 /// Abstraction over audio output; implemented by the synthesizer in the audio layer
 pub(open) trait AudioOutput {
-  schedule_sounds(Self, ScheduledSounds) -> Unit
+  fn schedule_sounds(Self, ScheduledSounds) -> Unit
 }
 
 ///|

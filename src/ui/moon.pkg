@@ -12,11 +12,11 @@ import {
   "mizchi/js/web/url" @js_url,
   "internal/jazzene/ui/sheet",
   "internal/jazzene/ui/piano_roll",
-  "internal/jazzene/music/midi" @midi,
+  "internal/jazzene/music/midi",
   "moonbitlang/core/string",
   "moonbitlang/core/strconv",
-  "internal/jazzene/ui/icon" @icon,
-  "internal/jazzene/ui/settings" @settings,
+  "internal/jazzene/ui/icon",
+  "internal/jazzene/ui/settings",
 }
 
 supported_targets = "js"

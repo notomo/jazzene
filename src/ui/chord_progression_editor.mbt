@@ -9,7 +9,7 @@ pub(all) struct EditingChord {
 } derive(Eq, Debug)
 
 ///|
-pub impl Show for EditingChord with output(self, logger) {
+pub impl Show for EditingChord with fn output(self, logger) {
   self.to_repr().output(logger)
 }
 

@@ -9,7 +9,7 @@ pub(all) enum DrumVoice {
 } derive(Eq, Debug)
 
 ///|
-pub impl Show for DrumVoice with output(self, logger) {
+pub impl Show for DrumVoice with fn output(self, logger) {
   self.to_repr().output(logger)
 }
 
@@ -49,7 +49,7 @@ pub(all) enum DrumPatternStyle {
 } derive(Eq, Debug)
 
 ///|
-pub impl Show for DrumPatternStyle with output(self, logger) {
+pub impl Show for DrumPatternStyle with fn output(self, logger) {
   self.to_repr().output(logger)
 }
 

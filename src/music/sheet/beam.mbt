@@ -16,7 +16,7 @@ pub struct SheetBeamStem {
 } derive(Debug)
 
 ///|
-pub impl Show for SheetBeamStem with output(self, logger) {
+pub impl Show for SheetBeamStem with fn output(self, logger) {
   self.to_repr().output(logger)
 }
 
@@ -29,7 +29,7 @@ pub struct SheetBeamRest {
 } derive(Debug)
 
 ///|
-pub impl Show for SheetBeamRest with output(self, logger) {
+pub impl Show for SheetBeamRest with fn output(self, logger) {
   self.to_repr().output(logger)
 }
 
@@ -50,7 +50,7 @@ pub struct SheetBeamGroup {
 } derive(Debug)
 
 ///|
-pub impl Show for SheetBeamGroup with output(self, logger) {
+pub impl Show for SheetBeamGroup with fn output(self, logger) {
   self.to_repr().output(logger)
 }
 

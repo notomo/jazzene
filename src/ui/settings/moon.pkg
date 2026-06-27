@@ -7,14 +7,14 @@ import {
   "mizchi/js/browser/dom" @js_dom,
   "mizchi/js/web/event",
   "mizchi/js/browser/file" @js_file,
-  "mizchi/js/builtins/arraybuffer" @arraybuffer,
+  "mizchi/js/builtins/arraybuffer",
   "mizchi/js/web/url" @js_url,
   "mizchi/js/web/blob" @js_blob,
   "mizchi/js/builtins/date" @js_date,
   "internal/jazzene/ui/theme",
   "internal/jazzene/audio/web_midi_api" @web_midi,
-  "internal/jazzene/music/midi" @midi,
-  "internal/jazzene/ui/icon" @icon,
+  "internal/jazzene/music/midi",
+  "internal/jazzene/ui/icon",
 }
 
 supported_targets = "js"

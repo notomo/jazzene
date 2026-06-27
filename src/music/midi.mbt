@@ -5,7 +5,7 @@ pub struct MidiNumber {
 } derive(Eq, Debug)
 
 ///|
-pub impl Show for MidiNumber with output(self, logger) {
+pub impl Show for MidiNumber with fn output(self, logger) {
   self.to_repr().output(logger)
 }
 

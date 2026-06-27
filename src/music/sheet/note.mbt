@@ -50,7 +50,7 @@ pub struct SheetNote {
 } derive(Debug)
 
 ///|
-pub impl Show for SheetNote with output(self, logger) {
+pub impl Show for SheetNote with fn output(self, logger) {
   self.to_repr().output(logger)
 }
 

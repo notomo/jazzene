@@ -7,7 +7,7 @@ pub(all) enum MelodyMode {
 } derive(Eq, Debug)
 
 ///|
-pub impl Show for MelodyMode with output(self, logger) {
+pub impl Show for MelodyMode with fn output(self, logger) {
   self.to_repr().output(logger)
 }
 
@@ -20,7 +20,7 @@ pub(all) enum CompingMode {
 } derive(Eq, Debug)
 
 ///|
-pub impl Show for CompingMode with output(self, logger) {
+pub impl Show for CompingMode with fn output(self, logger) {
   self.to_repr().output(logger)
 }
 
@@ -42,7 +42,7 @@ pub(all) struct JazzStyle {
 } derive(Eq, Debug)
 
 ///|
-pub impl Show for JazzStyle with output(self, logger) {
+pub impl Show for JazzStyle with fn output(self, logger) {
   self.to_repr().output(logger)
 }
 
