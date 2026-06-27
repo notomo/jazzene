@@ -72,7 +72,7 @@ fn commit_params(params : @js_url.URLSearchParams) -> Unit {
 ///|
 fn get_initial_int(name : String, default : Int) -> Int {
   match get_query_param(name) {
-    Some(value) => (try? @string.parse_int(value)).unwrap_or(default)
+    Some(value) => @string.parse_int(value) catch { _ => default }
     None => default
   }
 }
@@ -171,7 +171,7 @@ pub fn get_initial_loop_a_measure() -> Int {
 ///|
 pub fn get_initial_loop_b_measure(measure_count : Int) -> Int {
   match get_query_param("loop_b") {
-    Some(value) => (try? @string.parse_int(value)).unwrap_or(measure_count)
+    Some(value) => @string.parse_int(value) catch { _ => measure_count }
     None => measure_count
   }
 }
