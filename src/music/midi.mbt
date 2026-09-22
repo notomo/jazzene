@@ -6,7 +6,7 @@ pub struct MidiNumber {
 
 ///|
 pub impl Show for MidiNumber with fn output(self, logger) {
-  self.to_repr().output(logger)
+  Show::output(self.to_repr(), logger)
 }
 
 ///|

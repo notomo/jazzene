@@ -10,7 +10,7 @@ pub(all) enum DrumVoice {
 
 ///|
 pub impl Show for DrumVoice with fn output(self, logger) {
-  self.to_repr().output(logger)
+  Show::output(self.to_repr(), logger)
 }
 
 ///|
@@ -50,7 +50,7 @@ pub(all) enum DrumPatternStyle {
 
 ///|
 pub impl Show for DrumPatternStyle with fn output(self, logger) {
-  self.to_repr().output(logger)
+  Show::output(self.to_repr(), logger)
 }
 
 ///|

@@ -11,7 +11,7 @@ pub fn compute_unified_measure_width(
       let beam_groups_indices = @music.find_beam_groups(
         positioned, time_signature,
       )
-      let beamed_indices : Map[Int, Bool] = {}
+      let beamed_indices : Map[Int, Bool] = Map([])
       beam_groups_indices.each(fn(group) {
         group.each(fn(idx) { beamed_indices[idx] = true })
       })
@@ -43,7 +43,7 @@ pub fn compute_sheet_measure(
 
   // Beam grouping
   let beam_groups_indices = @music.find_beam_groups(display, time_signature)
-  let beamed_indices : Map[Int, Bool] = {}
+  let beamed_indices : Map[Int, Bool] = Map([])
   beam_groups_indices.each(fn(group) {
     group.each(fn(idx) { beamed_indices[idx] = true })
   })

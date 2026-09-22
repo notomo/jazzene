@@ -8,7 +8,7 @@ pub(all) struct Chord {
 
 ///|
 pub impl Show for Chord with fn output(self, logger) {
-  self.to_repr().output(logger)
+  Show::output(self.to_repr(), logger)
 }
 
 ///|

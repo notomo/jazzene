@@ -14,7 +14,7 @@ struct DurationWeights {
 
 ///|
 pub impl Show for DurationWeights with fn output(self, logger) {
-  self.to_repr().output(logger)
+  Show::output(self.to_repr(), logger)
 }
 
 ///|

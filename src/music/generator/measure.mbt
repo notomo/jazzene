@@ -8,7 +8,7 @@ struct ChordSegment {
 
 ///|
 pub impl Show for ChordSegment with fn output(self, logger) {
-  self.to_repr().output(logger)
+  Show::output(self.to_repr(), logger)
 }
 
 ///|
@@ -118,7 +118,7 @@ struct ImprovisationConfig {
 
 ///|
 pub impl Show for ImprovisationConfig with fn output(self, logger) {
-  self.to_repr().output(logger)
+  Show::output(self.to_repr(), logger)
 }
 
 ///|

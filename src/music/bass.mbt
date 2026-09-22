@@ -17,7 +17,7 @@ pub(all) enum BassStyle {
 
 ///|
 pub impl Show for BassStyle with fn output(self, logger) {
-  self.to_repr().output(logger)
+  Show::output(self.to_repr(), logger)
 }
 
 ///|

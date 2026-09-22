@@ -21,7 +21,7 @@ pub(all) enum OttavaMarking {
 
 ///|
 pub impl Show for OttavaMarking with fn output(self, logger) {
-  self.to_repr().output(logger)
+  Show::output(self.to_repr(), logger)
 }
 
 ///|
@@ -39,7 +39,7 @@ pub(all) enum OttavaSpanRole {
 
 ///|
 pub impl Show for OttavaSpanRole with fn output(self, logger) {
-  self.to_repr().output(logger)
+  Show::output(self.to_repr(), logger)
 }
 
 ///|
@@ -51,7 +51,7 @@ pub(all) struct OttavaSpan {
 
 ///|
 pub impl Show for OttavaSpan with fn output(self, logger) {
-  self.to_repr().output(logger)
+  Show::output(self.to_repr(), logger)
 }
 
 ///|

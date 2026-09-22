@@ -1,9 +1,7 @@
 import {
   "moonbitlang/core/cmp",
   "moonbitlang/core/math",
-  "moonbitlang/core/random",
   "moonbitlang/core/string",
-  "moonbitlang/core/strconv",
 }
 
 import {

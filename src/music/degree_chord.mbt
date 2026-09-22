@@ -12,7 +12,7 @@ pub(all) enum ScaleDegree {
 
 ///|
 pub impl Show for ScaleDegree with fn output(self, logger) {
-  self.to_repr().output(logger)
+  Show::output(self.to_repr(), logger)
 }
 
 ///|
@@ -52,7 +52,7 @@ pub(all) struct DegreeBass {
 
 ///|
 pub impl Show for DegreeBass with fn output(self, logger) {
-  self.to_repr().output(logger)
+  Show::output(self.to_repr(), logger)
 }
 
 ///|
@@ -66,7 +66,7 @@ pub(all) struct DegreeChord {
 
 ///|
 pub impl Show for DegreeChord with fn output(self, logger) {
-  self.to_repr().output(logger)
+  Show::output(self.to_repr(), logger)
 }
 
 ///|
@@ -204,7 +204,7 @@ pub(all) struct DegreeMeasure {
 
 ///|
 pub impl Show for DegreeMeasure with fn output(self, logger) {
-  self.to_repr().output(logger)
+  Show::output(self.to_repr(), logger)
 }
 
 ///|

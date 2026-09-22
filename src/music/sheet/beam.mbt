@@ -17,7 +17,7 @@ pub struct SheetBeamStem {
 
 ///|
 pub impl Show for SheetBeamStem with fn output(self, logger) {
-  self.to_repr().output(logger)
+  Show::output(self.to_repr(), logger)
 }
 
 ///|
@@ -30,7 +30,7 @@ pub struct SheetBeamRest {
 
 ///|
 pub impl Show for SheetBeamRest with fn output(self, logger) {
-  self.to_repr().output(logger)
+  Show::output(self.to_repr(), logger)
 }
 
 ///|
@@ -51,7 +51,7 @@ pub struct SheetBeamGroup {
 
 ///|
 pub impl Show for SheetBeamGroup with fn output(self, logger) {
-  self.to_repr().output(logger)
+  Show::output(self.to_repr(), logger)
 }
 
 ///|

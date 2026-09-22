@@ -31,7 +31,7 @@ fn make_midi_input(raw : @js.Any) -> MidiInput {
 ///|
 fn make_midi_input_map(access_any : @js.Any) -> MidiInputMap {
   let raws = ffi_collect_inputs(access_any)
-  @sorted_map.from_array(
+  @sorted_map.SortedMap(
     raws.map(fn(raw) {
       let input = make_midi_input(raw)
       (input.id, input)
@@ -96,7 +96,7 @@ extern "js" fn ffi_request_midi_access(
 ///|
 // Note: Array.from() is intentionally avoided here — it is not supported
 // in some Web MIDI browser environments (e.g. Web MIDI Browser on iOS).
-extern "js" fn ffi_collect_inputs(access : @js.Any) -> Array[@js.Any] =
+extern "js" fn ffi_collect_inputs(access : @js.Any) -> FixedArray[@js.Any] =
   #| (access) => {
   #|   const inputs = []
   #|   access.inputs.forEach(input => inputs.push(input))

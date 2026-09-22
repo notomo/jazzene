@@ -14,7 +14,7 @@ pub(all) enum ToneOrigin {
 
 ///|
 pub impl Show for ToneOrigin with fn output(self, logger) {
-  self.to_repr().output(logger)
+  Show::output(self.to_repr(), logger)
 }
 
 ///|

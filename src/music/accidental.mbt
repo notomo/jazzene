@@ -8,7 +8,7 @@ pub enum Accidental {
 
 ///|
 pub impl Show for Accidental with fn output(self, logger) {
-  self.to_repr().output(logger)
+  Show::output(self.to_repr(), logger)
 }
 
 ///|
@@ -19,9 +19,9 @@ pub fn create_accidental_calculator(
   key : KeySignature,
 ) -> (MidiNumber) -> Accidental? {
   // Track accidental state per (step, octave) - accidentals only apply within the same octave
-  let note_states : Map[Int, Accidental] = {}
+  let note_states : Map[Int, Accidental] = Map([])
   // Key signature defaults per step (applies to all octaves)
-  let key_defaults : Map[Int, Accidental] = {}
+  let key_defaults : Map[Int, Accidental] = Map([])
 
   for step in key.altered_steps {
     key_defaults[step] = key.accidental_type

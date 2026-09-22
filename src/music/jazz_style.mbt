@@ -8,7 +8,7 @@ pub(all) enum MelodyMode {
 
 ///|
 pub impl Show for MelodyMode with fn output(self, logger) {
-  self.to_repr().output(logger)
+  Show::output(self.to_repr(), logger)
 }
 
 ///|
@@ -21,7 +21,7 @@ pub(all) enum CompingMode {
 
 ///|
 pub impl Show for CompingMode with fn output(self, logger) {
-  self.to_repr().output(logger)
+  Show::output(self.to_repr(), logger)
 }
 
 ///|
@@ -43,7 +43,7 @@ pub(all) struct JazzStyle {
 
 ///|
 pub impl Show for JazzStyle with fn output(self, logger) {
-  self.to_repr().output(logger)
+  Show::output(self.to_repr(), logger)
 }
 
 ///|

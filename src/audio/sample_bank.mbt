@@ -116,7 +116,7 @@ async fn load_one_sample(
 /// Load all Salamander Grand Piano samples asynchronously.
 /// All samples are fetched in parallel; failed samples are silently skipped.
 async fn load_sample_bank(ctx : @web_audio.AudioContext) -> SampleBank {
-  let bank : Map[String, @web_audio.AudioBuffer] = {}
+  let bank : Map[String, @web_audio.AudioBuffer] = Map([])
   let promises = sample_note_names().map(fn(name) {
     @js.from_async(async fn() {
       let buf = load_one_sample(ctx, name)

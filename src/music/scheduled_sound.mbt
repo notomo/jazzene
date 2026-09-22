@@ -10,7 +10,7 @@ pub(all) struct ScheduledSound {
 
 ///|
 pub impl Show for ScheduledSound with fn output(self, logger) {
-  self.to_repr().output(logger)
+  Show::output(self.to_repr(), logger)
 }
 
 ///|

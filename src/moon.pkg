@@ -1,5 +1,4 @@
 import {
-  "moonbitlang/core/cmp",
   "mizchi/signals",
   "internal/jazzene/music",
   "internal/jazzene/audio",

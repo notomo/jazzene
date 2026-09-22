@@ -17,7 +17,7 @@ pub(all) enum ChordRoot {
 
 ///|
 pub impl Show for ChordRoot with fn output(self, logger) {
-  self.to_repr().output(logger)
+  Show::output(self.to_repr(), logger)
 }
 
 ///|

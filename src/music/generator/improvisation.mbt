@@ -184,7 +184,6 @@ fn remove_dangling_tie(
 ) -> Array[@music.Measure] {
   guard last_tie is Some(_) else { return measures }
   guard measures is [.. rest_measures, last_measure] else { return measures }
-  guard last_measure.beats is [.. _rest_beats] else { return measures }
 
   // Remove trailing tied notes from the last measure's beats
   let new_beats = remove_trailing_tied_notes(last_measure.beats)

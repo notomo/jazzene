@@ -22,7 +22,7 @@ pub(all) enum ChordScale {
 
 ///|
 pub impl Show for ChordScale with fn output(self, logger) {
-  self.to_repr().output(logger)
+  Show::output(self.to_repr(), logger)
 }
 
 ///|

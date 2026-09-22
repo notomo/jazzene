@@ -5,7 +5,6 @@ import {
   "mizchi/js/core" @js,
   "internal/jazzene/music",
   "mizchi/js/browser/dom" @js_dom,
-  "mizchi/js/web/event",
   "mizchi/js/browser/file" @js_file,
   "mizchi/js/builtins/arraybuffer",
   "mizchi/js/web/url" @js_url,

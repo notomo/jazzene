@@ -261,7 +261,8 @@ extern "js" fn ffi_channel_data_get(data : ChannelData, index : Int) -> Double =
   #| (data, i) => data[i]
 
 ///|
-pub fn ChannelData::op_get(self : Self, index : Int) -> Double {
+#alias("_[_]")
+pub fn ChannelData::at(self : Self, index : Int) -> Double {
   ffi_channel_data_get(self, index)
 }
 
@@ -274,7 +275,8 @@ extern "js" fn ffi_channel_data_set(
   #| (data, i, v) => { data[i] = v; }
 
 ///|
-pub fn ChannelData::op_set(self : Self, index : Int, value : Double) -> Unit {
+#alias("_[_]=_")
+pub fn ChannelData::set(self : Self, index : Int, value : Double) -> Unit {
   ffi_channel_data_set(self, index, value)
 }
 

@@ -29,7 +29,7 @@ pub(all) enum CompingStyle {
 
 ///|
 pub impl Show for CompingStyle with fn output(self, logger) {
-  self.to_repr().output(logger)
+  Show::output(self.to_repr(), logger)
 }
 
 ///|
@@ -44,7 +44,7 @@ pub(all) enum CompingPattern {
 
 ///|
 pub impl Show for CompingPattern with fn output(self, logger) {
-  self.to_repr().output(logger)
+  Show::output(self.to_repr(), logger)
 }
 
 ///|
