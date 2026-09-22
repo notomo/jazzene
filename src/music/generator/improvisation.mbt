@@ -188,7 +188,7 @@ fn remove_dangling_tie(
 
   // Remove trailing tied notes from the last measure's beats
   let new_beats = remove_trailing_tied_notes(last_measure.beats)
-  [..rest_measures, @music.Measure::{ ..last_measure, beats: new_beats }]
+  [..rest_measures, @music.Measure::{ ..last_measure, beats: new_beats, }]
 }
 
 ///|

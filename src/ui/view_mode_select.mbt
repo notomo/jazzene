@@ -8,7 +8,7 @@ pub struct ViewState {
 
 ///|
 fn ViewState::default() -> ViewState {
-  { show_sheet: true, show_piano_roll: true, show_settings: false }
+  { show_sheet: true, show_piano_roll: true, show_settings: false, }
 }
 
 ///|
@@ -35,25 +35,25 @@ fn ViewState::from_query_string(s : String) -> ViewState {
   if !show_sheet && !show_piano_roll {
     { ..ViewState::default(), show_settings, }
   } else {
-    { show_sheet, show_piano_roll, show_settings }
+    { show_sheet, show_piano_roll, show_settings, }
   }
 }
 
 ///|
 fn toggle_sheet(current : ViewState) -> ViewState {
   match (current.show_sheet, current.show_piano_roll) {
-    (true, true) => { ..current, show_sheet: false }
-    (false, _) => { ..current, show_sheet: true }
-    (true, false) => { ..current, show_sheet: false, show_piano_roll: true }
+    (true, true) => { ..current, show_sheet: false, }
+    (false, _) => { ..current, show_sheet: true, }
+    (true, false) => { ..current, show_sheet: false, show_piano_roll: true, }
   }
 }
 
 ///|
 fn toggle_piano(current : ViewState) -> ViewState {
   match (current.show_sheet, current.show_piano_roll) {
-    (true, true) => { ..current, show_piano_roll: false }
-    (_, false) => { ..current, show_piano_roll: true }
-    (false, true) => { ..current, show_sheet: true, show_piano_roll: false }
+    (true, true) => { ..current, show_piano_roll: false, }
+    (_, false) => { ..current, show_piano_roll: true, }
+    (false, true) => { ..current, show_sheet: true, show_piano_roll: false, }
   }
 }
 

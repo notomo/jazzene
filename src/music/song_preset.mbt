@@ -18,7 +18,7 @@ pub let song_presets : Array[SongPreset] = [
     key: Some(C),
     bpm: Some(160),
     measures: Some(6),
-    time_signature: Some(TimeSignature::{ numerator: 4, denominator: 4 }),
+    time_signature: Some(TimeSignature::{ numerator: 4, denominator: 4, }),
   },
   SongPreset::{
     name: "Blues",
@@ -26,7 +26,7 @@ pub let song_presets : Array[SongPreset] = [
     key: Some(F),
     bpm: Some(120),
     measures: Some(14),
-    time_signature: Some(TimeSignature::{ numerator: 4, denominator: 4 }),
+    time_signature: Some(TimeSignature::{ numerator: 4, denominator: 4, }),
   },
   SongPreset::{
     name: "Rhythm Changes A",
@@ -34,7 +34,7 @@ pub let song_presets : Array[SongPreset] = [
     key: Some(ASharp),
     bpm: Some(220),
     measures: Some(10),
-    time_signature: Some(TimeSignature::{ numerator: 4, denominator: 4 }),
+    time_signature: Some(TimeSignature::{ numerator: 4, denominator: 4, }),
   },
   SongPreset::{
     name: "Autumn Leaves",
@@ -42,7 +42,7 @@ pub let song_presets : Array[SongPreset] = [
     key: Some(ASharp),
     bpm: Some(140),
     measures: Some(18),
-    time_signature: Some(TimeSignature::{ numerator: 4, denominator: 4 }),
+    time_signature: Some(TimeSignature::{ numerator: 4, denominator: 4, }),
   },
   SongPreset::{
     name: "Someday My Prince Will Come",
@@ -50,6 +50,6 @@ pub let song_presets : Array[SongPreset] = [
     key: Some(ASharp),
     bpm: Some(180),
     measures: Some(18),
-    time_signature: Some(TimeSignature::{ numerator: 3, denominator: 4 }),
+    time_signature: Some(TimeSignature::{ numerator: 3, denominator: 4, }),
   },
 ]

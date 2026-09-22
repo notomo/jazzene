@@ -240,7 +240,7 @@ fn MeasureState::add_note(
 fn MeasureState::to_beats(self : MeasureState) -> Array[@music.Beat] {
   self.beat_notes
   .iter()
-  .mapi(fn(i, notes) { @music.Beat::{ count: i, notes } })
+  .mapi(fn(i, notes) { @music.Beat::{ count: i, notes, } })
   .collect()
 }
 
@@ -403,7 +403,7 @@ fn process_incoming_tie(
   for remaining = tie_ctx.remaining_beats, state = state {
     guard remaining > 0.0 && state.measure_pos < beats_per_measure else {
       let outgoing = if remaining > 0.0 {
-        Some(TieContext::{ midi, remaining_beats: remaining })
+        Some(TieContext::{ midi, remaining_beats: remaining, })
       } else {
         None
       }
@@ -528,7 +528,7 @@ fn handle_playing(
       random_int(100) < prob
     })
   guard !should_end_early else {
-    return Continue(MeasureState::{ ..state, phrase: Resting })
+    return Continue(MeasureState::{ ..state, phrase: Resting, })
   }
   // Try to generate a triplet group (3 eighth triplets = 1 beat)
   guard !should_generate_triplet(

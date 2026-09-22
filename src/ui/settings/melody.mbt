@@ -24,7 +24,7 @@ fn melody_section(
         fn() { jazz_style.get().melody_mode },
         fn(v) {
           jazz_style.update(fn(style) {
-            @music.JazzStyle::{ ..style, melody_mode: v }
+            @music.JazzStyle::{ ..style, melody_mode: v, }
           })
         },
       ),
@@ -41,7 +41,7 @@ fn swing_section(
     "Swing",
     [
       segmented_buttons(swing_options, fn() { jazz_style.get().swing }, fn(v) {
-        jazz_style.update(fn(style) { @music.JazzStyle::{ ..style, swing: v } })
+        jazz_style.update(fn(style) { @music.JazzStyle::{ ..style, swing: v, } })
       }),
     ],
     aria_label="swing",

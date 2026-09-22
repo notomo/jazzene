@@ -76,17 +76,17 @@ priv struct DrumPattern {
 fn DrumPattern::swing_ride_3_4() -> DrumPattern {
   DrumPattern::{
     hits: [
-      DrumHit::{ voice: Kick, beat: 0.0 },
-      DrumHit::{ voice: Ride, beat: 0.0 },
-      DrumHit::{ voice: Ride, beat: 0.5 },
-      DrumHit::{ voice: Snare, beat: 1.0 },
-      DrumHit::{ voice: HiHat, beat: 1.0 },
-      DrumHit::{ voice: Ride, beat: 1.0 },
-      DrumHit::{ voice: Ride, beat: 1.5 },
-      DrumHit::{ voice: Snare, beat: 2.0 },
-      DrumHit::{ voice: HiHat, beat: 2.0 },
-      DrumHit::{ voice: Ride, beat: 2.0 },
-      DrumHit::{ voice: Ride, beat: 2.5 },
+      DrumHit::{ voice: Kick, beat: 0.0, },
+      DrumHit::{ voice: Ride, beat: 0.0, },
+      DrumHit::{ voice: Ride, beat: 0.5, },
+      DrumHit::{ voice: Snare, beat: 1.0, },
+      DrumHit::{ voice: HiHat, beat: 1.0, },
+      DrumHit::{ voice: Ride, beat: 1.0, },
+      DrumHit::{ voice: Ride, beat: 1.5, },
+      DrumHit::{ voice: Snare, beat: 2.0, },
+      DrumHit::{ voice: HiHat, beat: 2.0, },
+      DrumHit::{ voice: Ride, beat: 2.0, },
+      DrumHit::{ voice: Ride, beat: 2.5, },
     ],
   }
 }
@@ -98,13 +98,13 @@ fn DrumPattern::swing_ride_3_4() -> DrumPattern {
 fn DrumPattern::brushes_3_4() -> DrumPattern {
   DrumPattern::{
     hits: [
-      DrumHit::{ voice: Kick, beat: 0.0 },
-      DrumHit::{ voice: Brush, beat: 0.0 },
-      DrumHit::{ voice: Brush, beat: 0.5 },
-      DrumHit::{ voice: Brush, beat: 1.0 },
-      DrumHit::{ voice: Brush, beat: 1.5 },
-      DrumHit::{ voice: Brush, beat: 2.0 },
-      DrumHit::{ voice: Brush, beat: 2.5 },
+      DrumHit::{ voice: Kick, beat: 0.0, },
+      DrumHit::{ voice: Brush, beat: 0.0, },
+      DrumHit::{ voice: Brush, beat: 0.5, },
+      DrumHit::{ voice: Brush, beat: 1.0, },
+      DrumHit::{ voice: Brush, beat: 1.5, },
+      DrumHit::{ voice: Brush, beat: 2.0, },
+      DrumHit::{ voice: Brush, beat: 2.5, },
     ],
   }
 }
@@ -118,18 +118,18 @@ fn DrumPattern::brushes_3_4() -> DrumPattern {
 fn DrumPattern::swing_ride_4_4() -> DrumPattern {
   DrumPattern::{
     hits: [
-      DrumHit::{ voice: Kick, beat: 0.0 },
-      DrumHit::{ voice: Ride, beat: 0.0 },
-      DrumHit::{ voice: Snare, beat: 1.0 },
-      DrumHit::{ voice: HiHat, beat: 1.0 },
-      DrumHit::{ voice: Ride, beat: 1.0 },
-      DrumHit::{ voice: Ride, beat: 1.5 },
-      DrumHit::{ voice: Kick, beat: 2.0 },
-      DrumHit::{ voice: Ride, beat: 2.0 },
-      DrumHit::{ voice: Snare, beat: 3.0 },
-      DrumHit::{ voice: HiHat, beat: 3.0 },
-      DrumHit::{ voice: Ride, beat: 3.0 },
-      DrumHit::{ voice: Ride, beat: 3.5 },
+      DrumHit::{ voice: Kick, beat: 0.0, },
+      DrumHit::{ voice: Ride, beat: 0.0, },
+      DrumHit::{ voice: Snare, beat: 1.0, },
+      DrumHit::{ voice: HiHat, beat: 1.0, },
+      DrumHit::{ voice: Ride, beat: 1.0, },
+      DrumHit::{ voice: Ride, beat: 1.5, },
+      DrumHit::{ voice: Kick, beat: 2.0, },
+      DrumHit::{ voice: Ride, beat: 2.0, },
+      DrumHit::{ voice: Snare, beat: 3.0, },
+      DrumHit::{ voice: HiHat, beat: 3.0, },
+      DrumHit::{ voice: Ride, beat: 3.0, },
+      DrumHit::{ voice: Ride, beat: 3.5, },
     ],
   }
 }
@@ -143,15 +143,15 @@ fn DrumPattern::swing_ride_4_4() -> DrumPattern {
 fn DrumPattern::brushes_4_4() -> DrumPattern {
   DrumPattern::{
     hits: [
-      DrumHit::{ voice: Kick, beat: 0.0 },
-      DrumHit::{ voice: Brush, beat: 0.0 },
-      DrumHit::{ voice: Brush, beat: 0.5 },
-      DrumHit::{ voice: Brush, beat: 1.0 },
-      DrumHit::{ voice: Brush, beat: 1.5 },
-      DrumHit::{ voice: Brush, beat: 2.0 },
-      DrumHit::{ voice: Brush, beat: 2.5 },
-      DrumHit::{ voice: Brush, beat: 3.0 },
-      DrumHit::{ voice: Brush, beat: 3.5 },
+      DrumHit::{ voice: Kick, beat: 0.0, },
+      DrumHit::{ voice: Brush, beat: 0.0, },
+      DrumHit::{ voice: Brush, beat: 0.5, },
+      DrumHit::{ voice: Brush, beat: 1.0, },
+      DrumHit::{ voice: Brush, beat: 1.5, },
+      DrumHit::{ voice: Brush, beat: 2.0, },
+      DrumHit::{ voice: Brush, beat: 2.5, },
+      DrumHit::{ voice: Brush, beat: 3.0, },
+      DrumHit::{ voice: Brush, beat: 3.5, },
     ],
   }
 }

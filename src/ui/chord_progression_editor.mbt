@@ -44,7 +44,7 @@ fn update_chord_at(
   let new_measures = measures.copy()
   let new_chords = measure.chords.copy()
   new_chords[ec.chord_idx] = new_chord
-  new_measures[ec.measure_idx] = @music.DegreeMeasure::{ chords: new_chords }
+  new_measures[ec.measure_idx] = @music.DegreeMeasure::{ chords: new_chords, }
   new_measures
 }
 
@@ -64,9 +64,9 @@ fn merge_measures_at(
     if i < mi {
       measures[i]
     } else if i == mi {
-      @music.DegreeMeasure::{ chords: merged_chords }
+      @music.DegreeMeasure::{ chords: merged_chords, }
     } else {
-      @music.DegreeMeasure::{ chords: measures[i + 1].chords }
+      @music.DegreeMeasure::{ chords: measures[i + 1].chords, }
     }
   })
 }
@@ -91,7 +91,7 @@ fn insert_chord_after(
     }
   })
   let new_measures = measures.copy()
-  new_measures[ec.measure_idx] = @music.DegreeMeasure::{ chords: new_chords }
+  new_measures[ec.measure_idx] = @music.DegreeMeasure::{ chords: new_chords, }
   new_measures
 }
 
@@ -111,7 +111,7 @@ fn insert_measure_after(
     } else if i == mi + 1 {
       measure
     } else {
-      @music.DegreeMeasure::{ chords: measures[i - 1].chords }
+      @music.DegreeMeasure::{ chords: measures[i - 1].chords, }
     }
   })
 }
@@ -143,7 +143,7 @@ fn delete_chord_at(
       if i < ec.measure_idx {
         measures[i]
       } else {
-        @music.DegreeMeasure::{ chords: measures[i + 1].chords }
+        @music.DegreeMeasure::{ chords: measures[i + 1].chords, }
       }
     })
   } else {
@@ -155,7 +155,7 @@ fn delete_chord_at(
         measure.chords[j + 1]
       }
     })
-    new_measures[ec.measure_idx] = @music.DegreeMeasure::{ chords: new_chords }
+    new_measures[ec.measure_idx] = @music.DegreeMeasure::{ chords: new_chords, }
     new_measures
   }
 }
@@ -169,7 +169,7 @@ fn next_editing_chord_after_merge(
   current_ec : EditingChord?,
 ) -> EditingChord? {
   match current_ec {
-    None => Some(EditingChord::{ measure_idx: merge_mi, chord_idx: 0 })
+    None => Some(EditingChord::{ measure_idx: merge_mi, chord_idx: 0, })
     Some(ec) =>
       if ec.measure_idx < merge_mi {
         Some(ec)
@@ -203,7 +203,7 @@ fn next_editing_chord_after_delete(
     // Whole measure is removed — try right first, then left
     let new_len = measures.length() - 1
     if ec.measure_idx < new_len {
-      Some(EditingChord::{ measure_idx: ec.measure_idx, chord_idx: 0 })
+      Some(EditingChord::{ measure_idx: ec.measure_idx, chord_idx: 0, })
     } else if ec.measure_idx > 0 {
       let left_mi = ec.measure_idx - 1
       Some(EditingChord::{
@@ -278,7 +278,7 @@ pub fn chord_progression_display(
                 ],
                 on=@luna_dom.events().click(fn(_) {
                   editing_chord.set(
-                    Some(EditingChord::{ measure_idx: mi, chord_idx: ci }),
+                    Some(EditingChord::{ measure_idx: mi, chord_idx: ci, }),
                   )
                 }),
               ) <| [
@@ -321,9 +321,9 @@ pub fn chord_progression_display(
           if editing_chord.peek() is None {
             let measures = degree_measures.peek()
             let ec = if measures.is_empty() {
-              EditingChord::{ measure_idx: 0, chord_idx: 0 }
+              EditingChord::{ measure_idx: 0, chord_idx: 0, }
             } else {
-              EditingChord::{ measure_idx: 0, chord_idx: 0 }
+              EditingChord::{ measure_idx: 0, chord_idx: 0, }
             }
             editing_chord.set(Some(ec))
           }
@@ -410,7 +410,7 @@ pub fn chord_editor_dialog(
                   },
                   on=@luna_dom.events().click(fn(_) {
                     editing_chord.set(
-                      Some(EditingChord::{ measure_idx: mi, chord_idx: ci }),
+                      Some(EditingChord::{ measure_idx: mi, chord_idx: ci, }),
                     )
                   }),
                 ) <| [
@@ -457,10 +457,14 @@ pub fn chord_editor_dialog(
                 match editing_chord.peek() {
                   None => {
                     degree_measures.update(fn(_) {
-                      [@music.DegreeMeasure::{ chords: [default_degree_chord] }]
+                      [
+                        @music.DegreeMeasure::{
+                          chords: [default_degree_chord],
+                        },
+                      ]
                     })
                     editing_chord.set(
-                      Some(EditingChord::{ measure_idx: 0, chord_idx: 0 }),
+                      Some(EditingChord::{ measure_idx: 0, chord_idx: 0, }),
                     )
                   }
                   Some(_) => {
@@ -474,7 +478,7 @@ pub fn chord_editor_dialog(
                         ]
                       })
                       editing_chord.set(
-                        Some(EditingChord::{ measure_idx: 0, chord_idx: 0 }),
+                        Some(EditingChord::{ measure_idx: 0, chord_idx: 0, }),
                       )
                     } else {
                       let ec = editing_chord.peek().unwrap()
@@ -524,7 +528,7 @@ pub fn chord_editor_dialog(
                         ]
                       })
                       editing_chord.set(
-                        Some(EditingChord::{ measure_idx: 0, chord_idx: 0 }),
+                        Some(EditingChord::{ measure_idx: 0, chord_idx: 0, }),
                       )
                       return
                     }
@@ -557,7 +561,7 @@ pub fn chord_editor_dialog(
                       })
                     }
                     editing_chord.set(
-                      Some(EditingChord::{ measure_idx: new_mi, chord_idx: 0 }),
+                      Some(EditingChord::{ measure_idx: new_mi, chord_idx: 0, }),
                     )
                   }
                 }
@@ -663,7 +667,7 @@ pub fn chord_editor_dialog(
                       degree_measures.get(),
                       match editing_chord.get() {
                         Some(ec) => ec
-                        None => EditingChord::{ measure_idx: 0, chord_idx: 0 }
+                        None => EditingChord::{ measure_idx: 0, chord_idx: 0, }
                       },
                     ) {
                     Some(chord) => chord.degree == degree
@@ -720,7 +724,7 @@ pub fn chord_editor_dialog(
                       degree_measures.get(),
                       match editing_chord.get() {
                         Some(ec) => ec
-                        None => EditingChord::{ measure_idx: 0, chord_idx: 0 }
+                        None => EditingChord::{ measure_idx: 0, chord_idx: 0, }
                       },
                     ) {
                     Some(chord) => chord.quality == quality
@@ -771,7 +775,7 @@ pub fn chord_editor_dialog(
                     degree_measures.get(),
                     match editing_chord.get() {
                       Some(ec) => ec
-                      None => EditingChord::{ measure_idx: 0, chord_idx: 0 }
+                      None => EditingChord::{ measure_idx: 0, chord_idx: 0, }
                     },
                   ) {
                   Some(chord) => chord.bass is None
@@ -817,7 +821,7 @@ pub fn chord_editor_dialog(
                       degree_measures.get(),
                       match editing_chord.get() {
                         Some(ec) => ec
-                        None => EditingChord::{ measure_idx: 0, chord_idx: 0 }
+                        None => EditingChord::{ measure_idx: 0, chord_idx: 0, }
                       },
                     ) {
                     Some(chord) =>

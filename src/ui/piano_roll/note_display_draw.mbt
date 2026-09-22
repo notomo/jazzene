@@ -51,7 +51,7 @@ fn compute_chord_labels(
   bpm : Int,
 ) -> Array[ChordLabel] {
   let beat_duration_ms = @music.ms_per_beat(bpm)
-  let mi_ref : Ref[Int] = { val: 0 }
+  let mi_ref : Ref[Int] = { val: 0, }
   measures
   .iter()
   .flat_map(fn(measure) {
@@ -487,7 +487,7 @@ fn draw_notes(
   let label_width = calc_label_width(width)
   // Notes area starts after the chord label column so notes never overlap labels
   let key_areas = calc_key_areas(
-    { left: label_width, top: 0.0, width: width - label_width, height },
+    { left: label_width, top: 0.0, width: width - label_width, height, },
     KEYBOARD_MIN_KEY,
     KEYBOARD_MAX_KEY,
   )

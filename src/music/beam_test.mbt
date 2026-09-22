@@ -1,16 +1,22 @@
 ///|
 fn make_note(midi : Int, duration : NoteDuration) -> MeasureNote {
-  { midi: Some(midi), duration, accidental: None, tie: None, tone_origin: None }
+  {
+    midi: Some(midi),
+    duration,
+    accidental: None,
+    tie: None,
+    tone_origin: None,
+  }
 }
 
 ///|
 fn make_rest(duration : NoteDuration) -> MeasureNote {
-  { midi: None, duration, accidental: None, tie: None, tone_origin: None }
+  { midi: None, duration, accidental: None, tie: None, tone_origin: None, }
 }
 
 ///|
 fn ts44() -> TimeSignature {
-  TimeSignature::{ numerator: 4, denominator: 4 }
+  TimeSignature::{ numerator: 4, denominator: 4, }
 }
 
 ///|

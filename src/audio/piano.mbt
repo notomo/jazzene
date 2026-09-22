@@ -14,7 +14,7 @@ fn Piano::new(
 ) -> Piano {
   let gain = ctx.create_gain()
   gain.connect(master_gain.as_audio_node())
-  { ctx, gain, sample_bank: None }
+  { ctx, gain, sample_bank: None, }
 }
 
 ///|

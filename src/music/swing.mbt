@@ -9,19 +9,19 @@ pub struct SwingConfig {
 ///|
 /// Create a straight feel (no swing)
 pub fn SwingConfig::straight() -> SwingConfig {
-  SwingConfig::{ ratio: 0.5 }
+  SwingConfig::{ ratio: 0.5, }
 }
 
 ///|
 /// Create a triplet swing feel
 pub fn SwingConfig::triplet() -> SwingConfig {
-  SwingConfig::{ ratio: 2.0 / 3.0 }
+  SwingConfig::{ ratio: 2.0 / 3.0, }
 }
 
 ///|
 /// Create a hard swing feel
 pub fn SwingConfig::hard_swing() -> SwingConfig {
-  SwingConfig::{ ratio: 0.75 }
+  SwingConfig::{ ratio: 0.75, }
 }
 
 ///|

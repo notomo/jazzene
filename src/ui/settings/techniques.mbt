@@ -52,7 +52,7 @@ fn melody_techniques_section(
           let t = style.techniques
           @music.JazzStyle::{
             ..style,
-            techniques: @music.Techniques::{ ..t, enclosure: !t.enclosure },
+            techniques: @music.Techniques::{ ..t, enclosure: !t.enclosure, },
           }
         })
       },
@@ -65,7 +65,7 @@ fn melody_techniques_section(
           let t = style.techniques
           @music.JazzStyle::{
             ..style,
-            techniques: @music.Techniques::{ ..t, syncopation: !t.syncopation },
+            techniques: @music.Techniques::{ ..t, syncopation: !t.syncopation, },
           }
         })
       },
@@ -78,7 +78,7 @@ fn melody_techniques_section(
           let t = style.techniques
           @music.JazzStyle::{
             ..style,
-            techniques: @music.Techniques::{ ..t, triplets: !t.triplets },
+            techniques: @music.Techniques::{ ..t, triplets: !t.triplets, },
           }
         })
       },

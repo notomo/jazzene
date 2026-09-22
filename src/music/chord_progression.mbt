@@ -28,7 +28,7 @@ pub fn Chord::transpose(self : Chord, offset : Int) -> Chord {
     let bp = (b.midi() - 60 + offset + 120) % 12
     ChordRoot::from_pitch_class(bp)
   })
-  Chord::{ root: new_root, quality: self.quality, bass: new_bass }
+  Chord::{ root: new_root, quality: self.quality, bass: new_bass, }
 }
 
 ///|

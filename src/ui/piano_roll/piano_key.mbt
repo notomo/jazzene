@@ -72,7 +72,7 @@ fn calc_key_areas(
     let right = rect.left +
       (octave + right_ratio - base_offset_ratio) * octave_width
     {
-      rect: { left, top: rect.top, width: right - left, height: rect.height },
+      rect: { left, top: rect.top, width: right - left, height: rect.height, },
       midi: key,
       is_black: is_black_key(note_index),
     }
@@ -83,7 +83,7 @@ fn calc_key_areas(
 /// Compute the chord label column width = right edge of 3rd white key (C1) from left
 fn calc_label_width(total_width : Double) -> Double {
   let key_areas = calc_key_areas(
-    { left: 0.0, top: 0.0, width: total_width, height: 1.0 },
+    { left: 0.0, top: 0.0, width: total_width, height: 1.0, },
     KEYBOARD_MIN_KEY,
     KEYBOARD_MAX_KEY,
   )

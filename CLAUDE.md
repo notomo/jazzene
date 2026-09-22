@@ -67,5 +67,5 @@ Use Tailwind utility classes for all styling applied directly in MoonBit code (e
 ## Important Notes
 
 - **Web Audio API**: All access must go through `src/audio/web_audio_api/`. Never use raw JS FFI for Web Audio outside this package.
-- **Target**: JS only (`preferred-target: "js"`); ESM format; `src/moon.pkg` has `"is-main": true`.
+- **Target**: JS only (`preferred_target = "js"` in `moon.mod`); ESM format; `src/moon.pkg` has `pkgtype(kind: "executable")`.
 - **MoonBit Reference**: Use `/moonbit-agent-guide` or `/moonbit-refactoring` skills for MoonBit language questions.

@@ -25,7 +25,7 @@ pub struct MidiAccess {
 
 ///|
 fn make_midi_input(raw : @js.Any) -> MidiInput {
-  { id: raw._get("id").cast(), name: raw._get("name").cast(), raw }
+  { id: raw._get("id").cast(), name: raw._get("name").cast(), raw, }
 }
 
 ///|

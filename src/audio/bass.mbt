@@ -13,7 +13,7 @@ fn Bass::new(
 ) -> Bass {
   let gain = ctx.create_gain()
   gain.connect(master_gain.as_audio_node())
-  { ctx, gain }
+  { ctx, gain, }
 }
 
 ///|

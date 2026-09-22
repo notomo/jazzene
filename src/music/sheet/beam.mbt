@@ -231,7 +231,7 @@ fn compute_beam_group(
         let sx = note_positions[idx] + x_offset
         let sy1 = note_y + y_offset
         let sy2 = beam_y_at(sx, first_x, last_x, first_beam_y, last_beam_y)
-        stems.push(SheetBeamStem::{ x: sx, y1: sy1, y2: sy2 })
+        stems.push(SheetBeamStem::{ x: sx, y1: sy1, y2: sy2, })
       }
       None => ()
     }

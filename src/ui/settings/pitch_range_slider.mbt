@@ -45,8 +45,8 @@ fn add_document_drag_listeners(
   on_up : () -> Unit,
 ) -> Unit {
   let doc = @js_dom.document().as_event_target()
-  let move_ref : Ref[(@js.Any) -> Unit] = { val: fn(_) { () } }
-  let up_ref : Ref[(@js.Any) -> Unit] = { val: fn(_) { () } }
+  let move_ref : Ref[(@js.Any) -> Unit] = { val: fn(_) { () }, }
+  let up_ref : Ref[(@js.Any) -> Unit] = { val: fn(_) { () }, }
   move_ref.val = fn(e) { on_move(e._get("clientX").cast()) }
   up_ref.val = fn(_e) {
     on_up()
@@ -55,8 +55,8 @@ fn add_document_drag_listeners(
   }
   doc.addEventListener("mousemove", move_ref.val)
   doc.addEventListener("mouseup", up_ref.val)
-  let touch_move_ref : Ref[(@js.Any) -> Unit] = { val: fn(_) { () } }
-  let touch_end_ref : Ref[(@js.Any) -> Unit] = { val: fn(_) { () } }
+  let touch_move_ref : Ref[(@js.Any) -> Unit] = { val: fn(_) { () }, }
+  let touch_end_ref : Ref[(@js.Any) -> Unit] = { val: fn(_) { () }, }
   touch_move_ref.val = fn(e) {
     let touches = e._get("touches")
     if (touches._get("length").cast() : Int) > 0 {
@@ -127,13 +127,13 @@ pub fn pitch_range_slider(
         @cmp.maximum(new_midi, pitch_slider_min),
         style.pitch_max - 1,
       )
-      jazz_style.update(fn(s) { @music.JazzStyle::{ ..s, pitch_min: clamped } })
+      jazz_style.update(fn(s) { @music.JazzStyle::{ ..s, pitch_min: clamped, } })
     } else {
       let clamped = @cmp.minimum(
         @cmp.maximum(new_midi, style.pitch_min + 1),
         pitch_slider_max,
       )
-      jazz_style.update(fn(s) { @music.JazzStyle::{ ..s, pitch_max: clamped } })
+      jazz_style.update(fn(s) { @music.JazzStyle::{ ..s, pitch_max: clamped, } })
     }
     add_document_drag_listeners(
       fn(cx) {
@@ -146,7 +146,7 @@ pub fn pitch_range_slider(
             cur.pitch_max - 1,
           )
           jazz_style.update(fn(s) {
-            @music.JazzStyle::{ ..s, pitch_min: clamped }
+            @music.JazzStyle::{ ..s, pitch_min: clamped, }
           })
         } else {
           let clamped = @cmp.minimum(
@@ -154,7 +154,7 @@ pub fn pitch_range_slider(
             pitch_slider_max,
           )
           jazz_style.update(fn(s) {
-            @music.JazzStyle::{ ..s, pitch_max: clamped }
+            @music.JazzStyle::{ ..s, pitch_max: clamped, }
           })
         }
       },

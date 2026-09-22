@@ -171,7 +171,7 @@ pub fn sounds_to_measures(
           }
         })
         .collect()
-      Beat::{ count: bi, notes }
+      Beat::{ count: bi, notes, }
     })
     Measure::{
       chords: [],
@@ -219,7 +219,10 @@ pub fn transpose_sounds(
       Note(midi~, duration~) =>
         match MidiNumber::new(midi.value + semitones) {
           Some(new_midi) =>
-            ScheduledSound::{ ..s, sound_event: Note(midi=new_midi, duration~) }
+            ScheduledSound::{
+              ..s,
+              sound_event: Note(midi=new_midi, duration~),
+            }
           None => s
         }
       Rest(_) => s

@@ -1,16 +1,16 @@
 ///|
 fn make_cmaj7() -> Chord {
-  Chord::{ root: C, quality: Major7, bass: None }
+  Chord::{ root: C, quality: Major7, bass: None, }
 }
 
 ///|
 fn make_g7() -> Chord {
-  Chord::{ root: G, quality: Dominant7, bass: None }
+  Chord::{ root: G, quality: Dominant7, bass: None, }
 }
 
 ///|
 fn make_dm7() -> Chord {
-  Chord::{ root: D, quality: Minor7, bass: None }
+  Chord::{ root: D, quality: Minor7, bass: None, }
 }
 
 ///|
@@ -18,10 +18,10 @@ fn make_4beat_bass_measure(chords : Array[Chord], start_ms : Double) -> Measure 
   Measure::{
     chords,
     beats: [
-      Beat::{ count: 0, notes: [] },
-      Beat::{ count: 1, notes: [] },
-      Beat::{ count: 2, notes: [] },
-      Beat::{ count: 3, notes: [] },
+      Beat::{ count: 0, notes: [], },
+      Beat::{ count: 1, notes: [], },
+      Beat::{ count: 2, notes: [], },
+      Beat::{ count: 3, notes: [], },
     ],
     start_time: Duration::from_milliseconds(start_ms),
   }
@@ -138,9 +138,9 @@ fn make_3beat_bass_measure(chords : Array[Chord], start_ms : Double) -> Measure 
   Measure::{
     chords,
     beats: [
-      Beat::{ count: 0, notes: [] },
-      Beat::{ count: 1, notes: [] },
-      Beat::{ count: 2, notes: [] },
+      Beat::{ count: 0, notes: [], },
+      Beat::{ count: 1, notes: [], },
+      Beat::{ count: 2, notes: [], },
     ],
     start_time: Duration::from_milliseconds(start_ms),
   }
@@ -211,7 +211,7 @@ test "generate_walking_bass_sounds: RootFifth - 3/4 two chords" {
 test "generate_walking_bass_sounds: empty measures produce no sounds" {
   let measure = Measure::{
     chords: [],
-    beats: [Beat::{ count: 0, notes: [] }, Beat::{ count: 1, notes: [] }],
+    beats: [Beat::{ count: 0, notes: [], }, Beat::{ count: 1, notes: [], }],
     start_time: Duration::from_milliseconds(0.0),
   }
   let sounds = generate_walking_bass_sounds([measure], 60, WalkingBass)

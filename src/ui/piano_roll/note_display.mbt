@@ -14,7 +14,7 @@ pub fn note_display(
   show_technique_hints : () -> Bool,
   on_chord_click~ : (Int, Int) -> Unit,
 ) -> @luna_dom.DomNode {
-  let { canvas, ctx } = create_canvas_context()
+  let { canvas, ctx, } = create_canvas_context()
   let resize_trigger = create_resize_trigger(canvas)
 
   // Pre-calculate note positions
@@ -100,7 +100,7 @@ pub fn note_display(
       show_technique_hints(),
     )
   })
-  let container_ref : Ref[@js_dom.Element?] = { val: None }
+  let container_ref : Ref[@js_dom.Element?] = { val: None, }
   @luna_dom.div(
     class="w-full flex-1 min-h-0 bg-slate-900",
     attrs=[("aria-label", @luna_dom.Attr::AttrString("falling notes"))],

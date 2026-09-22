@@ -34,8 +34,8 @@ fn add_document_drag_listeners_y(
   on_up : () -> Unit,
 ) -> Unit {
   let doc = @js_dom.document().as_event_target()
-  let move_ref : Ref[(@js.Any) -> Unit] = { val: fn(_) { () } }
-  let up_ref : Ref[(@js.Any) -> Unit] = { val: fn(_) { () } }
+  let move_ref : Ref[(@js.Any) -> Unit] = { val: fn(_) { () }, }
+  let up_ref : Ref[(@js.Any) -> Unit] = { val: fn(_) { () }, }
   move_ref.val = fn(e) { on_move(e._get("clientY").cast()) }
   up_ref.val = fn(_e) {
     on_up()
@@ -44,8 +44,8 @@ fn add_document_drag_listeners_y(
   }
   doc.addEventListener("mousemove", move_ref.val)
   doc.addEventListener("mouseup", up_ref.val)
-  let touch_move_ref : Ref[(@js.Any) -> Unit] = { val: fn(_) { () } }
-  let touch_end_ref : Ref[(@js.Any) -> Unit] = { val: fn(_) { () } }
+  let touch_move_ref : Ref[(@js.Any) -> Unit] = { val: fn(_) { () }, }
+  let touch_end_ref : Ref[(@js.Any) -> Unit] = { val: fn(_) { () }, }
   touch_move_ref.val = fn(e) {
     let touches = e._get("touches")
     if (touches._get("length").cast() : Int) > 0 {
@@ -132,12 +132,12 @@ fn setup_drag_seek(
   playback_position : @signals.Signal[@music.Duration],
   total_duration : () -> @music.Duration,
 ) -> Unit {
-  let drag_start_y : Ref[Double?] = { val: None }
-  let drag_start_position_ms : Ref[Double?] = { val: None }
-  let last_y : Ref[Double] = { val: 0.0 }
-  let last_time : Ref[Double] = { val: 0.0 }
-  let smoothed_velocity : Ref[Double] = { val: 0.0 }
-  let inertia_frame_id : Ref[Int?] = { val: None }
+  let drag_start_y : Ref[Double?] = { val: None, }
+  let drag_start_position_ms : Ref[Double?] = { val: None, }
+  let last_y : Ref[Double] = { val: 0.0, }
+  let last_time : Ref[Double] = { val: 0.0, }
+  let smoothed_velocity : Ref[Double] = { val: 0.0, }
+  let inertia_frame_id : Ref[Int?] = { val: None, }
 
   let cancel_inertia : () -> Unit = fn() {
     match inertia_frame_id.val {
@@ -174,8 +174,8 @@ fn setup_drag_seek(
     drag_start_y.val = None
     drag_start_position_ms.val = None
     if velocity.abs() > MIN_VELOCITY {
-      let current_velocity : Ref[Double] = { val: velocity }
-      let prev_time : Ref[Double?] = { val: None }
+      let current_velocity : Ref[Double] = { val: velocity, }
+      let prev_time : Ref[Double?] = { val: None, }
       fn inertia_step(timestamp : Double) -> Unit {
         let dt = match prev_time.val {
           Some(t) => timestamp - t

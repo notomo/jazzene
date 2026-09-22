@@ -78,8 +78,8 @@ test "Chord::approach_tones returns chromatic half-steps around chord tones for 
 ///|
 test "create_chord_segments evenly distributes chords" {
   let chords = [
-    @music.Chord::{ root: @music.C, quality: @music.Major7, bass: None },
-    @music.Chord::{ root: @music.G, quality: @music.Dominant7, bass: None },
+    @music.Chord::{ root: @music.C, quality: @music.Major7, bass: None, },
+    @music.Chord::{ root: @music.G, quality: @music.Dominant7, bass: None, },
   ]
   let segments = create_chord_segments(chords, 4.0)
   assert_eq(segments.length(), 2)
@@ -96,8 +96,8 @@ test "create_chord_segments evenly distributes chords" {
 ///|
 test "MeasureContext::chord_at returns correct chord for position" {
   let chords = [
-    @music.Chord::{ root: @music.C, quality: @music.Major7, bass: None },
-    @music.Chord::{ root: @music.G, quality: @music.Dominant7, bass: None },
+    @music.Chord::{ root: @music.C, quality: @music.Major7, bass: None, },
+    @music.Chord::{ root: @music.G, quality: @music.Dominant7, bass: None, },
   ]
   let segments = create_chord_segments(chords, 4.0)
   let ctx = MeasureContext::{
@@ -169,7 +169,7 @@ test "improvisation removes dangling tie at last measure" {
               ],
             },
           ],
-          outgoing_tie: Some(TieContext::{ midi: midi60, remaining_beats: 2.0 }),
+          outgoing_tie: Some(TieContext::{ midi: midi60, remaining_beats: 2.0, }),
           outgoing_stamina: ctx.incoming_stamina,
           outgoing_last_midi: Some(midi60),
           outgoing_phrase: None,
@@ -177,7 +177,7 @@ test "improvisation removes dangling tie at last measure" {
     }
   }
   let measure_defs = [
-    [@music.Chord::{ root: @music.C, quality: @music.Major7, bass: None }],
+    [@music.Chord::{ root: @music.C, quality: @music.Major7, bass: None, }],
   ]
   let settings = ImprovisationConfig::default(0)
   let measures = improvisation(
@@ -287,7 +287,7 @@ test "improvisation preserves tie when not at last measure" {
     }
   }
   let measure_defs = [
-    [@music.Chord::{ root: @music.C, quality: @music.Major7, bass: None }],
+    [@music.Chord::{ root: @music.C, quality: @music.Major7, bass: None, }],
   ]
   let settings = ImprovisationConfig::default(0)
   let measures = improvisation(
@@ -327,8 +327,8 @@ test "with_techniques disabling non-chord-tone techniques: generated notes use o
   }
   let settings = ImprovisationConfig::default(42, techniques~)
   let chords = [
-    [@music.Chord::{ root: @music.C, quality: @music.Major7, bass: None }],
-    [@music.Chord::{ root: @music.G, quality: @music.Dominant7, bass: None }],
+    [@music.Chord::{ root: @music.C, quality: @music.Major7, bass: None, }],
+    [@music.Chord::{ root: @music.G, quality: @music.Dominant7, bass: None, }],
   ]
   let generator = create_measure_generator(settings)
   let measures = improvisation(

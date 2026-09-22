@@ -30,7 +30,7 @@ pub fn keyboard(
   pitch_min : () -> Int,
   pitch_max : () -> Int,
 ) -> @luna_dom.DomNode {
-  let { canvas, ctx } = create_canvas_context()
+  let { canvas, ctx, } = create_canvas_context()
   let resize_trigger = create_resize_trigger(canvas)
 
   let chord_labels = @signals.memo(fn() {
@@ -153,7 +153,12 @@ fn draw_keyboard(
     }
     _ => ()
   }
-  let rect = { left: label_width, top: 0.0, width: width - label_width, height }
+  let rect = {
+    left: label_width,
+    top: 0.0,
+    width: width - label_width,
+    height,
+  }
   let key_areas = calc_key_areas(rect, KEYBOARD_MIN_KEY, KEYBOARD_MAX_KEY)
 
   // Draw white keys first (background layer)

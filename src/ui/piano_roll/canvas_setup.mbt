@@ -12,7 +12,7 @@ fn create_canvas_context() -> CanvasContext {
   set_canvas_style_width(canvas, "100%")
   set_canvas_style_height(canvas, "100%")
   let ctx = get_context_2d(canvas)
-  { canvas, ctx }
+  { canvas, ctx, }
 }
 
 ///|

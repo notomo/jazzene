@@ -103,7 +103,7 @@ fn parse_degree_bass(input : String) -> Result[DegreeBass, String] {
   if remainder != "" {
     return Err("Unexpected characters after bass degree: " + remainder)
   }
-  Ok(DegreeBass::{ accidental, degree })
+  Ok(DegreeBass::{ accidental, degree, })
 }
 
 ///|
@@ -144,7 +144,7 @@ pub fn parse_degree_chord(input : String) -> Result[DegreeChord, String] {
     Ok(q) => q
     Err(e) => return Err(e)
   }
-  Ok(DegreeChord::{ accidental, degree, quality, bass })
+  Ok(DegreeChord::{ accidental, degree, quality, bass, })
 }
 
 ///|
@@ -190,7 +190,7 @@ pub fn DegreeChord::resolve(self : DegreeChord, key_root : ChordRoot) -> Chord {
     let bass_pc = (key_root.midi() + b.degree.semitones() + b.accidental) % 12
     ChordRoot::from_pitch_class(bass_pc)
   })
-  Chord::{ root, quality: self.quality, bass }
+  Chord::{ root, quality: self.quality, bass, }
 }
 
 ///|

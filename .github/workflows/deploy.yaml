@@ -36,9 +36,7 @@ jobs:
       - run: npm ci
 
       - uses: hustcer/setup-moonbit@v1.25
-      - run: |
-          moon update
-          moon install
+      - run: moon update
 
       - run: npm run download:samples
       - run: npm run build

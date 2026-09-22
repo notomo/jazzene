@@ -30,7 +30,7 @@ fn Drum::new(
   gain.connect(master_gain.as_audio_node())
   // Pre-generate 0.3s of white noise (long enough for any single hit)
   let noise_buffer = create_noise_buffer(ctx, 0.3)
-  { ctx, gain, noise_buffer, volume_scale: 0.2 }
+  { ctx, gain, noise_buffer, volume_scale: 0.2, }
 }
 
 ///|

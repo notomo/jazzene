@@ -192,7 +192,7 @@ test "positioned_notes: half note overflows two beats" {
         ],
       },
       // beat 1 is empty (half note occupies it)
-      Beat::{ count: 1, notes: [] },
+      Beat::{ count: 1, notes: [], },
       Beat::{
         count: 2,
         notes: [

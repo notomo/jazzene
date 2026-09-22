@@ -8,7 +8,7 @@ pub(all) struct TimeSignature {
 ///|
 /// Default time signature: 4/4
 pub fn TimeSignature::default() -> TimeSignature {
-  TimeSignature::{ numerator: 4, denominator: 4 }
+  TimeSignature::{ numerator: 4, denominator: 4, }
 }
 
 ///|
@@ -107,8 +107,8 @@ pub fn TimeSignature::beat_accent(
 /// Returns all supported time signatures
 pub fn TimeSignature::all() -> Array[TimeSignature] {
   [
-    TimeSignature::{ numerator: 4, denominator: 4 },
-    TimeSignature::{ numerator: 3, denominator: 4 },
+    TimeSignature::{ numerator: 4, denominator: 4, },
+    TimeSignature::{ numerator: 3, denominator: 4, },
   ]
 }
 
@@ -120,8 +120,8 @@ pub fn TimeSignature::to_string(self : TimeSignature) -> String {
 ///|
 pub fn TimeSignature::from_string(s : String) -> Result[TimeSignature, String] {
   match s {
-    "4/4" => Ok(TimeSignature::{ numerator: 4, denominator: 4 })
-    "3/4" => Ok(TimeSignature::{ numerator: 3, denominator: 4 })
+    "4/4" => Ok(TimeSignature::{ numerator: 4, denominator: 4, })
+    "3/4" => Ok(TimeSignature::{ numerator: 3, denominator: 4, })
     _ => Err("Unknown time signature: " + s)
   }
 }

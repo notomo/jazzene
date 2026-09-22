@@ -70,7 +70,7 @@ test "ChordQuality::chord_scale - Augmented → WholeTone" {
 ///|
 /// Verify Chord::scale_tones uses chord scale theory (not just major scale)
 test "Chord::scale_tones - Cmaj7 in C (Ionian from C)" {
-  let chord = Chord::{ root: C, quality: Major7, bass: None }
+  let chord = Chord::{ root: C, quality: Major7, bass: None, }
   let scale_tones = chord.scale_tones()
   // Ionian from C: [0,2,4,5,7,9,11]; chord tones Cmaj7: [0,4,7,11]
   // Tensions Major7: [2,6,9] → D(2), F#(6), A(9) excluded
@@ -81,7 +81,7 @@ test "Chord::scale_tones - Cmaj7 in C (Ionian from C)" {
 
 ///|
 test "Chord::scale_tones - Dm7 (Dorian from D = D E F G A B C)" {
-  let chord = Chord::{ root: D, quality: Minor7, bass: None }
+  let chord = Chord::{ root: D, quality: Minor7, bass: None, }
   let scale_tones = chord.scale_tones()
   // Dorian from D (root=62): [0,2,3,5,7,9,10]
   // D(62)=chord, E(64)=scale, F(65)=chord, G(67)=scale, A(69)=chord, B(71)=scale, C(72)=chord
@@ -92,7 +92,7 @@ test "Chord::scale_tones - Dm7 (Dorian from D = D E F G A B C)" {
 
 ///|
 test "Chord::scale_tones - G7 (Mixolydian from G = G A B C D E F)" {
-  let chord = Chord::{ root: G, quality: Dominant7, bass: None }
+  let chord = Chord::{ root: G, quality: Dominant7, bass: None, }
   let scale_tones = chord.scale_tones()
   // Mixolydian from G (root=67): [0,2,4,5,7,9,10]
   // G7 chord tones: G(7), B(11), D(2), F(5)
@@ -109,7 +109,7 @@ test "Chord::scale_tones - G7 (Mixolydian from G = G A B C D E F)" {
 
 ///|
 test "Chord::scale_tones - none are chord tones" {
-  let chord = Chord::{ root: C, quality: Minor7, bass: None }
+  let chord = Chord::{ root: C, quality: Minor7, bass: None, }
   let chord_pcs = chord.tones().map(fn(m) { m.pitch_class() })
   let scale_tones = chord.scale_tones()
   for tone in scale_tones {

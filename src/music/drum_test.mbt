@@ -33,7 +33,7 @@ test "DrumVoice::from_midi roundtrips with midi_number" {
 
 ///|
 test "generate_drum_sounds 4/4 produces correct number of hits" {
-  let time_signature = TimeSignature::{ numerator: 4, denominator: 4 }
+  let time_signature = TimeSignature::{ numerator: 4, denominator: 4, }
   // swing_ride_4_4 pattern has 12 hits per measure
   let sounds = generate_drum_sounds(120, 1, time_signature~)
   assert_eq(sounds.length(), 12)
@@ -41,14 +41,14 @@ test "generate_drum_sounds 4/4 produces correct number of hits" {
 
 ///|
 test "generate_drum_sounds 4/4 two measures doubles hits" {
-  let time_signature = TimeSignature::{ numerator: 4, denominator: 4 }
+  let time_signature = TimeSignature::{ numerator: 4, denominator: 4, }
   let sounds = generate_drum_sounds(120, 2, time_signature~)
   assert_eq(sounds.length(), 24)
 }
 
 ///|
 test "generate_drum_sounds 3/4 produces correct number of hits" {
-  let time_signature = TimeSignature::{ numerator: 3, denominator: 4 }
+  let time_signature = TimeSignature::{ numerator: 3, denominator: 4, }
   // swing_ride_3_4 pattern has 11 hits per measure
   let sounds = generate_drum_sounds(120, 1, time_signature~)
   assert_eq(sounds.length(), 11)
@@ -56,7 +56,7 @@ test "generate_drum_sounds 3/4 produces correct number of hits" {
 
 ///|
 test "generate_drum_sounds 4/4 start times increase within measure" {
-  let time_signature = TimeSignature::{ numerator: 4, denominator: 4 }
+  let time_signature = TimeSignature::{ numerator: 4, denominator: 4, }
   let sounds = generate_drum_sounds(120, 1, time_signature~)
   // All start times should be non-negative and within the measure
   for sound in sounds {
@@ -76,7 +76,7 @@ test "generate_drum_sounds 4/4 start times increase within measure" {
 
 ///|
 test "generate_drum_sounds second measure starts after first" {
-  let time_signature = TimeSignature::{ numerator: 4, denominator: 4 }
+  let time_signature = TimeSignature::{ numerator: 4, denominator: 4, }
   let sounds = generate_drum_sounds(120, 2, time_signature~)
   // At 120 bpm, measure duration = 2000ms
   // Second measure hits should start at >= 2000ms
@@ -88,14 +88,14 @@ test "generate_drum_sounds second measure starts after first" {
 
 ///|
 test "generate_drum_sounds zero measures returns empty" {
-  let time_signature = TimeSignature::{ numerator: 4, denominator: 4 }
+  let time_signature = TimeSignature::{ numerator: 4, denominator: 4, }
   let sounds = generate_drum_sounds(120, 0, time_signature~)
   assert_eq(sounds.length(), 0)
 }
 
 ///|
 test "generate_drum_sounds all notes are Eighth duration" {
-  let time_signature = TimeSignature::{ numerator: 4, denominator: 4 }
+  let time_signature = TimeSignature::{ numerator: 4, denominator: 4, }
   let sounds = generate_drum_sounds(120, 1, time_signature~)
   for sound in sounds {
     match sound.sound_event {
@@ -107,7 +107,7 @@ test "generate_drum_sounds all notes are Eighth duration" {
 
 ///|
 test "generate_drum_sounds uses drum MIDI numbers" {
-  let time_signature = TimeSignature::{ numerator: 4, denominator: 4 }
+  let time_signature = TimeSignature::{ numerator: 4, denominator: 4, }
   let sounds = generate_drum_sounds(120, 1, time_signature~)
   let drum_midis = [36, 38, 42, 51]
   for sound in sounds {
@@ -120,7 +120,7 @@ test "generate_drum_sounds uses drum MIDI numbers" {
 
 ///|
 test "SwingRide pattern produces 12 hits per measure" {
-  let time_signature = TimeSignature::{ numerator: 4, denominator: 4 }
+  let time_signature = TimeSignature::{ numerator: 4, denominator: 4, }
   let sounds = generate_drum_sounds(
     120,
     1,
@@ -132,7 +132,7 @@ test "SwingRide pattern produces 12 hits per measure" {
 
 ///|
 test "SwingRide pattern includes Ride cymbal" {
-  let time_signature = TimeSignature::{ numerator: 4, denominator: 4 }
+  let time_signature = TimeSignature::{ numerator: 4, denominator: 4, }
   let sounds = generate_drum_sounds(
     120,
     1,
@@ -152,7 +152,7 @@ test "SwingRide pattern includes Ride cymbal" {
 
 ///|
 test "Brushes pattern produces 9 hits per measure" {
-  let time_signature = TimeSignature::{ numerator: 4, denominator: 4 }
+  let time_signature = TimeSignature::{ numerator: 4, denominator: 4, }
   let sounds = generate_drum_sounds(
     120,
     1,
@@ -164,7 +164,7 @@ test "Brushes pattern produces 9 hits per measure" {
 
 ///|
 test "3/4 time respects pattern style" {
-  let time_signature = TimeSignature::{ numerator: 3, denominator: 4 }
+  let time_signature = TimeSignature::{ numerator: 3, denominator: 4, }
   // swing_ride_3_4 has 11 hits per measure
   let ride_sounds = generate_drum_sounds(
     120,

@@ -42,7 +42,7 @@ pub fn select_measures(
       full_measures.map(fn(m) {
         @music.Measure::{
           ..m,
-          beats: m.beats.map(fn(b) { @music.Beat::{ ..b, notes: [] } }),
+          beats: m.beats.map(fn(b) { @music.Beat::{ ..b, notes: [], } }),
         }
       })
   }

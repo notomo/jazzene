@@ -12,7 +12,7 @@ pub impl Show for Duration with fn output(self, logger) {
 ///|
 /// Create a Duration from milliseconds (as Double)
 pub fn Duration::from_milliseconds(milliseconds : Double) -> Duration {
-  { seconds: milliseconds / 1000.0 }
+  { seconds: milliseconds / 1000.0, }
 }
 
 ///|
@@ -50,13 +50,13 @@ pub impl Compare for Duration with fn compare(self, other) {
 ///|
 /// Implement Add trait for Duration
 pub impl Add for Duration with fn add(self, other) {
-  { seconds: self.seconds + other.seconds }
+  { seconds: self.seconds + other.seconds, }
 }
 
 ///|
 /// Implement Sub trait for Duration
 pub impl Sub for Duration with fn sub(self, other) {
-  { seconds: self.seconds - other.seconds }
+  { seconds: self.seconds - other.seconds, }
 }
 
 ///|

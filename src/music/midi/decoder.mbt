@@ -178,7 +178,7 @@ pub fn decode_midi(bytes : Array[Int]) -> ImportedMidi? {
   for ti in 0..<track_starts.length() {
     let t_start = track_starts[ti]
     let t_end = t_start + track_lengths[ti]
-    let p : Ref[Int] = { val: t_start }
+    let p : Ref[Int] = { val: t_start, }
     let mut running = 0
     while p.val < t_end {
       let _ = read_vlq(bytes, p)
@@ -252,7 +252,7 @@ pub fn decode_midi(bytes : Array[Int]) -> ImportedMidi? {
   for ti in 0..<track_starts.length() {
     let t_start = track_starts[ti]
     let t_end = t_start + track_lengths[ti]
-    let p : Ref[Int] = { val: t_start }
+    let p : Ref[Int] = { val: t_start, }
     let mut running = 0
     let mut tick = 0
     while p.val < t_end {
@@ -296,7 +296,7 @@ pub fn decode_midi(bytes : Array[Int]) -> ImportedMidi? {
             let vel = bytes[p.val + 1]
             p.val = p.val + 2
             if vel > 0 {
-              open_notes.push(OpenNote::{ ch, pitch, start_tick: tick })
+              open_notes.push(OpenNote::{ ch, pitch, start_tick: tick, })
             } else {
               // Note On with velocity 0 = Note Off
               match pop_open_note(open_notes, ch, pitch) {

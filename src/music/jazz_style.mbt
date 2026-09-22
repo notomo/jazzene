@@ -51,7 +51,7 @@ pub impl Show for JazzStyle with fn output(self, logger) {
 pub fn JazzStyle::default() -> JazzStyle {
   JazzStyle::{
     swing: SwingConfig::triplet(),
-    techniques: Techniques::{ ..Techniques::default(), bebop_scales: true },
+    techniques: Techniques::{ ..Techniques::default(), bebop_scales: true, },
     melody_mode: On,
     comping_mode: On,
     drums_enabled: true,

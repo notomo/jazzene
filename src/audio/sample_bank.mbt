@@ -94,7 +94,7 @@ fn midi_to_sample_info(midi_value : Int) -> SampleInfo {
   }
 
   let detune_cents = (midi_value - best_midi).to_double() * 100.0
-  { note_name: best_name, detune_cents }
+  { note_name: best_name, detune_cents, }
 }
 
 ///|

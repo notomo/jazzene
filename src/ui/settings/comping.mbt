@@ -26,7 +26,7 @@ fn comping_section(
         fn() { jazz_style.get().comping_mode },
         fn(v) {
           jazz_style.update(fn(style) {
-            @music.JazzStyle::{ ..style, comping_mode: v }
+            @music.JazzStyle::{ ..style, comping_mode: v, }
           })
         },
       ),
@@ -46,7 +46,7 @@ fn comping_section(
           fn() { jazz_style.get().comping_style },
           fn(v) {
             jazz_style.update(fn(style) {
-              @music.JazzStyle::{ ..style, comping_style: v }
+              @music.JazzStyle::{ ..style, comping_style: v, }
             })
           },
           is_disabled=fn(v) {

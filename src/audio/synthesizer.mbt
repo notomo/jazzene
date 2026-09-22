@@ -18,7 +18,7 @@ pub fn Synthesizer::new() -> Synthesizer {
   let bass = Bass::new(ctx, master_gain)
   let drum = Drum::new(ctx, master_gain)
   piano.load_samples()
-  { ctx, master_gain, piano, bass, drum }
+  { ctx, master_gain, piano, bass, drum, }
 }
 
 ///|

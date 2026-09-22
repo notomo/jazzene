@@ -34,14 +34,14 @@ pub fn compute_tie_arcs(
         Some(nx) => nx
         None => measure_end_x
       }
-      [SheetTieArc::{ start_x: note_x, end_x, note_y, stem_up }]
+      [SheetTieArc::{ start_x: note_x, end_x, note_y, stem_up, }]
     }
     Some(TieEnd) => {
       let start_x = match prev_note_x {
         Some(px) => px
         None => measure_start_x
       }
-      [SheetTieArc::{ start_x, end_x: note_x, note_y, stem_up }]
+      [SheetTieArc::{ start_x, end_x: note_x, note_y, stem_up, }]
     }
     Some(TieBoth) => {
       let start_x = match prev_note_x {
@@ -53,8 +53,8 @@ pub fn compute_tie_arcs(
         None => measure_end_x
       }
       [
-        SheetTieArc::{ start_x, end_x: note_x, note_y, stem_up },
-        SheetTieArc::{ start_x: note_x, end_x, note_y, stem_up },
+        SheetTieArc::{ start_x, end_x: note_x, note_y, stem_up, },
+        SheetTieArc::{ start_x: note_x, end_x, note_y, stem_up, },
       ]
     }
     None => []

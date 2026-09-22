@@ -55,7 +55,7 @@ pub impl Show for OttavaSpan with fn output(self, logger) {
 }
 
 ///|
-pub let ottava_span_none : OttavaSpan = { kind: OttavaNone, role: SpanSole }
+pub let ottava_span_none : OttavaSpan = { kind: OttavaNone, role: SpanSole, }
 
 ///|
 /// Returns true if any pitched note in the measure has MIDI >= threshold
@@ -157,13 +157,13 @@ pub fn compute_ottava_spans(
         })
       _ =>
         if run_len == 1 {
-          result[run_start] = { kind: effective_kind, role: SpanSole }
+          result[run_start] = { kind: effective_kind, role: SpanSole, }
         } else {
-          result[run_start] = { kind: effective_kind, role: SpanFirst }
+          result[run_start] = { kind: effective_kind, role: SpanFirst, }
           Array::makei(run_len - 2, fn(k) { run_start + 1 + k }).each(fn(idx) {
-            result[idx] = { kind: effective_kind, role: SpanMiddle }
+            result[idx] = { kind: effective_kind, role: SpanMiddle, }
           })
-          result[run_end - 1] = { kind: effective_kind, role: SpanLast }
+          result[run_end - 1] = { kind: effective_kind, role: SpanLast, }
         }
     }
 
@@ -181,7 +181,7 @@ pub fn shift_for_8va(
   positioned.map(fn(pair) {
     let (pos, note) = pair
     let shifted_midi = note.midi.map(fn(m) { m - OTTAVA_SHIFT })
-    (pos, { ..note, midi: shifted_midi })
+    (pos, { ..note, midi: shifted_midi, })
   })
 }
 
@@ -193,6 +193,6 @@ pub fn shift_for_8vb(
   positioned.map(fn(pair) {
     let (pos, note) = pair
     let shifted_midi = note.midi.map(fn(m) { m + OTTAVA_SHIFT })
-    (pos, { ..note, midi: shifted_midi })
+    (pos, { ..note, midi: shifted_midi, })
   })
 }

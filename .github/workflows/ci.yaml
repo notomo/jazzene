@@ -25,9 +25,7 @@ jobs:
       - run: npx playwright install --with-deps chromium
 
       - uses: hustcer/setup-moonbit@v1.25
-      - run: |
-          moon update
-          moon install
+      - run: moon update
 
       - run: npm run build
       - run: npm run check

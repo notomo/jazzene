@@ -24,7 +24,7 @@ pub fn KeySignature::from_root(root : ChordRoot) -> KeySignature {
     GSharp => ([6, 2, 5, 1], Flat) // Ab
     CSharp => ([6, 2, 5, 1, 4], Flat) // Db
   }
-  KeySignature::{ root, altered_steps, accidental_type }
+  KeySignature::{ root, altered_steps, accidental_type, }
 }
 
 ///|

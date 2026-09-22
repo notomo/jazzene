@@ -37,7 +37,7 @@ fn default_key() -> @music.KeySignature {
 
 ///|
 fn default_time_signature() -> @music.TimeSignature {
-  @music.TimeSignature::{ numerator: 4, denominator: 4 }
+  @music.TimeSignature::{ numerator: 4, denominator: 4, }
 }
 
 ///|
@@ -45,10 +45,10 @@ fn make_measure(start_ms : Double) -> @music.Measure {
   @music.Measure::{
     chords: [],
     beats: [
-      @music.Beat::{ count: 0, notes: [] },
-      @music.Beat::{ count: 1, notes: [] },
-      @music.Beat::{ count: 2, notes: [] },
-      @music.Beat::{ count: 3, notes: [] },
+      @music.Beat::{ count: 0, notes: [], },
+      @music.Beat::{ count: 1, notes: [], },
+      @music.Beat::{ count: 2, notes: [], },
+      @music.Beat::{ count: 3, notes: [], },
     ],
     start_time: @music.Duration::from_milliseconds(start_ms),
   }
@@ -235,7 +235,7 @@ test "select_measures: On with imported melody builds measures from imported sou
 
 ///|
 test "select_drum_sounds: drums_enabled=false returns empty" {
-  let style = { ..@music.JazzStyle::default(), drums_enabled: false }
+  let style = { ..@music.JazzStyle::default(), drums_enabled: false, }
   inspect(
     select_drum_sounds(style, None, 120, 4, default_time_signature()).length(),
     content="0",
@@ -285,7 +285,7 @@ test "select_drum_sounds: non-Imported generates drum sounds" {
 
 ///|
 test "select_comping_sounds: comping_mode=Off returns empty" {
-  let style = { ..@music.JazzStyle::default(), comping_mode: @music.Off }
+  let style = { ..@music.JazzStyle::default(), comping_mode: @music.Off, }
   inspect(
     select_comping_sounds(style, None, [], 120, [], default_key(), 0).length(),
     content="0",
@@ -331,7 +331,7 @@ test "select_comping_sounds: Imported with midi returns comping sounds" {
 
 ///|
 test "select_bass_sounds: bass_enabled=false returns empty" {
-  let style = { ..@music.JazzStyle::default(), bass_enabled: false }
+  let style = { ..@music.JazzStyle::default(), bass_enabled: false, }
   inspect(
     select_bass_sounds(style, None, [], 120, default_key()).length(),
     content="0",

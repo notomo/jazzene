@@ -3,9 +3,9 @@ fn make_3beat_measure(chords : Array[Chord], start_ms : Double) -> Measure {
   Measure::{
     chords,
     beats: [
-      Beat::{ count: 0, notes: [] },
-      Beat::{ count: 1, notes: [] },
-      Beat::{ count: 2, notes: [] },
+      Beat::{ count: 0, notes: [], },
+      Beat::{ count: 1, notes: [], },
+      Beat::{ count: 2, notes: [], },
     ],
     start_time: Duration::from_milliseconds(start_ms),
   }
@@ -16,10 +16,10 @@ fn make_4beat_measure(chords : Array[Chord], start_ms : Double) -> Measure {
   Measure::{
     chords,
     beats: [
-      Beat::{ count: 0, notes: [] },
-      Beat::{ count: 1, notes: [] },
-      Beat::{ count: 2, notes: [] },
-      Beat::{ count: 3, notes: [] },
+      Beat::{ count: 0, notes: [], },
+      Beat::{ count: 1, notes: [], },
+      Beat::{ count: 2, notes: [], },
+      Beat::{ count: 3, notes: [], },
     ],
     start_time: Duration::from_milliseconds(start_ms),
   }
@@ -60,7 +60,7 @@ test "CompingPattern::from_measure_index cycles every 4 measures" {
 test "generate_comping_sounds: shell voicing for Cmaj7" {
   // shell_voicing(Cmaj7, None): 3rd=E4(64), 7th=B3(59)
   let measures = [
-    make_4beat_measure([Chord::{ root: C, quality: Major7, bass: None }], 0.0),
+    make_4beat_measure([Chord::{ root: C, quality: Major7, bass: None, }], 0.0),
   ]
   let sounds = generate_comping_sounds(
     measures,
@@ -83,7 +83,7 @@ test "generate_comping_sounds: shell voicing for G7" {
   // closest to C4(60): B3(59) is 1 away, F4(65) is 5 away
   let measures = [
     make_4beat_measure(
-      [Chord::{ root: G, quality: Dominant7, bass: None }],
+      [Chord::{ root: G, quality: Dominant7, bass: None, }],
       0.0,
     ),
   ]
@@ -101,7 +101,7 @@ test "generate_comping_sounds: shell voicing for Fmaj7" {
   // shell_voicing(Fmaj7, None): 3rd=A3(57), 7th=E4(64)
   // closest to C4(60): A3(57) is 3 away, E4(64) is 4 away
   let measures = [
-    make_4beat_measure([Chord::{ root: F, quality: Major7, bass: None }], 0.0),
+    make_4beat_measure([Chord::{ root: F, quality: Major7, bass: None, }], 0.0),
   ]
   let sounds = generate_comping_sounds(
     measures,
@@ -117,7 +117,7 @@ test "generate_comping_sounds: shell voicing for Am7" {
   // shell_voicing(Am7, None): 3rd=C4(60), 7th=G3(55)
   // closest to C4(60): C4(60) is 0 away, G3(55) is 5 away
   let measures = [
-    make_4beat_measure([Chord::{ root: A, quality: Minor7, bass: None }], 0.0),
+    make_4beat_measure([Chord::{ root: A, quality: Minor7, bass: None, }], 0.0),
   ]
   let sounds = generate_comping_sounds(
     measures,
@@ -133,7 +133,7 @@ test "generate_comping_sounds: triad uses 3rd and 5th" {
   // shell_voicing(C Major, None): 3rd=E4(64), 5th=G3(55)
   // closest to C4(60): E4(64) is 4 away, G3(55) is 5 away
   let measures = [
-    make_4beat_measure([Chord::{ root: C, quality: Major, bass: None }], 0.0),
+    make_4beat_measure([Chord::{ root: C, quality: Major, bass: None, }], 0.0),
   ]
   let sounds = generate_comping_sounds(
     measures,
@@ -150,7 +150,7 @@ test "generate_comping_sounds: melody avoidance lowers overlapping guide tone" {
   // 3-7 voicing: raw=F3(53), C4(60)
   // melody min=C4(60): F3(53)<60 stays; C4(60)>=60 → C3(48)
   let measures = [
-    make_4beat_measure([Chord::{ root: D, quality: Minor7, bass: None }], 0.0),
+    make_4beat_measure([Chord::{ root: D, quality: Minor7, bass: None, }], 0.0),
   ]
   let melody = [make_melody_note(60, 0.0, 4000.0)]
   let sounds = generate_comping_sounds(
@@ -168,7 +168,7 @@ test "generate_comping_sounds: melody near guide tone triggers octave shift" {
   // melody min=G4(67): F4(65) is only 2 semitones below → shifts to F3(53)
   //                    C4(60) is 7 semitones below → stays at C4(60)
   let measures = [
-    make_4beat_measure([Chord::{ root: D, quality: Minor7, bass: None }], 0.0),
+    make_4beat_measure([Chord::{ root: D, quality: Minor7, bass: None, }], 0.0),
   ]
   let melody = [make_melody_note(67, 0.0, 4000.0)]
   let sounds = generate_comping_sounds(
@@ -185,7 +185,7 @@ test "generate_comping_sounds: melody within 4 semitones triggers octave shift" 
   // D root Dm7: raw=F3(53), C4(60)
   // melody min=E4(64): gap(C4,E4)=4 < 5 → C4 shifts to C3(48); gap(F3,E4)=11 → stays
   let measures = [
-    make_4beat_measure([Chord::{ root: D, quality: Minor7, bass: None }], 0.0),
+    make_4beat_measure([Chord::{ root: D, quality: Minor7, bass: None, }], 0.0),
   ]
   let melody = [make_melody_note(64, 0.0, 4000.0)]
   let sounds = generate_comping_sounds(
@@ -204,7 +204,7 @@ test "generate_comping_sounds: melody after chord uses first note as register an
   // Pre-seeding with first melody note C4(60) anchors the register,
   // so voicing shifts down an octave: F3(53), C3(48)
   let measures = [
-    make_4beat_measure([Chord::{ root: D, quality: Minor7, bass: None }], 0.0),
+    make_4beat_measure([Chord::{ root: D, quality: Minor7, bass: None, }], 0.0),
   ]
   let melody = [make_melody_note(60, 4000.0, 4000.0)]
   let sounds = generate_comping_sounds(
@@ -223,8 +223,8 @@ test "generate_comping_sounds: two chords split timing evenly" {
   let measures = [
     make_4beat_measure(
       [
-        Chord::{ root: C, quality: Major7, bass: None },
-        Chord::{ root: G, quality: Dominant7, bass: None },
+        Chord::{ root: C, quality: Major7, bass: None, },
+        Chord::{ root: G, quality: Dominant7, bass: None, },
       ],
       0.0,
     ),
@@ -251,7 +251,7 @@ test "generate_comping_sounds: measure start time is reflected in output" {
   // Measure starts at 8000ms
   let measures = [
     make_4beat_measure(
-      [Chord::{ root: C, quality: Major7, bass: None }],
+      [Chord::{ root: C, quality: Major7, bass: None, }],
       8000.0,
     ),
   ]
@@ -282,9 +282,9 @@ test "generate_comping_sounds: Dense pattern (measure index 1)" {
   // Dense hits at 4-beat chord: beat1(4000), and-2(5500), beat3(6000), and-4(7500)
   // → 4 hits × 2 tones = 8 sounds
   let measures = [
-    make_4beat_measure([Chord::{ root: C, quality: Major7, bass: None }], 0.0),
+    make_4beat_measure([Chord::{ root: C, quality: Major7, bass: None, }], 0.0),
     make_4beat_measure(
-      [Chord::{ root: C, quality: Major7, bass: None }],
+      [Chord::{ root: C, quality: Major7, bass: None, }],
       4000.0,
     ),
   ]
@@ -305,13 +305,13 @@ test "generate_comping_sounds: TwoFour pattern (measure index 2)" {
   // BPM=60; Cmaj7: E3(52), B3(59)
   // TwoFour hits at 4-beat chord: beat2(9000), beat4(11000) → 2 hits × 2 = 4 sounds
   let measures = [
-    make_4beat_measure([Chord::{ root: C, quality: Major7, bass: None }], 0.0),
+    make_4beat_measure([Chord::{ root: C, quality: Major7, bass: None, }], 0.0),
     make_4beat_measure(
-      [Chord::{ root: C, quality: Major7, bass: None }],
+      [Chord::{ root: C, quality: Major7, bass: None, }],
       4000.0,
     ),
     make_4beat_measure(
-      [Chord::{ root: C, quality: Major7, bass: None }],
+      [Chord::{ root: C, quality: Major7, bass: None, }],
       8000.0,
     ),
   ]
@@ -334,17 +334,17 @@ test "generate_comping_sounds: Sparse pattern (measure index 3)" {
   // BPM=60; Cmaj7: E3(52), B3(59)
   // Sparse: beat1 only → 1 hit × 2 = 2 sounds
   let measures = [
-    make_4beat_measure([Chord::{ root: C, quality: Major7, bass: None }], 0.0),
+    make_4beat_measure([Chord::{ root: C, quality: Major7, bass: None, }], 0.0),
     make_4beat_measure(
-      [Chord::{ root: C, quality: Major7, bass: None }],
+      [Chord::{ root: C, quality: Major7, bass: None, }],
       4000.0,
     ),
     make_4beat_measure(
-      [Chord::{ root: C, quality: Major7, bass: None }],
+      [Chord::{ root: C, quality: Major7, bass: None, }],
       8000.0,
     ),
     make_4beat_measure(
-      [Chord::{ root: C, quality: Major7, bass: None }],
+      [Chord::{ root: C, quality: Major7, bass: None, }],
       12000.0,
     ),
   ]
@@ -365,21 +365,21 @@ test "generate_comping_sounds: Sparse pattern (measure index 3)" {
 test "generate_comping_sounds: pattern cycles back at index 4" {
   // Index 4 mod 4 = 0 → Standard again; same hit count as index 0
   let measures = [
-    make_4beat_measure([Chord::{ root: C, quality: Major7, bass: None }], 0.0),
+    make_4beat_measure([Chord::{ root: C, quality: Major7, bass: None, }], 0.0),
     make_4beat_measure(
-      [Chord::{ root: C, quality: Major7, bass: None }],
+      [Chord::{ root: C, quality: Major7, bass: None, }],
       4000.0,
     ),
     make_4beat_measure(
-      [Chord::{ root: C, quality: Major7, bass: None }],
+      [Chord::{ root: C, quality: Major7, bass: None, }],
       8000.0,
     ),
     make_4beat_measure(
-      [Chord::{ root: C, quality: Major7, bass: None }],
+      [Chord::{ root: C, quality: Major7, bass: None, }],
       12000.0,
     ),
     make_4beat_measure(
-      [Chord::{ root: C, quality: Major7, bass: None }],
+      [Chord::{ root: C, quality: Major7, bass: None, }],
       16000.0,
     ),
   ]
@@ -404,7 +404,7 @@ test "generate_comping_sounds: 3/4 Standard includes beat 3" {
   // Standard(mi=0): beat-1(0ms), and-of-2(1500ms), beat-3(2000ms) - all survive at seed=0
   // shell_voicing(Cmaj7, None): E4(64), B3(59) × 3 hits = 6 sounds
   let measures = [
-    make_3beat_measure([Chord::{ root: C, quality: Major7, bass: None }], 0.0),
+    make_3beat_measure([Chord::{ root: C, quality: Major7, bass: None, }], 0.0),
   ]
   let sounds = generate_comping_sounds(
     measures,
@@ -425,7 +425,7 @@ test "generate_comping_sounds: FullVoicing includes all chord tones" {
   // full_voicing(Cmaj7, None): root=C4(60), 3rd=E4(64), 5th=G4(67), 7th=B3(59)
   // Standard(mi=0): 3 hits × 4 tones = 12 sounds (all survive at seed=0)
   let measures = [
-    make_4beat_measure([Chord::{ root: C, quality: Major7, bass: None }], 0.0),
+    make_4beat_measure([Chord::{ root: C, quality: Major7, bass: None, }], 0.0),
   ]
   let sounds = generate_comping_sounds(
     measures,
@@ -449,7 +449,7 @@ test "generate_comping_sounds: WithTensions includes 4 notes per hit for Cmaj7" 
   // A form 3579: [E(4), G(7), B(11), D(2)]
   // Standard(mi=0): 3 hits × 4 tones = 12 sounds
   let measures = [
-    make_4beat_measure([Chord::{ root: C, quality: Major7, bass: None }], 0.0),
+    make_4beat_measure([Chord::{ root: C, quality: Major7, bass: None, }], 0.0),
   ]
   let sounds = generate_comping_sounds(
     measures,
@@ -475,7 +475,7 @@ test "generate_comping_sounds: WithTensions Diminished7 uses 4 voices" {
   // Standard(mi=0): 3 hits × 4 tones = 12 sounds
   let measures = [
     make_4beat_measure(
-      [Chord::{ root: C, quality: Diminished7, bass: None }],
+      [Chord::{ root: C, quality: Diminished7, bass: None, }],
       0.0,
     ),
   ]
@@ -494,7 +494,7 @@ test "generate_comping_sounds: WithTensions voicing is deterministic across hits
   // Tension voicing is now key-aware and deterministic (no randomness)
   // All hits for the same chord use the same 4 voices
   let measures = [
-    make_4beat_measure([Chord::{ root: C, quality: Major7, bass: None }], 0.0),
+    make_4beat_measure([Chord::{ root: C, quality: Major7, bass: None, }], 0.0),
   ]
   let sounds = generate_comping_sounds(
     measures,
@@ -519,7 +519,7 @@ test "generate_comping_sounds: WithTensions voicing span stays within one octave
   // melody at A4=69 (threshold=64); voicing notes like [48, 64, 60, 64] were produced
   // without compaction; now the low outlier is raised.
   let measures = [
-    make_4beat_measure([Chord::{ root: C, quality: Major7, bass: None }], 0.0),
+    make_4beat_measure([Chord::{ root: C, quality: Major7, bass: None, }], 0.0),
   ]
   let melody = [make_melody_note(69, 0.0, 4000.0)]
   let sounds = generate_comping_sounds(
@@ -548,13 +548,13 @@ test "generate_comping_sounds: 3/4 TwoFour beat-2 duration fits before beat-3" {
   // Max jitter=1.2 → beat-2 ends at 1000+750*1.2=1900ms < 2000ms (beat-3 start).
   // beat-3(hi=1) is omitted at seed=0 (rand_key=2019 < 0.25 threshold).
   let measures = [
-    make_3beat_measure([Chord::{ root: C, quality: Major7, bass: None }], 0.0),
+    make_3beat_measure([Chord::{ root: C, quality: Major7, bass: None, }], 0.0),
     make_3beat_measure(
-      [Chord::{ root: C, quality: Major7, bass: None }],
+      [Chord::{ root: C, quality: Major7, bass: None, }],
       3000.0,
     ),
     make_3beat_measure(
-      [Chord::{ root: C, quality: Major7, bass: None }],
+      [Chord::{ root: C, quality: Major7, bass: None, }],
       6000.0,
     ),
   ]

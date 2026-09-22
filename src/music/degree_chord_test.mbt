@@ -206,8 +206,8 @@ test "parse measure progression empty measure error" {
 test "DegreeMeasure resolve" {
   let dm = DegreeMeasure::{
     chords: [
-      DegreeChord::{ accidental: 0, degree: II, quality: Minor7, bass: None },
-      DegreeChord::{ accidental: 0, degree: V, quality: Dominant7, bass: None },
+      DegreeChord::{ accidental: 0, degree: II, quality: Minor7, bass: None, },
+      DegreeChord::{ accidental: 0, degree: V, quality: Dominant7, bass: None, },
     ],
   }
   let resolved = dm.resolve(C)
@@ -224,7 +224,7 @@ test "parse degree chord with slash bass V7/II" {
   assert_eq(dc.degree, V)
   assert_eq(dc.quality, Dominant7)
   assert_eq(dc.accidental, 0)
-  assert_eq(dc.bass, Some(DegreeBass::{ accidental: 0, degree: II }))
+  assert_eq(dc.bass, Some(DegreeBass::{ accidental: 0, degree: II, }))
 }
 
 ///|
@@ -232,7 +232,7 @@ test "parse degree chord with flat bass IIm7/bVII" {
   let dc = @helper.unwrap_or_fail(parse_degree_chord("IIm7/bVII"))
   assert_eq(dc.degree, II)
   assert_eq(dc.quality, Minor7)
-  assert_eq(dc.bass, Some(DegreeBass::{ accidental: -1, degree: VII }))
+  assert_eq(dc.bass, Some(DegreeBass::{ accidental: -1, degree: VII, }))
 }
 
 ///|
@@ -248,7 +248,7 @@ test "resolve slash chord V7/II in C major" {
     accidental: 0,
     degree: V,
     quality: Dominant7,
-    bass: Some(DegreeBass::{ accidental: 0, degree: II }),
+    bass: Some(DegreeBass::{ accidental: 0, degree: II, }),
   }
   let chord = dc.resolve(C)
   assert_eq(chord.root, G)
@@ -286,7 +286,12 @@ test "DegreeChord to_string roundtrip bVIImaj7" {
 
 ///|
 test "DegreeChord to_string Major triad (empty quality)" {
-  let dc = DegreeChord::{ accidental: 0, degree: I, quality: Major, bass: None }
+  let dc = DegreeChord::{
+    accidental: 0,
+    degree: I,
+    quality: Major,
+    bass: None,
+  }
   assert_eq(dc.to_string(), "I")
 }
 
@@ -296,7 +301,7 @@ test "DegreeChord to_string with bass" {
     accidental: 0,
     degree: V,
     quality: Dominant7,
-    bass: Some(DegreeBass::{ accidental: 0, degree: II }),
+    bass: Some(DegreeBass::{ accidental: 0, degree: II, }),
   }
   assert_eq(dc.to_string(), "V7/II")
 }
@@ -327,6 +332,6 @@ test "parse measure progression with slash chord" {
   assert_eq(measures[0].chords.length(), 2)
   assert_eq(
     measures[0].chords[1].bass,
-    Some(DegreeBass::{ accidental: 0, degree: II }),
+    Some(DegreeBass::{ accidental: 0, degree: II, }),
   )
 }

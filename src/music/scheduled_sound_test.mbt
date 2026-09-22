@@ -11,7 +11,7 @@ fn make_eighth(midi : Int) -> MeasureNote {
 
 ///|
 fn make_eighth_pair_measure(on_midi : Int, off_midi : Int, beat : Int) -> Beat {
-  Beat::{ count: beat, notes: [make_eighth(on_midi), make_eighth(off_midi)] }
+  Beat::{ count: beat, notes: [make_eighth(on_midi), make_eighth(off_midi)], }
 }
 
 ///|

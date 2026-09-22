@@ -3,7 +3,7 @@
 /// Catches window "error" and "unhandledrejection" events and renders
 /// a fixed overlay so errors are visible on screen.
 pub fn setup_error_overlay() -> Unit {
-  let container : Ref[@js.Any?] = { val: None }
+  let container : Ref[@js.Any?] = { val: None, }
   let show_error = fn(msg : String) {
     match container.val {
       None => {
@@ -94,8 +94,8 @@ pub fn setup_loop(
   is_playing : @signals.Signal[Bool],
   tick : (Double) -> Bool,
 ) -> Unit {
-  let request_id : Ref[Int?] = { val: None }
-  let previous_time : Ref[Double?] = { val: None }
+  let request_id : Ref[Int?] = { val: None, }
+  let previous_time : Ref[Double?] = { val: None, }
   fn cancel() -> Unit {
     match request_id.val {
       Some(id) => {
@@ -160,7 +160,7 @@ pub fn render(state : AppState) -> Unit {
     drum_sounds,
     recorded_sounds_visual,
     total_duration,
-    ..,
+    ..
   } = state
   let on_chord_click : (Int, Int) -> Unit = fn(mi, ci) {
     let dm = degree_measures.peek()
@@ -168,7 +168,7 @@ pub fn render(state : AppState) -> Unit {
     // full_measures has a leading rest at index 0, so music measures start at 1
     let degree_mi = (mi - 1 + dm.length()) % dm.length()
     editing_chord.set(
-      Some(EditingChord::{ measure_idx: degree_mi, chord_idx: ci }),
+      Some(EditingChord::{ measure_idx: degree_mi, chord_idx: ci, }),
     )
   }
   let get_midi_bytes = fn() {
@@ -253,7 +253,7 @@ pub fn render(state : AppState) -> Unit {
     @luna_dom.div(
       dyn_class=fn() {
         match view_state.get() {
-          { show_sheet: false, show_piano_roll: true, show_settings: false } =>
+          { show_sheet: false, show_piano_roll: true, show_settings: false, } =>
             "flex justify-center h-full min-h-0"
           _ => "flex h-full min-h-0"
         }

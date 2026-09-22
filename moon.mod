@@ -11,6 +11,4 @@ import {
 
 preferred_target = "js"
 
-options(
-  source: "src",
-)
+source = "src"

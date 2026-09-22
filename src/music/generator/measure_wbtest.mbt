@@ -19,8 +19,8 @@ test "create_chord_segments creates one segment for one chord" {
 
 ///|
 test "create_chord_segments splits evenly for two chords" {
-  let c = @music.Chord::{ root: @music.C, quality: @music.Major7, bass: None }
-  let f = @music.Chord::{ root: @music.F, quality: @music.Major7, bass: None }
+  let c = @music.Chord::{ root: @music.C, quality: @music.Major7, bass: None, }
+  let f = @music.Chord::{ root: @music.F, quality: @music.Major7, bass: None, }
   let result = create_chord_segments([c, f], 4.0)
   assert_eq(result.length(), 2)
   assert_eq(result[0].start_beat, 0.0)
@@ -31,8 +31,8 @@ test "create_chord_segments splits evenly for two chords" {
 
 ///|
 test "create_chord_segments assigns correct chords" {
-  let c = @music.Chord::{ root: @music.C, quality: @music.Major7, bass: None }
-  let f = @music.Chord::{ root: @music.F, quality: @music.Major7, bass: None }
+  let c = @music.Chord::{ root: @music.C, quality: @music.Major7, bass: None, }
+  let f = @music.Chord::{ root: @music.F, quality: @music.Major7, bass: None, }
   let result = create_chord_segments([c, f], 4.0)
   assert_eq(result[0].chord, c)
   assert_eq(result[1].chord, f)
@@ -40,8 +40,8 @@ test "create_chord_segments assigns correct chords" {
 
 ///|
 test "MeasureContext::chord_at returns chord containing beat" {
-  let c = @music.Chord::{ root: @music.C, quality: @music.Major7, bass: None }
-  let f = @music.Chord::{ root: @music.F, quality: @music.Major7, bass: None }
+  let c = @music.Chord::{ root: @music.C, quality: @music.Major7, bass: None, }
+  let f = @music.Chord::{ root: @music.F, quality: @music.Major7, bass: None, }
   let ctx = MeasureContext::{
     chords: create_chord_segments([c, f], 4.0),
     incoming_tie: None,
@@ -60,7 +60,7 @@ test "MeasureContext::chord_at returns chord containing beat" {
 
 ///|
 test "MeasureContext::chord_at returns last chord when beat is at end" {
-  let c = @music.Chord::{ root: @music.C, quality: @music.Major7, bass: None }
+  let c = @music.Chord::{ root: @music.C, quality: @music.Major7, bass: None, }
   let ctx = MeasureContext::{
     chords: create_chord_segments([c], 4.0),
     incoming_tie: None,

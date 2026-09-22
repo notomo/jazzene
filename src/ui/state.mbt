@@ -148,12 +148,12 @@ pub fn AppState::new() -> AppState {
   let is_recording : @signals.Signal[Bool] = @signals.signal(false)
   let recorded_lines : @signals.Signal[Array[@settings.RecordedLine]] = @signals.signal([],
   )
-  let next_line_id : Ref[Int] = { val: 0 }
+  let next_line_id : Ref[Int] = { val: 0, }
   // Per-note start times indexed by MIDI note value (0-127); None = not active
   let recording_note_starts : Ref[Array[@music.Duration?]] = {
     val: Array::make(128, None),
   }
-  let recording_buffer : Ref[Array[@music.ScheduledSound]] = { val: [] }
+  let recording_buffer : Ref[Array[@music.ScheduledSound]] = { val: [], }
 
   // Practice state
   let practice_score : @signals.Signal[Double] = @signals.signal(0.0)
