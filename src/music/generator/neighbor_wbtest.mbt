@@ -59,16 +59,16 @@ test "generate_neighbor_ornament produces exactly 3 notes with correct tone orig
     .collect()
   assert_eq(all_notes.length(), 3)
   // First note: ChordTone
-  inspect(all_notes[0].tone_origin, content="Some(ChordTone)")
+  debug_inspect(all_notes[0].tone_origin, content="Some(ChordTone)")
   assert_eq(all_notes[0].midi, Some(60))
   // Second note: NeighborTone
-  inspect(all_notes[1].tone_origin, content="Some(NeighborTone)")
+  debug_inspect(all_notes[1].tone_origin, content="Some(NeighborTone)")
   // Neighbor must be ±1 or ±2 from anchor
   let neighbor_val = all_notes[1].midi.unwrap()
   let dist = (neighbor_val - 60).abs()
   assert_true(dist >= 1 && dist <= 2)
   // Third note: ChordTone (same anchor)
-  inspect(all_notes[2].tone_origin, content="Some(ChordTone)")
+  debug_inspect(all_notes[2].tone_origin, content="Some(ChordTone)")
   assert_eq(all_notes[2].midi, Some(60))
 }
 

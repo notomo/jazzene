@@ -1,13 +1,13 @@
 ///|
 test "positioned_notes: simple quarter notes" {
-  let measure = Measure::{
+  let measure = @music.Measure::{
     chords: [],
-    start_time: Duration::from_milliseconds(0),
+    start_time: @music.Duration::from_milliseconds(0),
     beats: [
-      Beat::{
+      @music.Beat::{
         count: 0,
         notes: [
-          MeasureNote::{
+          @music.MeasureNote::{
             midi: Some(60),
             duration: Quarter,
             accidental: None,
@@ -16,10 +16,10 @@ test "positioned_notes: simple quarter notes" {
           },
         ],
       },
-      Beat::{
+      @music.Beat::{
         count: 1,
         notes: [
-          MeasureNote::{
+          @music.MeasureNote::{
             midi: Some(62),
             duration: Quarter,
             accidental: None,
@@ -28,10 +28,10 @@ test "positioned_notes: simple quarter notes" {
           },
         ],
       },
-      Beat::{
+      @music.Beat::{
         count: 2,
         notes: [
-          MeasureNote::{
+          @music.MeasureNote::{
             midi: Some(64),
             duration: Quarter,
             accidental: None,
@@ -40,10 +40,10 @@ test "positioned_notes: simple quarter notes" {
           },
         ],
       },
-      Beat::{
+      @music.Beat::{
         count: 3,
         notes: [
-          MeasureNote::{
+          @music.MeasureNote::{
             midi: Some(65),
             duration: Quarter,
             accidental: None,
@@ -65,14 +65,14 @@ test "positioned_notes: simple quarter notes" {
 ///|
 test "positioned_notes: dotted quarter overflows into next beat" {
   // quarter rest, quarter note, dotted quarter, eighth note
-  let measure = Measure::{
+  let measure = @music.Measure::{
     chords: [],
-    start_time: Duration::from_milliseconds(0),
+    start_time: @music.Duration::from_milliseconds(0),
     beats: [
-      Beat::{
+      @music.Beat::{
         count: 0,
         notes: [
-          MeasureNote::{
+          @music.MeasureNote::{
             midi: None,
             duration: Quarter,
             accidental: None,
@@ -81,10 +81,10 @@ test "positioned_notes: dotted quarter overflows into next beat" {
           },
         ],
       },
-      Beat::{
+      @music.Beat::{
         count: 1,
         notes: [
-          MeasureNote::{
+          @music.MeasureNote::{
             midi: Some(60),
             duration: Quarter,
             accidental: None,
@@ -93,10 +93,10 @@ test "positioned_notes: dotted quarter overflows into next beat" {
           },
         ],
       },
-      Beat::{
+      @music.Beat::{
         count: 2,
         notes: [
-          MeasureNote::{
+          @music.MeasureNote::{
             midi: Some(62),
             duration: DottedQuarter,
             accidental: None,
@@ -105,10 +105,10 @@ test "positioned_notes: dotted quarter overflows into next beat" {
           },
         ],
       },
-      Beat::{
+      @music.Beat::{
         count: 3,
         notes: [
-          MeasureNote::{
+          @music.MeasureNote::{
             midi: Some(64),
             duration: Eighth,
             accidental: None,
@@ -129,21 +129,21 @@ test "positioned_notes: dotted quarter overflows into next beat" {
 
 ///|
 test "positioned_notes: two eighths in one beat" {
-  let measure = Measure::{
+  let measure = @music.Measure::{
     chords: [],
-    start_time: Duration::from_milliseconds(0),
+    start_time: @music.Duration::from_milliseconds(0),
     beats: [
-      Beat::{
+      @music.Beat::{
         count: 0,
         notes: [
-          MeasureNote::{
+          @music.MeasureNote::{
             midi: Some(60),
             duration: Eighth,
             accidental: None,
             tie: None,
             tone_origin: None,
           },
-          MeasureNote::{
+          @music.MeasureNote::{
             midi: Some(62),
             duration: Eighth,
             accidental: None,
@@ -152,10 +152,10 @@ test "positioned_notes: two eighths in one beat" {
           },
         ],
       },
-      Beat::{
+      @music.Beat::{
         count: 1,
         notes: [
-          MeasureNote::{
+          @music.MeasureNote::{
             midi: Some(64),
             duration: Quarter,
             accidental: None,
@@ -175,14 +175,14 @@ test "positioned_notes: two eighths in one beat" {
 
 ///|
 test "positioned_notes: half note overflows two beats" {
-  let measure = Measure::{
+  let measure = @music.Measure::{
     chords: [],
-    start_time: Duration::from_milliseconds(0),
+    start_time: @music.Duration::from_milliseconds(0),
     beats: [
-      Beat::{
+      @music.Beat::{
         count: 0,
         notes: [
-          MeasureNote::{
+          @music.MeasureNote::{
             midi: Some(60),
             duration: Half,
             accidental: None,
@@ -192,11 +192,11 @@ test "positioned_notes: half note overflows two beats" {
         ],
       },
       // beat 1 is empty (half note occupies it)
-      Beat::{ count: 1, notes: [], },
-      Beat::{
+      @music.Beat::{ count: 1, notes: [], },
+      @music.Beat::{
         count: 2,
         notes: [
-          MeasureNote::{
+          @music.MeasureNote::{
             midi: Some(64),
             duration: Quarter,
             accidental: None,

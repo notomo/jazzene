@@ -11,7 +11,7 @@ test "Chord::scale_tones returns non-chord non-tension diatonic tones for Cmaj7 
   // Tensions Major7: D(9th), F#(#11), A(13th) excluded
   // Scale tone: F(5) only — natural 11 (avoid note, not a tension)
   let pitch_classes = scale_tones.map(fn(m) { m.pitch_class() })
-  inspect(pitch_classes, content="[5]")
+  debug_inspect(pitch_classes, content="[5]")
   // Verify none are chord tones
   let chord_pcs = chord.tones().map(fn(m) { m.pitch_class() })
   for pc in pitch_classes {
@@ -31,7 +31,7 @@ test "Chord::scale_tones returns empty for Dm7 — all scale tones are tensions"
   // Dorian scale from D: D E F G A B C
   // Tensions Minor7: E(9th), G(11th), B(13th) — all scale tones are tensions
   let pitch_classes = scale_tones.map(fn(m) { m.pitch_class() })
-  inspect(pitch_classes, content="[]")
+  debug_inspect(pitch_classes, content="[]")
 }
 
 ///|
@@ -49,7 +49,7 @@ test "Chord::approach_tones returns chromatic half-steps around chord tones for 
   //   G: Gb(66) ✓, Ab(68) ✓
   //   B: Bb(70) ✓, C(72) is chord tone → excluded
   let pitch_classes = approach.map(fn(m) { m.pitch_class() })
-  inspect(pitch_classes, content="[1, 3, 5, 6, 8, 10]")
+  debug_inspect(pitch_classes, content="[1, 3, 5, 6, 8, 10]")
   // Verify none are chord tones
   let chord_pcs = chord.tones().map(fn(m) { m.pitch_class() })
   for pc in pitch_classes {
@@ -72,7 +72,7 @@ test "Chord::approach_tones returns chromatic half-steps around chord tones for 
   //   A: Ab(68) ✓, Bb(70) ✓
   //   C: B(71) ✓, Db(73) ✓ (but same pc as 61)
   let pitch_classes = approach.map(fn(m) { m.pitch_class() })
-  inspect(pitch_classes, content="[1, 3, 4, 6, 8, 10, 11, 1]")
+  debug_inspect(pitch_classes, content="[1, 3, 4, 6, 8, 10, 11, 1]")
 }
 
 ///|
@@ -304,12 +304,12 @@ test "improvisation preserves tie when not at last measure" {
   // Second measure should have TieStart preserved (not last measure)
   let second_notes = measures[1].all_notes()
   let second_last_note = second_notes[second_notes.length() - 1]
-  inspect(second_last_note.tie, content="Some(TieStart)")
+  debug_inspect(second_last_note.tie, content="Some(TieStart)")
 
   // Third measure should have TieEnd
   let third_notes = measures[2].all_notes()
   let third_first_note = third_notes[0]
-  inspect(third_first_note.tie, content="Some(TieEnd)")
+  debug_inspect(third_first_note.tie, content="Some(TieEnd)")
 }
 
 ///|

@@ -23,7 +23,7 @@ test "compute_note_positions - single note" {
     ),
   ]
   let measure_x = 90.0
-  let beamed : Map[Int, Bool] = {}
+  let beamed : Map[Int, Bool] = Map([])
   let positions = compute_note_positions(positioned, measure_x, beamed)
   inspect(positions.length(), content="1")
   inspect(positions[0], content="132") // measure_x + NOTE_AREA_START_OFFSET
@@ -40,7 +40,7 @@ test "compute_note_positions - two equal notes" {
   }
   let positioned = [(0.0, note), (1.0, note)]
   let measure_x = 90.0
-  let beamed : Map[Int, Bool] = {}
+  let beamed : Map[Int, Bool] = Map([])
   let positions = compute_note_positions(positioned, measure_x, beamed)
   inspect(positions.length(), content="2")
   // First note at start, second proportionally placed
@@ -62,7 +62,7 @@ test "compute_note_positions - whole rest centered" {
     ),
   ]
   let measure_x = 90.0
-  let beamed : Map[Int, Bool] = {}
+  let beamed : Map[Int, Bool] = Map([])
   let positions = compute_note_positions(positioned, measure_x, beamed)
   inspect(positions[0], content="250") // measure_x + MIN_MEASURE_WIDTH / 2.0
 }

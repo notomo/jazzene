@@ -1,9 +1,11 @@
 ///|
 test "ChordRoot from_string" {
-  inspect(ChordRoot::from_string("C"), content="Ok(C)")
-  inspect(
-    ChordRoot::from_string("Invalid"),
-    content="Err(Invalid chord root: Invalid)",
+  debug_inspect(@music.ChordRoot::from_string("C"), content="Ok(C)")
+  debug_inspect(
+    @music.ChordRoot::from_string("Invalid"),
+    content=(
+      #|Err("Invalid chord root: Invalid")
+    ),
   )
 }
 

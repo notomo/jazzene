@@ -120,11 +120,11 @@ test "generate_enclosure_ornament produces exactly 3 notes with correct tone ori
     .collect()
   assert_eq(all_notes.length(), 3)
   // First note: Enclosure
-  inspect(all_notes[0].tone_origin, content="Some(Enclosure)")
+  debug_inspect(all_notes[0].tone_origin, content="Some(Enclosure)")
   // Second note: Enclosure
-  inspect(all_notes[1].tone_origin, content="Some(Enclosure)")
+  debug_inspect(all_notes[1].tone_origin, content="Some(Enclosure)")
   // Third note: ChordTone (the resolved anchor)
-  inspect(all_notes[2].tone_origin, content="Some(ChordTone)")
+  debug_inspect(all_notes[2].tone_origin, content="Some(ChordTone)")
   assert_eq(all_notes[2].midi, Some(60))
 }
 

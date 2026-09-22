@@ -46,23 +46,23 @@ test "midi_to_staff_y - F4 one step up from E4" {
 ///|
 test "ledger_steps_below - C4 needs one ledger line" {
   let steps = ledger_steps_below(-2) // C4 = step -2
-  inspect(steps, content="[-2]")
+  debug_inspect(steps, content="[-2]")
 }
 
 ///|
 test "ledger_steps_below - no ledger lines for notes on staff" {
   let steps = ledger_steps_below(0) // E4 = step 0 (on staff)
-  inspect(steps, content="[]")
+  debug_inspect(steps, content="[]")
 }
 
 ///|
 test "ledger_steps_above - G5 needs one ledger line" {
   let steps = ledger_steps_above(10) // G5 = step 10
-  inspect(steps, content="[10]")
+  debug_inspect(steps, content="[10]")
 }
 
 ///|
 test "ledger_steps_above - no ledger lines for notes on staff" {
   let steps = ledger_steps_above(8) // F5 = step 8 (within threshold)
-  inspect(steps, content="[]")
+  debug_inspect(steps, content="[]")
 }

@@ -109,9 +109,9 @@ test "generate_chromatic_approach_ornament produces exactly 2 notes with correct
     .collect()
   assert_eq(all_notes.length(), 2)
   // First note: approach tone (ChromaticApproach)
-  inspect(all_notes[0].tone_origin, content="Some(ChromaticApproach)")
+  debug_inspect(all_notes[0].tone_origin, content="Some(ChromaticApproach)")
   // Second note: chord tone (ChordTone)
-  inspect(all_notes[1].tone_origin, content="Some(ChordTone)")
+  debug_inspect(all_notes[1].tone_origin, content="Some(ChordTone)")
   assert_eq(all_notes[1].midi, Some(60))
 }
 

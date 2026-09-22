@@ -1,6 +1,6 @@
 ///|
 test "parse degree chord IIm7" {
-  let dc = @helper.unwrap_or_fail(parse_degree_chord("IIm7"))
+  let dc = @helper.unwrap_or_fail(@music.parse_degree_chord("IIm7"))
   assert_eq(dc.degree, II)
   assert_eq(dc.quality, Minor7)
   assert_eq(dc.accidental, 0)
@@ -8,7 +8,7 @@ test "parse degree chord IIm7" {
 
 ///|
 test "parse degree chord V7" {
-  let dc = @helper.unwrap_or_fail(parse_degree_chord("V7"))
+  let dc = @helper.unwrap_or_fail(@music.parse_degree_chord("V7"))
   assert_eq(dc.degree, V)
   assert_eq(dc.quality, Dominant7)
   assert_eq(dc.accidental, 0)
@@ -16,7 +16,7 @@ test "parse degree chord V7" {
 
 ///|
 test "parse degree chord Imaj7" {
-  let dc = @helper.unwrap_or_fail(parse_degree_chord("Imaj7"))
+  let dc = @helper.unwrap_or_fail(@music.parse_degree_chord("Imaj7"))
   assert_eq(dc.degree, I)
   assert_eq(dc.quality, Major7)
   assert_eq(dc.accidental, 0)
@@ -24,7 +24,7 @@ test "parse degree chord Imaj7" {
 
 ///|
 test "parse degree chord with flat accidental" {
-  let dc = @helper.unwrap_or_fail(parse_degree_chord("bVIImaj7"))
+  let dc = @helper.unwrap_or_fail(@music.parse_degree_chord("bVIImaj7"))
   assert_eq(dc.degree, VII)
   assert_eq(dc.quality, Major7)
   assert_eq(dc.accidental, -1)
@@ -32,7 +32,7 @@ test "parse degree chord with flat accidental" {
 
 ///|
 test "parse degree chord with sharp accidental" {
-  let dc = @helper.unwrap_or_fail(parse_degree_chord("#IVm7b5"))
+  let dc = @helper.unwrap_or_fail(@music.parse_degree_chord("#IVm7b5"))
   assert_eq(dc.degree, IV)
   assert_eq(dc.quality, HalfDiminished)
   assert_eq(dc.accidental, 1)
@@ -40,7 +40,7 @@ test "parse degree chord with sharp accidental" {
 
 ///|
 test "parse degree chord lowercase roman numeral" {
-  let dc = @helper.unwrap_or_fail(parse_degree_chord("ii7"))
+  let dc = @helper.unwrap_or_fail(@music.parse_degree_chord("ii7"))
   assert_eq(dc.degree, II)
   assert_eq(dc.quality, Dominant7)
   assert_eq(dc.accidental, 0)
@@ -49,7 +49,7 @@ test "parse degree chord lowercase roman numeral" {
 ///|
 test "parse degree progression" {
   let chords = @helper.unwrap_or_fail(
-    parse_degree_progression("IIm7 V7 Imaj7 IVmaj7"),
+    @music.parse_degree_progression("IIm7 V7 Imaj7 IVmaj7"),
   )
   assert_eq(chords.length(), 4)
   assert_eq(chords[0].degree, II)
@@ -64,13 +64,13 @@ test "parse degree progression" {
 
 ///|
 test "parse empty degree progression" {
-  let chords = @helper.unwrap_or_fail(parse_degree_progression(""))
+  let chords = @helper.unwrap_or_fail(@music.parse_degree_progression(""))
   assert_eq(chords.length(), 0)
 }
 
 ///|
 test "parse degree progression with invalid token" {
-  guard parse_degree_progression("IIm7 XYZ V7") is Err(e) else {
+  guard @music.parse_degree_progression("IIm7 XYZ V7") is Err(e) else {
     fail("Expected error for invalid degree chord")
   }
   assert_true(e.contains("Failed to parse 'XYZ'"))
@@ -79,7 +79,7 @@ test "parse degree progression with invalid token" {
 ///|
 test "resolve IIm7 in Bb major" {
   // II of Bb = C, so IIm7 -> Cm7
-  let dc = DegreeChord::{
+  let dc = @music.DegreeChord::{
     accidental: 0,
     degree: II,
     quality: Minor7,
@@ -93,7 +93,7 @@ test "resolve IIm7 in Bb major" {
 ///|
 test "resolve V7 in Bb major" {
   // V of Bb = F, so V7 -> F7
-  let dc = DegreeChord::{
+  let dc = @music.DegreeChord::{
     accidental: 0,
     degree: V,
     quality: Dominant7,
@@ -106,7 +106,7 @@ test "resolve V7 in Bb major" {
 
 ///|
 test "resolve Imaj7 in Bb major" {
-  let dc = DegreeChord::{
+  let dc = @music.DegreeChord::{
     accidental: 0,
     degree: I,
     quality: Major7,
@@ -120,7 +120,7 @@ test "resolve Imaj7 in Bb major" {
 ///|
 test "resolve IVmaj7 in Bb major" {
   // IV of Bb = Eb
-  let dc = DegreeChord::{
+  let dc = @music.DegreeChord::{
     accidental: 0,
     degree: IV,
     quality: Major7,
@@ -134,7 +134,7 @@ test "resolve IVmaj7 in Bb major" {
 ///|
 test "resolve bVII in C major" {
   // bVII of C = Bb
-  let dc = DegreeChord::{
+  let dc = @music.DegreeChord::{
     accidental: -1,
     degree: VII,
     quality: Major,
@@ -148,7 +148,7 @@ test "resolve bVII in C major" {
 ///|
 test "parse measure progression without delimiter treats all as single measure" {
   let measures = @helper.unwrap_or_fail(
-    parse_measure_progression("IIm7 V7 Imaj7 IVmaj7"),
+    @music.parse_measure_progression("IIm7 V7 Imaj7 IVmaj7"),
   )
   assert_eq(measures.length(), 1)
   // All chords in single measure
@@ -162,7 +162,7 @@ test "parse measure progression without delimiter treats all as single measure" 
 ///|
 test "parse measure progression" {
   let measures = @helper.unwrap_or_fail(
-    parse_measure_progression("IIm7 V7 | Imaj7 | IVmaj7"),
+    @music.parse_measure_progression("IIm7 V7 | Imaj7 | IVmaj7"),
   )
   assert_eq(measures.length(), 3)
   // First measure has 2 chords
@@ -180,7 +180,7 @@ test "parse measure progression" {
 ///|
 test "parse measure progression with multiple chords per measure" {
   let measures = @helper.unwrap_or_fail(
-    parse_measure_progression("IIm7 V7 | Imaj7 VIm7 | IVmaj7 IIIm7"),
+    @music.parse_measure_progression("IIm7 V7 | Imaj7 VIm7 | IVmaj7 IIIm7"),
   )
   assert_eq(measures.length(), 3)
   assert_eq(measures[0].chords.length(), 2)
@@ -190,13 +190,13 @@ test "parse measure progression with multiple chords per measure" {
 
 ///|
 test "parse measure progression empty string" {
-  let measures = @helper.unwrap_or_fail(parse_measure_progression(""))
+  let measures = @helper.unwrap_or_fail(@music.parse_measure_progression(""))
   assert_eq(measures.length(), 0)
 }
 
 ///|
 test "parse measure progression empty measure error" {
-  guard parse_measure_progression("IIm7 | | V7") is Err(e) else {
+  guard @music.parse_measure_progression("IIm7 | | V7") is Err(e) else {
     fail("Expected error for empty measure")
   }
   assert_true(e.contains("Empty measure"))
@@ -204,10 +204,20 @@ test "parse measure progression empty measure error" {
 
 ///|
 test "DegreeMeasure resolve" {
-  let dm = DegreeMeasure::{
+  let dm = @music.DegreeMeasure::{
     chords: [
-      DegreeChord::{ accidental: 0, degree: II, quality: Minor7, bass: None, },
-      DegreeChord::{ accidental: 0, degree: V, quality: Dominant7, bass: None, },
+      @music.DegreeChord::{
+        accidental: 0,
+        degree: II,
+        quality: Minor7,
+        bass: None,
+      },
+      @music.DegreeChord::{
+        accidental: 0,
+        degree: V,
+        quality: Dominant7,
+        bass: None,
+      },
     ],
   }
   let resolved = dm.resolve(C)
@@ -220,35 +230,35 @@ test "DegreeMeasure resolve" {
 
 ///|
 test "parse degree chord with slash bass V7/II" {
-  let dc = @helper.unwrap_or_fail(parse_degree_chord("V7/II"))
+  let dc = @helper.unwrap_or_fail(@music.parse_degree_chord("V7/II"))
   assert_eq(dc.degree, V)
   assert_eq(dc.quality, Dominant7)
   assert_eq(dc.accidental, 0)
-  assert_eq(dc.bass, Some(DegreeBass::{ accidental: 0, degree: II, }))
+  assert_eq(dc.bass, Some(@music.DegreeBass::{ accidental: 0, degree: II, }))
 }
 
 ///|
 test "parse degree chord with flat bass IIm7/bVII" {
-  let dc = @helper.unwrap_or_fail(parse_degree_chord("IIm7/bVII"))
+  let dc = @helper.unwrap_or_fail(@music.parse_degree_chord("IIm7/bVII"))
   assert_eq(dc.degree, II)
   assert_eq(dc.quality, Minor7)
-  assert_eq(dc.bass, Some(DegreeBass::{ accidental: -1, degree: VII, }))
+  assert_eq(dc.bass, Some(@music.DegreeBass::{ accidental: -1, degree: VII, }))
 }
 
 ///|
 test "parse degree chord without slash has None bass" {
-  let dc = @helper.unwrap_or_fail(parse_degree_chord("IIm7"))
+  let dc = @helper.unwrap_or_fail(@music.parse_degree_chord("IIm7"))
   assert_eq(dc.bass, None)
 }
 
 ///|
 test "resolve slash chord V7/II in C major" {
   // V7 = G7, bass II = D
-  let dc = DegreeChord::{
+  let dc = @music.DegreeChord::{
     accidental: 0,
     degree: V,
     quality: Dominant7,
-    bass: Some(DegreeBass::{ accidental: 0, degree: II, }),
+    bass: Some(@music.DegreeBass::{ accidental: 0, degree: II, }),
   }
   let chord = dc.resolve(C)
   assert_eq(chord.root, G)
@@ -258,7 +268,7 @@ test "resolve slash chord V7/II in C major" {
 
 ///|
 test "DegreeChord to_string roundtrip IIm7" {
-  let dc = DegreeChord::{
+  let dc = @music.DegreeChord::{
     accidental: 0,
     degree: II,
     quality: Minor7,
@@ -266,13 +276,13 @@ test "DegreeChord to_string roundtrip IIm7" {
   }
   let s = dc.to_string()
   assert_eq(s, "IIm7")
-  let parsed = @helper.unwrap_or_fail(parse_degree_chord(s))
+  let parsed = @helper.unwrap_or_fail(@music.parse_degree_chord(s))
   assert_eq(parsed, dc)
 }
 
 ///|
 test "DegreeChord to_string roundtrip bVIImaj7" {
-  let dc = DegreeChord::{
+  let dc = @music.DegreeChord::{
     accidental: -1,
     degree: VII,
     quality: Major7,
@@ -280,13 +290,13 @@ test "DegreeChord to_string roundtrip bVIImaj7" {
   }
   let s = dc.to_string()
   assert_eq(s, "bVIImaj7")
-  let parsed = @helper.unwrap_or_fail(parse_degree_chord(s))
+  let parsed = @helper.unwrap_or_fail(@music.parse_degree_chord(s))
   assert_eq(parsed, dc)
 }
 
 ///|
 test "DegreeChord to_string Major triad (empty quality)" {
-  let dc = DegreeChord::{
+  let dc = @music.DegreeChord::{
     accidental: 0,
     degree: I,
     quality: Major,
@@ -297,11 +307,11 @@ test "DegreeChord to_string Major triad (empty quality)" {
 
 ///|
 test "DegreeChord to_string with bass" {
-  let dc = DegreeChord::{
+  let dc = @music.DegreeChord::{
     accidental: 0,
     degree: V,
     quality: Dominant7,
-    bass: Some(DegreeBass::{ accidental: 0, degree: II, }),
+    bass: Some(@music.DegreeBass::{ accidental: 0, degree: II, }),
   }
   assert_eq(dc.to_string(), "V7/II")
 }
@@ -309,29 +319,31 @@ test "DegreeChord to_string with bass" {
 ///|
 test "serialize_measure_progression" {
   let measures = @helper.unwrap_or_fail(
-    parse_measure_progression("IIm7 V7 | Imaj7"),
+    @music.parse_measure_progression("IIm7 V7 | Imaj7"),
   )
-  let serialized = serialize_measure_progression(measures)
+  let serialized = @music.serialize_measure_progression(measures)
   assert_eq(serialized, "IIm7 V7 | Imaj7")
 }
 
 ///|
 test "serialize_measure_progression roundtrip" {
   let original = "IIm7 | V7 | Imaj7 | IVmaj7"
-  let measures = @helper.unwrap_or_fail(parse_measure_progression(original))
-  let serialized = serialize_measure_progression(measures)
+  let measures = @helper.unwrap_or_fail(
+    @music.parse_measure_progression(original),
+  )
+  let serialized = @music.serialize_measure_progression(measures)
   assert_eq(serialized, original)
 }
 
 ///|
 test "parse measure progression with slash chord" {
   let measures = @helper.unwrap_or_fail(
-    parse_measure_progression("IIm7 V7/II | Imaj7"),
+    @music.parse_measure_progression("IIm7 V7/II | Imaj7"),
   )
   assert_eq(measures.length(), 2)
   assert_eq(measures[0].chords.length(), 2)
   assert_eq(
     measures[0].chords[1].bass,
-    Some(DegreeBass::{ accidental: 0, degree: II, }),
+    Some(@music.DegreeBass::{ accidental: 0, degree: II, }),
   )
 }

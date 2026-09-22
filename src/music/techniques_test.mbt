@@ -1,6 +1,6 @@
 ///|
 test "Techniques::default enables standard techniques, bebop disabled by default" {
-  let t = Techniques::default()
+  let t = @music.Techniques::default()
   assert_true(t.tension_tones)
   assert_true(t.chromatic_approach)
   assert_true(t.enclosure)

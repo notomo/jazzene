@@ -121,7 +121,7 @@ test "decide_midi_number first note always returns ChordTone" {
     rng,
   )
   assert_true(midi is Some(_))
-  inspect(origin, content="Some(ChordTone)")
+  debug_inspect(origin, content="Some(ChordTone)")
 }
 
 ///|
@@ -147,8 +147,8 @@ test "decide_midi_number rest returns None for both midi and origin" {
     127,
     always_rest,
   )
-  inspect(midi, content="None")
-  inspect(origin, content="None")
+  debug_inspect(midi, content="None")
+  debug_inspect(origin, content="None")
 }
 
 ///|
@@ -177,13 +177,14 @@ test "decide_midi_number chord tone returns ChordTone origin" {
   // Only chord tones enabled → origin must be ChordTone or None (rest)
   match origin {
     Some(@music.ChordTone) | None => () // expected
-    _ => fail("Expected ChordTone or None, got: \{origin}")
+    _ => fail("Expected ChordTone or None, got: \{Repr(origin)}")
   }
   // If midi is Some, origin must be ChordTone
   match (midi, origin) {
     (Some(_), Some(@music.ChordTone)) => ()
     (None, None) => ()
-    _ => fail("Unexpected combination: midi=\{midi}, origin=\{origin}")
+    _ =>
+      fail("Unexpected combination: midi=\{Repr(midi)}, origin=\{Repr(origin)}")
   }
 }
 

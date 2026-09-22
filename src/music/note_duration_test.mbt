@@ -8,12 +8,12 @@ test "NoteDuration to_beats" {
 
 ///|
 test "NoteDuration fit" {
-  assert_eq(NoteDuration::fit(4.0), Some(@music.Whole))
-  assert_eq(NoteDuration::fit(1.0), Some(@music.Quarter))
-  assert_eq(NoteDuration::fit(0.5), Some(@music.Eighth))
-  assert_eq(NoteDuration::fit(0.25), Some(@music.Sixteenth))
-  assert_eq(NoteDuration::fit(0.34), Some(@music.EighthTriplet))
-  assert_eq(NoteDuration::fit(0.1), None)
+  assert_eq(@music.NoteDuration::fit(4.0), Some(@music.Whole))
+  assert_eq(@music.NoteDuration::fit(1.0), Some(@music.Quarter))
+  assert_eq(@music.NoteDuration::fit(0.5), Some(@music.Eighth))
+  assert_eq(@music.NoteDuration::fit(0.25), Some(@music.Sixteenth))
+  assert_eq(@music.NoteDuration::fit(0.34), Some(@music.EighthTriplet))
+  assert_eq(@music.NoteDuration::fit(0.1), None)
 }
 
 ///|

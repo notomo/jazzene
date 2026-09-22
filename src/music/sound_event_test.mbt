@@ -1,7 +1,7 @@
 ///|
 test "SoundEvent duration" {
   let bpm = 120
-  let midi = MidiNumber::new(60).unwrap()
+  let midi = @music.MidiNumber::new(60).unwrap()
   assert_eq(
     @music.Note(midi~, duration=@music.Eighth).duration(bpm).to_milliseconds(),
     250.0,
@@ -14,7 +14,7 @@ test "SoundEvent duration" {
 
 ///|
 test "SoundEvent with_duration" {
-  let midi = MidiNumber::new(60).unwrap()
+  let midi = @music.MidiNumber::new(60).unwrap()
   assert_eq(
     @music.Note(midi~, duration=@music.Quarter).with_duration(@music.Eighth),
     @music.Note(midi~, duration=@music.Eighth),

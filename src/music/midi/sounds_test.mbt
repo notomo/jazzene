@@ -17,8 +17,8 @@ fn make_sound(
 }
 
 ///|
-fn empty_imported() -> ImportedMidi {
-  ImportedMidi::{
+fn empty_imported() -> @midi.ImportedMidi {
+  @midi.ImportedMidi::{
     melody_sounds: [],
     comping_sounds: [],
     bass_sounds: [],
@@ -62,11 +62,17 @@ test "select_melody_sounds: Off returns empty regardless of imported" {
     melody_sounds: [make_sound(64, 0.0, 500.0)],
   }
   inspect(
-    select_melody_sounds(@music.Off, Some(imported), full, 120, default_key()).length(),
+    @midi.select_melody_sounds(
+      @music.Off,
+      Some(imported),
+      full,
+      120,
+      default_key(),
+    ).length(),
     content="0",
   )
   inspect(
-    select_melody_sounds(@music.Off, None, full, 120, default_key()).length(),
+    @midi.select_melody_sounds(@music.Off, None, full, 120, default_key()).length(),
     content="0",
   )
 }
@@ -75,11 +81,11 @@ test "select_melody_sounds: Off returns empty regardless of imported" {
 test "select_melody_sounds: On with no imported uses full_sounds" {
   let full = [make_sound(60, 0.0, 500.0)]
   inspect(
-    select_melody_sounds(@music.On, None, full, 120, default_key()).length(),
+    @midi.select_melody_sounds(@music.On, None, full, 120, default_key()).length(),
     content="1",
   )
-  inspect(
-    select_melody_sounds(@music.On, None, full, 120, default_key())[0]
+  debug_inspect(
+    @midi.select_melody_sounds(@music.On, None, full, 120, default_key())[0]
     .midi()
     .map(fn(m) { m.value }),
     content="Some(60)",
@@ -91,7 +97,13 @@ test "select_melody_sounds: On with imported that has no melody uses full_sounds
   let full = [make_sound(60, 0.0, 500.0)]
   let imported = empty_imported()
   inspect(
-    select_melody_sounds(@music.On, Some(imported), full, 120, default_key()).length(),
+    @midi.select_melody_sounds(
+      @music.On,
+      Some(imported),
+      full,
+      120,
+      default_key(),
+    ).length(),
     content="1",
   )
 }
@@ -103,7 +115,7 @@ test "select_melody_sounds: On with imported melody uses imported sounds" {
     ..empty_imported(),
     melody_sounds: [make_sound(64, 0.0, 500.0), make_sound(67, 500.0, 500.0)],
   }
-  let result = select_melody_sounds(
+  let result = @midi.select_melody_sounds(
     @music.On,
     Some(imported),
     full,
@@ -111,7 +123,7 @@ test "select_melody_sounds: On with imported melody uses imported sounds" {
     default_key(),
   )
   inspect(result.length(), content="2")
-  inspect(result[0].midi().map(fn(m) { m.value }), content="Some(64)")
+  debug_inspect(result[0].midi().map(fn(m) { m.value }), content="Some(64)")
 }
 
 ///|
@@ -121,7 +133,7 @@ test "select_melody_sounds: Silent behaves same as On" {
     ..empty_imported(),
     melody_sounds: [make_sound(64, 0.0, 500.0)],
   }
-  let result = select_melody_sounds(
+  let result = @midi.select_melody_sounds(
     @music.Silent,
     Some(imported),
     full,
@@ -129,7 +141,7 @@ test "select_melody_sounds: Silent behaves same as On" {
     default_key(),
   )
   inspect(result.length(), content="1")
-  inspect(result[0].midi().map(fn(m) { m.value }), content="Some(64)")
+  debug_inspect(result[0].midi().map(fn(m) { m.value }), content="Some(64)")
 }
 
 ///|
@@ -140,7 +152,7 @@ test "select_melody_sounds: On with imported adapts BPM scaling" {
     bpm: Some(60),
     melody_sounds: [make_sound(60, 0.0, 1000.0)],
   }
-  let result = select_melody_sounds(
+  let result = @midi.select_melody_sounds(
     @music.On,
     Some(imported),
     [],
@@ -160,15 +172,21 @@ test "select_melody_sounds: On with imported adapts key transposition" {
     melody_sounds: [make_sound(60, 0.0, 500.0)],
   }
   let g_key = @music.KeySignature::from_root(@music.ChordRoot::G)
-  let result = select_melody_sounds(@music.On, Some(imported), [], 120, g_key)
+  let result = @midi.select_melody_sounds(
+    @music.On,
+    Some(imported),
+    [],
+    120,
+    g_key,
+  )
   // G root midi=67, C root midi=60: raw=7 > 6 → shift=-5 → 60+(-5)=55
-  inspect(result[0].midi().map(fn(m) { m.value }), content="Some(55)")
+  debug_inspect(result[0].midi().map(fn(m) { m.value }), content="Some(55)")
 }
 
 ///|
 test "select_measures: Off returns measures with empty beats" {
   let full = [make_measure(0.0), make_measure(2000.0)]
-  let result = select_measures(
+  let result = @midi.select_measures(
     @music.Off,
     None,
     full,
@@ -184,7 +202,7 @@ test "select_measures: Off returns measures with empty beats" {
 ///|
 test "select_measures: On with no imported uses full_measures" {
   let full = [make_measure(0.0)]
-  let result = select_measures(
+  let result = @midi.select_measures(
     @music.On,
     None,
     full,
@@ -199,7 +217,7 @@ test "select_measures: On with no imported uses full_measures" {
 ///|
 test "select_measures: On with empty imported melody uses full_measures" {
   let full = [make_measure(0.0)]
-  let result = select_measures(
+  let result = @midi.select_measures(
     @music.On,
     Some(empty_imported()),
     full,
@@ -219,7 +237,7 @@ test "select_measures: On with imported melody builds measures from imported sou
     ..empty_imported(),
     melody_sounds: [make_sound(60, 0.0, 500.0)],
   }
-  let result = select_measures(
+  let result = @midi.select_measures(
     @music.On,
     Some(imported),
     full,
@@ -230,14 +248,14 @@ test "select_measures: On with imported melody builds measures from imported sou
   )
   inspect(result.length(), content="1")
   inspect(result[0].beats[0].notes.length(), content="1")
-  inspect(result[0].beats[0].notes[0].midi, content="Some(60)")
+  debug_inspect(result[0].beats[0].notes[0].midi, content="Some(60)")
 }
 
 ///|
 test "select_drum_sounds: drums_enabled=false returns empty" {
   let style = { ..@music.JazzStyle::default(), drums_enabled: false, }
   inspect(
-    select_drum_sounds(style, None, 120, 4, default_time_signature()).length(),
+    @midi.select_drum_sounds(style, None, 120, 4, default_time_signature()).length(),
     content="0",
   )
 }
@@ -250,7 +268,7 @@ test "select_drum_sounds: Imported with no midi returns empty" {
     drum_pattern: @music.Imported,
   }
   inspect(
-    select_drum_sounds(style, None, 120, 4, default_time_signature()).length(),
+    @midi.select_drum_sounds(style, None, 120, 4, default_time_signature()).length(),
     content="0",
   )
 }
@@ -267,7 +285,13 @@ test "select_drum_sounds: Imported with midi returns drum sounds" {
     drum_sounds: [make_sound(36, 0.0, 100.0), make_sound(38, 500.0, 100.0)],
   }
   inspect(
-    select_drum_sounds(style, Some(imported), 120, 4, default_time_signature()).length(),
+    @midi.select_drum_sounds(
+      style,
+      Some(imported),
+      120,
+      4,
+      default_time_signature(),
+    ).length(),
     content="2",
   )
 }
@@ -279,7 +303,13 @@ test "select_drum_sounds: non-Imported generates drum sounds" {
     drums_enabled: true,
     drum_pattern: @music.SwingRide,
   }
-  let result = select_drum_sounds(style, None, 120, 1, default_time_signature())
+  let result = @midi.select_drum_sounds(
+    style,
+    None,
+    120,
+    1,
+    default_time_signature(),
+  )
   inspect(result.length() > 0, content="true")
 }
 
@@ -287,7 +317,7 @@ test "select_drum_sounds: non-Imported generates drum sounds" {
 test "select_comping_sounds: comping_mode=Off returns empty" {
   let style = { ..@music.JazzStyle::default(), comping_mode: @music.Off, }
   inspect(
-    select_comping_sounds(style, None, [], 120, [], default_key(), 0).length(),
+    @midi.select_comping_sounds(style, None, [], 120, [], default_key(), 0).length(),
     content="0",
   )
 }
@@ -300,7 +330,7 @@ test "select_comping_sounds: Imported with no midi returns empty" {
     comping_style: @music.Imported,
   }
   inspect(
-    select_comping_sounds(style, None, [], 120, [], default_key(), 0).length(),
+    @midi.select_comping_sounds(style, None, [], 120, [], default_key(), 0).length(),
     content="0",
   )
 }
@@ -316,7 +346,7 @@ test "select_comping_sounds: Imported with midi returns comping sounds" {
     ..empty_imported(),
     comping_sounds: [make_sound(48, 0.0, 500.0)],
   }
-  let result = select_comping_sounds(
+  let result = @midi.select_comping_sounds(
     style,
     Some(imported),
     [],
@@ -326,14 +356,14 @@ test "select_comping_sounds: Imported with midi returns comping sounds" {
     0,
   )
   inspect(result.length(), content="1")
-  inspect(result[0].midi().map(fn(m) { m.value }), content="Some(48)")
+  debug_inspect(result[0].midi().map(fn(m) { m.value }), content="Some(48)")
 }
 
 ///|
 test "select_bass_sounds: bass_enabled=false returns empty" {
   let style = { ..@music.JazzStyle::default(), bass_enabled: false, }
   inspect(
-    select_bass_sounds(style, None, [], 120, default_key()).length(),
+    @midi.select_bass_sounds(style, None, [], 120, default_key()).length(),
     content="0",
   )
 }
@@ -346,7 +376,7 @@ test "select_bass_sounds: Imported with no midi returns empty" {
     bass_style: @music.Imported,
   }
   inspect(
-    select_bass_sounds(style, None, [], 120, default_key()).length(),
+    @midi.select_bass_sounds(style, None, [], 120, default_key()).length(),
     content="0",
   )
 }
@@ -362,7 +392,13 @@ test "select_bass_sounds: Imported with midi returns bass sounds" {
     ..empty_imported(),
     bass_sounds: [make_sound(36, 0.0, 500.0), make_sound(38, 500.0, 500.0)],
   }
-  let result = select_bass_sounds(style, Some(imported), [], 120, default_key())
+  let result = @midi.select_bass_sounds(
+    style,
+    Some(imported),
+    [],
+    120,
+    default_key(),
+  )
   inspect(result.length(), content="2")
-  inspect(result[0].midi().map(fn(m) { m.value }), content="Some(36)")
+  debug_inspect(result[0].midi().map(fn(m) { m.value }), content="Some(36)")
 }

@@ -32,7 +32,7 @@ test "compute_sheet_measure - basic quarter note measure" {
   }
   let key = @music.KeySignature::c_major()
   let time_signature = @music.TimeSignature::default()
-  let sheet = compute_sheet_measure(measure, 0, key, time_signature)
+  let sheet = @sheet.compute_sheet_measure(measure, 0, key, time_signature)
   inspect(sheet.notes.length(), content="2")
   inspect(sheet.beam_groups.length(), content="0")
   inspect(sheet.ottava.kind, content="OttavaNone")
@@ -68,7 +68,7 @@ test "compute_sheet_measure - eighth notes get beamed" {
   }
   let key = @music.KeySignature::c_major()
   let time_signature = @music.TimeSignature::default()
-  let sheet = compute_sheet_measure(measure, 0, key, time_signature)
+  let sheet = @sheet.compute_sheet_measure(measure, 0, key, time_signature)
   inspect(sheet.notes.length(), content="2")
   inspect(sheet.beam_groups.length(), content="1")
   inspect(sheet.notes[0].beamed, content="true")
@@ -97,13 +97,13 @@ test "compute_sheet_measure - high note triggers 8va" {
   }
   let key = @music.KeySignature::c_major()
   let time_signature = @music.TimeSignature::default()
-  let sheet = compute_sheet_measure(measure, 0, key, time_signature, ottava={
+  let sheet = @sheet.compute_sheet_measure(measure, 0, key, time_signature, ottava={
     kind: OttavaAlta,
     role: SpanSole,
   })
   inspect(sheet.ottava.kind, content="OttavaAlta")
   // Note should be shifted down by 12
-  inspect(sheet.notes[0].midi, content="Some(76)")
+  debug_inspect(sheet.notes[0].midi, content="Some(76)")
 }
 
 ///|
@@ -135,11 +135,17 @@ test "cross-measure 8va span: consecutive measures share span roles via compute_
   let high = make_high_note_measure()
   let measures = [high, high, high]
 
-  let spans = compute_ottava_spans(measures, key)
+  let spans = @sheet.compute_ottava_spans(measures, key)
   let sheets = spans
     .iter()
     .mapi(fn(i, span) {
-      compute_sheet_measure(measures[i], i, key, time_signature, ottava=span)
+      @sheet.compute_sheet_measure(
+        measures[i],
+        i,
+        key,
+        time_signature,
+        ottava=span,
+      )
     })
     .collect()
 
@@ -154,6 +160,6 @@ test "cross-measure 8va span: consecutive measures share span roles via compute_
   inspect(sheets[2].ottava.role, content="SpanLast")
 
   // Notes are shifted down by 12 in all measures
-  inspect(sheets[0].notes[0].midi, content="Some(76)")
-  inspect(sheets[2].notes[0].midi, content="Some(76)")
+  debug_inspect(sheets[0].notes[0].midi, content="Some(76)")
+  debug_inspect(sheets[2].notes[0].midi, content="Some(76)")
 }
