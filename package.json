@@ -5,7 +5,7 @@
   "scripts": {
     "setup": "git config --local include.path ../.gitconfig",
     "check_all": "npm run format && npm run check && npm run test && npm run build && E2E_PREVIEW=1 npm run test:e2e",
-    "check": "moon check src && moon fmt --check",
+    "check": "moon check && moon fmt --check",
     "format": "NEW_MOON_PKG=1 moon fmt",
     "test": "moon test -p internal/jazzene/music internal/jazzene/music/generator internal/jazzene/music/sheet internal/jazzene/music/midi --target wasm-gc",
     "test:e2e": "playwright test",
